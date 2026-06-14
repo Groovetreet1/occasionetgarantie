@@ -1,0 +1,25 @@
+const Colors = {
+  primary: "#6C63FF",
+  primaryDark: "#4A42DB",
+  primaryLight: "#E8E6FF",
+  accent: "#FF6584",
+  accentLight: "#FFE0E8",
+  success: "#00C9A7",
+  successLight: "#D4F5ED",
+  warning: "#FFB800",
+  warningLight: "#FFF3D6",
+  background: "#F0F2F8",
+  surface: "#FFFFFF",
+  surfaceAlt: "#F8F9FE",
+  text: "#2D2D3A",
+  textSecondary: "#8E8EA0",
+  error: "#FF4757",
+  profit: "#00C9A7",
+  loss: "#FF4757",
+  border: "#EAECF5",
+  cardShadow: "#6C63FF20",
+  gradientStart: "#6C63FF",
+  gradientEnd: "#FF6584",
+};
+
+export default Colors;
