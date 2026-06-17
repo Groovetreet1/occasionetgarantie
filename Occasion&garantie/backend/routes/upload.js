@@ -30,7 +30,7 @@ const upload = multer({
 
 router.post('/', authenticate, adminOnly, upload.single('image'), (req, res) => {
   if (!req.file) return res.status(400).json({ message: 'Aucun fichier envoyé.' });
-  res.json({ url: `/uploads/${req.file.filename}` });
+  res.json({ url: req.file.filename });
 });
 
 module.exports = router;

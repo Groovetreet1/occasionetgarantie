@@ -175,7 +175,7 @@ export default function AdminProductForm() {
               <label>Image</label>
               {form.image && (
                 <div style={{ marginBottom: '8px' }}>
-                  <img src={`http://localhost:5000${form.image}`} alt="Preview" style={{ width: '120px', height: '120px', objectFit: 'cover', borderRadius: 'var(--radius)', border: '1px solid var(--border)' }} />
+                  <img src={`/uploads/${form.image}`} alt="Preview" style={{ width: '120px', height: '120px', objectFit: 'cover', borderRadius: 'var(--radius)', border: '1px solid var(--border)' }} />
                 </div>
               )}
               <div style={{ display: 'flex', gap: '8px' }}>
