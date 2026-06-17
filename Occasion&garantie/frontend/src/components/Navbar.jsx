@@ -6,30 +6,25 @@ import ThemeToggle from './ThemeToggle';
 
 export default function Navbar() {
   const { user, logout } = useAuth();
-  const [menuOpen, setMenuOpen] = useState(false);
   const [dropdownOpen, setDropdownOpen] = useState(false);
-  const navRef = useRef(null);
   const dropdownRef = useRef(null);
 
   useEffect(() => {
     const handle = (e) => {
-      if (navRef.current && !navRef.current.contains(e.target)) setMenuOpen(false);
       if (dropdownRef.current && !dropdownRef.current.contains(e.target)) setDropdownOpen(false);
     };
     document.addEventListener('mousedown', handle);
     return () => document.removeEventListener('mousedown', handle);
   }, []);
 
-  const closeMenu = () => setMenuOpen(false);
-
   return (
-    <nav className="navbar" ref={navRef}>
+    <nav className="navbar">
       <div className="navbar-inner">
         <Link to="/" className="navbar-logo">OG</Link>
 
-        <div className={`navbar-nav${menuOpen ? ' open' : ''}`}>
-          <NavLink to="/" end onClick={closeMenu}>Accueil</NavLink>
-          <NavLink to="/products" onClick={closeMenu}>Produits</NavLink>
+        <div className="navbar-nav">
+          <NavLink to="/" end>Accueil</NavLink>
+          <NavLink to="/products">Produits</NavLink>
           <div className="navbar-nav-divider" />
           <div className="navbar-mobile-only">
             <ThemeToggle />
@@ -37,18 +32,16 @@ export default function Navbar() {
           {user ? (
             <div className="navbar-mobile-only">
               {user.role === 'admin' && (
-                <NavLink to="/admin" onClick={closeMenu}>
-                  <FiSettings size={14} /> Admin
-                </NavLink>
+                <NavLink to="/admin"><FiSettings size={14} /> Admin</NavLink>
               )}
-              <button onClick={() => { logout(); closeMenu(); }} className="navbar-logout-mobile">
+              <button onClick={() => logout()} className="navbar-logout-mobile">
                 <FiLogOut size={14} /> D&eacute;connexion
               </button>
             </div>
           ) : (
             <div className="navbar-mobile-only">
-              <NavLink to="/login" onClick={closeMenu}>Connexion</NavLink>
-              <Link to="/signup" className="navbar-signup-mobile" onClick={closeMenu}>
+              <NavLink to="/login">Connexion</NavLink>
+              <Link to="/signup" className="navbar-signup-mobile">
                 S&rsquo;inscrire
               </Link>
             </div>
@@ -81,9 +74,6 @@ export default function Navbar() {
               <Link to="/signup" className="navbar-signup">S&rsquo;inscrire</Link>
             </div>
           )}
-          <button className={`navbar-hamburger${menuOpen ? ' active' : ''}`} onClick={() => setMenuOpen((o) => !o)} aria-label="Menu">
-            <span /><span /><span />
-          </button>
         </div>
       </div>
     </nav>

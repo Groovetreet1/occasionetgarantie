@@ -5,7 +5,6 @@ import api from '../api/axios';
 import ProductCard from '../components/ProductCard';
 import AnimatedBg from '../components/AnimatedBg';
 import HeroSlider from '../components/HeroSlider';
-import AboutSlider from '../components/AboutSlider';
 
 export default function Home() {
   const [phones, setPhones] = useState([]);
@@ -24,7 +23,6 @@ export default function Home() {
     <>
       <AnimatedBg />
       <HeroSlider />
-      <AboutSlider />
 
       <section className="features">
         <div className="container">
