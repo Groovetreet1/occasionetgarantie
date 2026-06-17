@@ -91,7 +91,7 @@ router.put('/:id', authenticate, adminOnly, async (req, res) => {
   try {
     const { name, slug, description, price, old_price, category_id, brand, state, warranty, stock, featured, image, specs } = req.body;
     await pool.query(
-      `UPDATE products SET name=?, slug=?, description=?, price=?, old_price=?, category_id=?, brand=?, state=?, warranty=?, stock=?, featured=?, image=?, specs=? WHERE id=?`,
+      `UPDATE products SET name=?, slug=?, description=?, price=?, old_price=?, category_id=?, brand=?, state=?, warranty=?, stock=?, featured=?, image=?, specs=? WHERE id = ?`,
       [name, slug, description, price, old_price || null, category_id || null, brand || null, state || 'tres_bon', warranty || '6 mois', stock || 1, featured || false, image || null, specs ? JSON.stringify(specs) : null, req.params.id]
     );
     res.json({ message: 'Produit mis à jour.' });

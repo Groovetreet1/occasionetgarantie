@@ -406,6 +406,42 @@
       "image": null,
       "active": true,
       "created_at": "2026-06-17T16:00:00.000Z"
+    },
+    {
+      "id": 33,
+      "name": "test",
+      "slug": "test",
+      "description": "uigedifeb",
+      "price": 110000,
+      "old_price": 28999.98,
+      "category_id": 1,
+      "brand": "Samsung",
+      "state": "tres_bon",
+      "warranty": "12 mois",
+      "stock": 1,
+      "featured": true,
+      "image": "1781717833617-29ohx2.jpg",
+      "specs": "{\"Ecran\":\"\",\"Processeur\":\"\",\"RAM\":\"\",\"Stockage\":\"\",\"Batterie\":\"\",\"Couleur\":\"\"}",
+      "active": true,
+      "created_at": "2026-06-17T17:37:16.484Z"
+    },
+    {
+      "id": 34,
+      "name": "test1",
+      "slug": "test1",
+      "description": "ufcvyuihojkp",
+      "price": 1000,
+      "old_price": 2000,
+      "category_id": 1,
+      "brand": "Samsung",
+      "state": "tres_bon",
+      "warranty": "12 mois",
+      "stock": 1,
+      "featured": false,
+      "image": "1781718366059-faizgg.webp",
+      "specs": "{\"Ecran\":\"\",\"Processeur\":\"\",\"RAM\":\"\",\"Stockage\":\"\",\"Batterie\":\"\",\"Couleur\":\"\"}",
+      "active": true,
+      "created_at": "2026-06-17T17:46:07.095Z"
     }
   ],
   "categories": [
@@ -440,7 +476,7 @@
   "product_images": [],
   "nextId": {
     "users": 2,
-    "products": 33,
+    "products": 35,
     "orders": 1,
     "order_items": 1,
     "product_images": 1
