@@ -4,6 +4,8 @@ import { FiShield, FiRefreshCw, FiTruck, FiArrowRight } from 'react-icons/fi';
 import api from '../api/axios';
 import ProductCard from '../components/ProductCard';
 import AnimatedBg from '../components/AnimatedBg';
+import HeroSlider from '../components/HeroSlider';
+import AboutSlider from '../components/AboutSlider';
 
 export default function Home() {
   const [products, setProducts] = useState([]);
@@ -17,34 +19,8 @@ export default function Home() {
   return (
     <>
       <AnimatedBg />
-      <section className="hero">
-        <div className="container">
-          <div className="hero-content">
-            <div className="hero-text">
-              <h1>
-                Des produits <span>d&rsquo;exception</span> à prix réduits
-              </h1>
-              <p>
-                Chaque article est vérifié, testé et garanti. Profitez du meilleur
-                de la technologie sans vous ruiner.
-              </p>
-              <div className="hero-buttons">
-                <Link to="/products" className="btn btn-primary">
-                  Découvrir nos produits <FiArrowRight size={18} />
-                </Link>
-                <Link to="/signup" className="btn btn-outline">
-                  Créer un compte
-                </Link>
-              </div>
-            </div>
-            <div className="hero-image">
-              <div className="hero-image-placeholder">
-                <FiShield size={120} />
-              </div>
-            </div>
-          </div>
-        </div>
-      </section>
+      <HeroSlider />
+      <AboutSlider />
 
       <section className="features">
         <div className="container">
