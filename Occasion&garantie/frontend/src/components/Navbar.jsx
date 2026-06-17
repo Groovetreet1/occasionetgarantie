@@ -17,15 +17,15 @@ export default function Navbar() {
           {user ? (
             <>
               {user.role === 'admin' && (
-                <NavLink to="/admin" style={{ display: 'flex', alignItems: 'center', gap: '4px', color: 'var(--secondary)' }}>
+                <NavLink to="/admin" className="admin-btn">
                   <FiSettings size={14} /> Admin
                 </NavLink>
               )}
-              <span className="btn-ghost" style={{ cursor: 'default' }}>
-                <FiUser size={16} /> {user.fullName}
+              <span className="user-badge">
+                <FiUser size={14} /> {user.fullName}
               </span>
-              <button onClick={logout} className="btn-ghost">
-                <FiLogOut size={16} /> Déconnexion
+              <button onClick={logout} className="logout-btn">
+                <FiLogOut size={14} /> Déconnexion
               </button>
             </>
           ) : (
