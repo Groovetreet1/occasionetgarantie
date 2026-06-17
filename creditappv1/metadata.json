@@ -1,6 +1,0 @@
-{
-  "name": "Maîtresse des Crédits MAD",
-  "description": "Application Android-style Material 3 pour le suivi des crédits, dettes et prêts en dirhams marocains (MAD) avec code technique natif.",
-  "requestFramePermissions": [],
-  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
-}
