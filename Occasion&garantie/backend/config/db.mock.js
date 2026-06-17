@@ -89,6 +89,11 @@ const mockPool = {
       if (upper.includes('WHERE P.FEATURED = TRUE')) {
         results = results.filter(p => p.featured === true);
       }
+      if (upper.includes('AND C.SLUG = ?')) {
+        const slugParam = params[params.length - 1];
+        const cat = data.categories.find(c => c.slug === slugParam);
+        if (cat) results = results.filter(p => p.category_id === cat.id);
+      }
       if (upper.includes('P.FEATURED DESC')) {
         results.sort((a, b) => (b.featured ? 1 : 0) - (a.featured ? 1 : 0));
       }

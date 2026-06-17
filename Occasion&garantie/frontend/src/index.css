@@ -737,6 +737,27 @@ img { max-width: 100%; }
   padding: 80px 0;
 }
 
+.products-section-accessories {
+  border-top: 1px solid var(--border);
+  position: relative;
+}
+
+.products-section-accessories::before {
+  content: '';
+  position: absolute;
+  top: -1px;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 200px;
+  height: 2px;
+  background: var(--gradient);
+  border-radius: 2px;
+}
+
+.section-title svg {
+  color: var(--primary);
+}
+
 .products-header {
   display: flex;
   justify-content: space-between;

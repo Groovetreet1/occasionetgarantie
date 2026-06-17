@@ -1,6 +1,6 @@
 import { Link } from 'react-router-dom';
 import { useEffect, useState } from 'react';
-import { FiShield, FiRefreshCw, FiTruck, FiArrowRight } from 'react-icons/fi';
+import { FiShield, FiRefreshCw, FiTruck, FiArrowRight, FiSmartphone, FiHeadphones } from 'react-icons/fi';
 import api from '../api/axios';
 import ProductCard from '../components/ProductCard';
 import AnimatedBg from '../components/AnimatedBg';
@@ -8,11 +8,15 @@ import HeroSlider from '../components/HeroSlider';
 import AboutSlider from '../components/AboutSlider';
 
 export default function Home() {
-  const [products, setProducts] = useState([]);
+  const [phones, setPhones] = useState([]);
+  const [accessories, setAccessories] = useState([]);
 
   useEffect(() => {
-    api.get('/products/featured')
-      .then((res) => setProducts(res.data))
+    api.get('/products?category=smartphones')
+      .then((res) => setPhones(res.data))
+      .catch(() => {});
+    api.get('/products?category=accessoires')
+      .then((res) => setAccessories(res.data))
       .catch(() => {});
   }, []);
 
@@ -52,21 +56,45 @@ export default function Home() {
         <div className="container">
           <div className="products-header">
             <div>
-              <h2 className="section-title">Produits à la une</h2>
-              <p className="section-subtitle" style={{ marginBottom: 0 }}>Nos meilleures offres du moment.</p>
+              <h2 className="section-title"><FiSmartphone size={28} style={{ verticalAlign: 'middle', marginRight: 10 }} />Smartphones</h2>
+              <p className="section-subtitle" style={{ marginBottom: 0 }}>Nos téléphones reconditionnés, testés et garantis.</p>
             </div>
-            <Link to="/products" className="btn btn-secondary">
+            <Link to="/products?category=smartphones" className="btn btn-secondary">
               Voir tout <FiArrowRight size={16} />
             </Link>
           </div>
-          {products.length > 0 ? (
+          {phones.length > 0 ? (
             <div className="products-grid">
-              {products.map((p) => <ProductCard key={p.id} product={p} />)}
+              {phones.map((p) => <ProductCard key={p.id} product={p} />)}
             </div>
           ) : (
             <div className="empty-state">
-              <div className="icon"><FiShield size={48} /></div>
-              <p>Aucun produit à la une pour le moment. Revenez bientôt !</p>
+              <div className="icon"><FiSmartphone size={48} /></div>
+              <p>Aucun téléphone disponible pour le moment.</p>
+            </div>
+          )}
+        </div>
+      </section>
+
+      <section className="products-section products-section-accessories">
+        <div className="container">
+          <div className="products-header">
+            <div>
+              <h2 className="section-title"><FiHeadphones size={28} style={{ verticalAlign: 'middle', marginRight: 10 }} />Accessoires</h2>
+              <p className="section-subtitle" style={{ marginBottom: 0 }}>Chargeurs, coques, kits Bluetooth et protections.</p>
+            </div>
+            <Link to="/products?category=accessoires" className="btn btn-secondary">
+              Voir tout <FiArrowRight size={16} />
+            </Link>
+          </div>
+          {accessories.length > 0 ? (
+            <div className="products-grid">
+              {accessories.map((p) => <ProductCard key={p.id} product={p} />)}
+            </div>
+          ) : (
+            <div className="empty-state">
+              <div className="icon"><FiHeadphones size={48} /></div>
+              <p>Aucun accessoire disponible pour le moment.</p>
             </div>
           )}
         </div>
