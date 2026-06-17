@@ -911,7 +911,7 @@ img { max-width: 100%; }
 
 .product-image {
   width: 100%;
-  aspect-ratio: 3/4;
+  aspect-ratio: 1/1;
   background: var(--bg-secondary);
   display: flex;
   align-items: center;
@@ -938,10 +938,12 @@ img { max-width: 100%; }
   font-weight: 700;
   text-transform: uppercase;
   letter-spacing: 0.5px;
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
 }
 
-.badge-featured { background: var(--gradient); color: white; }
-.badge-warranty { background: rgba(16, 185, 129, 0.2); color: var(--success); }
+.badge-featured { background: linear-gradient(135deg, rgba(245, 158, 11, 0.85), rgba(236, 72, 153, 0.85)); color: white; }
+.badge-warranty { background: rgba(16, 185, 129, 0.75); color: white; }
 
 .product-info {
   padding: 20px;
@@ -1265,13 +1267,18 @@ img { max-width: 100%; }
   .hero-text h1 { font-size: 36px; }
   .features-grid { grid-template-columns: 1fr; }
   .products-header { flex-direction: column; align-items: flex-start; gap: 16px; }
-  .products-grid { grid-template-columns: repeat(2, 1fr); gap: 12px; }
-  .product-info h3 { font-size: 14px; }
+  .products-grid { grid-template-columns: repeat(2, 1fr); gap: 10px; }
+  .product-info { padding: 12px; }
+  .product-image { aspect-ratio: 1/1; padding: 10px; }
+  .product-info h3 { font-size: 13px; }
+  .product-price { gap: 4px; flex-wrap: wrap; }
+  .price-current { font-size: 16px; }
+  .price-old { font-size: 11px; }
+  .product-meta { padding-top: 8px; }
+  .product-meta .btn { font-size: 10px !important; padding: 3px 8px !important; }
+  .product-category { font-size: 10px; margin-bottom: 4px; }
   .product-detail-grid { grid-template-columns: 1fr !important; gap: 24px !important; }
-  .product-detail-grid .product-image { position: static !important; aspect-ratio: 1 !important; }
-  .product-price { font-size: 13px; }
-  .product-meta .btn { font-size: 11px !important; padding: 4px 10px !important; }
-  .product-category { font-size: 11px; }
+  .product-detail-grid .product-image { aspect-ratio: 1 !important; }
   .footer-grid { grid-template-columns: 1fr 1fr; }
   .hero-slide-title { font-size: 32px; }
   .hero-slide-card { padding: 36px 28px; max-width: 100%; }

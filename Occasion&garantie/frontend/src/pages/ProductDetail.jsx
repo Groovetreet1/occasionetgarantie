@@ -34,6 +34,7 @@ export default function ProductDetail() {
   const [lightboxIndex, setLightboxIndex] = useState(0);
 
   useEffect(() => {
+    window.scrollTo(0, 0);
     setLoading(true);
     api.get(`/products/${slug}`)
       .then((res) => setProduct(res.data))
@@ -178,11 +179,11 @@ export default function ProductDetail() {
                 rel="noopener noreferrer"
                 className="btn"
                 style={{
+                  width: '100%',
                   background: 'var(--gradient)',
                   color: 'white',
                   fontSize: '18px',
                   padding: '16px 36px',
-                  width: '100%',
                   justifyContent: 'center',
                   boxShadow: '0 4px 20px rgba(245, 158, 11, 0.4)',
                 }}

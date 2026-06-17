@@ -11,7 +11,7 @@ export default function ProductCard({ product }) {
     <Link to={`/products/${product.slug}`} className="product-card" style={{ textDecoration: 'none', color: 'inherit', display: 'block' }}>
       <div className="product-image">
         {product.featured && <span className="product-badge badge-featured">Top</span>}
-        <span className="product-badge badge-warranty" style={{ left: 'auto', right: '12px' }}>
+        <span className="product-badge badge-warranty" style={{ top: '44px', left: '12px', right: 'auto' }}>
           <FiShield size={10} /> {product.warranty || '6 mois'}
         </span>
         {imgUrl ? (
