@@ -1,5 +1,5 @@
 import { Link, NavLink } from 'react-router-dom';
-import { FiUser, FiLogOut, FiSettings } from 'react-icons/fi';
+import { FiUser, FiLogOut, FiSettings, FiChevronDown } from 'react-icons/fi';
 import { useState, useRef, useEffect } from 'react';
 import { useAuth } from '../context/AuthContext';
 import ThemeToggle from './ThemeToggle';
@@ -7,54 +7,83 @@ import ThemeToggle from './ThemeToggle';
 export default function Navbar() {
   const { user, logout } = useAuth();
   const [menuOpen, setMenuOpen] = useState(false);
-  const menuRef = useRef(null);
+  const [dropdownOpen, setDropdownOpen] = useState(false);
+  const navRef = useRef(null);
+  const dropdownRef = useRef(null);
 
   useEffect(() => {
-    const handleClick = (e) => {
-      if (menuRef.current && !menuRef.current.contains(e.target)) {
-        setMenuOpen(false);
-      }
+    const handle = (e) => {
+      if (navRef.current && !navRef.current.contains(e.target)) setMenuOpen(false);
+      if (dropdownRef.current && !dropdownRef.current.contains(e.target)) setDropdownOpen(false);
     };
-    if (menuOpen) document.addEventListener('mousedown', handleClick);
-    return () => document.removeEventListener('mousedown', handleClick);
-  }, [menuOpen]);
+    document.addEventListener('mousedown', handle);
+    return () => document.removeEventListener('mousedown', handle);
+  }, []);
 
   const closeMenu = () => setMenuOpen(false);
 
   return (
-    <nav className="navbar">
-      <div className="container">
-        <Link to="/" className="logo">Occasion &amp; Garantie</Link>
-        <button className="hamburger" onClick={() => setMenuOpen((o) => !o)} aria-label="Menu">
-          {menuOpen ? '\u2715' : '\u2630'}
-        </button>
-        <div ref={menuRef} className={`nav-links${menuOpen ? ' open' : ''}`}>
+    <nav className="navbar" ref={navRef}>
+      <div className="navbar-inner">
+        <Link to="/" className="navbar-logo">OG</Link>
+
+        <div className={`navbar-nav${menuOpen ? ' open' : ''}`}>
           <NavLink to="/" end onClick={closeMenu}>Accueil</NavLink>
           <NavLink to="/products" onClick={closeMenu}>Produits</NavLink>
-          <ThemeToggle />
-          <div className="mobile-divider" />
+          <div className="navbar-nav-divider" />
+          <div className="navbar-mobile-only">
+            <ThemeToggle />
+          </div>
           {user ? (
-            <>
+            <div className="navbar-mobile-only">
               {user.role === 'admin' && (
-                <NavLink to="/admin" className="admin-btn" onClick={closeMenu}>
+                <NavLink to="/admin" onClick={closeMenu}>
                   <FiSettings size={14} /> Admin
                 </NavLink>
               )}
-              <span className="user-badge">
-                <FiUser size={14} /> {user.fullName}
-              </span>
-              <button onClick={() => { logout(); closeMenu(); }} className="logout-btn">
+              <button onClick={() => { logout(); closeMenu(); }} className="navbar-logout-mobile">
                 <FiLogOut size={14} /> D&eacute;connexion
               </button>
-            </>
+            </div>
           ) : (
-            <>
+            <div className="navbar-mobile-only">
               <NavLink to="/login" onClick={closeMenu}>Connexion</NavLink>
-              <Link to="/signup" className="btn btn-primary" onClick={closeMenu}>
+              <Link to="/signup" className="navbar-signup-mobile" onClick={closeMenu}>
                 S&rsquo;inscrire
               </Link>
-            </>
+            </div>
           )}
+        </div>
+
+        <div className="navbar-actions">
+          <ThemeToggle />
+          {user ? (
+            <div className="navbar-dropdown" ref={dropdownRef}>
+              <button className="navbar-user" onClick={() => setDropdownOpen((o) => !o)}>
+                <FiUser size={16} /> <span>{user.fullName}</span> <FiChevronDown size={14} />
+              </button>
+              {dropdownOpen && (
+                <div className="navbar-dropdown-menu">
+                  {user.role === 'admin' && (
+                    <NavLink to="/admin" onClick={() => setDropdownOpen(false)}>
+                      <FiSettings size={14} /> Administration
+                    </NavLink>
+                  )}
+                  <button onClick={() => { logout(); setDropdownOpen(false); }}>
+                    <FiLogOut size={14} /> D&eacute;connexion
+                  </button>
+                </div>
+              )}
+            </div>
+          ) : (
+            <div className="navbar-auth">
+              <Link to="/login" className="navbar-login">Connexion</Link>
+              <Link to="/signup" className="navbar-signup">S&rsquo;inscrire</Link>
+            </div>
+          )}
+          <button className={`navbar-hamburger${menuOpen ? ' active' : ''}`} onClick={() => setMenuOpen((o) => !o)} aria-label="Menu">
+            <span /><span /><span />
+          </button>
         </div>
       </div>
     </nav>
