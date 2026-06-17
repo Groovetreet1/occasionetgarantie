@@ -76,11 +76,21 @@ export default function Home() {
         </div>
       </section>
 
+      <div className="section-divider">
+        <div className="divider-line" />
+        <div className="divider-content">
+          <FiHeadphones size={20} />
+          <span>Accessoires &amp; Protections</span>
+          <FiHeadphones size={20} />
+        </div>
+        <div className="divider-line" />
+      </div>
+
       <section className="products-section products-section-accessories">
         <div className="container">
           <div className="products-header">
             <div>
-              <h2 className="section-title"><FiHeadphones size={28} style={{ verticalAlign: 'middle', marginRight: 10 }} />Accessoires</h2>
+              <h2 className="section-title">Accessoires</h2>
               <p className="section-subtitle" style={{ marginBottom: 0 }}>Chargeurs, coques, kits Bluetooth et protections.</p>
             </div>
             <Link to="/products?category=accessoires" className="btn btn-secondary">
