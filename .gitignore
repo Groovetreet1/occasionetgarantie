@@ -55,3 +55,20 @@ coverage/
 
 # Uploads
 game_hub/uploads/
+
+# Other projects
+creditappv1/
+credit_app_expo/
+games_pack/
+game_hub/
+PhoneTracker/
+Ors music hamid/
+
+# Root py/html files
+convert_all.py
+convert_to_mp3.py
+import_games_to_hub.py
+new.py
+speed_rush.py
+super_pixel_quest.py
+capture_front_camera.html
