@@ -1,28 +1,34 @@
-import { Link, NavLink, useLocation } from 'react-router-dom';
-import { FiUser, FiLogOut, FiSettings, FiMenu, FiX } from 'react-icons/fi';
-import { useState, useEffect } from 'react';
+import { Link, NavLink } from 'react-router-dom';
+import { FiUser, FiLogOut, FiSettings } from 'react-icons/fi';
+import { useState, useRef, useEffect } from 'react';
 import { useAuth } from '../context/AuthContext';
 import ThemeToggle from './ThemeToggle';
 
 export default function Navbar() {
   const { user, logout } = useAuth();
   const [menuOpen, setMenuOpen] = useState(false);
-  const location = useLocation();
+  const menuRef = useRef(null);
 
   useEffect(() => {
-    setMenuOpen(false);
-  }, [location]);
+    const handleClick = (e) => {
+      if (menuRef.current && !menuRef.current.contains(e.target)) {
+        setMenuOpen(false);
+      }
+    };
+    if (menuOpen) document.addEventListener('mousedown', handleClick);
+    return () => document.removeEventListener('mousedown', handleClick);
+  }, [menuOpen]);
 
   const closeMenu = () => setMenuOpen(false);
 
   return (
     <nav className="navbar">
       <div className="container">
-        <Link to="/" className="logo">Occasion & Garantie</Link>
+        <Link to="/" className="logo">Occasion &amp; Garantie</Link>
         <button className="hamburger" onClick={() => setMenuOpen((o) => !o)} aria-label="Menu">
-          {menuOpen ? <FiX size={24} /> : <FiMenu size={24} />}
+          {menuOpen ? '\u2715' : '\u2630'}
         </button>
-        <div className={`nav-links${menuOpen ? ' open' : ''}`}>
+        <div ref={menuRef} className={`nav-links${menuOpen ? ' open' : ''}`}>
           <NavLink to="/" end onClick={closeMenu}>Accueil</NavLink>
           <NavLink to="/products" onClick={closeMenu}>Produits</NavLink>
           <ThemeToggle />
@@ -38,7 +44,7 @@ export default function Navbar() {
                 <FiUser size={14} /> {user.fullName}
               </span>
               <button onClick={() => { logout(); closeMenu(); }} className="logout-btn">
-                <FiLogOut size={14} /> Déconnexion
+                <FiLogOut size={14} /> D&eacute;connexion
               </button>
             </>
           ) : (
