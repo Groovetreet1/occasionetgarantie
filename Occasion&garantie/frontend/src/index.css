@@ -364,7 +364,9 @@ img { max-width: 100%; }
 }
 
 .hamburger {
-  display: none;
+  display: flex;
+  align-items: center;
+  justify-content: center;
   background: none;
   border: none;
   color: var(--text-primary);
@@ -380,8 +382,6 @@ img { max-width: 100%; }
 }
 
 @media (max-width: 900px) {
-  .hamburger { display: flex; align-items: center; justify-content: center; }
-
   .nav-links {
     position: fixed;
     top: 70px;
