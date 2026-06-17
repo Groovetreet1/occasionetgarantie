@@ -15,7 +15,7 @@ export default function PromoPopup() {
   });
 
   useEffect(() => {
-    const timer = setTimeout(() => setVisible(true), 5000);
+    const timer = setTimeout(() => setVisible(true), 2000);
     return () => clearTimeout(timer);
   }, []);
 
