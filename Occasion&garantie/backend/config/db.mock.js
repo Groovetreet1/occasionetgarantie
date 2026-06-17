@@ -24,7 +24,9 @@ let data = { ...defaultData };
 function load() {
   try {
     if (fs.existsSync(DB_PATH)) {
-      data = JSON.parse(fs.readFileSync(DB_PATH, 'utf8'));
+      let raw = fs.readFileSync(DB_PATH, 'utf8');
+      if (raw.charCodeAt(0) === 0xFEFF) raw = raw.slice(1);
+      data = JSON.parse(raw);
     }
   } catch { data = { ...defaultData }; }
 }
