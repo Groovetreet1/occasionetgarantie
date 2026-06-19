@@ -9,7 +9,9 @@ const { authenticate } = require('../middleware/auth');
 const router = express.Router();
 
 const resetCodes = new Map();
+const pendingSignups = new Map();
 const CODE_EXPIRY = 15 * 60 * 1000;
+const SIGNUP_EXPIRY = 15 * 60 * 1000;
 
 async function sendSms(to, message) {
   return new Promise((resolve, reject) => {
@@ -179,6 +181,94 @@ router.post('/reset-password', async (req, res) => {
     resetCodes.delete(email);
 
     res.json({ message: 'Mot de passe réinitialisé avec succès.' });
+  } catch (err) {
+    res.status(500).json({ message: 'Erreur serveur.', error: err.message });
+  }
+});
+
+// Send verification SMS for signup
+router.post('/send-verification', async (req, res) => {
+  try {
+    const { fullName, email, password, phone } = req.body;
+    if (!fullName || !email || !password || !phone) {
+      return res.status(400).json({ message: 'Tous les champs sont requis (nom, email, mot de passe, téléphone).' });
+    }
+    if (password.length < 6) {
+      return res.status(400).json({ message: 'Le mot de passe doit contenir au moins 6 caractères.' });
+    }
+
+    const [existing] = await pool.query('SELECT id FROM users WHERE email = ?', [email]);
+    if (existing.length > 0) {
+      return res.status(400).json({ message: 'Cet email est déjà utilisé.' });
+    }
+
+    if (!process.env.SMS_API_KEY) {
+      return res.status(500).json({ message: 'Service SMS non configuré. Contactez le support.' });
+    }
+
+    const token = crypto.randomBytes(32).toString('hex');
+    pendingSignups.set(token, {
+      fullName, email, password, phone,
+      expiresAt: Date.now() + SIGNUP_EXPIRY
+    });
+
+    const verifyUrl = `${req.protocol}://${req.get('host')}/verify-account?token=${encodeURIComponent(token)}`;
+
+    const smsResult = await sendSms(
+      phone,
+      `Bienvenue chez O&G ${fullName} ! Confirmez votre inscription : ${verifyUrl}. Ce lien expire dans 15 min.`
+    );
+
+    if (!smsResult.success) {
+      pendingSignups.delete(token);
+      return res.status(500).json({ message: 'Erreur lors de l\'envoi du SMS.', error: smsResult.error });
+    }
+
+    res.json({ message: 'SMS de confirmation envoyé.', email });
+  } catch (err) {
+    res.status(500).json({ message: 'Erreur serveur.', error: err.message });
+  }
+});
+
+// Verify signup token
+router.post('/verify-signup', async (req, res) => {
+  try {
+    const { token } = req.body;
+    if (!token) return res.status(400).json({ message: 'Token requis.' });
+
+    const entry = pendingSignups.get(token);
+    if (!entry) return res.status(400).json({ message: 'Lien de vérification invalide ou expiré.' });
+    if (Date.now() > entry.expiresAt) {
+      pendingSignups.delete(token);
+      return res.status(400).json({ message: 'Lien expiré. Veuillez refaire une inscription.' });
+    }
+
+    // Double-check email still available
+    const [existing] = await pool.query('SELECT id FROM users WHERE email = ?', [entry.email]);
+    if (existing.length > 0) {
+      pendingSignups.delete(token);
+      return res.status(400).json({ message: 'Cet email est déjà utilisé (inscription concurrente).' });
+    }
+
+    const hashed = await bcrypt.hash(entry.password, 10);
+    const [result] = await pool.query(
+      'INSERT INTO users (full_name, email, password, phone) VALUES (?, ?, ?, ?)',
+      [entry.fullName, entry.email, hashed, entry.phone]
+    );
+
+    pendingSignups.delete(token);
+
+    const jwtToken = jwt.sign(
+      { id: result.insertId, email: entry.email, role: 'client' },
+      process.env.JWT_SECRET,
+      { expiresIn: '7d' }
+    );
+
+    res.json({
+      message: 'Compte créé avec succès.',
+      token: jwtToken,
+      user: { id: result.insertId, fullName: entry.fullName, email: entry.email, role: 'client' }
+    });
   } catch (err) {
     res.status(500).json({ message: 'Erreur serveur.', error: err.message });
   }
