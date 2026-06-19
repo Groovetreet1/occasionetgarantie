@@ -3,8 +3,7 @@
   "version": "1.0.0",
   "private": true,
   "scripts": {
-    "postinstall": "cd 'Occasion&garantie/backend' && npm install",
-    "build": "cd 'Occasion&garantie' && npm run build",
+    "build": "cd 'Occasion&garantie/backend' && npm install && cd ../frontend && npm install && npm run build && cd .. && node -e \"var fs=require('fs'),p=require('path');var src=p.join(process.cwd(),'frontend','dist'),dst=p.join(process.cwd(),'backend','public');if(fs.existsSync(dst))fs.rmSync(dst,{recursive:true});fs.cpSync(src,dst,{recursive:true});console.log('Copied frontend to backend/public')\"",
     "start": "cd 'Occasion&garantie' && npm start"
   }
 }
