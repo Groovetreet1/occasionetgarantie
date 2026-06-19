@@ -21,6 +21,21 @@ const storage = multer.diskStorage({
 
 const upload = multer({ storage, limits: { fileSize: 5 * 1024 * 1024 } });
 
+// Serve screenshot by deposit ID
+router.get('/:id/screenshot', async (req, res) => {
+  try {
+    const [deposits] = await pool.query('SELECT * FROM deposits WHERE id = ?', [Number(req.params.id)]);
+    if (deposits.length === 0) return res.status(404).json({ message: 'Acompte introuvable.' });
+    const deposit = deposits[0];
+    if (!deposit.screenshot) return res.status(404).json({ message: 'Aucune capture.' });
+    const filePath = path.join(depositDir, deposit.screenshot);
+    if (!fs.existsSync(filePath)) return res.status(404).json({ message: 'Fichier introuvable.' });
+    res.sendFile(filePath);
+  } catch (err) {
+    res.status(500).json({ message: 'Erreur serveur.' });
+  }
+});
+
 // Bank details config endpoint
 router.get('/bank-info', (req, res) => {
   res.json({
@@ -58,14 +73,17 @@ router.post('/', authenticate, upload.single('screenshot'), async (req, res) => 
       [req.user.id, product.id, product.name, screenshotFile, 'en_attente']
     );
 
-    // Notify admin via SMS (sans URL directe de la capture)
+    // Notify admin via SMS
+    const screenshotUrl = screenshotFile
+      ? `${req.protocol}://${req.get('host')}/api/deposits/${result.insertId}/screenshot`
+      : null;
     const adminPhone = process.env.ADMIN_PHONE || '212669017295';
     const adminMsg =
       `Nouvel acompte 200DH !\n` +
       `Produit: ${product.name} (${product.price}DH)\n` +
       `Client: ${clientName}\n` +
       `Tél: ${clientPhone}\n` +
-      `Capture d'écran reçue`;
+      `Voir capture: ${screenshotUrl || 'Pas de capture'}`;
 
     let smsError = null;
     try {

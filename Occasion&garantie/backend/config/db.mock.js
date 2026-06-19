@@ -231,6 +231,12 @@ const mockPool = {
       return [[]];
     }
 
+    // SELECT FROM deposits WHERE id = ?
+    if (upper.startsWith('SELECT') && upper.includes('FROM DEPOSITS') && upper.includes('WHERE ID =')) {
+      const deposit = data.deposits.find(d => d.id === Number(params[0]));
+      return [deposit ? [deposit] : []];
+    }
+
     // INSERT INTO deposits
     if (upper.startsWith('INSERT INTO DEPOSITS')) {
       const newDeposit = {
