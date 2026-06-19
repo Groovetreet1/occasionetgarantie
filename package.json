@@ -1,0 +1,10 @@
+{
+  "name": "occasion-garantie",
+  "version": "1.0.0",
+  "private": true,
+  "scripts": {
+    "postinstall": "cd 'Occasion&garantie' && npm install",
+    "build": "cd 'Occasion&garantie' && npm run build",
+    "start": "cd 'Occasion&garantie' && npm start"
+  }
+}

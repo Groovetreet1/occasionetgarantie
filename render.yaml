@@ -4,7 +4,6 @@ services:
     env: node
     region: frankfurt
     plan: free
-    rootDir: "Occasion&garantie"
     buildCommand: npm run build
     startCommand: npm start
     envVars:
