@@ -1,9 +1,9 @@
 import { Link } from 'react-router-dom';
 import { useEffect, useState } from 'react';
-import { FiShield, FiRefreshCw, FiTruck, FiArrowRight, FiSmartphone, FiHeadphones } from 'react-icons/fi';
+import { FiShield, FiRefreshCw, FiTruck, FiArrowRight, FiSmartphone, FiHeadphones, FiMonitor, FiWatch, FiTablet } from 'react-icons/fi';
+import { BsPhone, BsLaptop, BsHeadphones, BsController } from 'react-icons/bs';
 import api from '../api/axios';
 import ProductCard from '../components/ProductCard';
-import AnimatedBg from '../components/AnimatedBg';
 import HeroSlider from '../components/HeroSlider';
 import PromoPopup from '../components/PromoPopup';
 
@@ -22,33 +22,39 @@ export default function Home() {
 
   return (
     <>
-      <AnimatedBg />
       <HeroSlider />
       <PromoPopup />
 
-      <section className="features">
-        <div className="container">
-          <div style={{ textAlign: 'center', marginBottom: '48px' }}>
-            <h2 className="section-title">Pourquoi nous choisir ?</h2>
-            <p className="section-subtitle">La qualité au meilleur prix, c&rsquo;est notre promesse.</p>
-          </div>
-          <div className="features-grid">
-            <div className="feature-card">
-              <div className="feature-icon"><FiShield size={24} /></div>
-              <h3>Garantie incluse</h3>
-              <p>Chaque produit est couvert par une garantie minimum de 15 jours pour votre tranquillité.</p>
+      <section className="container">
+        <div className="category-grid">
+          <Link to="/products?category=Smartphones" className="category-card">
+            <div>
+              <div className="cat-icon"><BsPhone /></div>
+              <h3>Smartphones</h3>
+              <p>iPhone, Samsung, Xiaomi</p>
             </div>
-            <div className="feature-card">
-              <div className="feature-icon"><FiRefreshCw size={24} /></div>
-              <h3>Testé et vérifié</h3>
-              <p>Nos experts vérifient chaque article avant mise en vente. Qualité irréprochable.</p>
+          </Link>
+          <Link to="/products?category=Tablettes" className="category-card">
+            <div>
+              <div className="cat-icon"><FiTablet /></div>
+              <h3>Tablettes</h3>
+              <p>iPad, Samsung Tab</p>
             </div>
-            <div className="feature-card">
-              <div className="feature-icon"><FiTruck size={24} /></div>
-              <h3>Livraison rapide</h3>
-              <p>Après la confirmation, Expédition sur Casablanca Gratuit sous 24h. Suivi de commande en temps réel et retour facile.</p>
+          </Link>
+          <Link to="/products?category=Ordinateurs" className="category-card">
+            <div>
+              <div className="cat-icon"><BsLaptop /></div>
+              <h3>Ordinateurs</h3>
+              <p>MacBook, PC Portable</p>
             </div>
-          </div>
+          </Link>
+          <Link to="/products?category=Accessoires" className="category-card">
+            <div>
+              <div className="cat-icon"><BsHeadphones /></div>
+              <h3>Accessoires</h3>
+              <p>Chargeurs, coques, etc.</p>
+            </div>
+          </Link>
         </div>
       </section>
 
@@ -107,6 +113,32 @@ export default function Home() {
               <p>Aucun accessoire disponible pour le moment.</p>
             </div>
           )}
+        </div>
+      </section>
+
+      <section className="features">
+        <div className="container">
+          <div style={{ textAlign: 'center', marginBottom: '48px' }}>
+            <h2 className="section-title">Pourquoi nous choisir ?</h2>
+            <p className="section-subtitle">La qualité au meilleur prix, c&rsquo;est notre promesse.</p>
+          </div>
+          <div className="features-grid">
+            <div className="feature-card">
+              <div className="feature-icon"><FiShield size={24} /></div>
+              <h3>Garantie incluse</h3>
+              <p>Chaque produit est couvert par une garantie minimum de 15 jours pour votre tranquillité.</p>
+            </div>
+            <div className="feature-card">
+              <div className="feature-icon"><FiRefreshCw size={24} /></div>
+              <h3>Testé et vérifié</h3>
+              <p>Nos experts vérifient chaque article avant mise en vente. Qualité irréprochable.</p>
+            </div>
+            <div className="feature-card">
+              <div className="feature-icon"><FiTruck size={24} /></div>
+              <h3>Livraison rapide</h3>
+              <p>Après la confirmation, Expédition sur Casablanca Gratuit sous 24h. Suivi de commande en temps réel et retour facile.</p>
+            </div>
+          </div>
         </div>
       </section>
     </>

@@ -56,6 +56,18 @@ coverage/
 # Uploads
 game_hub/uploads/
 
+# Junction (symlink) duplicate of Occasion&garantie
+Occasion-Garantie/
+
+# Built frontend assets
+Occasion&garantie/backend/public/assets/
+Occasion&garantie/backend/public/index.html
+Occasion&garantie/backend/public/favicon.svg
+
+# Server logs
+*.err
+*.log
+
 # Other projects
 creditappv1/
 credit_app_expo/

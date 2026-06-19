@@ -6,8 +6,7 @@ export default function ThemeToggle() {
   return (
     <button
       onClick={toggle}
-      className="btn-ghost"
-      style={{ fontSize: '18px', padding: '8px' }}
+      className="theme-toggle"
       title={theme === 'dark' ? 'Mode clair' : 'Mode sombre'}
     >
       {theme === 'dark' ? <FiSun /> : <FiMoon />}

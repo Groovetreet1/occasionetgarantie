@@ -16,7 +16,7 @@ router.get('/', async (req, res) => {
     `;
     const params = [];
 
-    if (category) { sql += ' AND c.slug = ?'; params.push(category); }
+    if (category) { sql += ' AND LOWER(c.name) = ?'; params.push(category.toLowerCase()); }
     if (search) { sql += ' AND (p.name LIKE ? OR p.description LIKE ?)'; params.push(`%${search}%`, `%${search}%`); }
     if (min) { sql += ' AND p.price >= ?'; params.push(min); }
     if (max) { sql += ' AND p.price <= ?'; params.push(max); }

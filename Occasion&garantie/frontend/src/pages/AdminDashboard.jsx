@@ -3,8 +3,6 @@ import { Link } from 'react-router-dom';
 import { FiPlus, FiEdit2, FiTrash2, FiPackage, FiArrowLeft } from 'react-icons/fi';
 import { BsWhatsapp } from 'react-icons/bs';
 import api from '../api/axios';
-import AnimatedBg from '../components/AnimatedBg';
-
 const stateLabels = { neuf: 'Neuf', comme_neuf: 'Comme neuf', tres_bon: 'Très bon', bon: 'Bon', acceptable: 'Acceptable' };
 const formatPrice = (p) => new Intl.NumberFormat('fr-FR', { style: 'currency', currency: 'MAD' }).format(p).replace('MAD', '').trim() + ' DH';
 
@@ -31,8 +29,7 @@ export default function AdminDashboard() {
   };
 
   return (
-    <section style={{ paddingTop: '100px', paddingBottom: '60px', position: 'relative' }}>
-      <AnimatedBg />
+    <section className="admin-dashboard">
       <div className="container" style={{ position: 'relative', zIndex: 1 }}>
         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '32px', flexWrap: 'wrap', gap: '12px' }}>
           <div>
@@ -45,10 +42,16 @@ export default function AdminDashboard() {
           </Link>
         </div>
 
+        <div style={{ background: 'var(--bg-card)', border: '1px solid var(--border)', borderRadius: 'var(--radius-lg)', padding: '16px 20px', marginBottom: '24px', display: 'flex', gap: '24px', flexWrap: 'wrap', fontSize: '13px', color: 'var(--text-secondary)' }}>
+          <span><strong style={{ color: 'var(--text-primary)' }}>Catégories disponibles :</strong> Smartphones, Tablettes, Ordinateurs, Accessoires, Gaming</span>
+          <span><strong style={{ color: 'var(--text-primary)' }}>États :</strong> Neuf, Comme neuf, Très bon état, Bon état</span>
+          <span><strong style={{ color: 'var(--text-primary)' }}>Astuce :</strong> Cochez <strong style={{ color: 'var(--primary)' }}>Produit à la une</strong> pour mettre un produit en avant</span>
+        </div>
+
         {loading ? (
           <div style={{ padding: '60px 0' }}><div className="spinner" /></div>
         ) : products.length === 0 ? (
-          <div className="empty-state"><div className="icon"><FiPackage size={48} /></div><p>Aucun produit.</p></div>
+          <div className="empty-state"><div className="icon"><FiPackage size={48} /></div><p>Aucun produit. Cliquez sur "Nouveau produit" pour commencer.</p></div>
         ) : (
           <div style={{ overflowX: 'auto' }}>
             <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: '14px' }}>

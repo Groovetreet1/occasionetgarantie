@@ -2,8 +2,6 @@ import { useEffect, useState, useRef } from 'react';
 import { useNavigate, useParams, Link } from 'react-router-dom';
 import { FiArrowLeft, FiSave, FiUpload, FiX } from 'react-icons/fi';
 import api from '../api/axios';
-import AnimatedBg from '../components/AnimatedBg';
-
 const stateOptions = [
   { value: 'neuf', label: 'Neuf' },
   { value: 'comme_neuf', label: 'Comme neuf' },
@@ -138,7 +136,6 @@ export default function AdminProductForm() {
 
   return (
     <section style={{ paddingTop: '100px', paddingBottom: '60px', position: 'relative' }}>
-      <AnimatedBg />
       <div className="container" style={{ position: 'relative', zIndex: 1, maxWidth: '800px' }}>
         <Link to="/admin" className="btn btn-ghost" style={{ marginBottom: '16px' }}>
           <FiArrowLeft /> Retour au dashboard

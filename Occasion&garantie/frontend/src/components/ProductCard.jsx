@@ -1,5 +1,5 @@
 import { Link } from 'react-router-dom';
-import { FiShoppingBag, FiShield } from 'react-icons/fi';
+import { FiShoppingBag } from 'react-icons/fi';
 
 const API_BASE = import.meta.env.VITE_API_URL || '';
 
@@ -11,12 +11,9 @@ export default function ProductCard({ product }) {
     : 0;
 
   return (
-    <Link to={`/products/${product.slug}`} className="product-card" style={{ textDecoration: 'none', color: 'inherit', display: 'block' }}>
-      <div className="product-image">
+    <Link to={`/products/${product.slug}`} className="product-card">
+      <div className="product-card-image">
         {product.featured && <span className="product-badge badge-featured">Top</span>}
-        <span className="product-badge badge-warranty" style={{ top: '44px', left: '12px', right: 'auto' }}>
-          <FiShield size={10} /> {product.warranty || '6 mois'}
-        </span>
         {discount > 0 && (
           <span className="product-discount-badge">-{discount}%</span>
         )}

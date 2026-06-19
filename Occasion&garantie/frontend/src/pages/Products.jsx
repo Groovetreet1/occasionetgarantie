@@ -1,8 +1,8 @@
 import { useEffect, useState } from 'react';
+import { useSearchParams } from 'react-router-dom';
 import { FiSearch, FiSliders, FiPackage, FiX } from 'react-icons/fi';
 import api from '../api/axios';
 import ProductCard from '../components/ProductCard';
-import AnimatedBg from '../components/AnimatedBg';
 
 const STATE_LABELS = {
   neuf: 'Neuf',
@@ -11,17 +11,23 @@ const STATE_LABELS = {
   bon: 'Bon état',
 };
 
-const CATEGORIES = ['Tous', 'Smartphones', 'Accessoires'];
+const CATEGORIES = ['Tous', 'Smartphones', 'Tablettes', 'Ordinateurs', 'Accessoires'];
 
 export default function Products() {
+  const [searchParams] = useSearchParams();
   const [products, setProducts] = useState([]);
   const [loading, setLoading] = useState(true);
   const [search, setSearch] = useState('');
   const [showFilters, setShowFilters] = useState(false);
-  const [category, setCategory] = useState('Tous');
+  const [category, setCategory] = useState(searchParams.get('category') || 'Tous');
   const [stateFilter, setStateFilter] = useState('Tous');
   const [priceMin, setPriceMin] = useState('');
   const [priceMax, setPriceMax] = useState('');
+
+  useEffect(() => {
+    const catParam = searchParams.get('category');
+    if (catParam) setCategory(catParam);
+  }, [searchParams]);
 
   useEffect(() => {
     setLoading(true);
@@ -50,7 +56,6 @@ export default function Products() {
 
   return (
     <section className="products-section" style={{ paddingTop: '120px' }}>
-      <AnimatedBg />
       <div className="container">
         <div className="products-header">
           <div>
@@ -61,29 +66,19 @@ export default function Products() {
           </div>
         </div>
 
-        <div style={{ marginBottom: '16px', display: 'flex', gap: '12px', flexWrap: 'wrap', alignItems: 'center' }}>
-          <div style={{ flex: 1, minWidth: '250px', position: 'relative' }}>
-            <FiSearch size={18} style={{ position: 'absolute', left: '14px', top: '14px', color: 'var(--text-muted)' }} />
+        <div className="products-toolbar">
+          <div className="products-search-wrap">
+            <FiSearch size={16} className="products-search-icon" />
             <input
               type="text"
               placeholder="Rechercher un produit..."
               value={search}
               onChange={(e) => setSearch(e.target.value)}
-              style={{
-                width: '100%',
-                padding: '12px 16px 12px 42px',
-                background: 'var(--bg-card)',
-                border: '1px solid var(--border)',
-                borderRadius: 'var(--radius)',
-                color: 'var(--text-primary)',
-                fontSize: '15px',
-                fontFamily: 'inherit',
-                outline: 'none',
-              }}
+              className="products-search-input"
             />
           </div>
-          <button className={`btn ${hasFilters ? 'btn-primary' : 'btn-secondary'}`} onClick={() => setShowFilters((o) => !o)}>
-            <FiSliders size={16} /> Filtres{hasFilters ? ' (1)' : ''}
+          <button className={`btn ${hasFilters ? 'btn-primary' : 'btn-outline'}`} onClick={() => setShowFilters((o) => !o)}>
+            <FiSliders size={14} /> Filtres{hasFilters ? ' (1)' : ''}
           </button>
         </div>
 

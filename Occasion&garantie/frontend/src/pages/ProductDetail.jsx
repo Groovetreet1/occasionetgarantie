@@ -88,15 +88,15 @@ export default function ProductDetail() {
 
   return (
     <>
-      <section style={{ paddingTop: '100px', paddingBottom: '60px' }}>
+      <section className="product-detail-section">
         <div className="container">
           <Link to="/products" className="btn btn-ghost" style={{ marginBottom: '24px' }}>
             <FiArrowLeft /> Retour aux produits
           </Link>
 
-          <div className="product-detail-grid" style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '48px', alignItems: 'start' }}>
+          <div className="product-detail-grid">
             <div>
-              <div className="product-image" style={{ aspectRatio: '1', borderRadius: 'var(--radius-lg)', overflow: 'hidden', position: 'relative', cursor: allImages.length > 0 ? 'pointer' : 'default' }} onClick={() => allImages.length > 0 && openLightbox(0)}>
+              <div className="product-detail-image" style={{ cursor: allImages.length > 0 ? 'pointer' : 'default' }} onClick={() => allImages.length > 0 && openLightbox(0)}>
                 {imgUrl ? (
                   <img src={`${API_BASE}/uploads/${product.image}`} alt={product.name} style={{ width: '100%', height: '100%', objectFit: 'contain' }} />
                 ) : (
@@ -108,9 +108,9 @@ export default function ProductDetail() {
               </div>
 
               {allImages.length > 1 && (
-                <div style={{ display: 'flex', gap: '8px', marginTop: '12px', overflowX: 'auto', paddingBottom: '4px' }}>
+                <div className="product-detail-thumbs">
                   {allImages.map((img, i) => (
-                    <div key={i} onClick={() => openLightbox(i)} style={{ width: '72px', height: '72px', borderRadius: '8px', overflow: 'hidden', border: i === 0 ? '2px solid var(--primary)' : '1px solid var(--border)', cursor: 'pointer', flexShrink: 0 }}>
+                    <div key={i} onClick={() => openLightbox(i)} className={`product-detail-thumb${i === 0 ? ' active' : ''}`}>
                       <img src={`${API_BASE}/uploads/${img}`} alt="" style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
                     </div>
                   ))}
@@ -119,36 +119,36 @@ export default function ProductDetail() {
             </div>
 
             <div>
-              <div className="product-category" style={{ fontSize: '14px', marginBottom: '8px' }}>{product.category_name}</div>
-              <h1 style={{ fontSize: '32px', fontWeight: 800, marginBottom: '16px' }}>{product.name}</h1>
+              <div className="product-detail-category">{product.category_name}</div>
+              <h1 className="product-detail-name">{product.name}</h1>
 
-              <div className="product-price" style={{ marginBottom: '16px' }}>
-                <span className="price-current" style={{ fontSize: '36px' }}>{formatPrice(product.price)}</span>
-                {product.old_price && <span className="price-old" style={{ fontSize: '20px' }}>{formatPrice(product.old_price)}</span>}
+              <div className="product-detail-price">
+                <span className="price-current">{formatPrice(product.price)}</span>
+                {product.old_price && <span className="price-old">{formatPrice(product.old_price)}</span>}
               </div>
 
-              <div style={{ display: 'flex', gap: '8px', flexWrap: 'wrap', marginBottom: '24px' }}>
-                <span style={{ padding: '6px 14px', borderRadius: '20px', background: 'var(--primary-light)', color: 'var(--primary)', fontSize: '13px', fontWeight: 600 }}>
+              <div className="product-detail-tags">
+                <span className="product-detail-tag state">
                   {stateLabels[product.state] || product.state}
                 </span>
-                <span style={{ padding: '6px 14px', borderRadius: '20px', background: 'rgba(16,185,129,0.1)', color: 'var(--success)', fontSize: '13px', fontWeight: 600 }}>
+                <span className="product-detail-tag verified">
                   <FiCheck size={12} /> Vérifié
                 </span>
                 {product.brand && (
-                  <span style={{ padding: '6px 14px', borderRadius: '20px', background: 'var(--bg-card)', border: '1px solid var(--border)', fontSize: '13px', fontWeight: 600 }}>
+                  <span className="product-detail-tag brand">
                     {product.brand}
                   </span>
                 )}
               </div>
 
-              <p style={{ color: 'var(--text-secondary)', lineHeight: 1.8, marginBottom: '32px', fontSize: '15px' }}>
+              <p className="product-detail-desc">
                 {product.description}
               </p>
 
               {specs && Object.keys(specs).length > 0 && (
-                <div style={{ marginBottom: '32px' }}>
-                  <h3 style={{ fontSize: '18px', fontWeight: 700, marginBottom: '16px' }}>Fiche technique</h3>
-                  <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '8px' }}>
+                <div className="product-detail-specs">
+                  <h3>Fiche technique</h3>
+                  <div className="product-detail-specs-grid">
                     {Object.entries(specs).map(([key, val]) => {
                       const Icon = specIcons[key] || FiCpu;
                       return (

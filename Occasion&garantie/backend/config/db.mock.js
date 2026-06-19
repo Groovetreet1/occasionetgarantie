@@ -91,9 +91,9 @@ const mockPool = {
       if (upper.includes('WHERE P.FEATURED = TRUE')) {
         results = results.filter(p => p.featured === true);
       }
-      if (upper.includes('AND C.SLUG = ?')) {
-        const slugParam = params[params.length - 1];
-        const cat = data.categories.find(c => c.slug === slugParam);
+      if (upper.includes('AND LOWER(C.NAME) = ?')) {
+        const nameParam = params[params.length - 1];
+        const cat = data.categories.find(c => c.name.toLowerCase() === nameParam);
         if (cat) results = results.filter(p => p.category_id === cat.id);
       }
       if (upper.includes('P.FEATURED DESC')) {
@@ -163,6 +163,18 @@ const mockPool = {
       data.products.push(newProduct);
       save();
       return [{ insertId: newProduct.id }];
+    }
+
+    // UPDATE users SET password = ? WHERE email = ? (reset password)
+    if (upper.startsWith('UPDATE USERS SET') && upper.includes('WHERE EMAIL =')) {
+      const password = params[0];
+      const email = params[1];
+      const idx = data.users.findIndex(u => u.email === email);
+      if (idx !== -1) {
+        data.users[idx].password = password;
+        save();
+      }
+      return [[]];
     }
 
     // UPDATE products SET ... WHERE slug = ? (seed)
