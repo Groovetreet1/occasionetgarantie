@@ -94,77 +94,59 @@ export default function ProductDetail() {
             <FiArrowLeft /> Retour aux produits
           </Link>
 
-          <div className="product-detail-grid" style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '48px', alignItems: 'start' }}>
+          <div className="product-detail-grid">
             <div>
-              <div className="product-image" style={{ aspectRatio: '1', borderRadius: 'var(--radius-lg)', overflow: 'hidden', position: 'relative', cursor: allImages.length > 0 ? 'pointer' : 'default' }} onClick={() => allImages.length > 0 && openLightbox(0)}>
+              <div className="product-detail-image" onClick={() => allImages.length > 0 && openLightbox(0)}>
                 {imgUrl ? (
-                  <img src={`${API_BASE}/uploads/${product.image}`} alt={product.name} style={{ width: '100%', height: '100%', objectFit: 'contain' }} />
+                  <img src={`${API_BASE}/uploads/${product.image}`} alt={product.name} />
                 ) : (
                   <FiShoppingBag size={80} style={{ opacity: 0.15 }} />
                 )}
-                <span className="product-badge badge-warranty" style={{ bottom: '12px', left: '12px', top: 'auto', right: 'auto', fontSize: '14px', padding: '8px 16px' }}>
+                <span className="badge-warranty-inline" style={{ position: 'absolute', bottom: '12px', left: '12px', display: 'flex', alignItems: 'center', gap: '6px', background: 'rgba(16,185,129,0.85)', color: 'white', padding: '8px 16px', borderRadius: '8px', fontSize: '14px', fontWeight: 700, backdropFilter: 'blur(8px)' }}>
                   <FiShield size={14} /> Garantie {product.warranty}
                 </span>
               </div>
 
               {allImages.length > 1 && (
-                <div style={{ display: 'flex', gap: '8px', marginTop: '12px', overflowX: 'auto', paddingBottom: '4px' }}>
+                <div className="product-detail-thumbs">
                   {allImages.map((img, i) => (
-                    <div key={i} onClick={() => openLightbox(i)} style={{ width: '72px', height: '72px', borderRadius: '8px', overflow: 'hidden', border: i === 0 ? '2px solid var(--primary)' : '1px solid var(--border)', cursor: 'pointer', flexShrink: 0 }}>
-                      <img src={`${API_BASE}/uploads/${img}`} alt="" style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
+                    <div key={i} className={`product-detail-thumb${lightboxIndex === i ? ' active' : ''}`} onClick={() => openLightbox(i)}>
+                      <img src={`${API_BASE}/uploads/${img}`} alt="" />
                     </div>
                   ))}
                 </div>
               )}
             </div>
 
-            <div>
-              <div className="product-category" style={{ fontSize: '14px', marginBottom: '8px' }}>{product.category_name}</div>
-              <h1 style={{ fontSize: '32px', fontWeight: 800, marginBottom: '16px' }}>{product.name}</h1>
+            <div className="product-detail-info">
+              <div className="product-detail-category">{product.category_name}</div>
+              <h1 className="product-detail-name">{product.name}</h1>
 
-              <div className="product-price" style={{ marginBottom: '16px' }}>
-                <span className="price-current" style={{ fontSize: '36px' }}>{formatPrice(product.price)}</span>
-                {product.old_price && <span className="price-old" style={{ fontSize: '20px' }}>{formatPrice(product.old_price)}</span>}
+              <div className="product-detail-price">
+                <span className="price-current">{formatPrice(product.price)}</span>
+                {product.old_price && <span className="price-old">{formatPrice(product.old_price)}</span>}
               </div>
 
-              <div style={{ display: 'flex', gap: '8px', flexWrap: 'wrap', marginBottom: '24px' }}>
-                <span style={{ padding: '6px 14px', borderRadius: '20px', background: 'var(--primary-light)', color: 'var(--primary)', fontSize: '13px', fontWeight: 600 }}>
-                  {stateLabels[product.state] || product.state}
-                </span>
-                <span style={{ padding: '6px 14px', borderRadius: '20px', background: 'rgba(16,185,129,0.1)', color: 'var(--success)', fontSize: '13px', fontWeight: 600 }}>
-                  <FiCheck size={12} /> Vérifié
-                </span>
-                {product.brand && (
-                  <span style={{ padding: '6px 14px', borderRadius: '20px', background: 'var(--bg-card)', border: '1px solid var(--border)', fontSize: '13px', fontWeight: 600 }}>
-                    {product.brand}
-                  </span>
-                )}
+              <div className="product-detail-tags">
+                <span className="product-detail-tag state">{stateLabels[product.state] || product.state}</span>
+                <span className="product-detail-tag verified"><FiCheck size={12} /> Vérifié</span>
+                {product.brand && <span className="product-detail-tag brand">{product.brand}</span>}
               </div>
 
-              <p style={{ color: 'var(--text-secondary)', lineHeight: 1.8, marginBottom: '32px', fontSize: '15px' }}>
-                {product.description}
-              </p>
+              <p className="product-detail-desc">{product.description}</p>
 
               {specs && Object.keys(specs).length > 0 && (
-                <div style={{ marginBottom: '32px' }}>
-                  <h3 style={{ fontSize: '18px', fontWeight: 700, marginBottom: '16px' }}>Fiche technique</h3>
-                  <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '8px' }}>
+                <div className="product-detail-specs">
+                  <h3>Fiche technique</h3>
+                  <div className="specs-grid">
                     {Object.entries(specs).map(([key, val]) => {
                       const Icon = specIcons[key] || FiCpu;
                       return (
-                        <div key={key} style={{
-                          padding: '12px 16px',
-                          background: 'var(--bg-card)',
-                          border: '1px solid var(--border)',
-                          borderRadius: 'var(--radius)',
-                          display: 'flex',
-                          alignItems: 'center',
-                          gap: '12px',
-                        }}>
-                          <Icon size={18} style={{ color: 'var(--primary)', flexShrink: 0 }} />
+                        <div key={key} className="spec-item">
+                          <span className="spec-icon"><Icon size={18} /></span>
                           <div>
-                            <div style={{ fontSize: '11px', color: 'var(--text-muted)', textTransform: 'uppercase', letterSpacing: '0.5px' }}>{key}</div>
-                            <div style={{ fontSize: '13px', fontWeight: 600 }}>{val}</div>
+                            <div className="spec-label">{key}</div>
+                            <div className="spec-value">{val}</div>
                           </div>
                         </div>
                       );
@@ -173,28 +155,10 @@ export default function ProductDetail() {
                 </div>
               )}
 
-              <a
-                href={waUrl}
-                target="_blank"
-                rel="noopener noreferrer"
-                className="btn"
-                style={{
-                  width: '100%',
-                  background: 'var(--gradient)',
-                  color: 'white',
-                  fontSize: '18px',
-                  padding: '16px 36px',
-                  justifyContent: 'center',
-                  boxShadow: '0 4px 20px rgba(245, 158, 11, 0.4)',
-                }}
-                onMouseOver={(e) => e.currentTarget.style.background = 'var(--gradient-hover)'}
-                onMouseOut={(e) => e.currentTarget.style.background = 'var(--gradient)'}
-              >
+              <a href={waUrl} target="_blank" rel="noopener noreferrer" className="product-detail-whatsapp">
                 <BsWhatsapp size={22} /> Acheter via WhatsApp
               </a>
-              <p style={{ textAlign: 'center', color: 'var(--text-muted)', fontSize: '12px', marginTop: '8px' }}>
-                Réponse sous 24h | Paiement sécurisé
-              </p>
+              <p className="product-detail-response">Réponse sous 24h | Paiement sécurisé</p>
             </div>
           </div>
         </div>
@@ -205,7 +169,7 @@ export default function ProductDetail() {
           <button className="lightbox-close" onClick={closeLightbox}><FiX size={24} /></button>
           <button className="lightbox-nav lightbox-prev" onClick={(e) => { e.stopPropagation(); prevImage(); }}><FiChevronLeft size={28} /></button>
           <div className="lightbox-content" onClick={(e) => e.stopPropagation()}>
-            <img src={`${API_BASE}/uploads/${allImages[lightboxIndex]}`} alt="" style={{ maxWidth: '90vw', maxHeight: '85vh', borderRadius: '12px', objectFit: 'contain' }} />
+            <img src={`${API_BASE}/uploads/${allImages[lightboxIndex]}`} alt="" />
           </div>
           <button className="lightbox-nav lightbox-next" onClick={(e) => { e.stopPropagation(); nextImage(); }}><FiChevronRight size={28} /></button>
           <div className="lightbox-counter">{lightboxIndex + 1} / {allImages.length}</div>

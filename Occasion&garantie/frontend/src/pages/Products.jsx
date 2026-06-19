@@ -61,25 +61,15 @@ export default function Products() {
           </div>
         </div>
 
-        <div style={{ marginBottom: '16px', display: 'flex', gap: '12px', flexWrap: 'wrap', alignItems: 'center' }}>
-          <div style={{ flex: 1, minWidth: '250px', position: 'relative' }}>
-            <FiSearch size={18} style={{ position: 'absolute', left: '14px', top: '14px', color: 'var(--text-muted)' }} />
+        <div className="products-toolbar">
+          <div className="products-search-wrap">
+            <FiSearch size={18} className="products-search-icon" />
             <input
               type="text"
               placeholder="Rechercher un produit..."
               value={search}
               onChange={(e) => setSearch(e.target.value)}
-              style={{
-                width: '100%',
-                padding: '12px 16px 12px 42px',
-                background: 'var(--bg-card)',
-                border: '1px solid var(--border)',
-                borderRadius: 'var(--radius)',
-                color: 'var(--text-primary)',
-                fontSize: '15px',
-                fontFamily: 'inherit',
-                outline: 'none',
-              }}
+              className="products-search-input"
             />
           </div>
           <button className={`btn ${hasFilters ? 'btn-primary' : 'btn-secondary'}`} onClick={() => setShowFilters((o) => !o)}>
