@@ -7,6 +7,7 @@ const http = require('http');
 const authRoutes = require('./routes/auth');
 const productRoutes = require('./routes/products');
 const uploadRoutes = require('./routes/upload');
+const depositRoutes = require('./routes/deposit');
 
 const app = express();
 const PORT = process.env.PORT || 5000;
@@ -19,6 +20,7 @@ app.use(express.static(path.join(__dirname, 'public')));
 app.use('/api/auth', authRoutes);
 app.use('/api/products', productRoutes);
 app.use('/api/upload', uploadRoutes);
+app.use('/api/deposits', depositRoutes);
 
 app.get('/api/health', (req, res) => {
   res.json({ status: 'ok', message: 'Occasion&Garantie API running' });

@@ -16,7 +16,8 @@ const defaultData = {
   orders: [],
   order_items: [],
   product_images: [],
-  nextId: { users: 1, products: 1, orders: 1, order_items: 1, product_images: 1 },
+  deposits: [],
+  nextId: { users: 1, products: 1, orders: 1, order_items: 1, product_images: 1, deposits: 1 },
 };
 
 let data = { ...defaultData };
@@ -218,6 +219,22 @@ const mockPool = {
         save();
       }
       return [[]];
+    }
+
+    // INSERT INTO deposits
+    if (upper.startsWith('INSERT INTO DEPOSITS')) {
+      const newDeposit = {
+        id: data.nextId.deposits++,
+        user_id: params[0],
+        product_id: params[1],
+        product_name: params[2],
+        screenshot: params[3] || null,
+        status: params[4] || 'en_attente',
+        created_at: new Date().toISOString(),
+      };
+      data.deposits.push(newDeposit);
+      save();
+      return [{ insertId: newDeposit.id }];
     }
 
     // DELETE FROM products WHERE id = ?

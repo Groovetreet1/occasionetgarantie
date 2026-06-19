@@ -1,8 +1,9 @@
-import { useParams, Link } from 'react-router-dom';
+import { useParams, Link, useNavigate } from 'react-router-dom';
 import { useEffect, useState } from 'react';
-import { FiArrowLeft, FiShoppingBag, FiShield, FiCheck, FiMonitor, FiCpu, FiHardDrive, FiBattery, FiCamera, FiDroplet, FiX, FiChevronLeft, FiChevronRight } from 'react-icons/fi';
+import { FiArrowLeft, FiShoppingBag, FiShield, FiCheck, FiMonitor, FiCpu, FiHardDrive, FiBattery, FiCamera, FiDroplet, FiX, FiChevronLeft, FiChevronRight, FiUpload, FiBank } from 'react-icons/fi';
 import { BsWhatsapp } from 'react-icons/bs';
 import api from '../api/axios';
+import { useAuth } from '../context/AuthContext';
 
 const stateLabels = {
   neuf: 'Neuf',
@@ -28,10 +29,18 @@ const WHATSAPP_NUMBER = '212669017295';
 
 export default function ProductDetail() {
   const { slug } = useParams();
+  const navigate = useNavigate();
+  const { user } = useAuth();
   const [product, setProduct] = useState(null);
   const [loading, setLoading] = useState(true);
   const [selectedImage, setSelectedImage] = useState(null);
   const [lightboxIndex, setLightboxIndex] = useState(0);
+  const [showDeposit, setShowDeposit] = useState(false);
+  const [bankInfo, setBankInfo] = useState(null);
+  const [screenshot, setScreenshot] = useState(null);
+  const [depositLoading, setDepositLoading] = useState(false);
+  const [depositDone, setDepositDone] = useState(false);
+  const [depositError, setDepositError] = useState('');
 
   useEffect(() => {
     window.scrollTo(0, 0);
@@ -84,6 +93,32 @@ export default function ProductDetail() {
 
   const nextImage = () => {
     setLightboxIndex((i) => (i + 1) % allImages.length);
+  };
+
+  const openDeposit = async () => {
+    if (!user) { navigate('/login'); return; }
+    try {
+      const res = await api.get('/deposits/bank-info');
+      setBankInfo(res.data);
+    } catch { setBankInfo(null); }
+    setShowDeposit(true);
+  };
+
+  const handleDeposit = async () => {
+    if (!screenshot) { setDepositError('Veuillez sélectionner une capture d\'écran du virement.'); return; }
+    setDepositError('');
+    setDepositLoading(true);
+    try {
+      const formData = new FormData();
+      formData.append('screenshot', screenshot);
+      formData.append('productSlug', slug);
+      await api.post('/deposits', formData, { headers: { 'Content-Type': 'multipart/form-data' } });
+      setDepositDone(true);
+    } catch (err) {
+      setDepositError(err.response?.data?.message || 'Erreur lors de l\'envoi.');
+    } finally {
+      setDepositLoading(false);
+    }
   };
 
   return (
@@ -192,6 +227,9 @@ export default function ProductDetail() {
               >
                 <BsWhatsapp size={22} /> Acheter via WhatsApp
               </a>
+              <button onClick={openDeposit} className="btn btn-outline" style={{ width: '100%', justifyContent: 'center', padding: '14px', fontSize: '15px', gap: '8px', marginTop: '12px' }}>
+                <FiBank size={18} /> Réserver avec 200 DH
+              </button>
               <p style={{ textAlign: 'center', color: 'var(--text-muted)', fontSize: '12px', marginTop: '8px' }}>
                 Réponse sous 24h | Paiement sécurisé
               </p>
@@ -199,6 +237,64 @@ export default function ProductDetail() {
           </div>
         </div>
       </section>
+
+      {showDeposit && (
+        <div className="lightbox-overlay" onClick={() => { if (!depositLoading) setShowDeposit(false); }}>
+          <div className="auth-card" style={{ maxWidth: '480px', margin: '40px auto', padding: '32px', position: 'relative' }} onClick={(e) => e.stopPropagation()}>
+            <button className="lightbox-close" onClick={() => setShowDeposit(false)}><FiX size={20} /></button>
+
+            {!depositDone ? (
+              <>
+                <div style={{ textAlign: 'center', marginBottom: '24px' }}>
+                  <FiBank size={36} style={{ color: 'var(--primary)', marginBottom: '8px' }} />
+                  <h2>Réserver avec 200 DH</h2>
+                  <p style={{ color: 'var(--text-secondary)', fontSize: '14px' }}>
+                    Versez 200 DH pour confirmer votre réservation sur <strong>{product.name}</strong>
+                  </p>
+                </div>
+
+                <div style={{ background: 'var(--bg-card)', border: '1px solid var(--border)', borderRadius: 'var(--radius)', padding: '16px', marginBottom: '20px' }}>
+                  <p style={{ fontSize: '13px', color: 'var(--text-muted)', marginBottom: '4px' }}>RIB</p>
+                  <p style={{ fontWeight: 600, fontSize: '14px', wordBreak: 'break-all' }}>{bankInfo?.rib || '...'}</p>
+                  <div style={{ display: 'flex', gap: '16px', marginTop: '12px', fontSize: '13px' }}>
+                    <div>
+                      <p style={{ color: 'var(--text-muted)' }}>Banque</p>
+                      <p style={{ fontWeight: 600 }}>{bankInfo?.bank || '...'}</p>
+                    </div>
+                    <div>
+                      <p style={{ color: 'var(--text-muted)' }}>Bénéficiaire</p>
+                      <p style={{ fontWeight: 600 }}>{bankInfo?.holder || '...'}</p>
+                    </div>
+                  </div>
+                </div>
+
+                <div className="form-group">
+                  <label><FiUpload size={14} /> Capture du virement</label>
+                  <input type="file" accept="image/*" capture="environment" onChange={(e) => setScreenshot(e.target.files[0])} style={{ fontSize: '13px' }} />
+                  <p style={{ fontSize: '11px', color: 'var(--text-muted)', marginTop: '4px' }}>Photo ou capture d'écran du virement effectué</p>
+                </div>
+
+                {depositError && <div className="alert alert-error">{depositError}</div>}
+
+                <button onClick={handleDeposit} className="form-submit" disabled={depositLoading}>
+                  {depositLoading ? 'Envoi...' : 'Confirmer le paiement'}
+                </button>
+              </>
+            ) : (
+              <div style={{ textAlign: 'center', padding: '20px 0' }}>
+                <FiCheck size={48} style={{ color: 'var(--success)', marginBottom: '16px' }} />
+                <h2>Paiement confirmé !</h2>
+                <p style={{ color: 'var(--text-secondary)', marginBottom: '12px' }}>
+                  Votre acompte de 200 DH a été enregistré. Le vendeur vous contactera sous 24h.
+                </p>
+                <button onClick={() => setShowDeposit(false)} className="btn btn-primary" style={{ width: '100%', justifyContent: 'center' }}>
+                  Fermer
+                </button>
+              </div>
+            )}
+          </div>
+        </div>
+      )}
 
       {selectedImage && (
         <div className="lightbox-overlay" onClick={closeLightbox}>
