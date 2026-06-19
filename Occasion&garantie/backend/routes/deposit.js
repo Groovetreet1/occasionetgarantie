@@ -43,10 +43,14 @@ router.post('/', authenticate, upload.single('screenshot'), async (req, res) => 
     if (products.length === 0) return res.status(404).json({ message: 'Produit introuvable.' });
 
     const product = products[0];
+
+    // Look up user details from DB (JWT only has id/email/role)
+    const [users] = await pool.query('SELECT id, full_name, phone FROM users WHERE id = ?', [req.user.id]);
+    const userData = users[0] || {};
+    const clientName = userData.full_name || req.user.email;
+    const clientPhone = userData.phone || 'Non renseigné';
+
     const screenshotFile = req.file ? req.file.filename : null;
-    const screenshotUrl = screenshotFile
-      ? `${req.protocol}://${req.get('host')}/uploads/deposits/${screenshotFile}`
-      : 'Pas de capture';
 
     // Store deposit record
     const [result] = await pool.query(
@@ -54,14 +58,14 @@ router.post('/', authenticate, upload.single('screenshot'), async (req, res) => 
       [req.user.id, product.id, product.name, screenshotFile, 'en_attente']
     );
 
-    // Notify admin via SMS
+    // Notify admin via SMS (sans URL directe de la capture)
     const adminPhone = process.env.ADMIN_PHONE || '212669017295';
     const adminMsg =
       `Nouvel acompte 200DH !\n` +
       `Produit: ${product.name} (${product.price}DH)\n` +
-      `Client: ${req.user.fullName || req.user.email}\n` +
-      `Tél: ${req.user.phone || 'Non renseigné'}\n` +
-      `Capture: ${screenshotUrl}`;
+      `Client: ${clientName}\n` +
+      `Tél: ${clientPhone}\n` +
+      `Capture d'écran reçue`;
 
     let smsError = null;
     try {

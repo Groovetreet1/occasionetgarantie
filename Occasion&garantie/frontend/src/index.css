@@ -68,6 +68,12 @@ input, textarea, select, button { font-family: inherit; }
 .btn-outline:hover { border-color: var(--primary); color: var(--primary); background: var(--primary-light); }
 .btn-ghost { background: transparent; color: var(--text-secondary); padding: 8px 12px; }
 .btn-ghost:hover { background: var(--bg-hover); border-radius: var(--radius); }
+.btn-whatsapp {
+  width: 100%; justify-content: center; padding: 16px 36px; font-size: 18px;
+  background: linear-gradient(135deg, #f59e0b 0%, #d97706 100%);
+  color: white; box-shadow: 0 4px 20px rgba(245, 158, 11, 0.4);
+}
+.btn-whatsapp:hover { background: linear-gradient(135deg, #d97706 0%, #b45309 100%); }
 
 .section-title { font-size: 24px; font-weight: 700; margin-bottom: 24px; }
 .section-subtitle { color: var(--text-secondary); font-size: 15px; margin-bottom: 32px; }

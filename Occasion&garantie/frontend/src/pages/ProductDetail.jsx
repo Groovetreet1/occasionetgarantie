@@ -212,18 +212,7 @@ export default function ProductDetail() {
                 href={waUrl}
                 target="_blank"
                 rel="noopener noreferrer"
-                className="btn"
-                style={{
-                  width: '100%',
-                  background: 'var(--gradient)',
-                  color: 'white',
-                  fontSize: '18px',
-                  padding: '16px 36px',
-                  justifyContent: 'center',
-                  boxShadow: '0 4px 20px rgba(245, 158, 11, 0.4)',
-                }}
-                onMouseOver={(e) => e.currentTarget.style.background = 'var(--gradient-hover)'}
-                onMouseOut={(e) => e.currentTarget.style.background = 'var(--gradient)'}
+                className="btn btn-whatsapp"
               >
                 <BsWhatsapp size={22} /> Acheter via WhatsApp
               </a>
