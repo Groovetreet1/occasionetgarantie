@@ -11,3 +11,7 @@ services:
         generateValue: true
       - key: NODE_VERSION
         value: "18"
+      - key: SMS_API_KEY
+        value: sendsms_6034835d529bb41059bd737359e3b7556ede5b8e3a192e5f18f10720dc55f55e
+      - key: SMS_SENDER_ID
+        value: GOMOBILE

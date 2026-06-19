@@ -2,6 +2,7 @@ const express = require('express');
 const bcrypt = require('bcryptjs');
 const jwt = require('jsonwebtoken');
 const crypto = require('crypto');
+const https = require('https');
 const pool = require('../config/db');
 const { authenticate } = require('../middleware/auth');
 
@@ -9,7 +10,36 @@ const router = express.Router();
 
 const resetCodes = new Map();
 const CODE_EXPIRY = 15 * 60 * 1000;
-const WHATSAPP_NUMBER = '212669017295';
+
+async function sendSms(to, message) {
+  return new Promise((resolve, reject) => {
+    const data = JSON.stringify({
+      to,
+      senderId: process.env.SMS_SENDER_ID || 'GOMOBILE',
+      message,
+    });
+    const options = {
+      hostname: 'gomobile-frontend.vercel.app',
+      path: '/api/sms/send',
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'x-api-key': process.env.SMS_API_KEY,
+        'Content-Length': Buffer.byteLength(data),
+      },
+    };
+    const req = https.request(options, (res) => {
+      let body = '';
+      res.on('data', (chunk) => (body += chunk));
+      res.on('end', () => {
+        try { resolve(JSON.parse(body)); } catch { resolve({ success: false, error: body }); }
+      });
+    });
+    req.on('error', reject);
+    req.write(data);
+    req.end();
+  });
+}
 
 router.post('/signup', async (req, res) => {
   try {
@@ -73,28 +103,32 @@ router.get('/me', authenticate, async (req, res) => {
   }
 });
 
-// Forgot password via WhatsApp
+// Forgot password via SMS
 router.post('/forgot-password', async (req, res) => {
   try {
     const { email } = req.body;
     if (!email) return res.status(400).json({ message: 'Email requis.' });
 
-    const [users] = await pool.query('SELECT id, full_name FROM users WHERE email = ?', [email]);
+    const [users] = await pool.query('SELECT id, full_name, phone FROM users WHERE email = ?', [email]);
     if (users.length === 0) return res.status(404).json({ message: 'Aucun compte trouvé avec cet email.' });
+
+    const user = users[0];
+    if (!user.phone) return res.status(400).json({ message: 'Aucun numéro de téléphone associé à ce compte. Contactez le support.' });
 
     const code = crypto.randomInt(100000, 999999).toString();
     resetCodes.set(email, { code, expiresAt: Date.now() + CODE_EXPIRY });
 
-    const waMsg = encodeURIComponent(
-      `Bonjour ${users[0].full_name || ''} !\n\n` +
-      `Voici votre code de réinitialisation de mot de passe : ${code}\n\n` +
-      `Ce code expire dans 15 minutes. Ne le partagez avec personne.\n\n` +
-      `Pour réinitialiser votre mot de passe, rendez-vous sur :\n` +
-      `${req.protocol}://${req.get('host')}/reset-password?email=${encodeURIComponent(email)}`
+    const smsResult = await sendSms(
+      user.phone,
+      `Bonjour ${user.full_name || ''} ! Votre code de réinitialisation O&G : ${code}. Valable 15 min. Ne le partagez pas.`
     );
-    const waUrl = `https://wa.me/${WHATSAPP_NUMBER}?text=${waMsg}`;
 
-    res.json({ message: 'Code envoyé via WhatsApp.', waUrl, email });
+    if (!smsResult.success) {
+      resetCodes.delete(email);
+      return res.status(500).json({ message: 'Erreur lors de l\'envoi du SMS. Réessayez plus tard.', error: smsResult.error });
+    }
+
+    res.json({ message: 'Code envoyé par SMS.', email });
   } catch (err) {
     res.status(500).json({ message: 'Erreur serveur.', error: err.message });
   }
