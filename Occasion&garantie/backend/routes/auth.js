@@ -118,6 +118,11 @@ router.post('/forgot-password', async (req, res) => {
     const code = crypto.randomInt(100000, 999999).toString();
     resetCodes.set(email, { code, expiresAt: Date.now() + CODE_EXPIRY });
 
+    if (!process.env.SMS_API_KEY) {
+      resetCodes.delete(email);
+      return res.status(500).json({ message: 'Service SMS non configuré. Contactez le support.' });
+    }
+
     const smsResult = await sendSms(
       user.phone,
       `Bonjour ${user.full_name || ''} ! Votre code de réinitialisation O&G : ${code}. Valable 15 min. Ne le partagez pas.`
