@@ -22,14 +22,24 @@ const defaultData = {
 
 let data = { ...defaultData };
 
+function ensureDefaults(obj, defaults) {
+  for (const key of Object.keys(defaults)) {
+    if (!(key in obj)) obj[key] = defaults[key];
+    else if (typeof defaults[key] === 'object' && !Array.isArray(defaults[key]) && defaults[key] !== null) {
+      ensureDefaults(obj[key], defaults[key]);
+    }
+  }
+}
+
 function load() {
   try {
     if (fs.existsSync(DB_PATH)) {
       let raw = fs.readFileSync(DB_PATH, 'utf8');
       if (raw.charCodeAt(0) === 0xFEFF) raw = raw.slice(1);
       data = JSON.parse(raw);
+      ensureDefaults(data, defaultData);
     }
-  } catch { data = { ...defaultData }; }
+  } catch { data = JSON.parse(JSON.stringify(defaultData)); }
 }
 
 function save() {

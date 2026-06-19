@@ -270,7 +270,7 @@ export default function ProductDetail() {
 
                 <div className="form-group">
                   <label><FiUpload size={14} /> Capture du virement</label>
-                  <input type="file" accept="image/*" capture="environment" onChange={(e) => setScreenshot(e.target.files[0])} style={{ fontSize: '13px' }} />
+                  <input type="file" accept="image/*" onChange={(e) => setScreenshot(e.target.files[0])} style={{ fontSize: '13px' }} />
                   <p style={{ fontSize: '11px', color: 'var(--text-muted)', marginTop: '4px' }}>Photo ou capture d'écran du virement effectué</p>
                 </div>
 
