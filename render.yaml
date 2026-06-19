@@ -17,3 +17,9 @@ services:
         value: GOMOBILE
       - key: ADMIN_PHONE
         value: 212669017295
+      - key: BANK_RIB
+        value: "230 780 4092106211004600 62"
+      - key: BANK_NAME
+        value: CIH bank
+      - key: BANK_HOLDER
+        value: ABDELLAH EL MAHFOUDY
