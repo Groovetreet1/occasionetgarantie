@@ -8,7 +8,9 @@
     "dev:backend": "cd backend && npm run dev",
     "dev:frontend": "cd frontend && npm run dev",
     "install:all": "npm install && cd backend && npm install && cd ../frontend && npm install",
-    "postinstall": "cd backend && npm install"
+    "postinstall": "cd backend && npm install",
+    "build:frontend": "cd frontend && npm install && npm run build",
+    "build": "npm run build:frontend && node -e \"const fs=require('fs');const p=require('path');const src=p.join(__dirname,'frontend','dist');const dst=p.join(__dirname,'backend','public');if(fs.existsSync(dst)){fs.rmSync(dst,{recursive:true})}fs.cpSync(src,dst,{recursive:true});console.log('Frontend copied to backend/public')\""
   },
   "devDependencies": {
     "concurrently": "^8.2.2"
