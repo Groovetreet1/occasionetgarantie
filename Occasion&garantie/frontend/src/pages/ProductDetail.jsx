@@ -1,6 +1,6 @@
 import { useParams, Link, useNavigate } from 'react-router-dom';
 import { useEffect, useState } from 'react';
-import { FiArrowLeft, FiShoppingBag, FiShield, FiCheck, FiMonitor, FiCpu, FiHardDrive, FiBattery, FiCamera, FiDroplet, FiX, FiChevronLeft, FiChevronRight, FiUpload, FiBank } from 'react-icons/fi';
+import { FiArrowLeft, FiShoppingBag, FiShield, FiCheck, FiMonitor, FiCpu, FiHardDrive, FiBattery, FiCamera, FiDroplet, FiX, FiChevronLeft, FiChevronRight, FiUpload, FiCreditCard } from 'react-icons/fi';
 import { BsWhatsapp } from 'react-icons/bs';
 import api from '../api/axios';
 import { useAuth } from '../context/AuthContext';
@@ -228,7 +228,7 @@ export default function ProductDetail() {
                 <BsWhatsapp size={22} /> Acheter via WhatsApp
               </a>
               <button onClick={openDeposit} className="btn btn-outline" style={{ width: '100%', justifyContent: 'center', padding: '14px', fontSize: '15px', gap: '8px', marginTop: '12px' }}>
-                <FiBank size={18} /> Réserver avec 200 DH
+                <FiCreditCard size={18} /> Réserver avec 200 DH
               </button>
               <p style={{ textAlign: 'center', color: 'var(--text-muted)', fontSize: '12px', marginTop: '8px' }}>
                 Réponse sous 24h | Paiement sécurisé
@@ -246,7 +246,7 @@ export default function ProductDetail() {
             {!depositDone ? (
               <>
                 <div style={{ textAlign: 'center', marginBottom: '24px' }}>
-                  <FiBank size={36} style={{ color: 'var(--primary)', marginBottom: '8px' }} />
+                  <FiCreditCard size={36} style={{ color: 'var(--primary)', marginBottom: '8px' }} />
                   <h2>Réserver avec 200 DH</h2>
                   <p style={{ color: 'var(--text-secondary)', fontSize: '14px' }}>
                     Versez 200 DH pour confirmer votre réservation sur <strong>{product.name}</strong>
