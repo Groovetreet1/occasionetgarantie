@@ -1,9 +1,11 @@
 import { useState } from 'react';
 import { Link } from 'react-router-dom';
+import { useTranslation } from 'react-i18next';
 import { FiMail, FiArrowLeft, FiPhone } from 'react-icons/fi';
 import api from '../api/axios';
 
 export default function ForgotPassword() {
+  const { t } = useTranslation();
   const [email, setEmail] = useState('');
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
@@ -28,8 +30,8 @@ export default function ForgotPassword() {
     <div className="auth-page">
       <div className="auth-container">
         <div className="auth-header">
-          <h1>Mot de passe oublié ?</h1>
-          <p>Entrez votre email pour recevoir un code par SMS</p>
+          <h1>{t('Mot de passe oublié ?')}</h1>
+          <p>{t('Entrez votre email pour recevoir un code par SMS')}</p>
         </div>
         <div className="auth-card">
           {error && <div className="alert alert-error">{error}</div>}
@@ -37,7 +39,7 @@ export default function ForgotPassword() {
           {!sent ? (
             <form onSubmit={handleSubmit}>
               <div className="form-group">
-                <label>Email</label>
+                <label>{t('Email')}</label>
                 <div style={{ position: 'relative' }}>
                   <FiMail size={18} style={{ position: 'absolute', left: '14px', top: '14px', color: 'var(--text-muted)' }} />
                   <input
@@ -51,27 +53,27 @@ export default function ForgotPassword() {
                 </div>
               </div>
               <button type="submit" className="form-submit" disabled={loading}>
-                {loading ? 'Envoi...' : 'Envoyer le code'}
+                {loading ? 'Envoi...' : t('Envoyer le code')}
               </button>
             </form>
           ) : (
             <div style={{ textAlign: 'center' }}>
               <FiPhone size={48} style={{ color: 'var(--success)', marginBottom: '16px' }} />
               <p style={{ marginBottom: '16px', color: 'var(--text-secondary)' }}>
-                Un code de réinitialisation a été envoyé par SMS au numéro associé à <strong>{email}</strong>.
+                {t('Un code de réinitialisation a été envoyé par SMS au numéro associé à')} <strong>{email}</strong>.
               </p>
               <p style={{ fontSize: '13px', color: 'var(--text-muted)', marginBottom: '16px' }}>
-                Le code expire dans 15 minutes.
+                {t('Le code expire dans 15 minutes.')}
               </p>
               <Link to={`/reset-password?email=${encodeURIComponent(email)}`} className="btn btn-primary" style={{ width: '100%', justifyContent: 'center', padding: '14px' }}>
-                J&rsquo;ai le code, réinitialiser
+                {t("J'ai le code, réinitialiser")}
               </Link>
             </div>
           )}
 
           <div className="form-footer" style={{ marginTop: '16px' }}>
             <Link to="/login" style={{ display: 'flex', alignItems: 'center', gap: '6px', justifyContent: 'center', color: 'var(--text-secondary)' }}>
-              <FiArrowLeft size={14} /> Retour à la connexion
+              <FiArrowLeft size={14} />               {t('Retour à la connexion')}
             </Link>
           </div>
         </div>

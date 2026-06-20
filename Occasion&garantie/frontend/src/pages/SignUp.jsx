@@ -1,10 +1,12 @@
 import { useState } from 'react';
 import { Link, Navigate } from 'react-router-dom';
+import { useTranslation } from 'react-i18next';
 import { FiUserPlus, FiMail, FiLock, FiPhone, FiCheckCircle } from 'react-icons/fi';
 import { useAuth } from '../context/AuthContext';
 import api from '../api/axios';
 
 export default function SignUp() {
+  const { t } = useTranslation();
   const { user } = useAuth();
   const [fullName, setFullName] = useState('');
   const [email, setEmail] = useState('');

@@ -1,5 +1,6 @@
 import { Link } from 'react-router-dom';
 import { useEffect, useState } from 'react';
+import { useTranslation } from 'react-i18next';
 import { FiShield, FiRefreshCw, FiTruck, FiArrowRight, FiSmartphone, FiHeadphones, FiMonitor, FiWatch, FiTablet } from 'react-icons/fi';
 import { BsPhone, BsLaptop, BsHeadphones, BsController } from 'react-icons/bs';
 import api from '../api/axios';
@@ -8,6 +9,7 @@ import HeroSlider from '../components/HeroSlider';
 import PromoPopup from '../components/PromoPopup';
 
 export default function Home() {
+  const { t } = useTranslation();
   const [phones, setPhones] = useState([]);
   const [accessories, setAccessories] = useState([]);
 
@@ -30,29 +32,29 @@ export default function Home() {
           <Link to="/products?category=Smartphones" className="category-card">
             <div>
               <div className="cat-icon"><BsPhone /></div>
-              <h3>Smartphones</h3>
-              <p>iPhone, Samsung, Xiaomi</p>
+              <h3>{t('Smartphones')}</h3>
+              <p>{t('iPhone, Samsung, Xiaomi')}</p>
             </div>
           </Link>
           <Link to="/products?category=Tablettes" className="category-card">
             <div>
               <div className="cat-icon"><FiTablet /></div>
-              <h3>Tablettes</h3>
-              <p>iPad, Samsung Tab</p>
+              <h3>{t('Tablettes')}</h3>
+              <p>{t('iPad, Samsung Tab')}</p>
             </div>
           </Link>
           <Link to="/products?category=Ordinateurs" className="category-card">
             <div>
               <div className="cat-icon"><BsLaptop /></div>
-              <h3>Ordinateurs</h3>
-              <p>MacBook, PC Portable</p>
+              <h3>{t('Ordinateurs')}</h3>
+              <p>{t('MacBook, PC Portable')}</p>
             </div>
           </Link>
           <Link to="/products?category=Accessoires" className="category-card">
             <div>
               <div className="cat-icon"><BsHeadphones /></div>
-              <h3>Accessoires</h3>
-              <p>Chargeurs, coques, etc.</p>
+              <h3>{t('Accessoires')}</h3>
+              <p>{t('Chargeurs, coques, etc.')}</p>
             </div>
           </Link>
         </div>
@@ -62,11 +64,11 @@ export default function Home() {
         <div className="container">
           <div className="products-header">
             <div>
-              <h2 className="section-title"><FiSmartphone size={28} style={{ verticalAlign: 'middle', marginRight: 10 }} />Smartphones</h2>
-              <p className="section-subtitle" style={{ marginBottom: 0 }}>Nos téléphones reconditionnés, testés et garantis.</p>
+              <h2 className="section-title"><FiSmartphone size={28} style={{ verticalAlign: 'middle', marginRight: 10 }} />{t('Smartphones')}</h2>
+              <p className="section-subtitle" style={{ marginBottom: 0 }}>{t('Nos téléphones reconditionnés, testés et garantis.')}</p>
             </div>
             <Link to="/products?category=smartphones" className="btn btn-secondary">
-              Voir tout <FiArrowRight size={16} />
+              {t('Voir tout')} <FiArrowRight size={16} />
             </Link>
           </div>
           {phones.length > 0 ? (
@@ -119,24 +121,24 @@ export default function Home() {
       <section className="features">
         <div className="container">
           <div style={{ textAlign: 'center', marginBottom: '48px' }}>
-            <h2 className="section-title">Pourquoi nous choisir ?</h2>
-            <p className="section-subtitle">La qualité au meilleur prix, c&rsquo;est notre promesse.</p>
+            <h2 className="section-title">{t('Pourquoi nous choisir ?')}</h2>
+            <p className="section-subtitle">{t("La qualité au meilleur prix, c'est notre promesse.")}</p>
           </div>
           <div className="features-grid">
             <div className="feature-card">
               <div className="feature-icon"><FiShield size={24} /></div>
-              <h3>Garantie incluse</h3>
-              <p>Chaque produit est couvert par une garantie minimum de 15 jours pour votre tranquillité.</p>
+              <h3>{t('Garantie incluse')}</h3>
+              <p>{t('Chaque produit est couvert par une garantie minimum de 15 jours pour votre tranquillité.')}</p>
             </div>
             <div className="feature-card">
               <div className="feature-icon"><FiRefreshCw size={24} /></div>
-              <h3>Testé et vérifié</h3>
-              <p>Nos experts vérifient chaque article avant mise en vente. Qualité irréprochable.</p>
+              <h3>{t('Testé et vérifié')}</h3>
+              <p>{t('Nos experts vérifient chaque article avant mise en vente. Qualité irréprochable.')}</p>
             </div>
             <div className="feature-card">
               <div className="feature-icon"><FiTruck size={24} /></div>
-              <h3>Livraison rapide</h3>
-              <p>Après la confirmation, Expédition sur Casablanca Gratuit sous 24h. Suivi de commande en temps réel et retour facile.</p>
+              <h3>{t('Livraison rapide')}</h3>
+              <p>{t('Après la confirmation, Expédition sur Casablanca Gratuit sous 24h. Suivi de commande en temps réel et retour facile.')}</p>
             </div>
           </div>
         </div>

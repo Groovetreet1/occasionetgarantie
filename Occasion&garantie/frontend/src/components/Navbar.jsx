@@ -1,6 +1,7 @@
 import { Link, NavLink, useNavigate, useLocation } from 'react-router-dom';
-import { FiUser, FiLogOut, FiSettings, FiChevronDown, FiSmartphone, FiMonitor, FiHeadphones, FiTablet } from 'react-icons/fi';
+import { FiUser, FiLogOut, FiSettings, FiChevronDown, FiSmartphone, FiMonitor, FiHeadphones, FiTablet, FiGlobe } from 'react-icons/fi';
 import { useState, useRef, useEffect } from 'react';
+import { useTranslation } from 'react-i18next';
 import { useAuth } from '../context/AuthContext';
 import ThemeToggle from './ThemeToggle';
 
@@ -12,6 +13,7 @@ const categories = [
 ];
 
 export default function Navbar() {
+  const { t, i18n } = useTranslation();
   const { user, logout } = useAuth();
   const navigate = useNavigate();
   const location = useLocation();
@@ -23,6 +25,13 @@ export default function Navbar() {
   const panelRef = useRef(null);
   const dropdownRef = useRef(null);
   const prodsRef = useRef(null);
+
+  const toggleLang = () => {
+    const next = i18n.language === 'ar' ? 'fr' : 'ar';
+    i18n.changeLanguage(next);
+    document.documentElement.dir = next === 'ar' ? 'rtl' : 'ltr';
+    document.documentElement.lang = next;
+  };
 
   useEffect(() => {
     const handle = (e) => {
@@ -43,30 +52,33 @@ export default function Navbar() {
           <Link to="/" className="navbar-logo">OG</Link>
 
           <div className="navbar-desktop-nav">
-            <NavLink to="/" end>Accueil</NavLink>
+            <NavLink to="/" end>{t('Accueil')}</NavLink>
             <div className="navbar-prods" ref={prodsRef} onMouseEnter={() => setProdsOpen(true)} onMouseLeave={() => setProdsOpen(false)}>
               <button className={`navbar-prods-btn${isProductsActive ? ' active' : ''}`} onClick={() => setProdsOpen((o) => !o)}>
-                Produits <FiChevronDown size={12} />
+                {t('Produits')} <FiChevronDown size={12} />
               </button>
               {prodsOpen && (
                 <div className="navbar-prods-menu">
-                  <Link to="/products" onClick={() => setProdsOpen(false)}>Tous les produits</Link>
+                  <Link to="/products" onClick={() => setProdsOpen(false)}>{t('Tous les produits')}</Link>
                   {categories.map((cat) => {
                     const isActive = location.search === `?category=${cat.slug}`;
                     return (
                       <Link key={cat.slug} to={`/products?category=${cat.slug}`} className={isActive ? 'active' : ''} onClick={() => setProdsOpen(false)}>
-                        <cat.icon size={14} /> {cat.name}
+                        <cat.icon size={14} /> {t(cat.name)}
                       </Link>
                     );
                   })}
                 </div>
               )}
             </div>
-            <NavLink to="/about">À propos</NavLink>
+            <NavLink to="/about">{t('À propos')}</NavLink>
           </div>
 
           <div className="navbar-actions">
             <ThemeToggle />
+            <button className="navbar-lang" onClick={toggleLang} title={i18n.language === 'ar' ? 'Français' : 'العربية'} aria-label="Langue">
+              <FiGlobe size={16} /> <span>{i18n.language === 'ar' ? 'FR' : 'AR'}</span>
+            </button>
             {user ? (
               <div className="navbar-dropdown" ref={dropdownRef}>
                 <button className="navbar-user" onClick={() => setDropdownOpen((o) => !o)}>
@@ -76,19 +88,19 @@ export default function Navbar() {
                   <div className="navbar-dropdown-menu">
                     {user.role === 'admin' && (
                       <NavLink to="/admin" onClick={() => setDropdownOpen(false)}>
-                        <FiSettings size={14} /> Administration
+                        <FiSettings size={14} /> {t('Admin')}
                       </NavLink>
                     )}
                     <button onClick={() => { logout(); setDropdownOpen(false); }}>
-                      <FiLogOut size={14} /> D&eacute;connexion
+                      <FiLogOut size={14} /> {t('Déconnexion')}
                     </button>
                   </div>
                 )}
               </div>
             ) : (
               <div className="navbar-auth">
-                <Link to="/login" className="navbar-login">Connexion</Link>
-                <Link to="/signup" className="navbar-signup">S&rsquo;inscrire</Link>
+                <Link to="/login" className="navbar-login">{t('Connexion')}</Link>
+                <Link to="/signup" className="navbar-signup">{t("S'inscrire")}</Link>
               </div>
             )}
             <button className={`navbar-hamburger${menuOpen ? ' active' : ''}`} onClick={() => setMenuOpen((o) => !o)} aria-label="Menu">
@@ -99,32 +111,32 @@ export default function Navbar() {
       </nav>
 
       <div className={`navbar-mobile-panel${menuOpen ? ' open' : ''}`} ref={panelRef}>
-        <NavLink to="/" end onClick={closeMenu}>Accueil</NavLink>
-        <Link to="/products" onClick={closeMenu} className={location.pathname.startsWith('/products') ? 'active' : ''}>Produits</Link>
+        <NavLink to="/" end onClick={closeMenu}>{t('Accueil')}</NavLink>
+        <Link to="/products" onClick={closeMenu} className={location.pathname.startsWith('/products') ? 'active' : ''}>{t('Produits')}</Link>
         {categories.map((cat) => {
           const isActive = location.search === `?category=${cat.slug}`;
           return (
             <Link key={cat.slug} to={`/products?category=${cat.slug}`} onClick={closeMenu} style={{ paddingLeft: '32px', fontSize: '14px', opacity: 0.7 }} className={isActive ? 'active' : ''}>
-              <cat.icon size={14} style={{ marginRight: 6 }} /> {cat.name}
+              <cat.icon size={14} style={{ marginRight: 6 }} /> {t(cat.name)}
             </Link>
           );
         })}
-        <NavLink to="/about" onClick={closeMenu}>À propos</NavLink>
+        <NavLink to="/about" onClick={closeMenu}>{t('À propos')}</NavLink>
         <div className="navbar-mobile-divider" />
         {user ? (
           <>
             {user.role === 'admin' && (
-              <NavLink to="/admin" onClick={closeMenu}><FiSettings size={14} /> Admin</NavLink>
+              <NavLink to="/admin" onClick={closeMenu}><FiSettings size={14} /> {t('Admin')}</NavLink>
             )}
             <button onClick={() => { logout(); closeMenu(); }} className="navbar-mobile-logout">
-              <FiLogOut size={14} /> D&eacute;connexion
+              <FiLogOut size={14} /> {t('Déconnexion')}
             </button>
           </>
         ) : (
           <>
-            <NavLink to="/login" onClick={closeMenu}>Connexion</NavLink>
+            <NavLink to="/login" onClick={closeMenu}>{t('Connexion')}</NavLink>
             <Link to="/signup" className="navbar-mobile-signup" onClick={closeMenu}>
-              S&rsquo;inscrire
+              {t("S'inscrire")}
             </Link>
           </>
         )}
