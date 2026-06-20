@@ -1,6 +1,7 @@
 import { Link } from 'react-router-dom';
 import { useEffect, useState } from 'react';
 import { useTranslation } from 'react-i18next';
+import SeoHead from '../components/SeoHead';
 import { FiShield, FiRefreshCw, FiTruck, FiArrowRight, FiSmartphone, FiHeadphones, FiMonitor, FiWatch, FiTablet } from 'react-icons/fi';
 import { BsPhone, BsLaptop, BsHeadphones, BsController } from 'react-icons/bs';
 import api from '../api/axios';
@@ -24,6 +25,9 @@ export default function Home() {
 
   return (
     <>
+      <SeoHead
+        description="Achetez des smartphones, tablettes, ordinateurs et accessoires reconditionnés avec garantie. Livraison rapide à Casablanca, Bouskoura et Berrechid."
+      />
       <HeroSlider />
       <PromoPopup />
 

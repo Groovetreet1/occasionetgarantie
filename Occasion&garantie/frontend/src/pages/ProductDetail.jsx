@@ -1,6 +1,7 @@
 import { useParams, Link, useNavigate } from 'react-router-dom';
 import { useEffect, useState } from 'react';
 import { useTranslation } from 'react-i18next';
+import SeoHead from '../components/SeoHead';
 import { FiArrowLeft, FiShoppingBag, FiShield, FiCheck, FiMonitor, FiCpu, FiHardDrive, FiBattery, FiCamera, FiDroplet, FiX, FiChevronLeft, FiChevronRight, FiUpload, FiCreditCard } from 'react-icons/fi';
 import { BsWhatsapp } from 'react-icons/bs';
 import api from '../api/axios';
@@ -125,6 +126,12 @@ export default function ProductDetail() {
 
   return (
     <>
+      <SeoHead
+        title={product?.name}
+        description={`${product?.name} – ${product?.description?.slice(0, 150)}. ${product?.price} DH. Livraison Casablanca, Bouskoura, Berrechid.`}
+        image={product?.image ? `${API_BASE}/uploads/${product.image}` : undefined}
+        url={`${window.location.origin}/products/${product?.slug}`}
+      />
       <section className="product-detail-section">
         <div className="container">
           <Link to="/products" className="btn btn-ghost" style={{ marginBottom: '24px' }}>
