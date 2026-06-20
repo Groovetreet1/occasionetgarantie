@@ -1,7 +1,7 @@
 import { Link } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import { FiMapPin, FiPhone, FiMail, FiClock } from 'react-icons/fi';
-import { BsInstagram, BsTiktok, BsWhatsapp } from 'react-icons/bs';
+import { BsInstagram, BsFacebook, BsWhatsapp } from 'react-icons/bs';
 
 export default function Footer() {
   const { t } = useTranslation();
@@ -13,8 +13,8 @@ export default function Footer() {
             <h3>{t('Occasion & Garantie')}</h3>
             <p>{t("Des produits d'exception à prix réduits, avec une garantie qui vous protège. Achetez en toute confiance.")}</p>
             <div className="footer-social">
-              <a href="https://instagram.com" target="_blank" rel="noopener noreferrer" title="Instagram"><BsInstagram /></a>
-              <a href="https://tiktok.com" target="_blank" rel="noopener noreferrer" title="TikTok"><BsTiktok /></a>
+              <a href="https://www.instagram.com/occasionetgarentie/" target="_blank" rel="noopener noreferrer" title="Instagram"><BsInstagram /></a>
+              <a href="https://www.facebook.com/abidal.kawtarix.dasilva.april1" target="_blank" rel="noopener noreferrer" title="Facebook"><BsFacebook /></a>
               <a href="https://wa.me/212669017295" target="_blank" rel="noopener noreferrer" title="WhatsApp"><BsWhatsapp /></a>
             </div>
           </div>
