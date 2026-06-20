@@ -3,6 +3,7 @@ const express = require('express');
 const cors = require('cors');
 const path = require('path');
 const http = require('http');
+const https = require('https');
 
 const authRoutes = require('./routes/auth');
 const productRoutes = require('./routes/products');
@@ -34,12 +35,19 @@ const server = app.listen(PORT, () => {
   console.log(`Server running on http://localhost:${PORT}`);
 });
 
-// Auto-ping pour éviter le sommeil Render (toutes les 10 min)
+// Auto-ping pour éviter le sommeil Render
 const PUBLIC_URL = process.env.RENDER_EXTERNAL_URL || `http://localhost:${PORT}`;
-setInterval(() => {
-  const req = http.get(`${PUBLIC_URL}/api/health`, (res) => {
+const PING_INTERVAL = Number(process.env.PING_INTERVAL) || 5 * 60 * 1000;
+
+const ping = () => {
+  const mod = PUBLIC_URL.startsWith('https') ? https : http;
+  const req = mod.get(`${PUBLIC_URL}/api/health`, (res) => {
     console.log(`[keepalive] ping ${PUBLIC_URL}/api/health → ${res.statusCode}`);
   });
-  req.on('error', (e) => { /* ignore */ });
+  req.on('error', () => {});
   req.end();
-}, 10 * 60 * 1000);
+};
+
+// Premier ping après 1 min (pas 5 min)
+setTimeout(ping, 60 * 1000);
+setInterval(ping, PING_INTERVAL);

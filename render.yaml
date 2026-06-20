@@ -23,3 +23,5 @@ services:
         value: CIH bank
       - key: BANK_HOLDER
         value: ABDELLAH EL MAHFOUDY
+      - key: PING_INTERVAL
+        value: "300000"
