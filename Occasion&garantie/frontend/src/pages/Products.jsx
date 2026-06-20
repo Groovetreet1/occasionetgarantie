@@ -5,6 +5,9 @@ import { FiSearch, FiSliders, FiPackage, FiX } from 'react-icons/fi';
 import api from '../api/axios';
 import ProductCard from '../components/ProductCard';
 
+const STATE_KEYS = ['neuf', 'comme_neuf', 'tres_bon', 'bon'];
+const CATEGORIES = ['Tous', 'Smartphones', 'Tablettes', 'Ordinateurs', 'Accessoires'];
+
 export default function Products() {
   const { t } = useTranslation();
   const [searchParams] = useSearchParams();
@@ -17,14 +20,9 @@ export default function Products() {
   const [priceMin, setPriceMin] = useState('');
   const [priceMax, setPriceMax] = useState('');
 
-  const STATE_LABELS = {
-    neuf: t('Neuf'),
-    comme_neuf: t('Comme neuf'),
-    tres_bon: t('Très bon état'),
-    bon: t('Bon état'),
-  };
-
-  const CATEGORIES = [t('Tous'), t('Smartphones'), t('Tablettes'), t('Ordinateurs'), t('Accessoires')];
+  const catLabel = (c) => c === 'Tous' ? t('Tous') : c;
+  const STATE_LABELS = { neuf: 'Neuf', comme_neuf: 'Comme neuf', tres_bon: 'Très bon état', bon: 'Bon état' };
+  const stateLabel = (s) => s === 'Tous' ? t('Tous') : t(STATE_LABELS[s] || s);
 
   useEffect(() => {
     const catParam = searchParams.get('category');
@@ -40,21 +38,21 @@ export default function Products() {
   }, [search]);
 
   const filtered = products.filter((p) => {
-    if (category !== t('Tous') && p.category_name !== category) return false;
-    if (stateFilter !== t('Tous') && p.state !== stateFilter) return false;
+    if (category !== 'Tous' && p.category_name !== category) return false;
+    if (stateFilter !== 'Tous' && p.state !== stateFilter) return false;
     if (priceMin && Number(p.price) < Number(priceMin)) return false;
     if (priceMax && Number(p.price) > Number(priceMax)) return false;
     return true;
   });
 
   const resetFilters = () => {
-    setCategory(t('Tous'));
-    setStateFilter(t('Tous'));
+    setCategory('Tous');
+    setStateFilter('Tous');
     setPriceMin('');
     setPriceMax('');
   };
 
-  const hasFilters = category !== t('Tous') || stateFilter !== t('Tous') || priceMin || priceMax;
+  const hasFilters = category !== 'Tous' || stateFilter !== 'Tous' || priceMin || priceMax;
 
   return (
     <section className="products-section" style={{ paddingTop: '120px' }}>
@@ -96,7 +94,7 @@ export default function Products() {
                 <div className="filter-chips">
                   {CATEGORIES.map((c) => (
                     <button key={c} className={`filter-chip${category === c ? ' active' : ''}`} onClick={() => setCategory(c)}>
-                      {c}
+                      {catLabel(c)}
                     </button>
                   ))}
                 </div>
@@ -104,10 +102,10 @@ export default function Products() {
               <div className="filter-group">
                 <label className="filter-label">{t('État')}</label>
                 <div className="filter-chips">
-                  <button className={`filter-chip${stateFilter === t('Tous') ? ' active' : ''}`} onClick={() => setStateFilter(t('Tous'))}>{t('Tous')}</button>
-                  {Object.entries(STATE_LABELS).map(([val, label]) => (
+                  <button className={`filter-chip${stateFilter === 'Tous' ? ' active' : ''}`} onClick={() => setStateFilter('Tous')}>{t('Tous')}</button>
+                  {STATE_KEYS.map((val) => (
                     <button key={val} className={`filter-chip${stateFilter === val ? ' active' : ''}`} onClick={() => setStateFilter(val)}>
-                      {label}
+                      {stateLabel(val)}
                     </button>
                   ))}
                 </div>
