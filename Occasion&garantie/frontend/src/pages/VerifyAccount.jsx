@@ -1,9 +1,11 @@
 import { useState, useEffect } from 'react';
 import { Link, useSearchParams } from 'react-router-dom';
+import { useTranslation } from 'react-i18next';
 import { FiCheckCircle, FiXCircle } from 'react-icons/fi';
 import api from '../api/axios';
 
 export default function VerifyAccount() {
+  const { t } = useTranslation();
   const [searchParams] = useSearchParams();
   const [status, setStatus] = useState('loading');
   const [error, setError] = useState('');
@@ -13,7 +15,7 @@ export default function VerifyAccount() {
   useEffect(() => {
     if (!token) {
       setStatus('error');
-      setError('Lien de vérification invalide.');
+      setError(t('Lien de vérification invalide.'));
       return;
     }
     api.post('/auth/verify-signup', { token })
@@ -25,9 +27,9 @@ export default function VerifyAccount() {
       })
       .catch((err) => {
         setStatus('error');
-        setError(err.response?.data?.message || 'Erreur de vérification.');
+        setError(err.response?.data?.message || t('Erreur de vérification.'));
       });
-  }, [token]);
+  }, [token, t]);
 
   return (
     <section className="auth-page">
@@ -36,23 +38,23 @@ export default function VerifyAccount() {
           {status === 'loading' && (
             <>
               <div className="spinner" style={{ margin: '0 auto 16px' }} />
-              <p>Vérification de votre compte...</p>
+              <p>{t('Vérification de votre compte...')}</p>
             </>
           )}
           {status === 'success' && (
             <>
               <FiCheckCircle size={48} style={{ color: 'var(--success)', marginBottom: '16px' }} />
-              <h2>Compte vérifié !</h2>
-              <p style={{ marginBottom: '16px', color: 'var(--text-secondary)' }}>Votre compte a été créé avec succès. Vous êtes maintenant connecté.</p>
-              <Link to="/" className="btn btn-primary" style={{ width: '100%', justifyContent: 'center' }}>Accueil</Link>
+              <h2>{t('Compte vérifié !')}</h2>
+              <p style={{ marginBottom: '16px', color: 'var(--text-secondary)' }}>{t("Votre compte a été créé avec succès. Vous êtes maintenant connecté.")}</p>
+              <Link to="/" className="btn btn-primary" style={{ width: '100%', justifyContent: 'center' }}>{t('Accueil')}</Link>
             </>
           )}
           {status === 'error' && (
             <>
               <FiXCircle size={48} style={{ color: 'var(--danger)', marginBottom: '16px' }} />
-              <h2>Lien invalide ou expiré</h2>
+              <h2>{t('Lien invalide ou expiré')}</h2>
               <p style={{ marginBottom: '16px', color: 'var(--text-secondary)' }}>{error}</p>
-              <Link to="/signup" className="btn btn-primary" style={{ width: '100%', justifyContent: 'center' }}>Réessayer l'inscription</Link>
+              <Link to="/signup" className="btn btn-primary" style={{ width: '100%', justifyContent: 'center' }}>{t("Réessayer l'inscription")}</Link>
             </>
           )}
         </div>

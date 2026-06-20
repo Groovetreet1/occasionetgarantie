@@ -1,9 +1,11 @@
 import { Link } from 'react-router-dom';
+import { useTranslation } from 'react-i18next';
 import { FiShoppingBag } from 'react-icons/fi';
 
 const API_BASE = import.meta.env.VITE_API_URL || '';
 
 export default function ProductCard({ product }) {
+  const { t } = useTranslation();
   const formatPrice = (p) => new Intl.NumberFormat('fr-FR', { style: 'currency', currency: 'MAD' }).format(p).replace('MAD', '').trim() + ' DH';
   const imgUrl = product.image ? `${API_BASE}/uploads/${product.image}` : null;
   const discount = product.old_price && product.old_price > product.price
@@ -13,7 +15,7 @@ export default function ProductCard({ product }) {
   return (
     <Link to={`/products/${product.slug}`} className="product-card">
       <div className="product-card-image">
-        {product.featured && <span className="product-badge badge-featured">Top</span>}
+        {product.featured && <span className="product-badge badge-featured">{t('Top')}</span>}
         {discount > 0 && (
           <span className="product-discount-badge">-{discount}%</span>
         )}
@@ -24,7 +26,7 @@ export default function ProductCard({ product }) {
         )}
       </div>
       <div className="product-info">
-        <div className="product-category">{product.category_name || 'Non classé'}</div>
+        <div className="product-category">{product.category_name || t('Non classé')}</div>
         <h3>{product.name}</h3>
         <div className="product-price">
           <span className="price-current">{formatPrice(product.price)}</span>
@@ -33,7 +35,7 @@ export default function ProductCard({ product }) {
         <div className="product-meta">
           <span className="product-state">{product.state?.replace(/_/g, ' ')}</span>
           <span className="btn btn-primary" style={{ padding: '6px 16px', fontSize: '13px', pointerEvents: 'none' }}>
-            Voir
+            {t('Voir')}
           </span>
         </div>
       </div>

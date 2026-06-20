@@ -1,10 +1,12 @@
 import { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
+import { useTranslation } from 'react-i18next';
 import { FiClock, FiGift, FiX, FiArrowRight } from 'react-icons/fi';
 
 const TWO_DAYS = 2 * 24 * 60 * 60;
 
 export default function PromoPopup() {
+  const { t } = useTranslation();
   const [visible, setVisible] = useState(false);
   const [remaining, setRemaining] = useState(() => {
     const saved = localStorage.getItem('promoEnd');
@@ -42,38 +44,37 @@ export default function PromoPopup() {
       <div className="promo-popup" onClick={(e) => e.stopPropagation()}>
         <button className="promo-close" onClick={() => setVisible(false)}><FiX size={20} /></button>
         <div className="promo-icon"><FiGift size={36} /></div>
-        <h2 className="promo-title">Promo Flash !</h2>
+        <h2 className="promo-title">{t('Promo Flash !')}</h2>
         <p className="promo-text">
-          Profitez de nos <strong>produits haut de gamme</strong> à prix réduits.<br />
-          Offre valable pour une durée limitée, ne manquez pas cette chance !
+          {t("Profitez de nos produits haut de gamme à prix réduits. Offre valable pour une durée limitée, ne manquez pas cette chance !")}
         </p>
         <div className="promo-timer">
           <FiClock size={18} />
           <div className="promo-timer-units">
             <div className="promo-unit">
               <span className="promo-num">{String(days).padStart(2, '0')}</span>
-              <span className="promo-label">Jours</span>
+              <span className="promo-label">{t('Jours')}</span>
             </div>
             <span className="promo-sep">:</span>
             <div className="promo-unit">
               <span className="promo-num">{String(hours).padStart(2, '0')}</span>
-              <span className="promo-label">Heures</span>
+              <span className="promo-label">{t('Heures')}</span>
             </div>
             <span className="promo-sep">:</span>
             <div className="promo-unit">
               <span className="promo-num">{String(minutes).padStart(2, '0')}</span>
-              <span className="promo-label">Minutes</span>
+              <span className="promo-label">{t('Minutes')}</span>
             </div>
             <span className="promo-sep">:</span>
             <div className="promo-unit">
               <span className="promo-num">{String(secs).padStart(2, '0')}</span>
-              <span className="promo-label">Secondes</span>
+              <span className="promo-label">{t('Secondes')}</span>
             </div>
           </div>
         </div>
-        <p className="promo-footer">Dépêchez-vous, l'offre se termine bientôt !</p>
+        <p className="promo-footer">{t("Dépêchez-vous, l'offre se termine bientôt !")}</p>
         <Link to="/products" className="btn btn-primary" onClick={() => setVisible(false)} style={{ width: '100%', justifyContent: 'center', padding: '14px', fontSize: '16px', marginTop: '8px' }}>
-          Voir les offres <FiArrowRight size={18} />
+          {t('Voir les offres')} <FiArrowRight size={18} />
         </Link>
       </div>
     </div>

@@ -1,5 +1,6 @@
 import { useParams, Link, useNavigate } from 'react-router-dom';
 import { useEffect, useState } from 'react';
+import { useTranslation } from 'react-i18next';
 import { FiArrowLeft, FiShoppingBag, FiShield, FiCheck, FiMonitor, FiCpu, FiHardDrive, FiBattery, FiCamera, FiDroplet, FiX, FiChevronLeft, FiChevronRight, FiUpload, FiCreditCard } from 'react-icons/fi';
 import { BsWhatsapp } from 'react-icons/bs';
 import api from '../api/axios';
@@ -30,6 +31,7 @@ const WHATSAPP_NUMBER = '212669017295';
 export default function ProductDetail() {
   const { slug } = useParams();
   const navigate = useNavigate();
+  const { t, i18n } = useTranslation();
   const { user } = useAuth();
   const [product, setProduct] = useState(null);
   const [loading, setLoading] = useState(true);
@@ -57,9 +59,9 @@ export default function ProductDetail() {
     <div className="auth-page">
       <div className="empty-state">
         <div className="icon"><FiShoppingBag size={48} /></div>
-        <h2>Produit introuvable</h2>
+        <h2>{t('Produit introuvable')}</h2>
         <Link to="/products" className="btn btn-primary" style={{ marginTop: '16px' }}>
-          <FiArrowLeft /> Retour aux produits
+          <FiArrowLeft /> {t('Retour aux produits')}
         </Link>
       </div>
     </div>
@@ -68,7 +70,7 @@ export default function ProductDetail() {
   const formatPrice = (p) => new Intl.NumberFormat('fr-FR', { style: 'currency', currency: 'MAD' }).format(p).replace('MAD', '').trim() + ' DH';
   const API_BASE = import.meta.env.VITE_API_URL || '';
   const imgUrl = product.image ? `${API_BASE}/uploads/${product.image}` : null;
-  const waMsg = encodeURIComponent(`Bonjour ! Je suis intéressé(e) par : ${product.name} (${formatPrice(product.price)}) - ${window.location.href}`);
+  const waMsg = encodeURIComponent(`${t('Bonjour ! Je suis intéressé(e) par')} : ${product.name} (${formatPrice(product.price)}) - ${window.location.href}`);
   const waUrl = `https://wa.me/${WHATSAPP_NUMBER}?text=${waMsg}`;
   const specs = typeof product.specs === 'string' ? JSON.parse(product.specs) : (product.specs || {});
 
@@ -105,7 +107,7 @@ export default function ProductDetail() {
   };
 
   const handleDeposit = async () => {
-    if (!screenshot) { setDepositError('Veuillez sélectionner une capture d\'écran du virement.'); return; }
+    if (!screenshot) { setDepositError(t("Veuillez sélectionner une capture d'écran du virement.")); return; }
     setDepositError('');
     setDepositLoading(true);
     try {
@@ -115,7 +117,7 @@ export default function ProductDetail() {
       await api.post('/deposits', formData, { headers: { 'Content-Type': 'multipart/form-data' } });
       setDepositDone(true);
     } catch (err) {
-      setDepositError(err.response?.data?.message || 'Erreur lors de l\'envoi.');
+      setDepositError(err.response?.data?.message || t("Erreur lors de l'envoi."));
     } finally {
       setDepositLoading(false);
     }
@@ -126,7 +128,7 @@ export default function ProductDetail() {
       <section className="product-detail-section">
         <div className="container">
           <Link to="/products" className="btn btn-ghost" style={{ marginBottom: '24px' }}>
-            <FiArrowLeft /> Retour aux produits
+            <FiArrowLeft /> {t('Retour aux produits')}
           </Link>
 
           <div className="product-detail-grid">
@@ -138,7 +140,7 @@ export default function ProductDetail() {
                   <FiShoppingBag size={80} style={{ opacity: 0.15 }} />
                 )}
                 <span className="product-badge badge-warranty" style={{ bottom: '12px', left: '12px', top: 'auto', right: 'auto', fontSize: '14px', padding: '8px 16px' }}>
-                  <FiShield size={14} /> Garantie {product.warranty}
+                  <FiShield size={14} /> {t('Garantie')} {product.warranty}
                 </span>
               </div>
 
@@ -164,10 +166,10 @@ export default function ProductDetail() {
 
               <div className="product-detail-tags">
                 <span className="product-detail-tag state">
-                  {stateLabels[product.state] || product.state}
+                  {t(stateLabels[product.state]) || product.state}
                 </span>
                 <span className="product-detail-tag verified">
-                  <FiCheck size={12} /> Vérifié
+                  <FiCheck size={12} /> {t('Vérifié')}
                 </span>
                 {product.brand && (
                   <span className="product-detail-tag brand">
@@ -182,7 +184,7 @@ export default function ProductDetail() {
 
               {specs && Object.keys(specs).length > 0 && (
                 <div className="product-detail-specs">
-                  <h3>Fiche technique</h3>
+                  <h3>{t('Fiche technique')}</h3>
                   <div className="product-detail-specs-grid">
                     {Object.entries(specs).map(([key, val]) => {
                       const Icon = specIcons[key] || FiCpu;
@@ -214,15 +216,15 @@ export default function ProductDetail() {
                 rel="noopener noreferrer"
                 className="btn btn-whatsapp"
               >
-                <BsWhatsapp size={22} /> Acheter via WhatsApp
+                <BsWhatsapp size={22} /> {t('Acheter via WhatsApp')}
               </a>
               {product.price > 500 && (
                 <button onClick={openDeposit} className="btn btn-outline" style={{ width: '100%', justifyContent: 'center', padding: '14px', fontSize: '15px', gap: '8px', marginTop: '12px' }}>
-                  <FiCreditCard size={18} /> Réserver avec 200 DH
+                  <FiCreditCard size={18} /> {t('Réserver avec 200 DH')}
                 </button>
               )}
               <p style={{ textAlign: 'center', color: 'var(--text-muted)', fontSize: '12px', marginTop: '8px' }}>
-                Réponse sous 24h | Paiement sécurisé
+                {t('Réponse sous 24h | Paiement sécurisé')}
               </p>
             </div>
           </div>
@@ -238,9 +240,9 @@ export default function ProductDetail() {
               <>
                 <div style={{ textAlign: 'center', marginBottom: '24px' }}>
                   <FiCreditCard size={36} style={{ color: 'var(--primary)', marginBottom: '8px' }} />
-                  <h2>Réserver avec 200 DH</h2>
+                  <h2>{t('Réserver avec 200 DH')}</h2>
                   <p style={{ color: 'var(--text-secondary)', fontSize: '14px' }}>
-                    Versez 200 DH pour confirmer votre réservation sur <strong>{product.name}</strong>
+                    {t("Versez 200 DH pour confirmer votre réservation sur")} <strong>{product.name}</strong>
                   </p>
                 </div>
 
@@ -249,37 +251,37 @@ export default function ProductDetail() {
                   <p style={{ fontWeight: 600, fontSize: '14px', wordBreak: 'break-all' }}>{bankInfo?.rib || '...'}</p>
                   <div style={{ display: 'flex', gap: '16px', marginTop: '12px', fontSize: '13px' }}>
                     <div>
-                      <p style={{ color: 'var(--text-muted)' }}>Banque</p>
+                      <p style={{ color: 'var(--text-muted)' }}>{t('Banque')}</p>
                       <p style={{ fontWeight: 600 }}>{bankInfo?.bank || '...'}</p>
                     </div>
                     <div>
-                      <p style={{ color: 'var(--text-muted)' }}>Bénéficiaire</p>
+                      <p style={{ color: 'var(--text-muted)' }}>{t('Bénéficiaire')}</p>
                       <p style={{ fontWeight: 600 }}>{bankInfo?.holder || '...'}</p>
                     </div>
                   </div>
                 </div>
 
                 <div className="form-group">
-                  <label><FiUpload size={14} /> Capture du virement</label>
+                  <label><FiUpload size={14} /> {t("Capture du virement")}</label>
                   <input type="file" accept="image/*" onChange={(e) => setScreenshot(e.target.files[0])} style={{ fontSize: '13px' }} />
-                  <p style={{ fontSize: '11px', color: 'var(--text-muted)', marginTop: '4px' }}>Photo ou capture d'écran du virement effectué</p>
+                  <p style={{ fontSize: '11px', color: 'var(--text-muted)', marginTop: '4px' }}>{t("Photo ou capture d'écran du virement effectué")}</p>
                 </div>
 
                 {depositError && <div className="alert alert-error">{depositError}</div>}
 
                 <button onClick={handleDeposit} className="form-submit" disabled={depositLoading}>
-                  {depositLoading ? 'Envoi...' : 'Confirmer le paiement'}
+                  {depositLoading ? t('Envoi...') : t('Confirmer le paiement')}
                 </button>
               </>
             ) : (
               <div style={{ textAlign: 'center', padding: '20px 0' }}>
                 <FiCheck size={48} style={{ color: 'var(--success)', marginBottom: '16px' }} />
-                <h2>Paiement confirmé !</h2>
+                <h2>{t('Paiement confirmé !')}</h2>
                 <p style={{ color: 'var(--text-secondary)', marginBottom: '12px' }}>
-                  Votre acompte de 200 DH a été enregistré. Le vendeur vous contactera sous 24h.
+                  {t("Votre acompte de 200 DH a été enregistré. Le vendeur vous contactera sous 24h.")}
                 </p>
                 <button onClick={() => setShowDeposit(false)} className="btn btn-primary" style={{ width: '100%', justifyContent: 'center' }}>
-                  Fermer
+                  {t('Fermer')}
                 </button>
               </div>
             )}

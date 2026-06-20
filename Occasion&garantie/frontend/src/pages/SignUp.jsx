@@ -26,7 +26,7 @@ export default function SignUp() {
       await api.post('/auth/send-verification', { fullName, email, password, phone });
       setSent(true);
     } catch (err) {
-      setError(err.response?.data?.message || 'Erreur lors de l\'envoi du SMS.');
+      setError(err.response?.data?.message || t("Erreur lors de l'envoi du SMS."));
     } finally {
       setLoading(false);
     }
@@ -36,8 +36,8 @@ export default function SignUp() {
     <section className="auth-page">
       <div className="auth-container">
         <div className="auth-header">
-          <h1>Créer un compte</h1>
-          <p>Rejoignez Occasion & Garantie</p>
+          <h1>{t('Créer un compte')}</h1>
+          <p>{t("Rejoignez Occasion & Garantie")}</p>
         </div>
         <div className="auth-card">
           {error && <div className="alert alert-error">{error}</div>}
@@ -45,42 +45,42 @@ export default function SignUp() {
           {!sent ? (
             <form onSubmit={handleSubmit}>
               <div className="form-group">
-                <label><FiUserPlus size={14} /> Nom complet</label>
-                <input type="text" value={fullName} onChange={(e) => setFullName(e.target.value)} placeholder="Votre nom" required />
+                <label><FiUserPlus size={14} /> {t('Nom complet')}</label>
+                <input type="text" value={fullName} onChange={(e) => setFullName(e.target.value)} placeholder={t('Votre nom')} required />
               </div>
               <div className="form-group">
                 <label><FiMail size={14} /> Email</label>
                 <input type="email" value={email} onChange={(e) => setEmail(e.target.value)} placeholder="exemple@email.com" required />
               </div>
               <div className="form-group">
-                <label><FiLock size={14} /> Mot de passe</label>
-                <input type="password" value={password} onChange={(e) => setPassword(e.target.value)} placeholder="Minimum 6 caractères" minLength={6} required />
+                <label><FiLock size={14} /> {t('Mot de passe')}</label>
+                <input type="password" value={password} onChange={(e) => setPassword(e.target.value)} placeholder={t('Minimum 6 caractères')} minLength={6} required />
               </div>
               <div className="form-group">
-                <label><FiPhone size={14} /> Téléphone</label>
+                <label><FiPhone size={14} /> {t('Téléphone')}</label>
                 <input type="tel" value={phone} onChange={(e) => setPhone(e.target.value)} placeholder="+212 6XX XXX XXX" required />
               </div>
               <button type="submit" className="form-submit" disabled={loading}>
-                {loading ? 'Envoi...' : 'Créer mon compte'}
+                {loading ? t('Envoi...') : t("Créer mon compte")}
               </button>
             </form>
           ) : (
             <div style={{ textAlign: 'center' }}>
               <FiCheckCircle size={48} style={{ color: 'var(--success)', marginBottom: '16px' }} />
               <p style={{ marginBottom: '16px', color: 'var(--text-secondary)' }}>
-                Un SMS de confirmation a été envoyé au <strong>{phone}</strong>.
+                {t('Un SMS de confirmation a été envoyé au')} <strong>{phone}</strong>.
               </p>
               <p style={{ fontSize: '13px', color: 'var(--text-muted)', marginBottom: '16px' }}>
-                Cliquez sur le lien reçu par SMS pour activer votre compte. Le lien expire dans 15 minutes.
+                {t("Cliquez sur le lien reçu par SMS pour activer votre compte. Le lien expire dans 15 minutes.")}
               </p>
               <Link to="/login" className="btn btn-outline" style={{ width: '100%', justifyContent: 'center' }}>
-                Retour à la connexion
+                {t('Retour à la connexion')}
               </Link>
             </div>
           )}
 
           <div className="form-footer">
-            Déjà un compte ? <Link to="/login">Connectez-vous</Link>
+            {t('Déjà un compte ?')} <Link to="/login">{t('Connectez-vous')}</Link>
           </div>
         </div>
       </div>

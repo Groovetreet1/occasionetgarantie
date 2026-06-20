@@ -1,66 +1,60 @@
 import { useState, useEffect, useCallback, useRef } from 'react';
 import { Link } from 'react-router-dom';
+import { useTranslation } from 'react-i18next';
 import { FiArrowRight, FiChevronLeft, FiChevronRight } from 'react-icons/fi';
 
-const slides = [
-  {
-    id: 1,
-    title: "Des produits d'exception à prix réduits",
-    subtitle:
-      'Chaque article est vérifié, testé et garanti. Profitez du meilleur de la technologie sans vous ruiner.',
-    cta: 'Découvrir nos produits',
-    link: '/products',
-    gradient:
-      'linear-gradient(135deg, #0F172A 0%, #1a1a3e 30%, #F59E0B 65%, #10B981 100%)',
-    orbColor: '#F59E0B',
-  },
-  {
-    id: 2,
-    title: 'Garantie incluse sur tous nos produits',
-    subtitle:
-      '15 jours de garantie minimum sur chaque achat. Votre satisfaction est notre priorité.',
-    cta: 'Voir la garantie',
-    link: '/products',
-    gradient:
-      'linear-gradient(135deg, #0F172A 0%, #1a1a3e 30%, #3B82F6 65%, #10B981 100%)',
-    orbColor: '#3B82F6',
-  },
-  {
-    id: 3,
-    title: 'Livraison rapide à Casablanca',
-    subtitle:
-      'Livraison gratuite sous 24h sur tout Casablanca. Suivi de commande en temps réel.',
-    cta: 'Nous contacter',
-    link: 'https://wa.me/212669017295',
-    external: true,
-    gradient:
-      'linear-gradient(135deg, #0F172A 0%, #1a1a3e 30%, #F59E0B 65%, #3B82F6 100%)',
-    orbColor: '#10B981',
-  },
-  {
-    id: 4,
-    title: 'Qualité testée et vérifiée',
-    subtitle:
-      'Nos experts vérifient chaque article avant mise en vente. Qualité irréprochable.',
-    cta: 'Créer un compte',
-    link: '/signup',
-    gradient:
-      'linear-gradient(135deg, #0F172A 0%, #1a1a3e 20%, #F59E0B 50%, #3B82F6 75%, #10B981 100%)',
-    orbColor: '#F59E0B',
-  },
-];
-
 export default function HeroSlider() {
+  const { t } = useTranslation();
   const [current, setCurrent] = useState(0);
   const [paused, setPaused] = useState(false);
   const timerRef = useRef(null);
+
+  const slides = [
+    {
+      id: 1,
+      title: t("Des produits d'exception à prix réduits"),
+      subtitle: t('Chaque article est vérifié, testé et garanti. Profitez du meilleur de la technologie sans vous ruiner.'),
+      cta: t('Découvrir nos produits'),
+      link: '/products',
+      gradient: 'linear-gradient(135deg, #0F172A 0%, #1a1a3e 30%, #F59E0B 65%, #10B981 100%)',
+      orbColor: '#F59E0B',
+    },
+    {
+      id: 2,
+      title: t('Garantie incluse sur tous nos produits'),
+      subtitle: t('15 jours de garantie minimum sur chaque achat. Votre satisfaction est notre priorité.'),
+      cta: t('Voir la garantie'),
+      link: '/products',
+      gradient: 'linear-gradient(135deg, #0F172A 0%, #1a1a3e 30%, #3B82F6 65%, #10B981 100%)',
+      orbColor: '#3B82F6',
+    },
+    {
+      id: 3,
+      title: t('Livraison rapide à Casablanca'),
+      subtitle: t('Livraison gratuite sous 24h sur tout Casablanca. Suivi de commande en temps réel.'),
+      cta: t('Nous contacter'),
+      link: 'https://wa.me/212669017295',
+      external: true,
+      gradient: 'linear-gradient(135deg, #0F172A 0%, #1a1a3e 30%, #F59E0B 65%, #3B82F6 100%)',
+      orbColor: '#10B981',
+    },
+    {
+      id: 4,
+      title: t('Qualité testée et vérifiée'),
+      subtitle: t('Nos experts vérifient chaque article avant mise en vente. Qualité irréprochable.'),
+      cta: t('Créer un compte'),
+      link: '/signup',
+      gradient: 'linear-gradient(135deg, #0F172A 0%, #1a1a3e 20%, #F59E0B 50%, #3B82F6 75%, #10B981 100%)',
+      orbColor: '#F59E0B',
+    },
+  ];
 
   const startTimer = useCallback(() => {
     if (timerRef.current) clearInterval(timerRef.current);
     timerRef.current = setInterval(() => {
       setCurrent((prev) => (prev + 1) % slides.length);
     }, 5000);
-  }, []);
+  }, [slides.length]);
 
   const stopTimer = useCallback(() => {
     if (timerRef.current) {
@@ -139,14 +133,14 @@ export default function HeroSlider() {
       <button
         className="hero-arrow hero-arrow-prev"
         onClick={prev}
-        aria-label="Précédent"
+        aria-label={t('Précédent')}
       >
         <FiChevronLeft size={28} />
       </button>
       <button
         className="hero-arrow hero-arrow-next"
         onClick={next}
-        aria-label="Suivant"
+        aria-label={t('Suivant')}
       >
         <FiChevronRight size={28} />
       </button>

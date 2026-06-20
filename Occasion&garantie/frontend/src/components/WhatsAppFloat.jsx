@@ -1,10 +1,12 @@
 import { useEffect, useState } from 'react';
+import { useTranslation } from 'react-i18next';
 import { FiArrowUp } from 'react-icons/fi';
 import { BsWhatsapp } from 'react-icons/bs';
 
 const WHATSAPP_NUMBER = '212669017295';
 
 export default function WhatsAppFloat() {
+  const { t } = useTranslation();
   const [showScroll, setShowScroll] = useState(false);
 
   useEffect(() => {
@@ -13,7 +15,7 @@ export default function WhatsAppFloat() {
     return () => window.removeEventListener('scroll', handle);
   }, []);
 
-  const msg = encodeURIComponent('Bonjour ! Bienvenue sur Occasion & Garantie. Comment puis-je vous aider ?');
+  const msg = encodeURIComponent(t("Bonjour ! Bienvenue sur Occasion & Garantie. Comment puis-je vous aider ?"));
 
   return (
     <div className="whatsapp-float">
@@ -21,7 +23,7 @@ export default function WhatsAppFloat() {
         onClick={() => window.scrollTo({ top: 0, behavior: 'smooth' })}
         className="scroll-top-btn"
         style={{ display: showScroll ? 'flex' : 'none' }}
-        title="Retour en haut"
+        title={t('Retour en haut')}
       >
         <FiArrowUp size={22} />
       </button>
@@ -30,7 +32,7 @@ export default function WhatsAppFloat() {
         target="_blank"
         rel="noopener noreferrer"
         className="whatsapp-btn"
-        title="Questions ? Contactez-nous sur WhatsApp"
+        title={t('Questions ? Contactez-nous sur WhatsApp')}
       >
         <BsWhatsapp />
       </a>
