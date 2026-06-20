@@ -216,9 +216,11 @@ export default function ProductDetail() {
               >
                 <BsWhatsapp size={22} /> Acheter via WhatsApp
               </a>
-              <button onClick={openDeposit} className="btn btn-outline" style={{ width: '100%', justifyContent: 'center', padding: '14px', fontSize: '15px', gap: '8px', marginTop: '12px' }}>
-                <FiCreditCard size={18} /> Réserver avec 200 DH
-              </button>
+              {product.price > 500 && (
+                <button onClick={openDeposit} className="btn btn-outline" style={{ width: '100%', justifyContent: 'center', padding: '14px', fontSize: '15px', gap: '8px', marginTop: '12px' }}>
+                  <FiCreditCard size={18} /> Réserver avec 200 DH
+                </button>
+              )}
               <p style={{ textAlign: 'center', color: 'var(--text-muted)', fontSize: '12px', marginTop: '8px' }}>
                 Réponse sous 24h | Paiement sécurisé
               </p>
