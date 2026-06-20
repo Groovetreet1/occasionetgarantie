@@ -14,7 +14,7 @@ export default function Footer() {
             <p>{t("Des produits d'exception à prix réduits, avec une garantie qui vous protège. Achetez en toute confiance.")}</p>
             <div className="footer-social">
               <a href="https://www.instagram.com/occasionetgarentie/" target="_blank" rel="noopener noreferrer" title="Instagram"><BsInstagram /></a>
-              <a href="https://www.facebook.com/abidal.kawtarix.dasilva.april1" target="_blank" rel="noopener noreferrer" title="Facebook"><BsFacebook /></a>
+              <a href="https://www.facebook.com/profile.php?id=61590748906163" target="_blank" rel="noopener noreferrer" title="Facebook"><BsFacebook /></a>
               <a href="https://wa.me/212669017295" target="_blank" rel="noopener noreferrer" title="WhatsApp"><BsWhatsapp /></a>
             </div>
           </div>
