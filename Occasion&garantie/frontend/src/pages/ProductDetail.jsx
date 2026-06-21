@@ -2,7 +2,7 @@ import { useParams, Link, useNavigate } from 'react-router-dom';
 import { useEffect, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import SeoHead from '../components/SeoHead';
-import { FiArrowLeft, FiShoppingBag, FiShield, FiCheck, FiMonitor, FiCpu, FiHardDrive, FiBattery, FiCamera, FiDroplet, FiX, FiChevronLeft, FiChevronRight, FiUpload, FiCreditCard } from 'react-icons/fi';
+import { FiArrowLeft, FiShoppingBag, FiShield, FiCheck, FiMonitor, FiCpu, FiHardDrive, FiBattery, FiCamera, FiDroplet, FiX, FiChevronLeft, FiChevronRight, FiUpload, FiCreditCard, FiCopy } from 'react-icons/fi';
 import { BsWhatsapp } from 'react-icons/bs';
 import api from '../api/axios';
 import { useAuth } from '../context/AuthContext';
@@ -44,6 +44,14 @@ export default function ProductDetail() {
   const [depositLoading, setDepositLoading] = useState(false);
   const [depositDone, setDepositDone] = useState(false);
   const [depositError, setDepositError] = useState('');
+  const [copied, setCopied] = useState('');
+
+  const copyToClipboard = (text, label) => {
+    navigator.clipboard.writeText(text).then(() => {
+      setCopied(label);
+      setTimeout(() => setCopied(''), 2000);
+    }).catch(() => {});
+  };
 
   useEffect(() => {
     window.scrollTo(0, 0);
@@ -254,8 +262,13 @@ export default function ProductDetail() {
                 </div>
 
                 <div style={{ background: 'var(--bg-card)', border: '1px solid var(--border)', borderRadius: 'var(--radius)', padding: '16px', marginBottom: '20px' }}>
-                  <p style={{ fontSize: '13px', color: 'var(--text-muted)', marginBottom: '4px' }}>RIB</p>
-                  <p style={{ fontWeight: 600, fontSize: '14px', wordBreak: 'break-all' }}>{bankInfo?.rib || '...'}</p>
+                  <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '4px' }}>
+                    <p style={{ fontSize: '13px', color: 'var(--text-muted)', margin: 0 }}>RIB</p>
+                    <button onClick={() => copyToClipboard(bankInfo?.rib || '', 'rib')} style={{ background: 'none', border: 'none', color: 'var(--primary)', cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '4px', fontSize: '12px', padding: '2px 6px', borderRadius: '6px' }}>
+                      <FiCopy size={14} /> {copied === 'rib' ? 'Copié ✓' : 'Copier'}
+                    </button>
+                  </div>
+                  <p style={{ fontWeight: 600, fontSize: '14px', wordBreak: 'break-all', userSelect: 'all' }}>{bankInfo?.rib || '...'}</p>
                   <div style={{ display: 'flex', gap: '16px', marginTop: '12px', fontSize: '13px' }}>
                     <div>
                       <p style={{ color: 'var(--text-muted)' }}>{t('Banque')}</p>
@@ -266,6 +279,9 @@ export default function ProductDetail() {
                       <p style={{ fontWeight: 600 }}>{bankInfo?.holder || '...'}</p>
                     </div>
                   </div>
+                  <button onClick={() => copyToClipboard(`RIB: ${bankInfo?.rib}\nBanque: ${bankInfo?.bank}\nBénéficiaire: ${bankInfo?.holder}` || '', 'all')} style={{ width: '100%', marginTop: '10px', background: 'var(--primary)', color: 'white', border: 'none', borderRadius: 'var(--radius)', padding: '8px', cursor: 'pointer', fontSize: '13px', fontWeight: 600, display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '6px' }}>
+                    <FiCopy size={14} /> {copied === 'all' ? 'Tout copié ✓' : t('Tout copier')}
+                  </button>
                 </div>
 
                 <div className="form-group">
