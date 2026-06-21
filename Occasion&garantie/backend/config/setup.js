@@ -40,9 +40,15 @@ async function setup() {
       password VARCHAR(255) NOT NULL,
       phone VARCHAR(20),
       role ENUM('client', 'admin') DEFAULT 'client',
+      avatar VARCHAR(255),
       created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
     )
   `);
+
+  // Add avatar column if missing (for existing DBs)
+  try {
+    await conn.query(`ALTER TABLE users ADD COLUMN IF NOT EXISTS avatar VARCHAR(255)`);
+  } catch {}
 
   await conn.query(`
     CREATE TABLE IF NOT EXISTS products (

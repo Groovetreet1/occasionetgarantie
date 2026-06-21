@@ -529,6 +529,77 @@ input, textarea, select, button { font-family: inherit; }
 .whatsapp-btn { width: 44px; height: 44px; border-radius: 50%; border: none; display: flex; align-items: center; justify-content: center; background: #25D366; color: white; box-shadow: 0 4px 12px rgba(37,211,102,0.3); font-size: 22px; transition: all 0.2s; }
 .whatsapp-btn:hover { transform: scale(1.05); }
 
+/* ============ Profile Page ============ */
+.profile-page { padding-top: calc(var(--nav-height) + 40px); padding-bottom: 60px; min-height: 100vh; }
+.profile-layout { display: grid; grid-template-columns: 280px 1fr; gap: 28px; align-items: start; }
+.profile-sidebar { position: sticky; top: calc(var(--nav-height) + 20px); }
+.profile-card {
+  background: var(--bg-card); border: 1px solid var(--border); border-radius: var(--radius-lg);
+  padding: 32px 24px; text-align: center; margin-bottom: 12px;
+}
+.profile-avatar-wrap { position: relative; width: 96px; height: 96px; margin: 0 auto 16px; }
+.profile-avatar, .profile-avatar-placeholder {
+  width: 100%; height: 100%; border-radius: 50%; object-fit: cover;
+}
+.profile-avatar-placeholder {
+  background: var(--primary-light); color: var(--primary); font-size: 32px; font-weight: 800;
+  display: flex; align-items: center; justify-content: center;
+}
+.profile-avatar-upload {
+  position: absolute; bottom: 0; right: 0; width: 32px; height: 32px; border-radius: 50%;
+  background: var(--primary); color: white; display: flex; align-items: center; justify-content: center;
+  cursor: pointer; border: 2px solid var(--bg-card); transition: all 0.2s;
+}
+.profile-avatar-upload:hover { background: var(--primary-hover); }
+.profile-name { font-size: 18px; font-weight: 700; margin-bottom: 4px; }
+.profile-role {
+  display: inline-block; padding: 3px 12px; border-radius: 20px; font-size: 11px; font-weight: 700;
+  margin-bottom: 12px; text-transform: uppercase; letter-spacing: 0.3px;
+}
+.profile-role.client { background: var(--primary-light); color: var(--primary); }
+.profile-role.admin { background: rgba(16,185,129,0.1); color: var(--success); }
+.profile-email, .profile-phone, .profile-since {
+  display: flex; align-items: center; justify-content: center; gap: 6px;
+  font-size: 13px; color: var(--text-secondary); margin-bottom: 4px;
+}
+.profile-tabs { display: flex; flex-direction: column; gap: 2px; background: var(--bg-card); border: 1px solid var(--border); border-radius: var(--radius-lg); padding: 4px; }
+.profile-tab {
+  display: flex; align-items: center; gap: 8px; width: 100%; padding: 10px 14px;
+  border: none; border-radius: var(--radius); background: transparent; color: var(--text-secondary);
+  font-size: 13px; font-weight: 500; cursor: pointer; font-family: inherit; transition: all 0.15s;
+}
+.profile-tab:hover { background: var(--bg-hover); color: var(--text-primary); }
+.profile-tab.active { background: var(--primary-light); color: var(--primary); font-weight: 600; }
+.profile-main { min-height: 400px; }
+.profile-panel { background: var(--bg-card); border: 1px solid var(--border); border-radius: var(--radius-lg); padding: 28px; }
+.profile-panel-title { font-size: 18px; font-weight: 700; margin-bottom: 20px; padding-bottom: 12px; border-bottom: 1px solid var(--border); }
+.profile-panel .form-group input:disabled { background: var(--bg-secondary); cursor: not-allowed; }
+
+/* Deposits list */
+.deposits-list { display: flex; flex-direction: column; gap: 8px; }
+.deposit-item { padding: 14px 16px; border: 1px solid var(--border); border-radius: var(--radius); transition: all 0.15s; }
+.deposit-item:hover { border-color: var(--primary); }
+.deposit-top { display: flex; justify-content: space-between; align-items: center; margin-bottom: 6px; gap: 8px; }
+.deposit-product { font-size: 14px; font-weight: 600; }
+.deposit-status { display: flex; align-items: center; gap: 4px; font-size: 12px; font-weight: 600; padding: 3px 10px; border-radius: 20px; white-space: nowrap; }
+.deposit-status.pending { background: rgba(245,158,11,0.1); color: #F59E0B; }
+.deposit-status.accepted { background: rgba(16,185,129,0.1); color: var(--success); }
+.deposit-status.refused { background: rgba(239,68,68,0.1); color: var(--error); }
+.deposit-bottom { display: flex; justify-content: space-between; align-items: center; gap: 8px; font-size: 12px; }
+.deposit-date { color: var(--text-muted); }
+.deposit-screenshot { color: var(--primary); font-weight: 600; text-decoration: underline; }
+
+.alert-success { background: rgba(16,185,129,0.1); color: var(--success); border: 1px solid rgba(16,185,129,0.2); }
+
+@media (max-width: 768px) {
+  .profile-layout { grid-template-columns: 1fr; }
+  .profile-sidebar { position: static; }
+  .profile-tabs { flex-direction: row; overflow-x: auto; gap: 2px; }
+  .profile-tab { white-space: nowrap; flex: 1; justify-content: center; }
+  .profile-card { padding: 24px 16px; }
+  .profile-panel { padding: 20px 16px; }
+}
+
 /* ============ RTL ============ */
 [dir="rtl"] .navbar-prods-menu { left: auto; right: 0; }
 [dir="rtl"] .products-sidebar { margin-left: 0; margin-right: 0; }

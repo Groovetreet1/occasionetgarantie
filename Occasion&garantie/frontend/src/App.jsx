@@ -14,6 +14,7 @@ import ForgotPassword from './pages/ForgotPassword';
 import ResetPassword from './pages/ResetPassword';
 import AdminDashboard from './pages/AdminDashboard';
 import AdminProductForm from './pages/AdminProductForm';
+import Profile from './pages/Profile';
 
 export default function App() {
   return (
@@ -32,6 +33,7 @@ export default function App() {
         <Route path="/admin" element={<AdminRoute><AdminDashboard /></AdminRoute>} />
         <Route path="/admin/products/new" element={<AdminRoute><AdminProductForm /></AdminRoute>} />
         <Route path="/admin/products/edit/:id" element={<AdminRoute><AdminProductForm /></AdminRoute>} />
+        <Route path="/profile" element={<Profile />} />
       </Routes>
       <WhatsAppFloat />
       <Footer />

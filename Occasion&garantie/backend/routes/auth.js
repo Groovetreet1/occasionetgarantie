@@ -67,11 +67,61 @@ router.post('/login', async (req, res) => {
 
 router.get('/me', authenticate, async (req, res) => {
   try {
-    const [users] = await pool.query('SELECT id, full_name, email, phone, role FROM users WHERE id = ?', [req.user.id]);
+    const [users] = await pool.query('SELECT id, full_name, email, phone, role, avatar, created_at FROM users WHERE id = ?', [req.user.id]);
     if (users.length === 0) return res.status(404).json({ message: 'Utilisateur introuvable.' });
     res.json(users[0]);
   } catch (err) {
     res.status(500).json({ message: 'Erreur serveur.' });
+  }
+});
+
+// Update profile (name, phone)
+router.put('/profile', authenticate, async (req, res) => {
+  try {
+    const { fullName, phone } = req.body;
+    if (!fullName || fullName.trim().length === 0) {
+      return res.status(400).json({ message: 'Le nom est requis.' });
+    }
+    await pool.query('UPDATE users SET full_name = ?, phone = ? WHERE id = ?', [fullName.trim(), phone || null, req.user.id]);
+    const [users] = await pool.query('SELECT id, full_name, email, phone, role, avatar, created_at FROM users WHERE id = ?', [req.user.id]);
+    res.json({ message: 'Profil mis à jour.', user: users[0] });
+  } catch (err) {
+    res.status(500).json({ message: 'Erreur serveur.', error: err.message });
+  }
+});
+
+// Change password (authenticated)
+router.put('/password', authenticate, async (req, res) => {
+  try {
+    const { currentPassword, newPassword } = req.body;
+    if (!currentPassword || !newPassword) {
+      return res.status(400).json({ message: 'Mot de passe actuel et nouveau mot de passe requis.' });
+    }
+    if (newPassword.length < 6) {
+      return res.status(400).json({ message: 'Le nouveau mot de passe doit contenir au moins 6 caractères.' });
+    }
+    const [users] = await pool.query('SELECT password FROM users WHERE id = ?', [req.user.id]);
+    if (users.length === 0) return res.status(404).json({ message: 'Utilisateur introuvable.' });
+    const valid = await bcrypt.compare(currentPassword, users[0].password);
+    if (!valid) return res.status(400).json({ message: 'Mot de passe actuel incorrect.' });
+    const hashed = await bcrypt.hash(newPassword, 10);
+    await pool.query('UPDATE users SET password = ? WHERE id = ?', [hashed, req.user.id]);
+    res.json({ message: 'Mot de passe modifié avec succès.' });
+  } catch (err) {
+    res.status(500).json({ message: 'Erreur serveur.', error: err.message });
+  }
+});
+
+// Get user deposits
+router.get('/deposits', authenticate, async (req, res) => {
+  try {
+    const [deposits] = await pool.query(
+      'SELECT d.*, p.name as product_name, p.image as product_image FROM deposits d LEFT JOIN products p ON d.product_id = p.id WHERE d.user_id = ? ORDER BY d.created_at DESC',
+      [req.user.id]
+    );
+    res.json(deposits);
+  } catch (err) {
+    res.status(500).json({ message: 'Erreur serveur.', error: err.message });
   }
 });
 

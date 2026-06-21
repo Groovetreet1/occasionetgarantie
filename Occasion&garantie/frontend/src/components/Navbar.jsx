@@ -1,5 +1,5 @@
 import { Link, NavLink, useNavigate, useLocation } from 'react-router-dom';
-import { FiUser, FiLogOut, FiSettings, FiChevronDown, FiSmartphone, FiMonitor, FiHeadphones, FiTablet, FiGlobe } from 'react-icons/fi';
+import { FiUser, FiLogOut, FiSettings, FiChevronDown, FiSmartphone, FiMonitor, FiHeadphones, FiTablet, FiGlobe, FiEdit } from 'react-icons/fi';
 import { useState, useRef, useEffect } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useAuth } from '../context/AuthContext';
@@ -86,6 +86,9 @@ export default function Navbar() {
                 </button>
                 {dropdownOpen && (
                   <div className="navbar-dropdown-menu">
+                    <NavLink to="/profile" onClick={() => setDropdownOpen(false)}>
+                      <FiUser size={14} /> {t('Mon profil')}
+                    </NavLink>
                     {user.role === 'admin' && (
                       <NavLink to="/admin" onClick={() => setDropdownOpen(false)}>
                         <FiSettings size={14} /> {t('Admin')}
@@ -125,6 +128,7 @@ export default function Navbar() {
         <div className="navbar-mobile-divider" />
         {user ? (
           <>
+            <NavLink to="/profile" onClick={closeMenu}><FiUser size={14} /> {t('Mon profil')}</NavLink>
             {user.role === 'admin' && (
               <NavLink to="/admin" onClick={closeMenu}><FiSettings size={14} /> {t('Admin')}</NavLink>
             )}
