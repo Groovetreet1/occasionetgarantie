@@ -5,6 +5,7 @@ const path = require('path');
 const http = require('http');
 const https = require('https');
 
+const setup = require('./config/setup');
 const authRoutes = require('./routes/auth');
 const productRoutes = require('./routes/products');
 const uploadRoutes = require('./routes/upload');
@@ -31,8 +32,13 @@ app.get('*', (req, res) => {
   res.sendFile(path.join(__dirname, 'public', 'index.html'));
 });
 
-const server = app.listen(PORT, () => {
-  console.log(`Server running on http://localhost:${PORT}`);
+setup().then(() => {
+  const server = app.listen(PORT, () => {
+    console.log(`Server running on http://localhost:${PORT}`);
+  });
+}).catch((err) => {
+  console.error('Setup failed:', err.message);
+  process.exit(1);
 });
 
 // Auto-ping pour éviter le sommeil Render

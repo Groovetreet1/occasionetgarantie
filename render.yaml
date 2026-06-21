@@ -11,6 +11,18 @@ services:
         generateValue: true
       - key: NODE_VERSION
         value: "18"
+      - key: DB_HOST
+        value: gateway01.eu-central-1.prod.aws.tidbcloud.com
+      - key: DB_PORT
+        value: "4000"
+      - key: DB_USER
+        value: 2XC4oorBLL3iqX3.root
+      - key: DB_PASSWORD
+        value: IOK6qrU6YchlVwni
+      - key: DB_NAME
+        value: occasion_garantie
+      - key: DB_SSL
+        value: "true"
       - key: SMS_API_KEY
         value: sendsms_6034835d529bb41059bd737359e3b7556ede5b8e3a192e5f18f10720dc55f55e
       - key: SMS_SENDER_ID
