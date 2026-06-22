@@ -53,6 +53,7 @@ async function setup() {
   await conn.query(`
     CREATE TABLE IF NOT EXISTS products (
       id INT AUTO_INCREMENT PRIMARY KEY,
+      sku VARCHAR(100),
       name VARCHAR(200) NOT NULL,
       slug VARCHAR(200) NOT NULL UNIQUE,
       description TEXT,
@@ -123,6 +124,10 @@ async function setup() {
   for (const [name, slug] of categories) {
     await conn.query('INSERT IGNORE INTO categories (name, slug) VALUES (?, ?)', [name, slug]);
   }
+
+  // Add sku column if missing (for EP product imports)
+  try { await conn.query(`ALTER TABLE products ADD COLUMN sku VARCHAR(100)`); } catch (e) {}
+  try { await conn.query(`ALTER TABLE products ADD INDEX idx_sku (sku)`); } catch (e) {}
 
   // Migrate products from data.json if products table is empty
   const [existingProducts] = await conn.query('SELECT COUNT(*) as count FROM products');
