@@ -1,0 +1,488 @@
+[
+  {
+    "sku": "3132952",
+    "url": "https://www.electroplanet.ma/p3132952-smartphone-km4k-spark-40c-256-8-black-tecno.html",
+    "name": "SMARTPHONE KM4K SPARK 40C 256/8 BLACK TECNO",
+    "brand": "TECNO",
+    "price": 1399,
+    "oldPrice": null,
+    "image": "https://prod2-media.electroplanet.ma/media/catalog/product/cache/14e469c4a70431355c88f88fd8855f6e/3/1/3132952-cb-65962_1.png"
+  },
+  {
+    "sku": "3130030",
+    "url": "https://www.electroplanet.ma/p3130030-reno15-f-5g-twilight-blue-12-512g-oppo.html",
+    "name": "RENO15 F 5G TWILIGHT BLUE 12+512G OPPO",
+    "brand": "OPPO",
+    "price": 4899,
+    "oldPrice": null,
+    "image": "https://prod2-media.electroplanet.ma/media/catalog/product/cache/14e469c4a70431355c88f88fd8855f6e/3/1/3130030-cb-64409_1.png"
+  },
+  {
+    "sku": "3130031",
+    "url": "https://www.electroplanet.ma/p3130031-reno15-f-5g-aurora-blue-12-512g-oppo.html",
+    "name": "RENO15 F 5G AURORA BLUE 12+512G OPPO",
+    "brand": "OPPO",
+    "price": 4899,
+    "oldPrice": null,
+    "image": "https://prod2-media.electroplanet.ma/media/catalog/product/cache/14e469c4a70431355c88f88fd8855f6e/3/1/3130031-cb-64402_1.png"
+  },
+  {
+    "sku": "3130032",
+    "url": "https://www.electroplanet.ma/p3130032-reno15-5g-twilight-blue-12-512g-oppo.html",
+    "name": "RENO15 5G TWILIGHT BLUE 12+512G OPPO",
+    "brand": "OPPO",
+    "price": 6499,
+    "oldPrice": null,
+    "image": "https://prod2-media.electroplanet.ma/media/catalog/product/cache/14e469c4a70431355c88f88fd8855f6e/3/1/3130032-cb-64397_1.png"
+  },
+  {
+    "sku": "3130033",
+    "url": "https://www.electroplanet.ma/p3130033-reno15-5g-aurora-white-12-512g-oppo.html",
+    "name": "RENO15 5G AURORA WHITE 12+512G OPPO",
+    "brand": "OPPO",
+    "price": 6499,
+    "oldPrice": null,
+    "image": "https://prod2-media.electroplanet.ma/media/catalog/product/cache/14e469c4a70431355c88f88fd8855f6e/3/1/3130033-cb-64354_1.png"
+  },
+  {
+    "sku": "3124104",
+    "url": "https://www.electroplanet.ma/p3124104-galaxy-s26-12-256gb-cobalt-violet-samsung.html",
+    "name": "GALAXY S26 12+256GB COBALT VIOLET SAMSUNG",
+    "brand": "SAMSUNG",
+    "price": 9990,
+    "oldPrice": null,
+    "image": "https://prod2-media.electroplanet.ma/media/catalog/product/cache/14e469c4a70431355c88f88fd8855f6e/3/1/3124104-cb-64328_1.png"
+  },
+  {
+    "sku": "3124126",
+    "url": "https://www.electroplanet.ma/p3124126-galaxy-s26ultra-12-512gb-white-samsung.html",
+    "name": "GALAXY S26ULTRA 12+512GB WHITE SAMSUNG",
+    "brand": "SAMSUNG",
+    "price": 15990,
+    "oldPrice": 15990,
+    "image": "https://prod2-media.electroplanet.ma/media/catalog/product/cache/14e469c4a70431355c88f88fd8855f6e/3/1/3124126-cb-64247_1.png"
+  },
+  {
+    "sku": "3124122",
+    "url": "https://www.electroplanet.ma/p3124122-galaxy-s26ultra-12-256gb-white-samsung.html",
+    "name": "GALAXY S26ULTRA 12+256GB WHITE SAMSUNG",
+    "brand": "SAMSUNG",
+    "price": 13990,
+    "oldPrice": null,
+    "image": "https://prod2-media.electroplanet.ma/media/catalog/product/cache/14e469c4a70431355c88f88fd8855f6e/3/1/3124122-cb-64268_1.png"
+  },
+  {
+    "sku": "3124121",
+    "url": "https://www.electroplanet.ma/p3124121-galaxy-s26ultra-12-256gb-sky-blue-samsung.html",
+    "name": "GALAXY S26ULTRA 12+256GB SKY BLUE SAMSUNG",
+    "brand": "SAMSUNG",
+    "price": 13990,
+    "oldPrice": null,
+    "image": ""
+  },
+  {
+    "sku": "3124120",
+    "url": "https://www.electroplanet.ma/p3124120-galaxy-s26ultra-12-256gb-cobalt-violet-samsung.html",
+    "name": "GALAXY S26ULTRA 12+256GB COBALT VIOLET SAMSUNG",
+    "brand": "SAMSUNG",
+    "price": 13990,
+    "oldPrice": null,
+    "image": ""
+  },
+  {
+    "sku": "3124119",
+    "url": "https://www.electroplanet.ma/p3124119-galaxy-s26ultra-12-256gb-black-samsung.html",
+    "name": "GALAXY S26ULTRA 12+256GB BLACK SAMSUNG",
+    "brand": "SAMSUNG",
+    "price": 13990,
+    "oldPrice": null,
+    "image": ""
+  },
+  {
+    "sku": "3124109",
+    "url": "https://www.electroplanet.ma/p3124109-galaxy-s26-12-512gb-sky-blue-samsung.html",
+    "name": "GALAXY S26 12+512GB SKY BLUE SAMSUNG",
+    "brand": "SAMSUNG",
+    "price": 11990,
+    "oldPrice": 11990,
+    "image": ""
+  },
+  {
+    "sku": "3124107",
+    "url": "https://www.electroplanet.ma/p3124107-galaxy-s26-12-512gb-black-samsung.html",
+    "name": "GALAXY S26 12+512GB BLACK SAMSUNG",
+    "brand": "SAMSUNG",
+    "price": 11990,
+    "oldPrice": 11990,
+    "image": ""
+  },
+  {
+    "sku": "3124106",
+    "url": "https://www.electroplanet.ma/p3124106-galaxy-s26-12-256gb-white-samsung.html",
+    "name": "GALAXY S26 12+256GB WHITE SAMSUNG",
+    "brand": "SAMSUNG",
+    "price": 9990,
+    "oldPrice": null,
+    "image": ""
+  },
+  {
+    "sku": "3124105",
+    "url": "https://www.electroplanet.ma/p3124105-galaxy-s26-12-256gb-sky-blue-samsung.html",
+    "name": "GALAXY S26 12+256GB SKY BLUE SAMSUNG",
+    "brand": "SAMSUNG",
+    "price": 9990,
+    "oldPrice": null,
+    "image": ""
+  },
+  {
+    "sku": "3104951",
+    "url": "https://www.electroplanet.ma/p3104951-smart-a5x-midnight-blue-4g-128g-oppo.html",
+    "name": "SMART A5X MIDNIGHT BLUE 4G/128G OPPO",
+    "brand": "OPPO",
+    "price": 1599,
+    "oldPrice": 1599,
+    "image": ""
+  },
+  {
+    "sku": "3110380",
+    "url": "https://www.electroplanet.ma/p3110380-smart-galaxy-a17-5g-4-128gb-black-samsung.html",
+    "name": "SMART GALAXY A17 (5G) 4+128GB BLACK SAMSUNG",
+    "brand": "SAMSUNG",
+    "price": 1990,
+    "oldPrice": 1990,
+    "image": ""
+  },
+  {
+    "sku": "3110382",
+    "url": "https://www.electroplanet.ma/p3110382-smart-galaxy-a17-5g-8-256gb-light-blue-samsung.html",
+    "name": "SMART GALAXY A17 (5G) 8+256GB LIGHT BLUE SAMSUNG",
+    "brand": "SAMSUNG",
+    "price": 2990,
+    "oldPrice": 2990,
+    "image": ""
+  },
+  {
+    "sku": "3110381",
+    "url": "https://www.electroplanet.ma/p3110381-smart-galaxy-a17-5g-8-256gb-gray-samsung.html",
+    "name": "SMART GALAXY A17 (5G) 8+256GB GRAY SAMSUNG",
+    "brand": "SAMSUNG",
+    "price": 2990,
+    "oldPrice": 2990,
+    "image": ""
+  },
+  {
+    "sku": "3110383",
+    "url": "https://www.electroplanet.ma/p3110383-smart-galaxy-a17-5g-8-256gb-black-samsung.html",
+    "name": "SMART GALAXY A17 (5G) 8+256GB BLACK SAMSUNG",
+    "brand": "SAMSUNG",
+    "price": 2990,
+    "oldPrice": 2990,
+    "image": ""
+  },
+  {
+    "sku": "3110379",
+    "url": "https://www.electroplanet.ma/p3110379-smart-galaxy-a17-5g-4-128gb-light-blue-samsung.html",
+    "name": "SMART GALAXY A17 (5G) 4+128GB LIGHT BLUE SAMSUNG",
+    "brand": "SAMSUNG",
+    "price": 1990,
+    "oldPrice": 1990,
+    "image": ""
+  },
+  {
+    "sku": "3110378",
+    "url": "https://www.electroplanet.ma/p3110378-smart-galaxy-a17-5g-4-128gb-gray-samsung.html",
+    "name": "SMART GALAXY A17 (5G) 4+128GB GRAY SAMSUNG",
+    "brand": "SAMSUNG",
+    "price": 1990,
+    "oldPrice": 1990,
+    "image": ""
+  },
+  {
+    "sku": "3110066",
+    "url": "https://www.electroplanet.ma/p3110066-smart-a6-pro-5g-rosewood-red-8g-256g-oppo.html",
+    "name": "SMART A6 PRO 5G ROSEWOOD RED 8G/256G OPPO",
+    "brand": "OPPO",
+    "price": 4699,
+    "oldPrice": 4699,
+    "image": ""
+  },
+  {
+    "sku": "3110065",
+    "url": "https://www.electroplanet.ma/p3110065-smart-a6-pro-5g-stellar-blue-8g-256g-oppo.html",
+    "name": "SMART A6 PRO 5G STELLAR BLUE 8G/256G OPPO",
+    "brand": "OPPO",
+    "price": 4699,
+    "oldPrice": 4699,
+    "image": ""
+  },
+  {
+    "sku": "3104910",
+    "url": "https://www.electroplanet.ma/p3104910-smartgalaxy-s25fe-8g-256g-white-samsung.html",
+    "name": "SMARTGALAXY S25FE 8G/256G WHITE SAMSUNG",
+    "brand": "SAMSUNG",
+    "price": 6990,
+    "oldPrice": 6990,
+    "image": ""
+  },
+  {
+    "sku": "3104909",
+    "url": "https://www.electroplanet.ma/p3104909-smart-galaxy-s25fe-8g-256g-black-samsung.html",
+    "name": "SMART GALAXY S25FE 8G/256G BLACK SAMSUNG",
+    "brand": "SAMSUNG",
+    "price": 6990,
+    "oldPrice": 6990,
+    "image": ""
+  },
+  {
+    "sku": "3104908",
+    "url": "https://www.electroplanet.ma/p3104908-smart-galaxy-s25fe-8g-256g-icyblue-samsung.html",
+    "name": "SMART GALAXY S25FE 8G/256G ICYBLUE SAMSUNG",
+    "brand": "SAMSUNG",
+    "price": 6990,
+    "oldPrice": 6990,
+    "image": ""
+  },
+  {
+    "sku": "3104907",
+    "url": "https://www.electroplanet.ma/p3104907-smart-galaxy-s25fe-8g-256g-navy-samsung.html",
+    "name": "SMART GALAXY S25FE 8G/256G NAVY SAMSUNG",
+    "brand": "SAMSUNG",
+    "price": 6990,
+    "oldPrice": 6990,
+    "image": ""
+  },
+  {
+    "sku": "3104439",
+    "url": "https://www.electroplanet.ma/p3104439-smartphone-galaxy-a17-4-128gb-black-samsung.html",
+    "name": "SMARTPHONE GALAXY A17 4+128GB BLACK SAMSUNG",
+    "brand": "SAMSUNG",
+    "price": 1749,
+    "oldPrice": 1749,
+    "image": ""
+  },
+  {
+    "sku": "3104438",
+    "url": "https://www.electroplanet.ma/p3104438-smartphone-galaxy-a17-4-128gb-gray-samsung.html",
+    "name": "SMARTPHONE GALAXY A17 4+128GB GRAY SAMSUNG",
+    "brand": "SAMSUNG",
+    "price": 1749,
+    "oldPrice": 1749,
+    "image": ""
+  },
+  {
+    "sku": "3104442",
+    "url": "https://www.electroplanet.ma/p3104442-smartphone-galaxy-a17-6-128gb-black-samsung.html",
+    "name": "SMARTPHONE GALAXY A17 6+128GB BLACK SAMSUNG",
+    "brand": "SAMSUNG",
+    "price": 1990,
+    "oldPrice": 1990,
+    "image": ""
+  },
+  {
+    "sku": "3102631",
+    "url": "https://www.electroplanet.ma/p3102631-smartphone-galaxy-a07-6-128gb-light-violet-samsun.html",
+    "name": "SMARTPHONE GALAXY A07 6+128GB LIGHT VIOLET SAMSUN",
+    "brand": "SAMSUNG",
+    "price": 1749,
+    "oldPrice": 1749,
+    "image": ""
+  },
+  {
+    "sku": "3102632",
+    "url": "https://www.electroplanet.ma/p3102632-smartphone-galaxy-a07-6-128gb-green-samsung.html",
+    "name": "SMARTPHONE GALAXY A07 6+128GB GREEN SAMSUNG",
+    "brand": "SAMSUNG",
+    "price": 1749,
+    "oldPrice": 1749,
+    "image": ""
+  },
+  {
+    "sku": "3102633",
+    "url": "https://www.electroplanet.ma/p3102633-smartphone-galaxy-a07-6-128gb-black-samsung.html",
+    "name": "SMARTPHONE GALAXY A07 6+128GB BLACK SAMSUNG",
+    "brand": "SAMSUNG",
+    "price": 1749,
+    "oldPrice": 1749,
+    "image": ""
+  },
+  {
+    "sku": "3102625",
+    "url": "https://www.electroplanet.ma/p3102625-smartphone-galaxy-a07-4-64gb-light-violet-samsung.html",
+    "name": "SMARTPHONE GALAXY A07 4+64GB LIGHT VIOLET SAMSUNG",
+    "brand": "SAMSUNG",
+    "price": 1249,
+    "oldPrice": 1249,
+    "image": ""
+  },
+  {
+    "sku": "3102626",
+    "url": "https://www.electroplanet.ma/p3102626-smartphone-galaxy-a07-4-64gb-green-samsung.html",
+    "name": "SMARTPHONE GALAXY A07 4+64GB GREEN SAMSUNG",
+    "brand": "SAMSUNG",
+    "price": 1249,
+    "oldPrice": 1249,
+    "image": ""
+  },
+  {
+    "sku": "3102627",
+    "url": "https://www.electroplanet.ma/p3102627-smartphone-galaxy-a07-4-64gb-black-samsung.html",
+    "name": "SMARTPHONE GALAXY A07 4+64GB BLACK SAMSUNG",
+    "brand": "SAMSUNG",
+    "price": 1249,
+    "oldPrice": 1249,
+    "image": ""
+  },
+  {
+    "sku": "3102629",
+    "url": "https://www.electroplanet.ma/p3102629-smartphone-galaxy-a07-4-128gb-green-samsung.html",
+    "name": "SMARTPHONE GALAXY A07 4+128GB GREEN SAMSUNG",
+    "brand": "SAMSUNG",
+    "price": 1490,
+    "oldPrice": 1490,
+    "image": ""
+  },
+  {
+    "sku": "3102628",
+    "url": "https://www.electroplanet.ma/p3102628-smartphone-galaxy-a07-4-128gb-light-violet-samsun.html",
+    "name": "SMARTPHONE GALAXY A07 4+128GB LIGHT VIOLET SAMSUN",
+    "brand": "SAMSUNG",
+    "price": 1490,
+    "oldPrice": 1490,
+    "image": ""
+  },
+  {
+    "sku": "3102630",
+    "url": "https://www.electroplanet.ma/p3102630-smartphone-galaxy-a07-4-128gb-black-samsung.html",
+    "name": "SMARTPHONE GALAXY A07 4+128GB BLACK SAMSUNG",
+    "brand": "SAMSUNG",
+    "price": 1490,
+    "oldPrice": 1490,
+    "image": "https://prod2-media.electroplanet.ma/media/catalog/category/electroplanet-940-telephone-android_.jpg"
+  },
+  {
+    "sku": "3080796",
+    "url": "https://www.electroplanet.ma/p3080796-smartphone-galaxya26-5g-8g256gb-peach-pink-samsun.html",
+    "name": "SMARTPHONE GALAXYA26 5G 8G256GB PEACH PINK SAMSUN",
+    "brand": "SAMSUNG",
+    "price": 3249,
+    "oldPrice": 3249,
+    "image": "https://prod2-media.electroplanet.ma/media/catalog/product/cache/14e469c4a70431355c88f88fd8855f6e/3/0/3080796-cb-38422_1.png"
+  },
+  {
+    "sku": "3080813",
+    "url": "https://www.electroplanet.ma/p3080813-smartphone-galaxya56-5g-8g256gb-olive-samsung.html",
+    "name": "SMARTPHONE GALAXYA56 5G 8G256GB OLIVE SAMSUNG",
+    "brand": "SAMSUNG",
+    "price": 5249,
+    "oldPrice": 5249,
+    "image": "https://prod2-media.electroplanet.ma/media/catalog/product/cache/14e469c4a70431355c88f88fd8855f6e/3/0/3080813-cb-63471_1.png"
+  },
+  {
+    "sku": "3080812",
+    "url": "https://www.electroplanet.ma/p3080812-smartphone-galaxya56-5g-8g256gb-lightgray-samsung.html",
+    "name": "SMARTPHONE GALAXYA56 5G 8G256GB LIGHTGRAY SAMSUNG",
+    "brand": "SAMSUNG",
+    "price": 5249,
+    "oldPrice": 5249,
+    "image": "https://prod2-media.electroplanet.ma/media/catalog/product/cache/14e469c4a70431355c88f88fd8855f6e/3/0/3080812-cb-63536_1.png"
+  },
+  {
+    "sku": "3080810",
+    "url": "https://www.electroplanet.ma/p3080810-smartphone-galaxya56-5g-8g128gb-graphite-samsung.html",
+    "name": "SMARTPHONE GALAXYA56 5G 8G128GB GRAPHITE SAMSUNG",
+    "brand": "SAMSUNG",
+    "price": 4990,
+    "oldPrice": 4990,
+    "image": "https://prod2-media.electroplanet.ma/media/catalog/product/cache/14e469c4a70431355c88f88fd8855f6e/3/0/3080810-cb-63491_1.png"
+  },
+  {
+    "sku": "3080809",
+    "url": "https://www.electroplanet.ma/p3080809-smartphone-galaxya56-5g-8g128gb-olive-samsung.html",
+    "name": "SMARTPHONE GALAXYA56 5G 8G128GB OLIVE SAMSUNG",
+    "brand": "SAMSUNG",
+    "price": 4990,
+    "oldPrice": 4990,
+    "image": "https://prod2-media.electroplanet.ma/media/catalog/product/cache/14e469c4a70431355c88f88fd8855f6e/3/0/3080809-cb-39882_1.png"
+  },
+  {
+    "sku": "3080808",
+    "url": "https://www.electroplanet.ma/p3080808-smartphone-galaxya56-5g-8g128gb-lightgray-samsung.html",
+    "name": "SMARTPHONE GALAXYA56 5G 8G128GB LIGHTGRAY SAMSUNG",
+    "brand": "SAMSUNG",
+    "price": 4990,
+    "oldPrice": 4990,
+    "image": "https://prod2-media.electroplanet.ma/media/catalog/product/cache/14e469c4a70431355c88f88fd8855f6e/3/0/3080808-cb-63481_1.png"
+  },
+  {
+    "sku": "3080807",
+    "url": "https://www.electroplanet.ma/p3080807-smartphone-galaxya56-5g-8g128gb-pink-samsung.html",
+    "name": "SMARTPHONE GALAXYA56 5G 8G128GB PINK SAMSUNG",
+    "brand": "SAMSUNG",
+    "price": 4990,
+    "oldPrice": 4990,
+    "image": "https://prod2-media.electroplanet.ma/media/catalog/product/cache/14e469c4a70431355c88f88fd8855f6e/3/0/3080807-cb-39830_1.png"
+  },
+  {
+    "sku": "3073055",
+    "url": "https://www.electroplanet.ma/p3073055-galaxy-s25ultra-12gb-512gb-titanium-black-samsung.html",
+    "name": "GALAXY S25ULTRA 12GB 512GB TITANIUM BLACK SAMSUNG",
+    "brand": "SAMSUNG",
+    "price": 15999,
+    "oldPrice": null,
+    "image": "https://prod2-media.electroplanet.ma/media/catalog/product/cache/14e469c4a70431355c88f88fd8855f6e/3/0/3073055-cb-26248_2_1.png"
+  },
+  {
+    "sku": "3048257",
+    "url": "https://www.electroplanet.ma/p3048257-smartphonea06-6-128gb-light-blue-samsung.html",
+    "name": "SMARTPHONEA06 6+128GB LIGHT BLUE SAMSUNG",
+    "brand": "SAMSUNG",
+    "price": 1490,
+    "oldPrice": null,
+    "image": ""
+  },
+  {
+    "sku": "3029001",
+    "url": "https://www.electroplanet.ma/p3029001-smartphone-tecno-kj6spark-20pro-8-256g-sunsetblus.html",
+    "name": "SMARTPHONE TECNO KJ6SPARK 20PRO 8+256G SUNSETBLUS",
+    "brand": "TECNO",
+    "price": 2099,
+    "oldPrice": null,
+    "image": ""
+  },
+  {
+    "sku": "3028866",
+    "url": "https://www.electroplanet.ma/p3028866-smartphone-a35-8-256gb-awesome-lemon-samsung.html",
+    "name": "SMARTPHONE A35 8+256GB AWESOME LEMON SAMSUNG",
+    "brand": "SAMSUNG",
+    "price": 4749,
+    "oldPrice": null,
+    "image": ""
+  },
+  {
+    "sku": "3028864",
+    "url": "https://www.electroplanet.ma/p3028864-smartphone-a35-8-256gb-awesome-lilac-samsung.html",
+    "name": "SMARTPHONE A35 8+256GB AWESOME LILAC SAMSUNG",
+    "brand": "SAMSUNG",
+    "price": 4749,
+    "oldPrice": null,
+    "image": ""
+  },
+  {
+    "sku": "2965600",
+    "url": "https://www.electroplanet.ma/p2965600-honor-x8-128-go-noir-midnight.html",
+    "name": "SMARTPHONE X8 6,7' 6G/128G NOIR MIDNIGHT HONOR",
+    "brand": "HONOR",
+    "price": 2499,
+    "oldPrice": null,
+    "image": ""
+  },
+  {
+    "sku": "2965598",
+    "url": "https://www.electroplanet.ma/p2965598-honor-x8-128-go-gris-titanium.html",
+    "name": "SMARTPHONE X8 6,7' 6G/128G GRIS TITANIUM HONOR",
+    "brand": "HONOR",
+    "price": 2499,
+    "oldPrice": null,
+    "image": "https://prod2-media.electroplanet.ma/media/catalog/category/electroplanet-940-telephone-android_.jpg"
+  }
+]

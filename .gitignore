@@ -78,7 +78,7 @@ PhoneTracker/
 Ors music hamid/
 
 # Scraped/generated data
-Occasion&garantie/backend/ep_scraped/
+# Occasion&garantie/backend/ep_scraped/  -- commented out, now tracked
 Occasion&garantie/backend/tidb_export/
 
 # Root py/html files
