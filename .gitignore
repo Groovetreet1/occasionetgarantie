@@ -77,6 +77,10 @@ game_hub/
 PhoneTracker/
 Ors music hamid/
 
+# Scraped/generated data
+Occasion&garantie/backend/ep_scraped/
+Occasion&garantie/backend/tidb_export/
+
 # Root py/html files
 convert_all.py
 convert_to_mp3.py
