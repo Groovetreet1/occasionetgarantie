@@ -111,17 +111,17 @@ async function setup() {
     }
   }
 
-  // Seed categories
-  const [existingCategories] = await conn.query('SELECT COUNT(*) as count FROM categories');
-  if (existingCategories[0].count === 0) {
-    await conn.query(`INSERT INTO categories (name, slug) VALUES
-      ('Smartphones', 'smartphones'),
-      ('Tablettes', 'tablettes'),
-      ('Ordinateurs', 'ordinateurs'),
-      ('Accessoires', 'accessoires'),
-      ('Gaming', 'gaming')
-    `);
-    console.log('Categories seeded.');
+  // Seed categories (idempotent)
+  const categories = [
+    ['Smartphones', 'smartphones'],
+    ['Tablettes', 'tablettes'],
+    ['Ordinateurs', 'ordinateurs'],
+    ['Accessoires', 'accessoires'],
+    ['Gaming', 'gaming'],
+    ['Accessoires Gaming', 'accessoires-gaming'],
+  ];
+  for (const [name, slug] of categories) {
+    await conn.query('INSERT IGNORE INTO categories (name, slug) VALUES (?, ?)', [name, slug]);
   }
 
   // Migrate products from data.json if products table is empty
@@ -151,6 +151,68 @@ async function setup() {
         console.log('Error migrating data.json:', err.message);
       }
     }
+  }
+
+  // Import Electroplanet products from scraped JSON files
+  const epDir = path.join(__dirname, '..', 'ep_scraped');
+  const uploadsDir = path.join(__dirname, '..', 'uploads');
+  if (!fs.existsSync(uploadsDir)) fs.mkdirSync(uploadsDir, { recursive: true });
+
+  const importJobs = [
+    { file: 'products.json', catSlug: 'smartphones' },
+    { file: 'ep_extra.json', catSlug: null }, // category is in each product
+  ];
+
+  for (const job of importJobs) {
+    const jsonPath = path.join(epDir, job.file);
+    if (!fs.existsSync(jsonPath)) continue;
+    const items = JSON.parse(fs.readFileSync(jsonPath, 'utf8'));
+    let imported = 0;
+    for (const p of items) {
+      const [dup] = await conn.query('SELECT id FROM products WHERE sku = ?', [p.sku]);
+      if (dup.length > 0) continue;
+
+      // Determine category
+      let catId = null;
+      if (job.catSlug) {
+        const [c] = await conn.query('SELECT id FROM categories WHERE slug = ?', [job.catSlug]);
+        if (c.length > 0) catId = c[0].id;
+      } else if (p.category) {
+        const catSlug = p.category.toLowerCase().replace(/\s+/g, '-');
+        const [c] = await conn.query('SELECT id FROM categories WHERE slug = ?', [catSlug]);
+        if (c.length > 0) catId = c[0].id;
+      }
+
+      // Copy image (find by localImage field or by SKU in images dir)
+      let imageFile = null;
+      let localImg = p.localImage;
+      if (!localImg) {
+        const files = fs.readdirSync(path.join(epDir, 'images')).filter(f => f.startsWith(p.sku));
+        if (files.length > 0) localImg = files[0];
+      }
+      if (localImg) {
+        const src = path.join(epDir, 'images', localImg);
+        const ext = path.extname(localImg) || '.jpg';
+        const slug = (p.sku + '-' + p.name).toLowerCase().replace(/[^\w\s-]/g, '').replace(/\s+/g, '-').replace(/-+/g, '-').substring(0, 60);
+        const newName = `${slug}${ext}`;
+        const dest = path.join(uploadsDir, newName);
+        if (fs.existsSync(src) && !fs.existsSync(dest)) fs.copyFileSync(src, dest);
+        imageFile = newName;
+      }
+
+      const price = p.price;
+      const oldPrice = p.oldPrice && p.oldPrice > price ? p.oldPrice : Math.round(price * 1.25);
+      const desc = `${p.name} - ${p.brand || 'Marque'}. Produit disponible chez Occasion & Garantie. Qualité garantie avec 6 mois de garantie.`;
+      const slug = p.sku + '-' + p.name.toLowerCase().replace(/[^\w\s-]/g, '').replace(/\s+/g, '-').replace(/-+/g, '-').substring(0, 190);
+
+      await conn.query(
+        `INSERT INTO products (sku, name, slug, description, price, old_price, category_id, image, brand, state, warranty, stock, featured, active, created_at)
+         VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, NOW())`,
+        [p.sku, p.name, slug, desc, price, oldPrice, catId, imageFile, p.brand || '', 'neuf', '6 mois', 1, 0, 1]
+      );
+      imported++;
+    }
+    if (imported > 0) console.log(`Imported ${imported} products from ${job.file}`);
   }
 
   await conn.end();
