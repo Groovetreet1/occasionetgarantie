@@ -5,6 +5,7 @@ const path = require('path');
 
 const authRoutes = require('./routes/auth');
 const productRoutes = require('./routes/products');
+const categoryRoutes = require('./routes/categories');
 const uploadRoutes = require('./routes/upload');
 
 const app = express();
@@ -17,10 +18,15 @@ app.use(express.static(path.join(__dirname, 'public')));
 
 app.use('/api/auth', authRoutes);
 app.use('/api/products', productRoutes);
+app.use('/api/categories', categoryRoutes);
 app.use('/api/upload', uploadRoutes);
 
 app.get('/api/health', (req, res) => {
   res.json({ status: 'ok', message: 'Occasion&Garantie API running' });
+});
+
+app.use('/api/*', (req, res) => {
+  res.status(404).json({ message: 'Endpoint API introuvable.' });
 });
 
 app.get('*', (req, res) => {

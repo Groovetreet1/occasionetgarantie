@@ -111,6 +111,13 @@ export default function AdminProductForm() {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
+    if (!form.description || form.description.length < 10) {
+      return alert('Veuillez entrer une description complète (min. 10 caractères).');
+    }
+    const emptySpecs = Object.entries(form.specs).filter(([k, v]) => !v && k !== '').map(([k]) => k);
+    if (emptySpecs.filter(k => ['Ecran','Processeur','RAM','Stockage'].includes(k)).length > 0) {
+      return alert('Veuillez remplir les specs essentielles : Écran, Processeur, RAM, Stockage.');
+    }
     setSaving(true);
     try {
       const payload = {
