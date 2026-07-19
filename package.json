@@ -1,0 +1,9 @@
+{
+  "name": "occasion-et-garantie-root",
+  "version": "1.0.0",
+  "private": true,
+  "scripts": {
+    "build": "cd \"Occasion&garantie\" && npm install && npm run build",
+    "start": "cd \"Occasion&garantie\" && npm start"
+  }
+}
