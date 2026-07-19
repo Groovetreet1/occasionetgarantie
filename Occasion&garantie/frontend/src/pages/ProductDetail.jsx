@@ -185,7 +185,7 @@ export default function ProductDetail() {
                   fontSize: '18px',
                   padding: '16px 36px',
                   justifyContent: 'center',
-                  boxShadow: '0 4px 20px rgba(245, 158, 11, 0.4)',
+                  boxShadow: 'var(--shadow-glow)',
                 }}
                 onMouseOver={(e) => e.currentTarget.style.background = 'var(--gradient-hover)'}
                 onMouseOut={(e) => e.currentTarget.style.background = 'var(--gradient)'}

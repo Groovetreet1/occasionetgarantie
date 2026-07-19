@@ -1,11 +1,22 @@
 import { Link } from 'react-router-dom';
 import { useEffect, useState } from 'react';
-import { FiShield, FiRefreshCw, FiTruck, FiArrowRight, FiSmartphone, FiHeadphones, FiMonitor, FiWatch, FiTablet } from 'react-icons/fi';
-import { BsPhone, BsLaptop, BsHeadphones, BsController } from 'react-icons/bs';
+import { motion } from 'framer-motion';
+import { FiShield, FiRefreshCw, FiTruck, FiArrowRight, FiSmartphone, FiHeadphones, FiTablet } from 'react-icons/fi';
+import { BsPhone, BsLaptop, BsHeadphones } from 'react-icons/bs';
 import api from '../api/axios';
 import ProductCard from '../components/ProductCard';
 import HeroSlider from '../components/HeroSlider';
 import PromoPopup from '../components/PromoPopup';
+
+const fadeUp = {
+  hidden: { opacity: 0, y: 40 },
+  show: { opacity: 1, y: 0, transition: { duration: 0.5 } },
+};
+
+const stagger = {
+  hidden: {},
+  show: { transition: { staggerChildren: 0.1 } },
+};
 
 export default function Home() {
   const [phones, setPhones] = useState([]);
@@ -21,44 +32,32 @@ export default function Home() {
   }, []);
 
   return (
-    <>
+    <motion.div initial="hidden" animate="show">
       <HeroSlider />
       <PromoPopup />
 
-      <section className="container">
-        <div className="category-grid">
-          <Link to="/products?category=Smartphones" className="category-card">
-            <div>
-              <div className="cat-icon"><BsPhone /></div>
-              <h3>Smartphones</h3>
-              <p>iPhone, Samsung, Xiaomi</p>
-            </div>
-          </Link>
-          <Link to="/products?category=Tablettes" className="category-card">
-            <div>
-              <div className="cat-icon"><FiTablet /></div>
-              <h3>Tablettes</h3>
-              <p>iPad, Samsung Tab</p>
-            </div>
-          </Link>
-          <Link to="/products?category=Ordinateurs" className="category-card">
-            <div>
-              <div className="cat-icon"><BsLaptop /></div>
-              <h3>Ordinateurs</h3>
-              <p>MacBook, PC Portable</p>
-            </div>
-          </Link>
-          <Link to="/products?category=Accessoires" className="category-card">
-            <div>
-              <div className="cat-icon"><BsHeadphones /></div>
-              <h3>Accessoires</h3>
-              <p>Chargeurs, coques, etc.</p>
-            </div>
-          </Link>
-        </div>
-      </section>
+      <motion.section variants={fadeUp} className="container">
+        <motion.div className="category-grid" variants={stagger} initial="hidden" whileInView="show" viewport={{ once: true }}>
+          {[
+            { to: '/products?category=Smartphones', icon: BsPhone, title: 'Smartphones', desc: 'iPhone, Samsung, Xiaomi' },
+            { to: '/products?category=Tablettes', icon: FiTablet, title: 'Tablettes', desc: 'iPad, Samsung Tab' },
+            { to: '/products?category=Ordinateurs', icon: BsLaptop, title: 'Ordinateurs', desc: 'MacBook, PC Portable' },
+            { to: '/products?category=Accessoires', icon: BsHeadphones, title: 'Accessoires', desc: 'Chargeurs, coques, etc.' },
+          ].map((cat, i) => (
+            <motion.div key={cat.title} variants={fadeUp}>
+              <Link to={cat.to} className="category-card">
+                <div>
+                  <div className="cat-icon"><cat.icon /></div>
+                  <h3>{cat.title}</h3>
+                  <p>{cat.desc}</p>
+                </div>
+              </Link>
+            </motion.div>
+          ))}
+        </motion.div>
+      </motion.section>
 
-      <section className="products-section">
+      <motion.section className="products-section" variants={fadeUp} initial="hidden" whileInView="show" viewport={{ once: true }}>
         <div className="container">
           <div className="products-header">
             <div>
@@ -71,7 +70,7 @@ export default function Home() {
           </div>
           {phones.length > 0 ? (
             <div className="products-grid">
-                {phones.slice(0, 4).map((p) => <ProductCard key={p.id} product={p} />)}
+              {phones.slice(0, 4).map((p, i) => <ProductCard key={p.id} product={p} index={i} />)}
             </div>
           ) : (
             <div className="empty-state">
@@ -80,7 +79,7 @@ export default function Home() {
             </div>
           )}
         </div>
-      </section>
+      </motion.section>
 
       <div className="section-divider">
         <div className="divider-line" />
@@ -92,7 +91,7 @@ export default function Home() {
         <div className="divider-line" />
       </div>
 
-      <section className="products-section products-section-accessories">
+      <motion.section className="products-section products-section-accessories" variants={fadeUp} initial="hidden" whileInView="show" viewport={{ once: true }}>
         <div className="container">
           <div className="products-header">
             <div>
@@ -105,7 +104,7 @@ export default function Home() {
           </div>
           {accessories.length > 0 ? (
             <div className="products-grid">
-              {accessories.slice(0, 4).map((p) => <ProductCard key={p.id} product={p} />)}
+              {accessories.slice(0, 4).map((p, i) => <ProductCard key={p.id} product={p} index={i} />)}
             </div>
           ) : (
             <div className="empty-state">
@@ -114,33 +113,29 @@ export default function Home() {
             </div>
           )}
         </div>
-      </section>
+      </motion.section>
 
-      <section className="features">
+      <motion.section className="features" variants={fadeUp} initial="hidden" whileInView="show" viewport={{ once: true }}>
         <div className="container">
           <div style={{ textAlign: 'center', marginBottom: '48px' }}>
             <h2 className="section-title">Pourquoi nous choisir ?</h2>
-            <p className="section-subtitle">La qualité au meilleur prix, c&rsquo;est notre promesse.</p>
+            <p className="section-subtitle">La qualité au meilleur prix, c'est notre promesse.</p>
           </div>
-          <div className="features-grid">
-            <div className="feature-card">
-              <div className="feature-icon"><FiShield size={24} /></div>
-              <h3>Garantie incluse</h3>
-              <p>Chaque produit est couvert par une garantie minimum de 15 jours pour votre tranquillité.</p>
-            </div>
-            <div className="feature-card">
-              <div className="feature-icon"><FiRefreshCw size={24} /></div>
-              <h3>Testé et vérifié</h3>
-              <p>Nos experts vérifient chaque article avant mise en vente. Qualité irréprochable.</p>
-            </div>
-            <div className="feature-card">
-              <div className="feature-icon"><FiTruck size={24} /></div>
-              <h3>Livraison rapide</h3>
-              <p>Après la confirmation, Expédition sur Casablanca Gratuit sous 24h. Suivi de commande en temps réel et retour facile.</p>
-            </div>
-          </div>
+          <motion.div className="features-grid" variants={stagger} initial="hidden" whileInView="show" viewport={{ once: true }}>
+            {[
+              { icon: FiShield, title: 'Garantie incluse', desc: 'Chaque produit est couvert par une garantie minimum de 15 jours pour votre tranquilité.' },
+              { icon: FiRefreshCw, title: 'Testé et vérifié', desc: 'Nos experts vérifient chaque article avant mise en vente. Qualité irréprochable.' },
+              { icon: FiTruck, title: 'Livraison rapide', desc: 'Après la confirmation, Expédition sur Casablanca Gratuit sous 24h. Suivi de commande en temps réel et retour facile.' },
+            ].map((feat, i) => (
+              <motion.div key={feat.title} className="feature-card" variants={fadeUp}>
+                <div className="feature-icon"><feat.icon size={24} /></div>
+                <h3>{feat.title}</h3>
+                <p>{feat.desc}</p>
+              </motion.div>
+            ))}
+          </motion.div>
         </div>
-      </section>
-    </>
+      </motion.section>
+    </motion.div>
   );
 }
