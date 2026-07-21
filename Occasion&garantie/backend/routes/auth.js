@@ -115,7 +115,7 @@ router.post('/login', [
     if (!valid) {
       return res.status(400).json({ message: 'Email ou mot de passe incorrect.' });
     }
-    if (!user.phone_verified) {
+    if (!user.phone_verified && user.role !== 'admin') {
       return res.status(403).json({ message: 'Compte non active. Veuillez verifier votre telephone via le lien recu par SMS.' });
     }
     const token = jwt.sign(
