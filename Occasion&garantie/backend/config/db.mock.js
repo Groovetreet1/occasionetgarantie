@@ -62,6 +62,12 @@ const mockPool = {
       return [user ? [user] : []];
     }
 
+    // SELECT users by phone
+    if (upper.startsWith('SELECT') && upper.includes('FROM USERS') && upper.includes('WHERE PHONE =')) {
+      const user = data.users.find(u => u.phone === params[0]);
+      return [user ? [user] : []];
+    }
+
     // INSERT INTO users
     if (upper.startsWith('INSERT INTO USERS')) {
       const newUser = {
@@ -164,6 +170,17 @@ const mockPool = {
       data.products.push(newProduct);
       save();
       return [{ insertId: newProduct.id }];
+    }
+
+    // UPDATE users SET password = ? WHERE id = ? (reset password by id)
+    if (upper.startsWith('UPDATE USERS SET') && upper.includes('PASSWORD =') && upper.includes('WHERE ID =')) {
+      const id = params[1];
+      const idx = data.users.findIndex(u => u.id === id);
+      if (idx !== -1) {
+        data.users[idx].password = params[0];
+        save();
+      }
+      return [[]];
     }
 
     // UPDATE users SET password = ? WHERE email = ? (reset password)

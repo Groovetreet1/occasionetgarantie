@@ -5,7 +5,7 @@ import api from '../api/axios';
 
 export default function ResetPassword() {
   const [searchParams] = useSearchParams();
-  const emailParam = searchParams.get('email') || '';
+  const identifierParam = searchParams.get('identifier') || '';
   const navigate = useNavigate();
   const [code, setCode] = useState('');
   const [newPassword, setNewPassword] = useState('');
@@ -18,7 +18,7 @@ export default function ResetPassword() {
     setError('');
     setLoading(true);
     try {
-      await api.post('/auth/reset-password', { email: emailParam, code, newPassword });
+      await api.post('/auth/reset-password', { identifier: identifierParam, code, newPassword });
       setSuccess(true);
     } catch (err) {
       setError(err.response?.data?.message || 'Erreur.');
@@ -27,14 +27,14 @@ export default function ResetPassword() {
     }
   };
 
-  if (!emailParam) {
+  if (!identifierParam) {
     return (
       <div className="auth-page">
         <div className="auth-container">
           <div className="auth-card">
             <p style={{ textAlign: 'center', color: 'var(--text-secondary)' }}>Lien invalide. Veuillez refaire une demande.</p>
             <Link to="/forgot-password" className="btn btn-primary" style={{ width: '100%', justifyContent: 'center', marginTop: '16px' }}>
-              Mot de passe oublié ?
+              Mot de passe oublie ?
             </Link>
           </div>
         </div>
@@ -48,8 +48,8 @@ export default function ResetPassword() {
         <div className="auth-container">
           <div className="auth-card" style={{ textAlign: 'center' }}>
             <FiCheckCircle size={48} style={{ color: 'var(--success)', marginBottom: '16px' }} />
-            <h2 style={{ marginBottom: '8px' }}>Mot de passe réinitialisé</h2>
-            <p style={{ color: 'var(--text-secondary)', marginBottom: '24px' }}>Votre mot de passe a été modifié avec succès.</p>
+            <h2 style={{ marginBottom: '8px' }}>Mot de passe reinitialise</h2>
+            <p style={{ color: 'var(--text-secondary)', marginBottom: '24px' }}>Votre mot de passe a ete modifie avec succes.</p>
             <Link to="/login" className="btn btn-primary" style={{ width: '100%', justifyContent: 'center' }}>
               Se connecter
             </Link>
@@ -63,18 +63,18 @@ export default function ResetPassword() {
     <div className="auth-page">
       <div className="auth-container">
         <div className="auth-header">
-          <h1>Réinitialisation</h1>
-          <p>Entrez le code reçu par SMS et votre nouveau mot de passe</p>
+          <h1>Reinitialisation</h1>
+          <p>Entrez le code recu par SMS et votre nouveau mot de passe</p>
         </div>
         <div className="auth-card">
           {error && <div className="alert alert-error">{error}</div>}
           <form onSubmit={handleSubmit}>
             <div className="form-group">
-              <label>Email</label>
-              <input type="email" value={emailParam} disabled style={{ opacity: 0.6 }} />
+              <label>Email / Telephone</label>
+              <input type="text" value={identifierParam} disabled style={{ opacity: 0.6 }} />
             </div>
             <div className="form-group">
-              <label>Code de vérification</label>
+              <label>Code de verification</label>
               <input
                 type="text"
                 placeholder="123456"
@@ -91,7 +91,7 @@ export default function ResetPassword() {
                 <FiLock size={18} style={{ position: 'absolute', left: '14px', top: '14px', color: 'var(--text-muted)' }} />
                 <input
                   type="password"
-                  placeholder="Au moins 6 caractères"
+                  placeholder="Au moins 6 caracteres"
                   value={newPassword}
                   onChange={(e) => setNewPassword(e.target.value)}
                   required
@@ -101,11 +101,11 @@ export default function ResetPassword() {
               </div>
             </div>
             <button type="submit" className="form-submit" disabled={loading}>
-              {loading ? 'Réinitialisation...' : 'Réinitialiser le mot de passe'}
+              {loading ? 'Reinitialisation...' : 'Reinitialiser le mot de passe'}
             </button>
           </form>
           <div className="form-footer">
-            <Link to="/login">Retour à la connexion</Link>
+            <Link to="/login">Retour a la connexion</Link>
           </div>
         </div>
       </div>
