@@ -1,13 +1,11 @@
 import { useState, useEffect, useRef } from 'react';
-import { FiUser, FiMail, FiPhone, FiLock, FiSave, FiArrowLeft, FiCamera, FiX, FiCheckCircle } from 'react-icons/fi';
+import { FiUser, FiMail, FiPhone, FiLock, FiSave, FiArrowLeft, FiCamera, FiX } from 'react-icons/fi';
 import { motion } from 'framer-motion';
 import { Link, useNavigate } from 'react-router-dom';
 import api from '../api/axios';
 
 const container = { hidden: {}, show: { transition: { staggerChildren: 0.06 } } };
 const item = { hidden: { opacity: 0, y: 20 }, show: { opacity: 1, y: 0, transition: { duration: 0.4 } } };
-
-const API_BASE = import.meta.env.VITE_API_URL || '/api';
 
 export default function Profile() {
   const navigate = useNavigate();
@@ -20,8 +18,10 @@ export default function Profile() {
   const [newPassword, setNewPassword] = useState('');
   const [confirmPassword, setConfirmPassword] = useState('');
   const [msg, setMsg] = useState(null);
+  const [pwdMsg, setPwdMsg] = useState(null);
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
+  const [savingPwd, setSavingPwd] = useState(false);
   const [uploading, setUploading] = useState(false);
   const [showPhoneModal, setShowPhoneModal] = useState(false);
   const [newPhone, setNewPhone] = useState('');
@@ -62,32 +62,45 @@ export default function Profile() {
     }
   };
 
-  const handleSubmit = async (e) => {
+  const handleProfileSubmit = async (e) => {
     e.preventDefault();
     setSaving(true);
     setMsg(null);
-
-    if (newPassword && newPassword !== confirmPassword) {
-      setMsg({ type: 'error', text: 'Les nouveaux mots de passe ne correspondent pas.' });
-      setSaving(false);
-      return;
-    }
-
     try {
-      await api.put('/auth/profile', {
-        fullName: name,
-        oldPassword: oldPassword || undefined,
-        newPassword: newPassword || undefined,
-      });
+      await api.put('/auth/profile', { fullName: name });
       localStorage.setItem('user', JSON.stringify({ fullName: name }));
       setMsg({ type: 'success', text: 'Profil mis a jour avec succes.' });
-      setOldPassword('');
-      setNewPassword('');
-      setConfirmPassword('');
     } catch (err) {
       setMsg({ type: 'error', text: err.response?.data?.message || 'Erreur.' });
     } finally {
       setSaving(false);
+    }
+  };
+
+  const handlePasswordSubmit = async (e) => {
+    e.preventDefault();
+    setPwdMsg(null);
+
+    if (!oldPassword) {
+      setPwdMsg({ type: 'error', text: 'Veuillez entrer votre ancien mot de passe.' });
+      return;
+    }
+    if (newPassword !== confirmPassword) {
+      setPwdMsg({ type: 'error', text: 'Les nouveaux mots de passe ne correspondent pas.' });
+      return;
+    }
+
+    setSavingPwd(true);
+    try {
+      await api.put('/auth/profile', { oldPassword, newPassword });
+      setPwdMsg({ type: 'success', text: 'Mot de passe modifie avec succes.' });
+      setOldPassword('');
+      setNewPassword('');
+      setConfirmPassword('');
+    } catch (err) {
+      setPwdMsg({ type: 'error', text: err.response?.data?.message || 'Erreur.' });
+    } finally {
+      setSavingPwd(false);
     }
   };
 
@@ -114,7 +127,7 @@ export default function Profile() {
       setNewPhone('');
       setPhoneCode('');
       setPhoneStep('form');
-      setMsg({ type: 'success', text: 'Numero de telephone mis a jour avec succes.' });
+      setMsg({ type: 'success', text: 'Numero mis a jour avec succes.' });
     } catch (err) {
       setMsg({ type: 'error', text: err.response?.data?.message || 'Code incorrect.' });
     } finally {
@@ -137,10 +150,10 @@ export default function Profile() {
           <p>Gerer vos informations personnelles</p>
         </motion.div>
 
-        <motion.form variants={item} className="auth-card" onSubmit={handleSubmit}>
+        <motion.form variants={item} className="auth-card" onSubmit={handleProfileSubmit} style={{ marginBottom: 20 }}>
           {msg && <div className={`alert alert-${msg.type}`}>{msg.text}</div>}
 
-          <div className="form-group" style={{ textAlign: 'center' }}>
+          <div style={{ textAlign: 'center', marginBottom: 16 }}>
             <div
               onClick={() => fileRef.current?.click()}
               style={{
@@ -150,7 +163,7 @@ export default function Profile() {
               }}
             >
               {avatar ? (
-                <img src={`/uploads/avatars/${avatar}`} alt="avatar" style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
+                <img src={`/uploads/avatars/${avatar}`} alt="" style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
               ) : (
                 <div style={{ width: '100%', height: '100%', display: 'flex', alignItems: 'center', justifyContent: 'center', color: 'var(--text-muted)' }}>
                   <FiUser size={40} />
@@ -184,27 +197,35 @@ export default function Profile() {
             </div>
           </div>
 
-          <hr style={{ border: 'none', borderTop: '1px solid var(--border)', margin: '20px 0' }} />
+          <motion.button className="form-submit" type="submit" disabled={saving} whileTap={{ scale: 0.97 }}>
+            <FiSave size={16} /> {saving ? 'Enregistrement...' : 'Enregistrer le profil'}
+          </motion.button>
+        </motion.form>
 
-          <h3 style={{ marginBottom: 16, fontSize: 15 }}>Changer le mot de passe</h3>
+        <motion.form variants={item} className="auth-card" onSubmit={handlePasswordSubmit}>
+          <h3 style={{ marginBottom: 16, fontSize: 15, display: 'flex', alignItems: 'center', gap: 8 }}>
+            <FiLock size={16} /> Changer le mot de passe
+          </h3>
+
+          {pwdMsg && <div className={`alert alert-${pwdMsg.type}`}>{pwdMsg.text}</div>}
 
           <div className="form-group">
-            <label><FiLock size={14} style={{ marginRight: 6 }} />Ancien mot de passe</label>
-            <input type="password" value={oldPassword} onChange={(e) => setOldPassword(e.target.value)} placeholder="Requis pour changer le mot de passe" />
+            <label>Ancien mot de passe</label>
+            <input type="password" value={oldPassword} onChange={(e) => setOldPassword(e.target.value)} placeholder="Votre mot de passe actuel" />
           </div>
 
           <div className="form-group">
-            <label><FiLock size={14} style={{ marginRight: 6 }} />Nouveau mot de passe</label>
+            <label>Nouveau mot de passe</label>
             <input type="password" value={newPassword} onChange={(e) => setNewPassword(e.target.value)} placeholder="Au moins 6 caracteres" minLength={6} />
           </div>
 
           <div className="form-group">
-            <label><FiLock size={14} style={{ marginRight: 6 }} />Confirmer le mot de passe</label>
+            <label>Confirmer le mot de passe</label>
             <input type="password" value={confirmPassword} onChange={(e) => setConfirmPassword(e.target.value)} placeholder="Repetez le nouveau mot de passe" minLength={6} />
           </div>
 
-          <motion.button className="form-submit" type="submit" disabled={saving} whileTap={{ scale: 0.97 }}>
-            <FiSave size={16} /> {saving ? 'Enregistrement...' : 'Enregistrer'}
+          <motion.button className="form-submit" type="submit" disabled={savingPwd} whileTap={{ scale: 0.97 }}>
+            <FiSave size={16} /> {savingPwd ? 'Modification...' : 'Modifier le mot de passe'}
           </motion.button>
         </motion.form>
       </div>
@@ -237,18 +258,17 @@ export default function Profile() {
               </form>
             ) : (
               <form onSubmit={handlePhoneVerify}>
-                <FiSmartphoneIcon />
+                <div style={{ textAlign: 'center', marginBottom: 12 }}>
+                  <svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" style={{ color: 'var(--primary)' }}>
+                    <rect x="5" y="2" width="14" height="20" rx="2" ry="2" /><line x1="12" y1="18" x2="12.01" y2="18" />
+                  </svg>
+                </div>
                 <p style={{ marginBottom: 16, color: 'var(--text-secondary)', textAlign: 'center', fontSize: 13 }}>
                   Un code a ete envoye au <strong>{newPhone}</strong>
                 </p>
                 <div className="form-group">
                   <label>Code de verification</label>
-                  <input
-                    type="text" placeholder="000000"
-                    value={phoneCode} onChange={(e) => setPhoneCode(e.target.value.replace(/\D/g, '').slice(0, 6))}
-                    required maxLength={6}
-                    style={{ textAlign: 'center', fontSize: 24, letterSpacing: 8, fontWeight: 700 }}
-                  />
+                  <input type="text" placeholder="000000" value={phoneCode} onChange={(e) => setPhoneCode(e.target.value.replace(/\D/g, '').slice(0, 6))} required maxLength={6} style={{ textAlign: 'center', fontSize: 24, letterSpacing: 8, fontWeight: 700 }} />
                 </div>
                 <button type="submit" className="form-submit" disabled={phoneLoading || phoneCode.length < 6}>
                   {phoneLoading ? 'Verification...' : 'Verifier le numero'}
@@ -259,16 +279,5 @@ export default function Profile() {
         </div>
       )}
     </motion.section>
-  );
-}
-
-function FiSmartphoneIcon() {
-  return (
-    <div style={{ textAlign: 'center', marginBottom: 12 }}>
-      <svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" style={{ color: 'var(--primary)' }}>
-        <rect x="5" y="2" width="14" height="20" rx="2" ry="2" />
-        <line x1="12" y1="18" x2="12.01" y2="18" />
-      </svg>
-    </div>
   );
 }
