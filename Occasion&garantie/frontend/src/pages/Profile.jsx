@@ -23,6 +23,7 @@ export default function Profile() {
   const [saving, setSaving] = useState(false);
   const [savingPwd, setSavingPwd] = useState(false);
   const [uploading, setUploading] = useState(false);
+  const [activeTab, setActiveTab] = useState('profile');
   const [showPhoneModal, setShowPhoneModal] = useState(false);
   const [newPhone, setNewPhone] = useState('');
   const [phoneCode, setPhoneCode] = useState('');
@@ -150,84 +151,97 @@ export default function Profile() {
           <p>Gerer vos informations personnelles</p>
         </motion.div>
 
-        <motion.form variants={item} className="auth-card" onSubmit={handleProfileSubmit} style={{ marginBottom: 20 }}>
-          {msg && <div className={`alert alert-${msg.type}`}>{msg.text}</div>}
+        <div style={{ display: 'flex', gap: 8, marginBottom: 20 }}>
+          <button type="button" onClick={() => setActiveTab('profile')} className={activeTab === 'profile' ? 'btn btn-primary' : 'btn btn-outline'} style={{ flex: 1, justifyContent: 'center' }}>
+            <FiUser size={16} /> Profil
+          </button>
+          <button type="button" onClick={() => setActiveTab('password')} className={activeTab === 'password' ? 'btn btn-primary' : 'btn btn-outline'} style={{ flex: 1, justifyContent: 'center' }}>
+            <FiLock size={16} /> Mot de passe
+          </button>
+        </div>
 
-          <div style={{ textAlign: 'center', marginBottom: 16 }}>
-            <div
-              onClick={() => fileRef.current?.click()}
-              style={{
-                width: 100, height: 100, borderRadius: '50%', overflow: 'hidden',
-                margin: '0 auto 8px', cursor: 'pointer', position: 'relative',
-                background: 'var(--bg-card)', border: '3px solid var(--border)',
-              }}
-            >
-              {avatar ? (
-                <img src={`/uploads/avatars/${avatar}`} alt="" style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
-              ) : (
-                <div style={{ width: '100%', height: '100%', display: 'flex', alignItems: 'center', justifyContent: 'center', color: 'var(--text-muted)' }}>
-                  <FiUser size={40} />
+        {activeTab === 'profile' && (
+          <motion.form variants={item} className="auth-card" onSubmit={handleProfileSubmit}>
+            {msg && <div className={`alert alert-${msg.type}`}>{msg.text}</div>}
+
+            <div style={{ textAlign: 'center', marginBottom: 16 }}>
+              <div
+                onClick={() => fileRef.current?.click()}
+                style={{
+                  width: 100, height: 100, borderRadius: '50%', overflow: 'hidden',
+                  margin: '0 auto 8px', cursor: 'pointer', position: 'relative',
+                  background: 'var(--bg-card)', border: '3px solid var(--border)',
+                }}
+              >
+                {avatar ? (
+                  <img src={`/uploads/avatars/${avatar}`} alt="" style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
+                ) : (
+                  <div style={{ width: '100%', height: '100%', display: 'flex', alignItems: 'center', justifyContent: 'center', color: 'var(--text-muted)' }}>
+                    <FiUser size={40} />
+                  </div>
+                )}
+                <div style={{ position: 'absolute', bottom: 0, left: 0, right: 0, background: 'rgba(0,0,0,0.5)', padding: '4px', color: '#fff', fontSize: 12 }}>
+                  {uploading ? '...' : <FiCamera size={16} />}
                 </div>
-              )}
-              <div style={{ position: 'absolute', bottom: 0, left: 0, right: 0, background: 'rgba(0,0,0,0.5)', padding: '4px', color: '#fff', fontSize: 12 }}>
-                {uploading ? '...' : <FiCamera size={16} />}
+              </div>
+              <input ref={fileRef} type="file" accept="image/*" onChange={handleAvatarChange} style={{ display: 'none' }} />
+            </div>
+
+            <div className="form-group">
+              <label><FiUser size={14} /> Nom complet</label>
+              <input type="text" value={name} onChange={(e) => setName(e.target.value)} required />
+            </div>
+
+            <div className="form-group">
+              <label><FiMail size={14} /> Email</label>
+              <input type="email" value={email} disabled style={{ opacity: 0.6, cursor: 'not-allowed' }} />
+              <small style={{ color: 'var(--text-muted)', fontSize: 11 }}>L&rsquo;email ne peut pas etre modifie.</small>
+            </div>
+
+            <div className="form-group">
+              <label><FiPhone size={14} /> Telephone</label>
+              <div style={{ display: 'flex', gap: 8 }}>
+                <input type="tel" value={phone} disabled style={{ opacity: 0.6, cursor: 'not-allowed', flex: 1 }} />
+                <button type="button" className="btn btn-outline" onClick={() => setShowPhoneModal(true)} style={{ whiteSpace: 'nowrap' }}>
+                  Changer
+                </button>
               </div>
             </div>
-            <input ref={fileRef} type="file" accept="image/*" onChange={handleAvatarChange} style={{ display: 'none' }} />
-          </div>
 
-          <div className="form-group">
-            <label><FiUser size={14} style={{ marginRight: 6 }} />Nom complet</label>
-            <input type="text" value={name} onChange={(e) => setName(e.target.value)} required />
-          </div>
+            <motion.button className="form-submit" type="submit" disabled={saving} whileTap={{ scale: 0.97 }}>
+              <FiSave size={16} /> {saving ? 'Enregistrement...' : 'Enregistrer le profil'}
+            </motion.button>
+          </motion.form>
+        )}
 
-          <div className="form-group">
-            <label><FiMail size={14} style={{ marginRight: 6 }} />Email</label>
-            <input type="email" value={email} disabled style={{ opacity: 0.6, cursor: 'not-allowed' }} />
-            <small style={{ color: 'var(--text-muted)', fontSize: 11 }}>L&rsquo;email ne peut pas etre modifie.</small>
-          </div>
+        {activeTab === 'password' && (
+          <motion.form variants={item} className="auth-card" onSubmit={handlePasswordSubmit}>
+            <h3 style={{ marginBottom: 16, fontSize: 15, display: 'flex', alignItems: 'center', gap: 8 }}>
+              <FiLock size={16} /> Changer le mot de passe
+            </h3>
 
-          <div className="form-group">
-            <label><FiPhone size={14} style={{ marginRight: 6 }} />Telephone</label>
-            <div style={{ display: 'flex', gap: 8 }}>
-              <input type="tel" value={phone} disabled style={{ opacity: 0.6, cursor: 'not-allowed', flex: 1 }} />
-              <button type="button" className="btn btn-outline" onClick={() => setShowPhoneModal(true)} style={{ whiteSpace: 'nowrap' }}>
-                Changer
-              </button>
+            {pwdMsg && <div className={`alert alert-${pwdMsg.type}`}>{pwdMsg.text}</div>}
+
+            <div className="form-group">
+              <label>Ancien mot de passe</label>
+              <input type="password" value={oldPassword} onChange={(e) => setOldPassword(e.target.value)} placeholder="Votre mot de passe actuel" />
             </div>
-          </div>
 
-          <motion.button className="form-submit" type="submit" disabled={saving} whileTap={{ scale: 0.97 }}>
-            <FiSave size={16} /> {saving ? 'Enregistrement...' : 'Enregistrer le profil'}
-          </motion.button>
-        </motion.form>
+            <div className="form-group">
+              <label>Nouveau mot de passe</label>
+              <input type="password" value={newPassword} onChange={(e) => setNewPassword(e.target.value)} placeholder="Au moins 6 caracteres" minLength={6} />
+            </div>
 
-        <motion.form variants={item} className="auth-card" onSubmit={handlePasswordSubmit}>
-          <h3 style={{ marginBottom: 16, fontSize: 15, display: 'flex', alignItems: 'center', gap: 8 }}>
-            <FiLock size={16} /> Changer le mot de passe
-          </h3>
+            <div className="form-group">
+              <label>Confirmer le mot de passe</label>
+              <input type="password" value={confirmPassword} onChange={(e) => setConfirmPassword(e.target.value)} placeholder="Repetez le nouveau mot de passe" minLength={6} />
+            </div>
 
-          {pwdMsg && <div className={`alert alert-${pwdMsg.type}`}>{pwdMsg.text}</div>}
-
-          <div className="form-group">
-            <label>Ancien mot de passe</label>
-            <input type="password" value={oldPassword} onChange={(e) => setOldPassword(e.target.value)} placeholder="Votre mot de passe actuel" />
-          </div>
-
-          <div className="form-group">
-            <label>Nouveau mot de passe</label>
-            <input type="password" value={newPassword} onChange={(e) => setNewPassword(e.target.value)} placeholder="Au moins 6 caracteres" minLength={6} />
-          </div>
-
-          <div className="form-group">
-            <label>Confirmer le mot de passe</label>
-            <input type="password" value={confirmPassword} onChange={(e) => setConfirmPassword(e.target.value)} placeholder="Repetez le nouveau mot de passe" minLength={6} />
-          </div>
-
-          <motion.button className="form-submit" type="submit" disabled={savingPwd} whileTap={{ scale: 0.97 }}>
-            <FiSave size={16} /> {savingPwd ? 'Modification...' : 'Modifier le mot de passe'}
-          </motion.button>
-        </motion.form>
+            <motion.button className="form-submit" type="submit" disabled={savingPwd} whileTap={{ scale: 0.97 }}>
+              <FiSave size={16} /> {savingPwd ? 'Modification...' : 'Modifier le mot de passe'}
+            </motion.button>
+          </motion.form>
+        )}
       </div>
 
       {showPhoneModal && (
