@@ -2,6 +2,9 @@ const express = require('express');
 const bcrypt = require('bcryptjs');
 const jwt = require('jsonwebtoken');
 const crypto = require('crypto');
+const multer = require('multer');
+const path = require('path');
+const fs = require('fs');
 const { body, validationResult } = require('express-validator');
 const pool = require('../config/db');
 const { authenticate } = require('../middleware/auth');
@@ -11,8 +14,28 @@ const router = express.Router();
 
 const verifyTokens = new Map();
 const resetCodes = new Map();
+const phoneChangeCodes = new Map();
 const CODE_EXPIRY = 15 * 60 * 1000;
 const CLIENT_URL = process.env.CLIENT_URL || 'http://localhost:5173';
+const AVATAR_DIR = path.join(__dirname, '..', 'uploads', 'avatars');
+if (!fs.existsSync(AVATAR_DIR)) fs.mkdirSync(AVATAR_DIR, { recursive: true });
+
+const avatarUpload = multer({
+  storage: multer.diskStorage({
+    destination: (req, file, cb) => cb(null, AVATAR_DIR),
+    filename: (req, file, cb) => {
+      const ext = path.extname(file.originalname);
+      cb(null, `avatar-${req.user.id}-${Date.now()}${ext}`);
+    },
+  }),
+  limits: { fileSize: 2 * 1024 * 1024 },
+  fileFilter: (req, file, cb) => {
+    const allowed = ['.jpg', '.jpeg', '.png', '.webp'];
+    const ext = path.extname(file.originalname).toLowerCase();
+    if (allowed.includes(ext)) cb(null, true);
+    else cb(new Error('Format non supporte. Utilisez JPG, PNG ou WebP.'));
+  },
+});
 
 const validate = (req, res, next) => {
   const errors = validationResult(req);
@@ -121,33 +144,86 @@ router.get('/me', authenticate, async (req, res) => {
 
 router.put('/profile', authenticate, [
   body('fullName').optional().trim().notEmpty().withMessage('Le nom ne peut pas etre vide.'),
-  body('email').optional().isEmail().withMessage('Email invalide.').normalizeEmail(),
-  body('phone').optional().trim(),
-  body('password').optional().isLength({ min: 6 }).withMessage('Le mot de passe doit contenir au moins 6 caracteres.'),
+  body('oldPassword').optional(),
+  body('newPassword').optional().isLength({ min: 6 }).withMessage('Le mot de passe doit contenir au moins 6 caracteres.'),
 ], validate, async (req, res) => {
   try {
-    const { fullName, email, phone, password } = req.body;
+    const { fullName, oldPassword, newPassword } = req.body;
     const userId = req.user.id;
 
-    if (email) {
-      const [existing] = await pool.query('SELECT id FROM users WHERE email = ? AND id != ?', [email, userId]);
-      if (existing.length > 0) return res.status(400).json({ message: 'Cet email est deja utilise.' });
+    if (newPassword) {
+      if (!oldPassword) return res.status(400).json({ message: 'Ancien mot de passe requis.' });
+      const [users] = await pool.query('SELECT password FROM users WHERE id = ?', [userId]);
+      if (users.length === 0) return res.status(404).json({ message: 'Utilisateur introuvable.' });
+      const valid = await bcrypt.compare(oldPassword, users[0].password);
+      if (!valid) return res.status(400).json({ message: 'Ancien mot de passe incorrect.' });
     }
 
-    let query = 'UPDATE users SET full_name = ?, email = ?, phone = ?';
-    const params = [fullName, email, phone || null];
-
-    if (password) {
-      const hashed = await bcrypt.hash(password, 10);
-      query += ', password = ?';
-      params.push(hashed);
+    if (fullName) {
+      await pool.query('UPDATE users SET full_name = ? WHERE id = ?', [fullName, userId]);
     }
 
-    query += ' WHERE id = ?';
-    params.push(userId);
+    if (newPassword) {
+      const hashed = await bcrypt.hash(newPassword, 10);
+      await pool.query('UPDATE users SET password = ? WHERE id = ?', [hashed, userId]);
+    }
 
-    await pool.query(query, params);
     res.json({ message: 'Profil mis a jour avec succes.' });
+  } catch (err) {
+    res.status(500).json({ message: 'Erreur serveur.' });
+  }
+});
+
+router.post('/upload-avatar', authenticate, (req, res) => {
+  avatarUpload.single('avatar')(req, res, async (err) => {
+    if (err) return res.status(400).json({ message: err.message });
+    if (!req.file) return res.status(400).json({ message: 'Aucun fichier envoye.' });
+    try {
+      await pool.query('UPDATE users SET avatar = ? WHERE id = ?', [req.file.filename, req.user.id]);
+      res.json({ avatar: req.file.filename });
+    } catch (dbErr) {
+      res.status(500).json({ message: 'Erreur serveur.' });
+    }
+  });
+});
+
+router.post('/send-phone-code', authenticate, [
+  body('newPhone').trim().notEmpty().withMessage('Nouveau numero requis.'),
+], validate, async (req, res) => {
+  try {
+    const { newPhone } = req.body;
+    const code = crypto.randomInt(100000, 999999).toString();
+    phoneChangeCodes.set(req.user.id, { code, newPhone, expiresAt: Date.now() + CODE_EXPIRY });
+
+    try {
+      await gomobile.sendSms(newPhone, `Votre code de verification Occasion & Garantie : ${code}. Valable 15 min.`);
+    } catch (smsErr) {
+      console.error('SMS send failed:', smsErr.message);
+    }
+
+    res.json({ message: 'Code de verification envoye au nouveau numero.' });
+  } catch (err) {
+    res.status(500).json({ message: 'Erreur serveur.' });
+  }
+});
+
+router.post('/verify-phone-change', authenticate, [
+  body('code').notEmpty().withMessage('Code requis.'),
+], validate, async (req, res) => {
+  try {
+    const { code } = req.body;
+    const entry = phoneChangeCodes.get(req.user.id);
+    if (!entry) return res.status(400).json({ message: 'Aucun code demande.' });
+    if (Date.now() > entry.expiresAt) {
+      phoneChangeCodes.delete(req.user.id);
+      return res.status(400).json({ message: 'Code expire.' });
+    }
+    if (entry.code !== code) return res.status(400).json({ message: 'Code incorrect.' });
+
+    await pool.query('UPDATE users SET phone = ? WHERE id = ?', [entry.newPhone, req.user.id]);
+    await pool.query('UPDATE users SET phone_verified = ? WHERE id = ?', [true, req.user.id]);
+    phoneChangeCodes.delete(req.user.id);
+    res.json({ message: 'Numero mis a jour avec succes.', phone: entry.newPhone });
   } catch (err) {
     res.status(500).json({ message: 'Erreur serveur.' });
   }
