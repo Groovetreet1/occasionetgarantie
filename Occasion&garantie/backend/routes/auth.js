@@ -5,12 +5,13 @@ const crypto = require('crypto');
 const { body, validationResult } = require('express-validator');
 const pool = require('../config/db');
 const { authenticate } = require('../middleware/auth');
+const gomobile = require('../services/gomobile');
 
 const router = express.Router();
 
+const verificationCodes = new Map();
 const resetCodes = new Map();
 const CODE_EXPIRY = 15 * 60 * 1000;
-const WHATSAPP_NUMBER = '212669017295';
 
 const validate = (req, res, next) => {
   const errors = validationResult(req);
@@ -22,7 +23,7 @@ router.post('/signup', [
   body('fullName').trim().notEmpty().withMessage('Le nom complet est requis.'),
   body('email').isEmail().withMessage('Email invalide.').normalizeEmail(),
   body('password').isLength({ min: 6 }).withMessage('Le mot de passe doit contenir au moins 6 caractères.'),
-  body('phone').optional().trim(),
+  body('phone').trim().notEmpty().withMessage('Le numéro de téléphone est requis.'),
 ], validate, async (req, res) => {
   try {
     const { fullName, email, password, phone } = req.body;
@@ -32,17 +33,28 @@ router.post('/signup', [
     }
     const hashed = await bcrypt.hash(password, 10);
     const [result] = await pool.query(
-      'INSERT INTO users (full_name, email, password, phone) VALUES (?, ?, ?, ?)',
-      [fullName, email, hashed, phone || null]
+      'INSERT INTO users (full_name, email, password, phone, phone_verified) VALUES (?, ?, ?, ?, ?)',
+      [fullName, email, hashed, phone, false]
     );
     const token = jwt.sign(
       { id: result.insertId, email, role: 'client' },
       process.env.JWT_SECRET,
       { expiresIn: '7d' }
     );
+
+    const code = crypto.randomInt(100000, 999999).toString();
+    verificationCodes.set(result.insertId, { code, expiresAt: Date.now() + CODE_EXPIRY });
+
+    try {
+      await gomobile.sendSms(phone, `Votre code de verification Occasion & Garantie : ${code}. Valable 15 min.`);
+    } catch (smsErr) {
+      console.error('SMS send failed:', smsErr.message);
+    }
+
     res.status(201).json({
       token,
-      user: { id: result.insertId, fullName, email, role: 'client' }
+      user: { id: result.insertId, fullName, email, phone, role: 'client', phoneVerified: false },
+      message: 'Un code de verification a ete envoye par SMS.'
     });
   } catch (err) {
     res.status(500).json({ message: 'Erreur serveur.' });
@@ -71,7 +83,7 @@ router.post('/login', [
     );
     res.json({
       token,
-      user: { id: user.id, fullName: user.full_name, email: user.email, role: user.role }
+      user: { id: user.id, fullName: user.full_name, email: user.email, phone: user.phone, role: user.role, phoneVerified: !!user.phone_verified }
     });
   } catch (err) {
     res.status(500).json({ message: 'Erreur serveur.' });
@@ -80,9 +92,48 @@ router.post('/login', [
 
 router.get('/me', authenticate, async (req, res) => {
   try {
-    const [users] = await pool.query('SELECT id, full_name, email, phone, role, created_at FROM users WHERE id = ?', [req.user.id]);
+    const [users] = await pool.query('SELECT id, full_name, email, phone, role, phone_verified, created_at FROM users WHERE id = ?', [req.user.id]);
     if (users.length === 0) return res.status(404).json({ message: 'Utilisateur introuvable.' });
     res.json(users[0]);
+  } catch (err) {
+    res.status(500).json({ message: 'Erreur serveur.' });
+  }
+});
+
+router.post('/verify-phone', authenticate, [
+  body('code').notEmpty().withMessage('Code requis.'),
+], validate, async (req, res) => {
+  try {
+    const { code } = req.body;
+    const userId = req.user.id;
+    const entry = verificationCodes.get(userId);
+    if (!entry) return res.status(400).json({ message: 'Aucun code envoye. Demandez un nouveau code.' });
+    if (Date.now() > entry.expiresAt) {
+      verificationCodes.delete(userId);
+      return res.status(400).json({ message: 'Code expire. Veuillez demander un nouveau code.' });
+    }
+    if (entry.code !== code) return res.status(400).json({ message: 'Code incorrect.' });
+
+    await pool.query('UPDATE users SET phone_verified = ? WHERE id = ?', [true, userId]);
+    verificationCodes.delete(userId);
+    res.json({ message: 'Telephone verifie avec succes.', phoneVerified: true });
+  } catch (err) {
+    res.status(500).json({ message: 'Erreur serveur.' });
+  }
+});
+
+router.post('/resend-sms-code', authenticate, async (req, res) => {
+  try {
+    const userId = req.user.id;
+    const [users] = await pool.query('SELECT phone FROM users WHERE id = ?', [userId]);
+    if (users.length === 0) return res.status(404).json({ message: 'Utilisateur introuvable.' });
+    if (!users[0].phone) return res.status(400).json({ message: 'Aucun telephone enregistre.' });
+
+    const code = crypto.randomInt(100000, 999999).toString();
+    verificationCodes.set(userId, { code, expiresAt: Date.now() + CODE_EXPIRY });
+
+    await gomobile.sendSms(users[0].phone, `Votre code de verification Occasion & Garantie : ${code}. Valable 15 min.`);
+    res.json({ message: 'Nouveau code envoye par SMS.' });
   } catch (err) {
     res.status(500).json({ message: 'Erreur serveur.' });
   }
@@ -127,22 +178,20 @@ router.post('/forgot-password', [
 ], validate, async (req, res) => {
   try {
     const { email } = req.body;
-    const [users] = await pool.query('SELECT id, full_name FROM users WHERE email = ?', [email]);
+    const [users] = await pool.query('SELECT id, full_name, phone FROM users WHERE email = ?', [email]);
     if (users.length === 0) return res.status(404).json({ message: 'Aucun compte trouvé avec cet email.' });
+    if (!users[0].phone) return res.status(400).json({ message: 'Aucun telephone enregistre sur ce compte.' });
 
     const code = crypto.randomInt(100000, 999999).toString();
     resetCodes.set(email, { code, expiresAt: Date.now() + CODE_EXPIRY });
 
-    const waMsg = encodeURIComponent(
-      `Bonjour ${users[0].full_name || ''} !\n\n` +
-      `Voici votre code de réinitialisation de mot de passe : ${code}\n\n` +
-      `Ce code expire dans 15 minutes. Ne le partagez avec personne.\n\n` +
-      `Pour réinitialiser votre mot de passe, rendez-vous sur :\n` +
-      `${req.protocol}://${req.get('host')}/reset-password?email=${encodeURIComponent(email)}`
-    );
-    const waUrl = `https://wa.me/${WHATSAPP_NUMBER}?text=${waMsg}`;
+    try {
+      await gomobile.sendSms(users[0].phone, `Votre code de reinitialisation Occasion & Garantie : ${code}. Valable 15 min.`);
+    } catch (smsErr) {
+      console.error('SMS send failed:', smsErr.message);
+    }
 
-    res.json({ message: 'Code envoyé via WhatsApp.', waUrl, email });
+    res.json({ message: 'Code de verification envoye par SMS.', email });
   } catch (err) {
     res.status(500).json({ message: 'Erreur serveur.' });
   }

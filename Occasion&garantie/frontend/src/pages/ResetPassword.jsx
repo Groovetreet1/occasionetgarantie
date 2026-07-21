@@ -64,7 +64,7 @@ export default function ResetPassword() {
       <div className="auth-container">
         <div className="auth-header">
           <h1>Réinitialisation</h1>
-          <p>Entrez le code reçu par WhatsApp et votre nouveau mot de passe</p>
+          <p>Entrez le code reçu par SMS et votre nouveau mot de passe</p>
         </div>
         <div className="auth-card">
           {error && <div className="alert alert-error">{error}</div>}

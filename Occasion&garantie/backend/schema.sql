@@ -9,6 +9,7 @@ CREATE TABLE users (
   phone VARCHAR(20),
   avatar VARCHAR(255),
   role ENUM('client', 'admin') DEFAULT 'client',
+  phone_verified BOOLEAN DEFAULT FALSE,
   created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );
 

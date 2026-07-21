@@ -71,6 +71,7 @@ const mockPool = {
         password: params[2],
         phone: params[3] || null,
         role: params[4] || 'client',
+        phone_verified: params[5] === undefined ? false : params[5],
         created_at: new Date().toISOString(),
       };
       data.users.push(newUser);
@@ -172,6 +173,31 @@ const mockPool = {
       const idx = data.users.findIndex(u => u.email === email);
       if (idx !== -1) {
         data.users[idx].password = password;
+        save();
+      }
+      return [[]];
+    }
+
+    // UPDATE users SET phone_verified = ? WHERE id = ?
+    if (upper.startsWith('UPDATE USERS SET') && upper.includes('PHONE_VERIFIED') && upper.includes('WHERE ID =')) {
+      const idx = data.users.findIndex(u => u.id === params[1]);
+      if (idx !== -1) {
+        data.users[idx].phone_verified = params[0];
+        save();
+      }
+      return [[]];
+    }
+
+    // UPDATE users SET full_name = ?, email = ?, phone = ? WHERE id = ? (profile)
+    if (upper.startsWith('UPDATE USERS SET') && !upper.includes('PHONE_VERIFIED') && !upper.includes('PASSWORD') && upper.includes('WHERE ID =')) {
+      const id = params[params.length - 1];
+      const idx = data.users.findIndex(u => u.id === id);
+      if (idx !== -1) {
+        const cols = parseCols(sql);
+        cols.forEach((assignment, i) => {
+          const col = assignment.split('=')[0].trim().toLowerCase();
+          data.users[idx][col] = params[i];
+        });
         save();
       }
       return [[]];
