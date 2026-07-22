@@ -38,6 +38,11 @@ export default function ProductDetail() {
   const [reserving, setReserving] = useState(false);
   const [reserved, setReserved] = useState(false);
   const [reserveMsg, setReserveMsg] = useState('');
+  const [bankInfo, setBankInfo] = useState(null);
+  const [reservationId, setReservationId] = useState(null);
+  const [screenshot, setScreenshot] = useState(null);
+  const [uploading, setUploading] = useState(false);
+  const [uploadDone, setUploadDone] = useState(false);
 
   useEffect(() => {
     window.scrollTo(0, 0);
@@ -99,11 +104,31 @@ export default function ProductDetail() {
     try {
       const { data } = await api.post('/reservations', { productId: product.id });
       setReserved(true);
+      setReservationId(data.reservationId);
+      setBankInfo(data.bank);
       setReserveMsg(data.message);
     } catch (err) {
       setReserveMsg(err.response?.data?.message || 'Erreur lors de la reservation.');
     } finally {
       setReserving(false);
+    }
+  };
+
+  const handleUploadScreenshot = async (e) => {
+    const file = e.target.files[0];
+    if (!file || !reservationId) return;
+    setUploading(true);
+    const formData = new FormData();
+    formData.append('screenshot', file);
+    try {
+      await api.post(`/reservations/${reservationId}/screenshot`, formData, {
+        headers: { 'Content-Type': 'multipart/form-data' },
+      });
+      setUploadDone(true);
+    } catch (err) {
+      setReserveMsg(err.response?.data?.message || 'Erreur lors de l\'upload.');
+    } finally {
+      setUploading(false);
     }
   };
 
@@ -234,15 +259,9 @@ export default function ProductDetail() {
                       <FiUserPlus size={16} /> Creer un compte
                     </Link>
                   </div>
-                ) : reserved ? (
-                  <div className="alert alert-success" style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-                    <FiCheck size={18} /> {reserveMsg}
-                  </div>
-                ) : (
+                ) : !reserved ? (
                   <>
-                    {reserveMsg && !reserved && (
-                      <div className="alert alert-error">{reserveMsg}</div>
-                    )}
+                    {reserveMsg && <div className="alert alert-error">{reserveMsg}</div>}
                     <button
                       onClick={handleReserve}
                       disabled={reserving}
@@ -256,8 +275,53 @@ export default function ProductDetail() {
                         padding: '14px',
                       }}
                     >
-                      {reserving ? 'Reservation...' : `Reserver (200 DH)`}
+                      {reserving ? 'Reservation...' : 'Reserver (200 DH)'}
                     </button>
+                  </>
+                ) : uploadDone ? (
+                  <div className="alert alert-success" style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                    <FiCheck size={18} /> Screenshot envoye. Reservation confirmee.
+                  </div>
+                ) : (
+                  <>
+                    <div style={{
+                      background: 'var(--bg-secondary)',
+                      border: '1px solid var(--border-light)',
+                      borderRadius: 'var(--radius)',
+                      padding: '16px',
+                      marginBottom: '16px',
+                    }}>
+                      <h4 style={{ fontSize: '13px', fontWeight: 600, marginBottom: '8px', color: 'var(--text-primary)' }}>
+                        Virement bancaire
+                      </h4>
+                      <table style={{ width: '100%', fontSize: '13px' }}>
+                        <tbody>
+                          {bankInfo && (
+                            <>
+                              <tr><td style={{ color: 'var(--text-muted)', padding: '4px 8px 4px 0', whiteSpace: 'nowrap' }}>Banque</td>
+                                <td style={{ fontWeight: 600 }}>{bankInfo.bank}</td></tr>
+                              <tr><td style={{ color: 'var(--text-muted)', padding: '4px 8px 4px 0', whiteSpace: 'nowrap' }}>Titulaire</td>
+                                <td style={{ fontWeight: 600 }}>{bankInfo.holder}</td></tr>
+                              <tr><td style={{ color: 'var(--text-muted)', padding: '4px 8px 4px 0', whiteSpace: 'nowrap' }}>RIB</td>
+                                <td style={{ fontWeight: 600, fontFamily: 'monospace', fontSize: '14px', letterSpacing: '1px' }}>{bankInfo.rib}</td></tr>
+                              <tr><td style={{ color: 'var(--text-muted)', padding: '4px 8px 4px 0', whiteSpace: 'nowrap' }}>Montant</td>
+                                <td style={{ fontWeight: 600, color: 'var(--success)' }}>{bankInfo.amount} DH</td></tr>
+                            </>
+                          )}
+                        </tbody>
+                      </table>
+                    </div>
+                    <p style={{ fontSize: '12px', color: 'var(--text-secondary)', marginBottom: '10px' }}>
+                      Apres le virement, envoyez la capture d&rsquo;ecran ci-dessous :
+                    </p>
+                    <label className="btn" style={{
+                      width: '100%', justifyContent: 'center', fontSize: '14px', cursor: 'pointer',
+                      background: 'var(--primary)', color: '#000',
+                    }}>
+                      {uploading ? 'Envoi...' : 'Choisir une photo'}
+                      <input type="file" accept="image/*" onChange={handleUploadScreenshot} hidden disabled={uploading} />
+                    </label>
+                    {reserveMsg && <div className="alert alert-error" style={{ marginTop: '8px' }}>{reserveMsg}</div>}
                   </>
                 )}
               </div>

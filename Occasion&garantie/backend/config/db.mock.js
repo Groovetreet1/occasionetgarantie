@@ -277,6 +277,19 @@ const mockPool = {
       return [results];
     }
 
+    // SELECT reservations with JOIN users
+    if (upper.startsWith('SELECT') && upper.includes('FROM RESERVATIONS R') && upper.includes('JOIN USERS U')) {
+      const rId = params[0];
+      const uId = params[1];
+      const reservation = data.reservations.find(r => r.id === rId && r.user_id === uId);
+      if (reservation) {
+        const user = data.users.find(u => u.id === reservation.user_id);
+        const result = { ...reservation, full_name: user ? user.full_name : null, phone: user ? user.phone : null };
+        return [[result]];
+      }
+      return [[]];
+    }
+
     // SELECT reservations by user + product + status
     if (upper.startsWith('SELECT') && upper.includes('FROM RESERVATIONS') && upper.includes('WHERE USER_ID =') && upper.includes('PRODUCT_ID =') && upper.includes('STATUS =')) {
       const userIdx = sql.toUpperCase().indexOf('USER_ID =') + 10;
@@ -287,6 +300,18 @@ const mockPool = {
       const statParam = params[2];
       const found = data.reservations.find(r => r.user_id === userParam && r.product_id === prodParam && r.status === statParam);
       return [found ? [found] : []];
+    }
+
+    // UPDATE reservations SET screenshot = ?, status = ? WHERE id = ?
+    if (upper.startsWith('UPDATE RESERVATIONS SET') && upper.includes('WHERE ID =')) {
+      const id = params[params.length - 1];
+      const idx = data.reservations.findIndex(r => r.id === Number(id));
+      if (idx !== -1) {
+        data.reservations[idx].screenshot = params[0];
+        data.reservations[idx].status = params[1] || 'confirmee';
+        save();
+      }
+      return [[]];
     }
 
     console.log('Unhandled SQL:', sql, JSON.stringify(params));

@@ -1,9 +1,41 @@
 const express = require('express');
 const router = express.Router();
+const multer = require('multer');
+const path = require('path');
+const fs = require('fs');
 const pool = require('../config/db');
 const { authenticate } = require('../middleware/auth');
+const gomobile = require('../services/gomobile');
 
 const RESERVATION_AMOUNT = 200;
+const ADMIN_PHONE = process.env.ADMIN_PHONE || '0669017205';
+
+const BANK_INFO = {
+  bank: 'CIH Bank',
+  holder: 'OCCASION & GARANTIE',
+  rib: '123 456 7890123456789012 34',
+  amount: RESERVATION_AMOUNT,
+};
+
+const SCREENSHOT_DIR = path.join(__dirname, '..', 'uploads', 'reservations');
+if (!fs.existsSync(SCREENSHOT_DIR)) fs.mkdirSync(SCREENSHOT_DIR, { recursive: true });
+
+const screenshotUpload = multer({
+  storage: multer.diskStorage({
+    destination: (req, file, cb) => cb(null, SCREENSHOT_DIR),
+    filename: (req, file, cb) => {
+      const ext = path.extname(file.originalname);
+      cb(null, `reservation-${req.params.id}-${Date.now()}${ext}`);
+    },
+  }),
+  limits: { fileSize: 5 * 1024 * 1024 },
+  fileFilter: (req, file, cb) => {
+    const allowed = ['.jpg', '.jpeg', '.png', '.webp'];
+    const ext = path.extname(file.originalname).toLowerCase();
+    if (allowed.includes(ext)) cb(null, true);
+    else cb(new Error('Format non supporte. Utilisez JPG, PNG ou WebP.'));
+  },
+});
 
 router.post('/', authenticate, async (req, res) => {
   try {
@@ -22,10 +54,53 @@ router.post('/', authenticate, async (req, res) => {
     );
 
     res.status(201).json({
-      message: `Reservation creee. Versez ${RESERVATION_AMOUNT} DH pour confirmer.`,
+      message: `Reservation creee. Versez ${RESERVATION_AMOUNT} DH sur le compte ci-dessous.`,
       reservationId: result.insertId,
-      amount: RESERVATION_AMOUNT
+      amount: RESERVATION_AMOUNT,
+      bank: BANK_INFO,
     });
+  } catch (err) {
+    res.status(500).json({ message: 'Erreur serveur.' });
+  }
+});
+
+router.post('/:id/screenshot', authenticate, screenshotUpload.single('screenshot'), async (req, res) => {
+  try {
+    const reservationId = Number(req.params.id);
+    const [rows] = await pool.query('SELECT r.*, u.full_name, u.phone FROM reservations r JOIN users u ON r.user_id = u.id WHERE r.id = ? AND r.user_id = ?', [reservationId, req.user.id]);
+    if (rows.length === 0) return res.status(404).json({ message: 'Reservation introuvable.' });
+    if (!req.file) return res.status(400).json({ message: 'Fichier requis.' });
+
+    const filename = req.file.filename;
+    await pool.query('UPDATE reservations SET screenshot = ?, status = ? WHERE id = ?', [filename, 'confirmee', reservationId]);
+
+    const screenshotUrl = `${req.protocol}://${req.get('host')}/api/reservations/${reservationId}/screenshot`;
+    const clientName = rows[0].full_name;
+    const clientPhone = rows[0].phone;
+    const smsMessage = `Nouveau versement - Reservation #${reservationId}\nClient: ${clientName}\nTel: ${clientPhone}\nPhoto: ${screenshotUrl}`;
+
+    try {
+      await gomobile.sendSms(ADMIN_PHONE, smsMessage);
+    } catch (smsErr) {
+      console.error('Admin SMS failed:', smsErr.message);
+    }
+
+    res.json({ message: 'Screenshot envoye. Reservation confirmee.' });
+  } catch (err) {
+    res.status(500).json({ message: 'Erreur serveur.' });
+  }
+});
+
+router.get('/:id/screenshot', async (req, res) => {
+  try {
+    const reservationId = Number(req.params.id);
+    const [rows] = await pool.query('SELECT screenshot FROM reservations WHERE id = ?', [reservationId]);
+    if (rows.length === 0 || !rows[0].screenshot) return res.status(404).json({ message: 'Screenshot introuvable.' });
+
+    const filePath = path.join(SCREENSHOT_DIR, rows[0].screenshot);
+    if (!fs.existsSync(filePath)) return res.status(404).json({ message: 'Fichier introuvable.' });
+
+    res.sendFile(filePath);
   } catch (err) {
     res.status(500).json({ message: 'Erreur serveur.' });
   }
