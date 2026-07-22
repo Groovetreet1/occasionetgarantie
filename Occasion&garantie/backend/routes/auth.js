@@ -85,19 +85,64 @@ router.post('/signup', [
 
 router.get('/verify-phone', async (req, res) => {
   const { token } = req.query;
-  if (!token) return res.redirect(`${CLIENT_URL}/login?verified=error`);
+  let status = 'success';
 
-  const entry = verifyTokens.get(token);
-  if (!entry) return res.redirect(`${CLIENT_URL}/login?verified=invalid`);
-  if (Date.now() > entry.expiresAt) {
-    verifyTokens.delete(token);
-    return res.redirect(`${CLIENT_URL}/login?verified=expired`);
+  if (!token) {
+    status = 'error';
+  } else {
+    const entry = verifyTokens.get(token);
+    if (!entry) {
+      status = 'invalid';
+    } else if (Date.now() > entry.expiresAt) {
+      verifyTokens.delete(token);
+      status = 'expired';
+    } else {
+      await pool.query('UPDATE users SET phone_verified = ? WHERE id = ?', [true, entry.userId]);
+      verifyTokens.delete(token);
+    }
   }
 
-  await pool.query('UPDATE users SET phone_verified = ? WHERE id = ?', [true, entry.userId]);
-  verifyTokens.delete(token);
+  const SITE_NAME = 'Occasion & Garantie';
+  const LOGIN_URL = `${CLIENT_URL}/login`;
 
-  res.redirect(`${CLIENT_URL}/login?verified=success`);
+  const messages = {
+    success: { title: 'Compte active !', desc: 'Votre compte a ete verifie avec succes. Vous pouvez maintenant vous connecter.', icon: '✅' },
+    expired: { title: 'Lien expire', desc: 'Ce lien de verification a expire. Veuillez refaire une inscription.', icon: '⏰' },
+    invalid: { title: 'Lien invalide', desc: 'Ce lien de verification n\'est pas valide.', icon: '❌' },
+    error: { title: 'Erreur', desc: 'Aucun token de verification fourni.', icon: '⚠️' },
+  };
+
+  const m = messages[status] || messages.error;
+
+  res.send(`<!DOCTYPE html>
+<html lang="fr">
+<head><meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1.0">
+<title>${SITE_NAME} - Verification</title>
+<style>
+  *{margin:0;padding:0;box-sizing:border-box}
+  body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;
+    background:linear-gradient(135deg,#667eea,#764ba2);min-height:100vh;
+    display:flex;align-items:center;justify-content:center;padding:20px}
+  .card{background:#fff;border-radius:20px;padding:40px;max-width:420px;
+    width:100%;text-align:center;box-shadow:0 20px 60px rgba(0,0,0,0.3)}
+  .icon{font-size:64px;margin-bottom:16px}
+  h1{font-size:24px;margin-bottom:12px;color:#1a1a2e}
+  p{font-size:16px;color:#666;margin-bottom:24px;line-height:1.5}
+  .btn{display:inline-block;padding:14px 32px;background:linear-gradient(135deg,#667eea,#764ba2);
+    color:#fff;text-decoration:none;border-radius:12px;font-weight:600;font-size:16px}
+  .btn:hover{opacity:0.9}
+  .footer{margin-top:24px;font-size:13px;color:#999}
+</style></head>
+<body>
+  <div class="card">
+    <div class="icon">${m.icon}</div>
+    <h1>${m.title}</h1>
+    <p>${m.desc}</p>
+    <a href="${LOGIN_URL}" class="btn">Se connecter</a>
+    <div class="footer">${SITE_NAME}</div>
+  </div>
+</body>
+</html>`);
 });
 
 router.post('/login', [
