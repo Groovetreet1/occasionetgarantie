@@ -308,6 +308,12 @@ const mockPool = {
       return [found ? [found] : []];
     }
 
+    // SELECT reservations by id (screenshot lookup)
+    if (upper.startsWith('SELECT') && upper.includes('FROM RESERVATIONS') && upper.includes('WHERE ID =') && !upper.includes('USER_ID =')) {
+      const reservation = data.reservations.find(r => r.id === Number(params[0]));
+      return [reservation ? [reservation] : []];
+    }
+
     // UPDATE reservations SET screenshot = ?, status = ? WHERE id = ?
     if (upper.startsWith('UPDATE RESERVATIONS SET') && upper.includes('WHERE ID =')) {
       const id = params[params.length - 1];
