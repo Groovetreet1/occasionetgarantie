@@ -217,7 +217,8 @@ export default function ProductDetail() {
                 Réponse sous 24h | Paiement sécurisé
               </p>
 
-              <div style={{ marginTop: '24px', borderTop: '1px solid var(--border)', paddingTop: '20px' }}>
+              {product.price >= 500 && (
+                <div style={{ marginTop: '24px', borderTop: '1px solid var(--border)', paddingTop: '20px' }}>
                 <h3 style={{ fontSize: '16px', fontWeight: 700, marginBottom: '8px', display: 'flex', alignItems: 'center', gap: '8px' }}>
                   <MdPayment size={20} style={{ color: 'var(--primary)' }} /> Reserver ce produit
                 </h3>
