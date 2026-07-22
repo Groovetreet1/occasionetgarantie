@@ -42,6 +42,10 @@ app.use('/api/products', productRoutes);
 app.use('/api/categories', categoryRoutes);
 app.use('/api/upload', uploadRoutes);
 
+app.get('/ads.txt', (req, res) => {
+  res.type('text/plain').send('google.com, pub-3266333749754332, DIRECT, f08c47fec0942fa0');
+});
+
 app.get('/api/health', (req, res) => {
   res.json({ status: 'ok', message: 'Occasion&Garantie API running' });
 });
