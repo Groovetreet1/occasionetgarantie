@@ -10,6 +10,7 @@ import ProductDetail from './pages/ProductDetail';
 import About from './pages/About';
 import Login from './pages/Login';
 import SignUp from './pages/SignUp';
+import VerifyCode from './pages/VerifyCode';
 import ForgotPassword from './pages/ForgotPassword';
 import ResetPassword from './pages/ResetPassword';
 import Profile from './pages/Profile';
@@ -50,6 +51,7 @@ export default function App() {
           <Route path="/about" element={<AnimatedPage><About /></AnimatedPage>} />
           <Route path="/login" element={<AnimatedPage><Login /></AnimatedPage>} />
           <Route path="/signup" element={<AnimatedPage><SignUp /></AnimatedPage>} />
+          <Route path="/verify-code" element={<AnimatedPage><VerifyCode /></AnimatedPage>} />
           <Route path="/forgot-password" element={<AnimatedPage><ForgotPassword /></AnimatedPage>} />
           <Route path="/reset-password" element={<AnimatedPage><ResetPassword /></AnimatedPage>} />
           <Route path="/profile" element={<AnimatedPage><Profile /></AnimatedPage>} />

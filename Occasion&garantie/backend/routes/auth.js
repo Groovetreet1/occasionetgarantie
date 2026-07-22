@@ -42,8 +42,8 @@ const validate = (req, res, next) => {
   next();
 };
 
-function generateToken() {
-  return crypto.randomBytes(32).toString('hex');
+function generateCode() {
+  return Math.floor(100000 + Math.random() * 900000).toString();
 }
 
 router.post('/signup', [
@@ -59,92 +59,77 @@ router.post('/signup', [
       return res.status(400).json({ message: 'Cet email est déjà utilisé.' });
     }
     const hashed = await bcrypt.hash(password, 10);
-    const token = generateToken();
+    const code = generateCode();
     const expiresAt = Date.now() + CODE_EXPIRY;
+
     const [result] = await pool.query(
       'INSERT INTO users (full_name, email, password, phone, phone_verified, verification_token, verification_expires) VALUES (?, ?, ?, ?, ?, ?, ?)',
-      [fullName, email, hashed, phone, false, token, expiresAt]
+      [fullName, email, hashed, phone, false, code, expiresAt]
     );
 
-    const verifyUrl = `${req.protocol}://${req.get('host')}/api/auth/verify-phone?token=${token}`;
     try {
-      await gomobile.sendSms(phone, `Activez votre compte Occasion & Garantie en cliquant ici : ${verifyUrl}`);
+      await gomobile.sendSms(phone, `Votre code de verification Occasion & Garantie : ${code}`);
     } catch (smsErr) {
       console.error('SMS send failed:', smsErr.message);
     }
 
     res.status(201).json({
-      message: 'Un lien d\'activation a ete envoye par SMS. Verifiez votre telephone.'
+      message: 'Un code de verification a ete envoye par SMS.',
+      needsVerification: true,
+      email
     });
   } catch (err) {
     res.status(500).json({ message: 'Erreur serveur.' });
   }
 });
 
-router.get('/verify-phone', async (req, res) => {
-  const { token } = req.query;
-  let status = 'success';
+router.post('/verify-code', [
+  body('email').isEmail().withMessage('Email invalide.').normalizeEmail(),
+  body('code').trim().isLength({ min: 6, max: 6 }).withMessage('Code invalide.'),
+], validate, async (req, res) => {
+  try {
+    const { email, code } = req.body;
+    const [users] = await pool.query('SELECT id, phone_verified, verification_token, verification_expires FROM users WHERE email = ?', [email]);
+    if (users.length === 0) return res.status(400).json({ message: 'Utilisateur introuvable.' });
 
-  if (!token) {
-    status = 'error';
-  } else {
-    const [users] = await pool.query('SELECT id, phone_verified, verification_expires FROM users WHERE verification_token = ?', [token]);
-    if (users.length === 0) {
-      status = 'invalid';
-    } else if (Date.now() > users[0].verification_expires) {
-      status = 'expired';
-    } else if (users[0].phone_verified) {
-      status = 'already';
-    } else {
-      await pool.query('UPDATE users SET phone_verified = ? WHERE id = ?', [true, users[0].id]);
-    }
+    const user = users[0];
+    if (user.phone_verified) return res.json({ message: 'Compte deja verifie.', verified: true });
+
+    if (user.verification_token !== code) return res.status(400).json({ message: 'Code incorrect.' });
+    if (Date.now() > user.verification_expires) return res.status(400).json({ message: 'Code expire. Demandez un nouveau code.' });
+
+    await pool.query('UPDATE users SET phone_verified = ? WHERE id = ?', [true, user.id]);
+    res.json({ message: 'Telephone verifie avec succes.', verified: true });
+  } catch (err) {
+    res.status(500).json({ message: 'Erreur serveur.' });
   }
+});
 
-  const SITE_NAME = 'Occasion & Garantie';
-  const LOGIN_URL = `${req.protocol}://${req.get('host')}/login`;
+router.post('/resend-code', [
+  body('email').isEmail().withMessage('Email invalide.').normalizeEmail(),
+], validate, async (req, res) => {
+  try {
+    const { email } = req.body;
+    const [users] = await pool.query('SELECT id, phone, phone_verified FROM users WHERE email = ?', [email]);
+    if (users.length === 0) return res.status(400).json({ message: 'Utilisateur introuvable.' });
 
-  const messages = {
-    success: { title: 'Compte active !', desc: 'Votre compte a ete verifie avec succes. Vous pouvez maintenant vous connecter.', icon: '1' },
-    already: { title: 'Deja verifie !', desc: 'Votre compte est deja actif. Connectez-vous pour acceder a votre profil.', icon: '1' },
-    expired: { title: 'Lien expire', desc: 'Ce lien de verification a expire. Veuillez refaire une inscription.', icon: '!' },
-    invalid: { title: 'Lien invalide', desc: 'Ce lien de verification n\'est pas valide.', icon: 'X' },
-    error: { title: 'Erreur', desc: 'Aucun token de verification fourni.', icon: '!' },
-  };
+    const user = users[0];
+    if (user.phone_verified) return res.json({ message: 'Compte deja verifie.' });
 
-  const m = messages[status] || messages.error;
+    const code = generateCode();
+    const expiresAt = Date.now() + CODE_EXPIRY;
+    await pool.query('UPDATE users SET verification_token = ?, verification_expires = ? WHERE id = ?', [code, expiresAt, user.id]);
 
-  res.send(`<!DOCTYPE html>
-<html lang="fr">
-<head><meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1.0">
-<title>${SITE_NAME} - Verification</title>
-<style>
-  *{margin:0;padding:0;box-sizing:border-box}
-  body{font-family:Inter,-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;
-    background:linear-gradient(135deg,var(--c1,#1a1a2e),var(--c2,#16213e));min-height:100vh;
-    display:flex;align-items:center;justify-content:center;padding:20px}
-  .card{background:#1e1e3a;border-radius:20px;padding:40px;max-width:420px;
-    width:100%;text-align:center;box-shadow:0 20px 60px rgba(0,0,0,0.4);border:1px solid rgba(255,255,255,0.08)}
-  .icn{width:72px;height:72px;border-radius:50%;display:flex;align-items:center;justify-content:center;
-    margin:0 auto 16px;font-size:32px;font-weight:800}
-  .icn-ok{background:rgba(0,200,83,0.15);color:#00c853}
-  .icn-err{background:rgba(255,82,82,0.15);color:#ff5252}
-  h1{font-size:24px;margin-bottom:12px;color:#fff}
-  p{font-size:16px;color:rgba(255,255,255,0.6);margin-bottom:24px;line-height:1.5}
-  .btn{display:inline-block;padding:14px 32px;background:linear-gradient(135deg,#667eea,#764ba2);
-    color:#fff;text-decoration:none;border-radius:12px;font-weight:600;font-size:16px;transition:opacity .2s}
-  .btn:hover{opacity:0.9}
-  .footer{margin-top:24px;font-size:13px;color:rgba(255,255,255,0.3)}
-</style></head>
-<body>
-  <div class="card">
-    <div class="icn ${status === 'success' ? 'icn-ok' : 'icn-err'}">${m.icon}</div>
-    <h1>${m.title}</h1>
-    <p>${m.desc}</p>
-    <a href="${LOGIN_URL}" class="btn">Se connecter</a>
-    <div class="footer">${SITE_NAME}</div>
-  </div>
-</body>
-</html>`);
+    try {
+      await gomobile.sendSms(user.phone, `Votre code de verification Occasion & Garantie : ${code}`);
+    } catch (smsErr) {
+      console.error('SMS send failed:', smsErr.message);
+    }
+
+    res.json({ message: 'Un nouveau code a ete envoye par SMS.' });
+  } catch (err) {
+    res.status(500).json({ message: 'Erreur serveur.' });
+  }
 });
 
 router.post('/login', [
@@ -163,7 +148,11 @@ router.post('/login', [
       return res.status(400).json({ message: 'Email ou mot de passe incorrect.' });
     }
     if (!user.phone_verified && user.role !== 'admin') {
-      return res.status(403).json({ message: 'Compte non active. Veuillez verifier votre telephone via le lien recu par SMS.' });
+      return res.status(403).json({
+        message: 'Compte non active. Veuillez entrer le code de verification recu par SMS.',
+        needsVerification: true,
+        email: user.email
+      });
     }
     const token = jwt.sign(
       { id: user.id, email: user.email, role: user.role },

@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { Link, useNavigate, Navigate, useSearchParams } from 'react-router-dom';
-import { FiMail, FiLock, FiEye, FiEyeOff, FiCheckCircle, FiXCircle } from 'react-icons/fi';
+import { FiMail, FiLock, FiEye, FiEyeOff, FiCheckCircle, FiXCircle, FiSmartphone } from 'react-icons/fi';
 import { useAuth } from '../context/AuthContext';
 
 export default function Login() {
@@ -11,6 +11,7 @@ export default function Login() {
   const [showPw, setShowPw] = useState(false);
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
+  const [needsVerification, setNeedsVerification] = useState(null);
   const navigate = useNavigate();
 
   const verified = searchParams.get('verified');
@@ -20,12 +21,18 @@ export default function Login() {
   const handleSubmit = async (e) => {
     e.preventDefault();
     setError('');
+    setNeedsVerification(null);
     setLoading(true);
     try {
       await login(email, password);
       navigate('/');
     } catch (err) {
-      setError(err.response?.data?.message || 'Erreur de connexion.');
+      const data = err.response?.data;
+      if (data?.needsVerification) {
+        setNeedsVerification(data.email);
+      } else {
+        setError(data?.message || 'Erreur de connexion.');
+      }
     } finally {
       setLoading(false);
     }
@@ -44,14 +51,12 @@ export default function Login() {
               <FiCheckCircle size={18} /> Telephone verifie avec succes. Vous pouvez maintenant vous connecter.
             </div>
           )}
-          {verified === 'expired' && (
-            <div className="alert alert-error" style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-              <FiXCircle size={18} /> Lien expire. Veuillez refaire une inscription.
-            </div>
-          )}
-          {verified === 'invalid' && (
-            <div className="alert alert-error" style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-              <FiXCircle size={18} /> Lien invalide.
+          {needsVerification && (
+            <div className="alert alert-warning" style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+              <FiSmartphone size={18} /> Compte non verifie.{' '}
+              <Link to={`/verify-code?email=${encodeURIComponent(needsVerification)}`} style={{ color: 'var(--primary)', textDecoration: 'underline', marginLeft: '4px' }}>
+                Entrer le code
+              </Link>
             </div>
           )}
           {error && <div className="alert alert-error">{error}</div>}
