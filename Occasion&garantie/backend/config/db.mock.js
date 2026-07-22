@@ -308,6 +308,12 @@ const mockPool = {
       return [found ? [found] : []];
     }
 
+    // SELECT reservations by screenshot_token
+    if (upper.startsWith('SELECT') && upper.includes('FROM RESERVATIONS') && upper.includes('SCREENSHOT_TOKEN =')) {
+      const reservation = data.reservations.find(r => r.screenshot_token === params[0]);
+      return [reservation ? [reservation] : []];
+    }
+
     // SELECT reservations by id (screenshot lookup)
     if (upper.startsWith('SELECT') && upper.includes('FROM RESERVATIONS') && upper.includes('WHERE ID =') && !upper.includes('USER_ID =')) {
       const reservation = data.reservations.find(r => r.id === Number(params[0]));

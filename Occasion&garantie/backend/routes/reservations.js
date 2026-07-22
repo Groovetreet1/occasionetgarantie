@@ -1,5 +1,4 @@
-const express = require('express');
-const router = express.Router();
+const crypto = require('crypto');
 const multer = require('multer');
 const path = require('path');
 const fs = require('fs');
@@ -72,9 +71,10 @@ router.post('/:id/screenshot', authenticate, screenshotUpload.single('screenshot
     if (!req.file) return res.status(400).json({ message: 'Fichier requis.' });
 
     const filename = req.file.filename;
-    await pool.query('UPDATE reservations SET screenshot = ?, status = ?, screenshot_views = 0 WHERE id = ?', [filename, 'confirmee', reservationId]);
+    const screenshotToken = crypto.randomBytes(24).toString('hex');
+    await pool.query('UPDATE reservations SET screenshot = ?, status = ?, screenshot_token = ?, screenshot_views = 0 WHERE id = ?', [filename, 'confirmee', screenshotToken, reservationId]);
 
-    const screenshotUrl = `${req.protocol}://${req.get('host')}/api/reservations/${reservationId}/screenshot`;
+    const screenshotUrl = `${req.protocol}://${req.get('host')}/api/reservations/screenshot/${screenshotToken}`;
     const clientName = rows[0].full_name;
     const clientPhone = rows[0].phone;
 
@@ -98,19 +98,18 @@ router.post('/:id/screenshot', authenticate, screenshotUpload.single('screenshot
   }
 });
 
-router.get('/:id/screenshot', async (req, res) => {
+router.get('/screenshot/:token', async (req, res) => {
   try {
-    const reservationId = Number(req.params.id);
-    const [rows] = await pool.query('SELECT screenshot, screenshot_views FROM reservations WHERE id = ?', [reservationId]);
+    const [rows] = await pool.query('SELECT screenshot, screenshot_views, id FROM reservations WHERE screenshot_token = ?', [req.params.token]);
     if (rows.length === 0 || !rows[0].screenshot) return res.status(404).json({ message: 'Screenshot introuvable.' });
 
     const views = (rows[0].screenshot_views || 0) + 1;
-    await pool.query('UPDATE reservations SET screenshot_views = ? WHERE id = ?', [views, reservationId]);
+    await pool.query('UPDATE reservations SET screenshot_views = ? WHERE id = ?', [views, rows[0].id]);
 
     if (views >= 5) {
       const filePath = path.join(SCREENSHOT_DIR, rows[0].screenshot);
       if (fs.existsSync(filePath)) fs.unlinkSync(filePath);
-      await pool.query('UPDATE reservations SET screenshot = NULL WHERE id = ?', [reservationId]);
+      await pool.query('UPDATE reservations SET screenshot = NULL, screenshot_token = NULL WHERE id = ?', [rows[0].id]);
       return res.status(404).json({ message: 'Lien expire apres 5 consultations.' });
     }
 
