@@ -1,4 +1,4 @@
-const BASE_URL = 'https://api.gomobile.ma/api';
+const BASE_URL = 'https://gateway.gomobile.ma/api';
 
 function getApiKey() {
   const key = process.env.SMS_API_KEY;
@@ -26,44 +26,12 @@ async function apiFetch(path, options = {}) {
   return data;
 }
 
-let senderIdCache = null;
-
-async function getSenderId() {
-  if (senderIdCache) return senderIdCache;
-  const data = await apiFetch('/sender-ids/available?limit=1');
-  const ids = data?.data || [];
-  if (ids.length === 0) throw new Error('No available sender ID found');
-  senderIdCache = ids[0].id;
-  return senderIdCache;
-}
-
-async function findOrCreateContact(phone) {
-  try {
-    const data = await apiFetch('/contact', {
-      method: 'POST',
-      body: JSON.stringify({ primaryPhone: phone }),
-    });
-    return data.id;
-  } catch (err) {
-    if (err.status === 409) {
-      const data = await apiFetch(`/contact?search=${encodeURIComponent(phone)}&limit=1`);
-      const contacts = data?.data || [];
-      if (contacts.length > 0) return contacts[0].id;
-    }
-    throw err;
-  }
-}
-
 async function sendSms(phone, message) {
-  const [contactId, senderId] = await Promise.all([
-    findOrCreateContact(phone),
-    getSenderId(),
-  ]);
   const data = await apiFetch('/sms/send', {
     method: 'POST',
-    body: JSON.stringify({ contactId, senderId, messageTemplate: message }),
+    body: JSON.stringify({ to: phone, senderId: 'GOMOBILE', message }),
   });
   return data;
 }
 
-module.exports = { sendSms, getSenderId, findOrCreateContact };
+module.exports = { sendSms };
