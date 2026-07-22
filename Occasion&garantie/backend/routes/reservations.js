@@ -72,7 +72,7 @@ router.post('/:id/screenshot', authenticate, screenshotUpload.single('screenshot
     if (!req.file) return res.status(400).json({ message: 'Fichier requis.' });
 
     const filename = req.file.filename;
-    await pool.query('UPDATE reservations SET screenshot = ?, status = ? WHERE id = ?', [filename, 'confirmee', reservationId]);
+    await pool.query('UPDATE reservations SET screenshot = ?, status = ?, screenshot_views = 0 WHERE id = ?', [filename, 'confirmee', reservationId]);
 
     const screenshotUrl = `${req.protocol}://${req.get('host')}/api/reservations/${reservationId}/screenshot`;
     const clientName = rows[0].full_name;
@@ -101,8 +101,18 @@ router.post('/:id/screenshot', authenticate, screenshotUpload.single('screenshot
 router.get('/:id/screenshot', async (req, res) => {
   try {
     const reservationId = Number(req.params.id);
-    const [rows] = await pool.query('SELECT screenshot FROM reservations WHERE id = ?', [reservationId]);
+    const [rows] = await pool.query('SELECT screenshot, screenshot_views FROM reservations WHERE id = ?', [reservationId]);
     if (rows.length === 0 || !rows[0].screenshot) return res.status(404).json({ message: 'Screenshot introuvable.' });
+
+    const views = (rows[0].screenshot_views || 0) + 1;
+    await pool.query('UPDATE reservations SET screenshot_views = ? WHERE id = ?', [views, reservationId]);
+
+    if (views >= 5) {
+      const filePath = path.join(SCREENSHOT_DIR, rows[0].screenshot);
+      if (fs.existsSync(filePath)) fs.unlinkSync(filePath);
+      await pool.query('UPDATE reservations SET screenshot = NULL WHERE id = ?', [reservationId]);
+      return res.status(404).json({ message: 'Lien expire apres 5 consultations.' });
+    }
 
     const filePath = path.join(SCREENSHOT_DIR, rows[0].screenshot);
     if (!fs.existsSync(filePath)) return res.status(404).json({ message: 'Fichier introuvable.' });

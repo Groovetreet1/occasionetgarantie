@@ -314,13 +314,31 @@ const mockPool = {
       return [reservation ? [reservation] : []];
     }
 
-    // UPDATE reservations SET screenshot = ?, status = ? WHERE id = ?
+    // UPDATE reservations SET ... WHERE id = ?
     if (upper.startsWith('UPDATE RESERVATIONS SET') && upper.includes('WHERE ID =')) {
-      const id = params[params.length - 1];
-      const idx = data.reservations.findIndex(r => r.id === Number(id));
+      const id = Number(params[params.length - 1]);
+      const idx = data.reservations.findIndex(r => r.id === id);
       if (idx !== -1) {
-        data.reservations[idx].screenshot = params[0];
-        data.reservations[idx].status = params[1] || 'confirmee';
+        const setClause = sql.substring(sql.toUpperCase().indexOf('SET') + 3, sql.toUpperCase().indexOf('WHERE')).trim();
+        const assignments = setClause.split(',').map(s => s.trim());
+        let paramIdx = 0;
+        assignments.forEach(assignment => {
+          const eqIdx = assignment.indexOf('=');
+          const col = assignment.substring(0, eqIdx).trim().toLowerCase();
+          let val = assignment.substring(eqIdx + 1).trim();
+          if (val === '?') {
+            val = params[paramIdx];
+            paramIdx++;
+          } else if (val.toUpperCase() === 'NULL') {
+            val = null;
+          } else if (val.includes('?')) {
+            val = params[paramIdx];
+            paramIdx++;
+          }
+          if (col !== 'screenshot_views' || val !== undefined) {
+            data.reservations[idx][col] = val;
+          }
+        });
         save();
       }
       return [[]];
