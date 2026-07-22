@@ -88,13 +88,15 @@ router.get('/verify-phone', async (req, res) => {
   if (!token) {
     status = 'error';
   } else {
-    const [users] = await pool.query('SELECT id, verification_expires FROM users WHERE verification_token = ?', [token]);
+    const [users] = await pool.query('SELECT id, phone_verified, verification_expires FROM users WHERE verification_token = ?', [token]);
     if (users.length === 0) {
       status = 'invalid';
     } else if (Date.now() > users[0].verification_expires) {
       status = 'expired';
+    } else if (users[0].phone_verified) {
+      status = 'already';
     } else {
-      await pool.query('UPDATE users SET phone_verified = ?, verification_token = NULL, verification_expires = NULL WHERE id = ?', [true, users[0].id]);
+      await pool.query('UPDATE users SET phone_verified = ? WHERE id = ?', [true, users[0].id]);
     }
   }
 
@@ -102,7 +104,8 @@ router.get('/verify-phone', async (req, res) => {
   const LOGIN_URL = `${req.protocol}://${req.get('host')}/login`;
 
   const messages = {
-    success: { title: 'Compte active !', desc: 'Votre a ete verifie avec succes. Vous pouvez maintenant vous connecter.', icon: '1' },
+    success: { title: 'Compte active !', desc: 'Votre compte a ete verifie avec succes. Vous pouvez maintenant vous connecter.', icon: '1' },
+    already: { title: 'Deja verifie !', desc: 'Votre compte est deja actif. Connectez-vous pour acceder a votre profil.', icon: '1' },
     expired: { title: 'Lien expire', desc: 'Ce lien de verification a expire. Veuillez refaire une inscription.', icon: '!' },
     invalid: { title: 'Lien invalide', desc: 'Ce lien de verification n\'est pas valide.', icon: 'X' },
     error: { title: 'Erreur', desc: 'Aucun token de verification fourni.', icon: '!' },
