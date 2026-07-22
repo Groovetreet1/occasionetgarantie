@@ -68,6 +68,12 @@ const mockPool = {
       return [user ? [user] : []];
     }
 
+    // SELECT users by role
+    if (upper.startsWith('SELECT') && upper.includes('FROM USERS') && upper.includes('WHERE ROLE =')) {
+      const users = data.users.filter(u => u.role === params[0]);
+      return [users];
+    }
+
     // SELECT users by verification_token
     if (upper.startsWith('SELECT') && upper.includes('FROM USERS') && upper.includes('WHERE VERIFICATION_TOKEN =')) {
       const user = data.users.find(u => u.verification_token === params[0]);
