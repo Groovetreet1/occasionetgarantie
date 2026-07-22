@@ -250,6 +250,45 @@ const mockPool = {
       return [[]];
     }
 
+    // INSERT INTO reservations
+    if (upper.startsWith('INSERT INTO RESERVATIONS')) {
+      const colsMatch = sql.match(/\(([^)]+)\)\s*VALUES/i);
+      const colNames = colsMatch ? colsMatch[1].split(',').map(c => c.trim().toLowerCase()) : [];
+      const newRow = { id: data.nextId.reservations++, created_at: new Date().toISOString() };
+      colNames.forEach((col, i) => {
+        if (col === 'status') newRow[col] = params[i] || 'en_attente';
+        else newRow[col] = params[i];
+      });
+      data.reservations.push(newRow);
+      save();
+      return [{ insertId: newRow.id }];
+    }
+
+    // SELECT reservations with JOIN products
+    if (upper.startsWith('SELECT') && upper.includes('FROM RESERVATIONS R') && upper.includes('JOIN PRODUCTS P')) {
+      const userId = params[0];
+      const results = data.reservations
+        .filter(r => r.user_id === userId)
+        .map(r => {
+          const product = data.products.find(p => p.id === r.product_id);
+          return { ...r, product_name: product ? product.name : null, product_price: product ? product.price : null };
+        })
+        .sort((a, b) => new Date(b.created_at) - new Date(a.created_at));
+      return [results];
+    }
+
+    // SELECT reservations by user + product + status
+    if (upper.startsWith('SELECT') && upper.includes('FROM RESERVATIONS') && upper.includes('WHERE USER_ID =') && upper.includes('PRODUCT_ID =') && upper.includes('STATUS =')) {
+      const userIdx = sql.toUpperCase().indexOf('USER_ID =') + 10;
+      const prodIdx = sql.toUpperCase().indexOf('PRODUCT_ID =');
+      const statIdx = sql.toUpperCase().indexOf('STATUS =');
+      const userParam = Number(params[0]);
+      const prodParam = Number(params[1]);
+      const statParam = params[2];
+      const found = data.reservations.find(r => r.user_id === userParam && r.product_id === prodParam && r.status === statParam);
+      return [found ? [found] : []];
+    }
+
     console.log('Unhandled SQL:', sql, JSON.stringify(params));
     return [[]];
   }

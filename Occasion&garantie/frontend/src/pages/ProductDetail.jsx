@@ -1,8 +1,10 @@
 import { useParams, Link } from 'react-router-dom';
 import { useEffect, useState } from 'react';
-import { FiArrowLeft, FiShoppingBag, FiShield, FiCheck, FiMonitor, FiCpu, FiHardDrive, FiBattery, FiCamera, FiDroplet, FiX, FiChevronLeft, FiChevronRight } from 'react-icons/fi';
+import { FiArrowLeft, FiShoppingBag, FiShield, FiCheck, FiMonitor, FiCpu, FiHardDrive, FiBattery, FiCamera, FiDroplet, FiX, FiChevronLeft, FiChevronRight, FiLock, FiUserPlus } from 'react-icons/fi';
 import { BsWhatsapp } from 'react-icons/bs';
+import { MdPayment } from 'react-icons/md';
 import api from '../api/axios';
+import { useAuth } from '../context/AuthContext';
 
 const stateLabels = {
   neuf: 'Neuf',
@@ -28,10 +30,14 @@ const WHATSAPP_NUMBER = '212669017295';
 
 export default function ProductDetail() {
   const { slug } = useParams();
+  const { user } = useAuth();
   const [product, setProduct] = useState(null);
   const [loading, setLoading] = useState(true);
   const [selectedImage, setSelectedImage] = useState(null);
   const [lightboxIndex, setLightboxIndex] = useState(0);
+  const [reserving, setReserving] = useState(false);
+  const [reserved, setReserved] = useState(false);
+  const [reserveMsg, setReserveMsg] = useState('');
 
   useEffect(() => {
     window.scrollTo(0, 0);
@@ -84,6 +90,21 @@ export default function ProductDetail() {
 
   const nextImage = () => {
     setLightboxIndex((i) => (i + 1) % allImages.length);
+  };
+
+  const handleReserve = async () => {
+    if (!user) return;
+    setReserving(true);
+    setReserveMsg('');
+    try {
+      const { data } = await api.post('/reservations', { productId: product.id });
+      setReserved(true);
+      setReserveMsg(data.message);
+    } catch (err) {
+      setReserveMsg(err.response?.data?.message || 'Erreur lors de la reservation.');
+    } finally {
+      setReserving(false);
+    }
   };
 
   return (
@@ -195,6 +216,50 @@ export default function ProductDetail() {
               <p style={{ textAlign: 'center', color: 'var(--text-muted)', fontSize: '12px', marginTop: '8px' }}>
                 Réponse sous 24h | Paiement sécurisé
               </p>
+
+              <div style={{ marginTop: '24px', borderTop: '1px solid var(--border)', paddingTop: '20px' }}>
+                <h3 style={{ fontSize: '16px', fontWeight: 700, marginBottom: '8px', display: 'flex', alignItems: 'center', gap: '8px' }}>
+                  <MdPayment size={20} style={{ color: 'var(--primary)' }} /> Reserver ce produit
+                </h3>
+                <p style={{ fontSize: '13px', color: 'var(--text-secondary)', marginBottom: '12px' }}>
+                  Versez seulement <strong>200 DH</strong> pour reserver ce produit. Le montant sera deduit du prix total.
+                </p>
+                {!user ? (
+                  <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
+                    <Link to="/login" className="btn btn-primary" style={{ justifyContent: 'center', fontSize: '14px' }}>
+                      <FiLock size={16} /> Connectez-vous pour reserver
+                    </Link>
+                    <Link to="/signup" className="btn btn-secondary" style={{ justifyContent: 'center', fontSize: '13px' }}>
+                      <FiUserPlus size={16} /> Creer un compte
+                    </Link>
+                  </div>
+                ) : reserved ? (
+                  <div className="alert alert-success" style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                    <FiCheck size={18} /> {reserveMsg}
+                  </div>
+                ) : (
+                  <>
+                    {reserveMsg && !reserved && (
+                      <div className="alert alert-error">{reserveMsg}</div>
+                    )}
+                    <button
+                      onClick={handleReserve}
+                      disabled={reserving}
+                      className="btn"
+                      style={{
+                        width: '100%',
+                        background: 'var(--success)',
+                        color: 'white',
+                        justifyContent: 'center',
+                        fontSize: '15px',
+                        padding: '14px',
+                      }}
+                    >
+                      {reserving ? 'Reservation...' : `Reserver (200 DH)`}
+                    </button>
+                  </>
+                )}
+              </div>
             </div>
           </div>
         </div>

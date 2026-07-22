@@ -828,6 +828,8 @@
     "products": 55,
     "orders": 1,
     "order_items": 1,
-    "product_images": 1
-  }
+    "product_images": 1,
+    "reservations": 1
+  },
+  "reservations": []
 }

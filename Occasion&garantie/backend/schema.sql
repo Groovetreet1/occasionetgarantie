@@ -73,6 +73,17 @@ CREATE TABLE order_items (
   FOREIGN KEY (product_id) REFERENCES products(id) ON DELETE CASCADE
 );
 
+CREATE TABLE reservations (
+  id INT AUTO_INCREMENT PRIMARY KEY,
+  user_id INT NOT NULL,
+  product_id INT NOT NULL,
+  amount DECIMAL(10,2) NOT NULL DEFAULT 200.00,
+  status ENUM('en_attente', 'confirmee', 'remboursee') DEFAULT 'en_attente',
+  created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+  FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE,
+  FOREIGN KEY (product_id) REFERENCES products(id) ON DELETE CASCADE
+);
+
 INSERT INTO categories (name, slug) VALUES
 ('Smartphones', 'smartphones'),
 ('Tablettes', 'tablettes'),

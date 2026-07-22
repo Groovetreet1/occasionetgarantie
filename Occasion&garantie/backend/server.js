@@ -9,6 +9,7 @@ const authRoutes = require('./routes/auth');
 const productRoutes = require('./routes/products');
 const categoryRoutes = require('./routes/categories');
 const uploadRoutes = require('./routes/upload');
+const reservationRoutes = require('./routes/reservations');
 
 const app = express();
 app.set('trust proxy', 1);
@@ -41,6 +42,7 @@ app.use('/api/auth', authLimiter, authRoutes);
 app.use('/api/products', productRoutes);
 app.use('/api/categories', categoryRoutes);
 app.use('/api/upload', uploadRoutes);
+app.use('/api/reservations', reservationRoutes);
 
 app.get('/ads.txt', (req, res) => {
   res.type('text/plain').send('google.com, pub-3266333749754332, DIRECT, f08c47fec0942fa0');
