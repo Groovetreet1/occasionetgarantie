@@ -2,13 +2,97 @@
   "users": [
     {
       "id": 1,
-      "full_name": "Admin",
+      "full_name": "AdminRenamed",
       "email": "admin@og.fr",
       "password": "$2a$10$YAP5X8atYvbXQYFSugi2y./KHz9aoU3QgLkT8p1UKRb7h8of.JM0a",
       "phone": "0600000000",
       "role": "admin",
       "created_at": "2026-06-16T13:00:44.464Z",
       "phone_verified": true
+    },
+    {
+      "id": 2,
+      "full_name": "Test User",
+      "email": "test@test.com",
+      "password": "$2a$10$.BBfv3uLdWmFeUK3R3iJv.hVT8nvCDv9DIVsAhh5QxBcsQStX8ojy",
+      "phone": "+212600000000",
+      "role": "client",
+      "phone_verified": "6326cd76ead4758c7378fe4c028e19ef83a942b2d55e29ca060a9a436f061b1c",
+      "verification_token": 1784724654557,
+      "verification_expires": null,
+      "created_at": "2026-07-22T12:35:54.557Z"
+    },
+    {
+      "id": 3,
+      "full_name": "Test",
+      "email": "test-1784723863727@test.com",
+      "password": "hash",
+      "phone": "+212600000000",
+      "role": "client",
+      "phone_verified": "mytesttoken1784723863727",
+      "verification_token": 1784724763727,
+      "verification_expires": null,
+      "created_at": "2026-07-22T12:37:43.729Z"
+    },
+    {
+      "id": 4,
+      "created_at": "2026-07-22T12:39:29.547Z",
+      "full_name": "Test",
+      "email": "test-1784723969544@test.com",
+      "password": "hash",
+      "phone": "+212600000000",
+      "phone_verified": true,
+      "verification_token": "mytesttoken1784723969544",
+      "verification_expires": 1784724869544,
+      "role": "client"
+    },
+    {
+      "id": 5,
+      "created_at": "2026-07-22T12:40:13.397Z",
+      "full_name": "Test",
+      "email": "t1784724013394@t.com",
+      "password": "hash",
+      "phone": "+2126",
+      "phone_verified": true,
+      "verification_token": "tok_1784724013394",
+      "verification_expires": 1784724913394,
+      "role": "client"
+    },
+    {
+      "id": 6,
+      "created_at": "2026-07-22T12:40:38.091Z",
+      "full_name": "Dbg",
+      "email": "dbg1784724038088@t.com",
+      "password": "hash",
+      "phone": "+212699",
+      "phone_verified": true,
+      "verification_token": "dbg_1784724038088",
+      "verification_expires": 1784724938088,
+      "role": "client"
+    },
+    {
+      "id": 7,
+      "created_at": "2026-07-22T12:41:07.452Z",
+      "full_name": "Test",
+      "email": "tu1784724067451@t.com",
+      "password": "hash",
+      "phone": "+2126",
+      "phone_verified": true,
+      "verification_token": "testupdate_1784724067451",
+      "verification_expires": 1784724967451,
+      "role": "client"
+    },
+    {
+      "id": 8,
+      "created_at": "2026-07-22T12:42:33.836Z",
+      "full_name": "Final",
+      "email": "final1784724153828@t.com",
+      "password": "hash",
+      "phone": "+212699",
+      "phone_verified": true,
+      "verification_token": null,
+      "verification_expires": null,
+      "role": "client"
     }
   ],
   "products": [
@@ -810,7 +894,7 @@
   "order_items": [],
   "product_images": [],
   "nextId": {
-    "users": 2,
+    "users": 9,
     "products": 55,
     "orders": 1,
     "order_items": 1,

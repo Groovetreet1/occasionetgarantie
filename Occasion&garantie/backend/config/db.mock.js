@@ -76,18 +76,20 @@ const mockPool = {
 
     // INSERT INTO users
     if (upper.startsWith('INSERT INTO USERS')) {
-      const newUser = {
-        id: data.nextId.users++,
-        full_name: params[0],
-        email: params[1],
-        password: params[2],
-        phone: params[3] || null,
-        role: params[4] || 'client',
-        phone_verified: params[5] === undefined ? false : params[5],
-        verification_token: params[6] || null,
-        verification_expires: params[7] || null,
-        created_at: new Date().toISOString(),
-      };
+      const colsMatch = sql.match(/\(([^)]+)\)\s*VALUES/i);
+      const colNames = colsMatch ? colsMatch[1].split(',').map(c => c.trim().toLowerCase()) : [];
+      const newUser = { id: data.nextId.users++, created_at: new Date().toISOString() };
+      colNames.forEach((col, i) => {
+        const val = params[i];
+        if (col === 'password') newUser.password = val;
+        else if (col === 'phone_verified') newUser.phone_verified = val === undefined ? false : !!val;
+        else if (col === 'role') newUser.role = val || 'client';
+        else if (col === 'verification_token') newUser.verification_token = val || null;
+        else if (col === 'verification_expires') newUser.verification_expires = val || null;
+        else newUser[col] = val;
+      });
+      if (!newUser.role) newUser.role = 'client';
+      if (newUser.phone_verified === undefined) newUser.phone_verified = false;
       data.users.push(newUser);
       save();
       return [{ insertId: newUser.id }];
@@ -180,48 +182,25 @@ const mockPool = {
       return [{ insertId: newProduct.id }];
     }
 
-    // UPDATE users SET password = ? WHERE id = ? (reset password by id)
-    if (upper.startsWith('UPDATE USERS SET') && upper.includes('PASSWORD =') && upper.includes('WHERE ID =')) {
-      const id = params[1];
-      const idx = data.users.findIndex(u => u.id === id);
-      if (idx !== -1) {
-        data.users[idx].password = params[0];
-        save();
-      }
-      return [[]];
-    }
-
-    // UPDATE users SET password = ? WHERE email = ? (reset password)
-    if (upper.startsWith('UPDATE USERS SET') && upper.includes('WHERE EMAIL =')) {
-      const password = params[0];
-      const email = params[1];
-      const idx = data.users.findIndex(u => u.email === email);
-      if (idx !== -1) {
-        data.users[idx].password = password;
-        save();
-      }
-      return [[]];
-    }
-
-    // UPDATE users SET phone_verified = ? WHERE id = ?
-    if (upper.startsWith('UPDATE USERS SET') && upper.includes('PHONE_VERIFIED') && upper.includes('WHERE ID =')) {
-      const idx = data.users.findIndex(u => u.id === params[1]);
-      if (idx !== -1) {
-        data.users[idx].phone_verified = params[0];
-        save();
-      }
-      return [[]];
-    }
-
-    // UPDATE users SET full_name = ?, email = ?, phone = ? WHERE id = ? (profile)
-    if (upper.startsWith('UPDATE USERS SET') && !upper.includes('PHONE_VERIFIED') && !upper.includes('PASSWORD') && upper.includes('WHERE ID =')) {
+    // UPDATE users SET ... WHERE id = ?
+    if (upper.startsWith('UPDATE USERS SET') && upper.includes('WHERE ID =')) {
       const id = params[params.length - 1];
-      const idx = data.users.findIndex(u => u.id === id);
+      const idx = data.users.findIndex(u => u.id === Number(id));
       if (idx !== -1) {
-        const cols = parseCols(sql);
-        cols.forEach((assignment, i) => {
-          const col = assignment.split('=')[0].trim().toLowerCase();
-          data.users[idx][col] = params[i];
+        const setClause = sql.substring(sql.toUpperCase().indexOf('SET') + 3, sql.toUpperCase().indexOf('WHERE')).trim();
+        const assignments = setClause.split(',').map(s => s.trim());
+        let paramIdx = 0;
+        assignments.forEach(assignment => {
+          const eqIdx = assignment.indexOf('=');
+          const col = assignment.substring(0, eqIdx).trim().toLowerCase();
+          let val = assignment.substring(eqIdx + 1).trim();
+          if (val === '?') {
+            val = params[paramIdx];
+            paramIdx++;
+          } else if (val.toUpperCase() === 'NULL') {
+            val = null;
+          }
+          data.users[idx][col] = val;
         });
         save();
       }
@@ -233,8 +212,8 @@ const mockPool = {
       const slug = params[params.length - 1];
       const idx = data.products.findIndex(p => p.slug === slug);
       if (idx !== -1) {
-        const cols = parseCols(sql);
-        cols.forEach((assignment, i) => {
+        const assignments = parseCols(sql);
+        assignments.forEach((assignment, i) => {
           const col = assignment.split('=')[0].trim().toLowerCase();
           if (col === 'specs') data.products[idx][col] = params[i];
         });
@@ -248,8 +227,8 @@ const mockPool = {
       const id = params[params.length - 1];
       const idx = data.products.findIndex(p => p.id === Number(id));
       if (idx !== -1) {
-        const cols = parseCols(sql);
-        cols.forEach((assignment, i) => {
+        const assignments = parseCols(sql);
+        assignments.forEach((assignment, i) => {
           const col = assignment.split('=')[0].trim().toLowerCase();
           if (col === 'specs') data.products[idx][col] = params[i];
           else if (col === 'name') data.products[idx].name = params[i];
@@ -268,14 +247,6 @@ const mockPool = {
         });
         save();
       }
-      return [[]];
-    }
-
-    // DELETE FROM products WHERE id = ?
-    if (upper.startsWith('DELETE FROM PRODUCTS')) {
-      const id = params[0];
-      data.products = data.products.filter(p => p.id !== Number(id));
-      save();
       return [[]];
     }
 
