@@ -10,6 +10,8 @@ CREATE TABLE users (
   avatar VARCHAR(255),
   role ENUM('client', 'admin') DEFAULT 'client',
   phone_verified BOOLEAN DEFAULT FALSE,
+  verification_token VARCHAR(128),
+  verification_expires BIGINT,
   created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );
 

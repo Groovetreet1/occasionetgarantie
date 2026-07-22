@@ -12,7 +12,6 @@ const gomobile = require('../services/gomobile');
 
 const router = express.Router();
 
-const verifyTokens = new Map();
 const resetCodes = new Map();
 const phoneChangeCodes = new Map();
 const CODE_EXPIRY = 15 * 60 * 1000;
@@ -60,13 +59,12 @@ router.post('/signup', [
       return res.status(400).json({ message: 'Cet email est déjà utilisé.' });
     }
     const hashed = await bcrypt.hash(password, 10);
-    const [result] = await pool.query(
-      'INSERT INTO users (full_name, email, password, phone, phone_verified) VALUES (?, ?, ?, ?, ?)',
-      [fullName, email, hashed, phone, false]
-    );
-
     const token = generateToken();
-    verifyTokens.set(token, { userId: result.insertId, email, expiresAt: Date.now() + CODE_EXPIRY });
+    const expiresAt = Date.now() + CODE_EXPIRY;
+    const [result] = await pool.query(
+      'INSERT INTO users (full_name, email, password, phone, phone_verified, verification_token, verification_expires) VALUES (?, ?, ?, ?, ?, ?, ?)',
+      [fullName, email, hashed, phone, false, token, expiresAt]
+    );
 
     const verifyUrl = `${req.protocol}://${req.get('host')}/api/auth/verify-phone?token=${token}`;
     try {
@@ -90,24 +88,18 @@ router.get('/verify-phone', async (req, res) => {
   if (!token) {
     status = 'error';
   } else {
-    const entry = verifyTokens.get(token);
-    if (!entry) {
+    const [users] = await pool.query('SELECT id, verification_expires FROM users WHERE verification_token = ?', [token]);
+    if (users.length === 0) {
       status = 'invalid';
-    } else if (Date.now() > entry.expiresAt) {
-      verifyTokens.delete(token);
+    } else if (Date.now() > users[0].verification_expires) {
       status = 'expired';
     } else {
-      await pool.query('UPDATE users SET phone_verified = ? WHERE id = ?', [true, entry.userId]);
-      verifyTokens.delete(token);
+      await pool.query('UPDATE users SET phone_verified = ?, verification_token = NULL, verification_expires = NULL WHERE id = ?', [true, users[0].id]);
     }
   }
 
   const SITE_NAME = 'Occasion & Garantie';
   const LOGIN_URL = `${req.protocol}://${req.get('host')}/login`;
-
-  if (status !== 'success') {
-    console.log(`Verify-phone: status=${status}, token=${token ? token.slice(0,12)+'...' : 'none'}, entries=${verifyTokens.size}`);
-  }
 
   const messages = {
     success: { title: 'Compte active !', desc: 'Votre a ete verifie avec succes. Vous pouvez maintenant vous connecter.', icon: '1' },

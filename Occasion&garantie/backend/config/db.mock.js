@@ -68,6 +68,12 @@ const mockPool = {
       return [user ? [user] : []];
     }
 
+    // SELECT users by verification_token
+    if (upper.startsWith('SELECT') && upper.includes('FROM USERS') && upper.includes('WHERE VERIFICATION_TOKEN =')) {
+      const user = data.users.find(u => u.verification_token === params[0]);
+      return [user ? [user] : []];
+    }
+
     // INSERT INTO users
     if (upper.startsWith('INSERT INTO USERS')) {
       const newUser = {
@@ -78,6 +84,8 @@ const mockPool = {
         phone: params[3] || null,
         role: params[4] || 'client',
         phone_verified: params[5] === undefined ? false : params[5],
+        verification_token: params[6] || null,
+        verification_expires: params[7] || null,
         created_at: new Date().toISOString(),
       };
       data.users.push(newUser);
