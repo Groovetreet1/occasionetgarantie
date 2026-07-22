@@ -73,10 +73,10 @@ router.post('/:id/screenshot', authenticate, screenshotUpload.single('screenshot
     if (!req.file) return res.status(400).json({ message: 'Fichier requis.' });
 
     const filename = req.file.filename;
-    const screenshotToken = crypto.randomBytes(24).toString('hex');
+    const screenshotToken = crypto.randomBytes(8).toString('hex');
     await pool.query('UPDATE reservations SET screenshot = ?, status = ?, screenshot_token = ?, screenshot_views = 0 WHERE id = ?', [filename, 'confirmee', screenshotToken, reservationId]);
 
-    const screenshotUrl = `${req.protocol}://${req.get('host')}/api/reservations/screenshot/${screenshotToken}`;
+    const screenshotUrl = `${req.protocol}://${req.get('host')}/api/reservations/s/${screenshotToken}`;
     const clientName = rows[0].full_name;
     const clientPhone = rows[0].phone;
 
@@ -87,7 +87,7 @@ router.post('/:id/screenshot', authenticate, screenshotUpload.single('screenshot
         adminPhone = admins[0].phone;
       }
       if (adminPhone) {
-        const smsMessage = `Nouveau versement - Reservation #${reservationId} Client: ${clientName} Tel: ${clientPhone} Photo: ${screenshotUrl}`;
+        const smsMessage = `Paiement #${reservationId} ${clientName} ${clientPhone} ${screenshotUrl}`;
         await gomobile.sendSms(adminPhone, smsMessage);
       }
     } catch (smsErr) {
@@ -100,7 +100,7 @@ router.post('/:id/screenshot', authenticate, screenshotUpload.single('screenshot
   }
 });
 
-router.get('/screenshot/:token', async (req, res) => {
+router.get('/s/:token', async (req, res) => {
   try {
     const [rows] = await pool.query('SELECT screenshot, screenshot_views, id FROM reservations WHERE screenshot_token = ?', [req.params.token]);
     if (rows.length === 0 || !rows[0].screenshot) return res.status(404).json({ message: 'Screenshot introuvable.' });
