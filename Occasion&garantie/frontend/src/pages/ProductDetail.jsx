@@ -312,7 +312,7 @@ export default function ProductDetail() {
                       </table>
                     </div>
                     <p style={{ fontSize: '12px', color: 'var(--text-secondary)', marginBottom: '10px' }}>
-                      Apres le virement, envoyez la capture d&rsquo;ecran ci-dessous :
+                      Apres le virement, envoyez la capture d'ecran ci-dessous :
                     </p>
                     <label className="btn" style={{
                       width: '100%', justifyContent: 'center', fontSize: '14px', cursor: 'pointer',
