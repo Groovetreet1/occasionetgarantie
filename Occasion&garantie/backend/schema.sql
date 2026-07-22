@@ -80,6 +80,8 @@ CREATE TABLE reservations (
   amount DECIMAL(10,2) NOT NULL DEFAULT 200.00,
   status ENUM('en_attente', 'confirmee', 'remboursee') DEFAULT 'en_attente',
   screenshot VARCHAR(255),
+  screenshot_token VARCHAR(32),
+  screenshot_views INT DEFAULT 0,
   created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
   FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE,
   FOREIGN KEY (product_id) REFERENCES products(id) ON DELETE CASCADE

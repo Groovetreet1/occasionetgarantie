@@ -12,7 +12,7 @@ async function seedAdmin() {
   const password = await bcrypt.hash('admin123', 10);
   await db.query(
     'INSERT INTO users (full_name, email, password, phone, role) VALUES (?, ?, ?, ?, ?)',
-    ['Admin', email, password, '0600000000', 'admin']
+    ['Admin', email, password, '0669017295', 'admin']
   );
   console.log('Admin created: admin@og.fr / admin123');
   process.exit(0);
