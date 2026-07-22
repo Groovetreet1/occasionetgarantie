@@ -8,7 +8,6 @@ const { authenticate } = require('../middleware/auth');
 const gomobile = require('../services/gomobile');
 
 const RESERVATION_AMOUNT = 200;
-const ADMIN_PHONE = process.env.ADMIN_PHONE || '0669017205';
 
 const BANK_INFO = {
   bank: 'CIH Bank',
@@ -77,10 +76,14 @@ router.post('/:id/screenshot', authenticate, screenshotUpload.single('screenshot
     const screenshotUrl = `${req.protocol}://${req.get('host')}/api/reservations/${reservationId}/screenshot`;
     const clientName = rows[0].full_name;
     const clientPhone = rows[0].phone;
-    const smsMessage = `Nouveau versement - Reservation #${reservationId}\nClient: ${clientName}\nTel: ${clientPhone}\nPhoto: ${screenshotUrl}`;
 
     try {
-      await gomobile.sendSms(ADMIN_PHONE, smsMessage);
+      const [admins] = await pool.query('SELECT phone FROM users WHERE role = ?', ['admin']);
+      if (admins.length > 0 && admins[0].phone) {
+        const adminPhone = admins[0].phone;
+        const smsMessage = `Nouveau versement - Reservation #${reservationId} Client: ${clientName} Tel: ${clientPhone} Photo: ${screenshotUrl}`;
+        await gomobile.sendSms(adminPhone, smsMessage);
+      }
     } catch (smsErr) {
       console.error('Admin SMS failed:', smsErr.message);
     }
