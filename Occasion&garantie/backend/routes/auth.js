@@ -103,13 +103,17 @@ router.get('/verify-phone', async (req, res) => {
   }
 
   const SITE_NAME = 'Occasion & Garantie';
-  const LOGIN_URL = `${CLIENT_URL}/login`;
+  const LOGIN_URL = `${req.protocol}://${req.get('host')}/login`;
+
+  if (status !== 'success') {
+    console.log(`Verify-phone: status=${status}, token=${token ? token.slice(0,12)+'...' : 'none'}, entries=${verifyTokens.size}`);
+  }
 
   const messages = {
-    success: { title: 'Compte active !', desc: 'Votre compte a ete verifie avec succes. Vous pouvez maintenant vous connecter.', icon: '✅' },
-    expired: { title: 'Lien expire', desc: 'Ce lien de verification a expire. Veuillez refaire une inscription.', icon: '⏰' },
-    invalid: { title: 'Lien invalide', desc: 'Ce lien de verification n\'est pas valide.', icon: '❌' },
-    error: { title: 'Erreur', desc: 'Aucun token de verification fourni.', icon: '⚠️' },
+    success: { title: 'Compte active !', desc: 'Votre a ete verifie avec succes. Vous pouvez maintenant vous connecter.', icon: '1' },
+    expired: { title: 'Lien expire', desc: 'Ce lien de verification a expire. Veuillez refaire une inscription.', icon: '!' },
+    invalid: { title: 'Lien invalide', desc: 'Ce lien de verification n\'est pas valide.', icon: 'X' },
+    error: { title: 'Erreur', desc: 'Aucun token de verification fourni.', icon: '!' },
   };
 
   const m = messages[status] || messages.error;
@@ -120,22 +124,25 @@ router.get('/verify-phone', async (req, res) => {
 <title>${SITE_NAME} - Verification</title>
 <style>
   *{margin:0;padding:0;box-sizing:border-box}
-  body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;
-    background:linear-gradient(135deg,#667eea,#764ba2);min-height:100vh;
+  body{font-family:Inter,-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;
+    background:linear-gradient(135deg,var(--c1,#1a1a2e),var(--c2,#16213e));min-height:100vh;
     display:flex;align-items:center;justify-content:center;padding:20px}
-  .card{background:#fff;border-radius:20px;padding:40px;max-width:420px;
-    width:100%;text-align:center;box-shadow:0 20px 60px rgba(0,0,0,0.3)}
-  .icon{font-size:64px;margin-bottom:16px}
-  h1{font-size:24px;margin-bottom:12px;color:#1a1a2e}
-  p{font-size:16px;color:#666;margin-bottom:24px;line-height:1.5}
+  .card{background:#1e1e3a;border-radius:20px;padding:40px;max-width:420px;
+    width:100%;text-align:center;box-shadow:0 20px 60px rgba(0,0,0,0.4);border:1px solid rgba(255,255,255,0.08)}
+  .icn{width:72px;height:72px;border-radius:50%;display:flex;align-items:center;justify-content:center;
+    margin:0 auto 16px;font-size:32px;font-weight:800}
+  .icn-ok{background:rgba(0,200,83,0.15);color:#00c853}
+  .icn-err{background:rgba(255,82,82,0.15);color:#ff5252}
+  h1{font-size:24px;margin-bottom:12px;color:#fff}
+  p{font-size:16px;color:rgba(255,255,255,0.6);margin-bottom:24px;line-height:1.5}
   .btn{display:inline-block;padding:14px 32px;background:linear-gradient(135deg,#667eea,#764ba2);
-    color:#fff;text-decoration:none;border-radius:12px;font-weight:600;font-size:16px}
+    color:#fff;text-decoration:none;border-radius:12px;font-weight:600;font-size:16px;transition:opacity .2s}
   .btn:hover{opacity:0.9}
-  .footer{margin-top:24px;font-size:13px;color:#999}
+  .footer{margin-top:24px;font-size:13px;color:rgba(255,255,255,0.3)}
 </style></head>
 <body>
   <div class="card">
-    <div class="icon">${m.icon}</div>
+    <div class="icn ${status === 'success' ? 'icn-ok' : 'icn-err'}">${m.icon}</div>
     <h1>${m.title}</h1>
     <p>${m.desc}</p>
     <a href="${LOGIN_URL}" class="btn">Se connecter</a>
