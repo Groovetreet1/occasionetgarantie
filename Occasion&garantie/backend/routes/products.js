@@ -111,13 +111,17 @@ router.get('/:slug', async (req, res) => {
     try {
       const [rows] = await pool.query(sql, [req.params.slug]);
       if (rows.length === 0) return res.status(404).json({ message: 'Produit introuvable.' });
-      return res.json(rows[0]);
+      const product = rows[0];
+      if (!product.seller_phone) product.seller_phone = '212669017295';
+      return res.json(product);
     } catch (e) {
       if (e.errno === 1054 || e.code === 'ER_BAD_FIELD_ERROR') {
         sql = sql.replace(/,\s*\(u\.premium.*?as seller_premium/i, '');
         const [rows] = await pool.query(sql, [req.params.slug]);
         if (rows.length === 0) return res.status(404).json({ message: 'Produit introuvable.' });
-        return res.json(rows[0]);
+        const product = rows[0];
+        if (!product.seller_phone) product.seller_phone = '212669017295';
+        return res.json(product);
       }
       throw e;
     }

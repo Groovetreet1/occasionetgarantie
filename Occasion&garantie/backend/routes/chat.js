@@ -38,8 +38,8 @@ router.post('/conversations', authenticate, async (req, res) => {
     if (req.user.id === sellerId) return res.status(400).json({ message: 'Vous ne pouvez pas vous ecrire a vous-meme.' });
 
     const [existing] = await pool.query(
-      'SELECT * FROM conversations WHERE buyer_id = ? AND seller_id = ? AND product_id IS NOT DISTINCT FROM ? ORDER BY updated_at DESC LIMIT 1',
-      [req.user.id, sellerId, productId || null]
+      'SELECT * FROM conversations WHERE buyer_id = ? AND seller_id = ? AND (product_id = ? OR (product_id IS NULL AND ? IS NULL)) ORDER BY updated_at DESC LIMIT 1',
+      [req.user.id, sellerId, productId || null, productId || null]
     );
     if (existing.length > 0) return res.json(existing[0]);
 
@@ -50,6 +50,7 @@ router.post('/conversations', authenticate, async (req, res) => {
     const conv = { id: result.insertId, buyer_id: req.user.id, seller_id: sellerId, product_id: productId, product_name: productName };
     res.status(201).json(conv);
   } catch (err) {
+    console.error('POST /conversations:', err.message);
     res.status(500).json({ message: 'Erreur serveur.' });
   }
 });
@@ -71,6 +72,7 @@ router.get('/conversations', authenticate, async (req, res) => {
     );
     res.json(rows);
   } catch (err) {
+    console.error('GET /conversations:', err.message);
     res.status(500).json({ message: 'Erreur serveur.' });
   }
 });
@@ -89,6 +91,7 @@ router.get('/conversations/:id/messages', authenticate, async (req, res) => {
     );
     res.json(rows);
   } catch (err) {
+    console.error('GET /conversations/:id/messages:', err.message);
     res.status(500).json({ message: 'Erreur serveur.' });
   }
 });
@@ -111,6 +114,7 @@ router.post('/conversations/:id/messages', authenticate, async (req, res) => {
     const msg = { id: result.insertId, conversation_id: Number(req.params.id), sender_id: req.user.id, text: text.trim(), created_at: new Date().toISOString(), sender_name: req.user.fullName || req.user.full_name };
     res.status(201).json(msg);
   } catch (err) {
+    console.error('POST /conversations/:id/messages:', err.message);
     res.status(500).json({ message: 'Erreur serveur.' });
   }
 });
