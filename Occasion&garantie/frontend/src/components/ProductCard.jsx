@@ -1,6 +1,6 @@
 import { Link } from 'react-router-dom';
 import { motion } from 'framer-motion';
-import { FiShoppingBag } from 'react-icons/fi';
+import { FiShoppingBag, FiUser } from 'react-icons/fi';
 
 const API_BASE = import.meta.env.VITE_API_URL || '';
 
@@ -35,6 +35,9 @@ export default function ProductCard({ product, index = 0 }) {
         <div className="product-info">
           <div className="product-category">{product.category_name || 'Non classé'}</div>
           <h3>{product.name}</h3>
+          {product.seller_name && (
+            <div className="product-seller"><FiUser size={10} /> {product.seller_name}</div>
+          )}
           <div className="product-price">
             <span className="price-current">{formatPrice(product.price)}</span>
             {product.old_price && <span className="price-old">{formatPrice(product.old_price)}</span>}
