@@ -590,13 +590,15 @@ input, textarea, select, button { font-family: inherit; }
 }
 .form-group { margin-bottom: 18px; }
 .form-group label { display: block; font-size: 13px; font-weight: 600; margin-bottom: 6px; color: var(--text-secondary); }
-.form-group input {
-  width: 100%; padding: 12px 16px; background: var(--bg-secondary);
+.form-control {
+  width: 100%; padding: 10px 14px; background: var(--bg-secondary);
   border: 1px solid var(--border-light); border-radius: var(--radius);
   color: var(--text-primary); font-size: 14px; outline: none;
-  transition: var(--transition);
+  transition: var(--transition); font-family: var(--font);
 }
-.form-group input:focus { border-color: var(--primary); box-shadow: 0 0 0 3px var(--primary-glow); }
+.form-control:focus { border-color: var(--primary); box-shadow: 0 0 0 3px var(--primary-glow); }
+textarea.form-control { resize: vertical; min-height: 120px; line-height: 1.6; }
+select.form-control { cursor: pointer; appearance: auto; }
 .form-submit {
   width: 100%; padding: 14px;
   background: var(--gradient);
@@ -712,13 +714,10 @@ input, textarea, select, button { font-family: inherit; }
 
 .form-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 18px; }
 .form-grid .form-group:first-child, .form-grid .form-group:nth-child(2), .form-grid .form-group:nth-child(3), .form-grid .form-group:nth-child(4) { grid-column: 1 / -1; }
-.form-row { display: flex; gap: 14px; }
-.form-row .form-group { flex: 1; }
 .form-checkbox { display: flex; align-items: center; gap: 10px; margin: 14px 0; }
 .form-actions { display: flex; gap: 12px; justify-content: flex-end; margin-top: 24px; }
 @media (max-width: 768px) {
   .form-grid { grid-template-columns: 1fr; }
-  .form-row { flex-direction: column; gap: 0; }
 }
 
 .section-divider {
