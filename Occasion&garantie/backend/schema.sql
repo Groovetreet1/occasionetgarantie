@@ -43,6 +43,7 @@ CREATE TABLE products (
   stock INT DEFAULT 1,
   featured BOOLEAN DEFAULT FALSE,
   active BOOLEAN DEFAULT TRUE,
+  status ENUM('disponible', 'en_attente', 'vendu') DEFAULT 'disponible',
   specs JSON,
   created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
   FOREIGN KEY (category_id) REFERENCES categories(id) ON DELETE SET NULL,

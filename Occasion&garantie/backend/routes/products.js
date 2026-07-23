@@ -8,7 +8,7 @@ function isAdminOrSeller(req) {
   return req.user && (req.user.role === 'admin' || req.user.role === 'seller');
 }
 
-// Public: list products
+// Public: list products (only disponible)
 router.get('/', async (req, res) => {
   try {
     const { category, search, min, max, state, sort, seller } = req.query;
@@ -18,7 +18,7 @@ router.get('/', async (req, res) => {
       FROM products p
       LEFT JOIN categories c ON p.category_id = c.id
       LEFT JOIN users u ON p.seller_id = u.id
-      WHERE p.active = TRUE
+      WHERE p.active = TRUE AND p.status = 'disponible'
     `;
     const params = [];
 
@@ -41,7 +41,7 @@ router.get('/', async (req, res) => {
   }
 });
 
-// Public: featured products
+// Public: featured products (only disponible)
 router.get('/featured', async (req, res) => {
   try {
     const [rows] = await pool.query(
@@ -49,7 +49,7 @@ router.get('/featured', async (req, res) => {
        FROM products p
        LEFT JOIN categories c ON p.category_id = c.id
        LEFT JOIN users u ON p.seller_id = u.id
-       WHERE p.featured = TRUE AND p.active = TRUE LIMIT 8`
+       WHERE p.featured = TRUE AND p.active = TRUE AND p.status = 'disponible' LIMIT 8`
     );
     res.json(rows);
   } catch (err) {
@@ -72,7 +72,7 @@ router.get('/id/:id', authenticate, async (req, res) => {
   }
 });
 
-// Public: single product by slug
+// Public: single product by slug (show any status)
 router.get('/:slug', async (req, res) => {
   try {
     const [rows] = await pool.query(
@@ -100,9 +100,9 @@ router.post('/', authenticate, async (req, res) => {
     const { name, slug, description, price, old_price, category_id, brand, state, warranty, stock, featured, image, gallery, specs } = req.body;
     const sellerId = req.user.role === 'admin' ? (req.body.seller_id || null) : req.user.id;
     const [result] = await pool.query(
-      `INSERT INTO products (name, slug, description, price, old_price, category_id, seller_id, brand, state, warranty, stock, featured, image, gallery, specs)
-       VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
-      [name, slug, description, price, old_price || null, category_id || null, sellerId, brand || null, state || 'tres_bon', warranty || '6 mois', stock || 1, featured || false, image || null, gallery ? JSON.stringify(gallery) : null, specs ? JSON.stringify(specs) : null]
+      `INSERT INTO products (name, slug, description, price, old_price, category_id, seller_id, brand, state, warranty, stock, featured, image, gallery, specs, status)
+       VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
+      [name, slug, description, price, old_price || null, category_id || null, sellerId, brand || null, state || 'tres_bon', warranty || '6 mois', stock || 1, featured || false, image || null, gallery ? JSON.stringify(gallery) : null, specs ? JSON.stringify(specs) : null, 'disponible']
     );
     res.status(201).json({ id: result.insertId, message: 'Produit ajouté.' });
   } catch (err) {
@@ -118,12 +118,31 @@ router.put('/:id', authenticate, async (req, res) => {
     if (req.user.role !== 'admin' && rows[0].seller_id !== req.user.id) {
       return res.status(403).json({ message: 'Vous ne pouvez modifier que vos propres produits.' });
     }
-    const { name, slug, description, price, old_price, category_id, brand, state, warranty, stock, featured, image, gallery, specs } = req.body;
+    const { name, slug, description, price, old_price, category_id, brand, state, warranty, stock, featured, image, gallery, specs, status } = req.body;
     await pool.query(
-      `UPDATE products SET name=?, slug=?, description=?, price=?, old_price=?, category_id=?, brand=?, state=?, warranty=?, stock=?, featured=?, image=?, gallery=?, specs=? WHERE id = ?`,
-      [name, slug, description, price, old_price || null, category_id || null, brand || null, state || 'tres_bon', warranty || '6 mois', stock || 1, featured || false, image || null, gallery ? JSON.stringify(gallery) : null, specs ? JSON.stringify(specs) : null, req.params.id]
+      `UPDATE products SET name=?, slug=?, description=?, price=?, old_price=?, category_id=?, brand=?, state=?, warranty=?, stock=?, featured=?, image=?, gallery=?, specs=?, status=? WHERE id = ?`,
+      [name, slug, description, price, old_price || null, category_id || null, brand || null, state || 'tres_bon', warranty || '6 mois', stock || 1, featured || false, image || null, gallery ? JSON.stringify(gallery) : null, specs ? JSON.stringify(specs) : null, status || 'disponible', req.params.id]
     );
     res.json({ message: 'Produit mis à jour.' });
+  } catch (err) {
+    res.status(500).json({ message: 'Erreur serveur.', error: err.message });
+  }
+});
+
+// Authenticated: quick status update
+router.patch('/:id/status', authenticate, async (req, res) => {
+  try {
+    const [rows] = await pool.query('SELECT seller_id FROM products WHERE id = ?', [req.params.id]);
+    if (rows.length === 0) return res.status(404).json({ message: 'Produit introuvable.' });
+    if (req.user.role !== 'admin' && rows[0].seller_id !== req.user.id) {
+      return res.status(403).json({ message: 'Vous ne pouvez modifier que vos propres produits.' });
+    }
+    const { status } = req.body;
+    if (!['disponible', 'en_attente', 'vendu'].includes(status)) {
+      return res.status(400).json({ message: 'Statut invalide.' });
+    }
+    await pool.query('UPDATE products SET status = ? WHERE id = ?', [status, req.params.id]);
+    res.json({ message: 'Statut mis à jour.', status });
   } catch (err) {
     res.status(500).json({ message: 'Erreur serveur.', error: err.message });
   }

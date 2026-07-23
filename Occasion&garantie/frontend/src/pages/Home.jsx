@@ -1,35 +1,24 @@
-import { Link } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 import { useEffect, useState } from 'react';
 import { motion } from 'framer-motion';
-import { FiSmartphone, FiHeadphones, FiTablet, FiShield, FiRefreshCw, FiTruck, FiArrowRight, FiTrendingUp, FiShoppingBag, FiStar } from 'react-icons/fi';
+import { FiSmartphone, FiHeadphones, FiTablet, FiShield, FiRefreshCw, FiTruck, FiArrowRight, FiTrendingUp, FiShoppingBag, FiStar, FiSearch, FiMonitor } from 'react-icons/fi';
 import { BsPhone, BsLaptop, BsHeadphones } from 'react-icons/bs';
 import api from '../api/axios';
 import ProductCard from '../components/ProductCard';
-import HeroSlider from '../components/HeroSlider';
-import PromoPopup from '../components/PromoPopup';
 import TrustBar from '../components/TrustBar';
 import TestimonialsSection from '../components/TestimonialsSection';
 import NewsletterSection from '../components/NewsletterSection';
+import PromoPopup from '../components/PromoPopup';
 
-const fadeUp = {
-  hidden: { opacity: 0, y: 40 },
-  show: { opacity: 1, y: 0, transition: { duration: 0.5 } },
-};
-
-const stagger = {
-  hidden: {},
-  show: { transition: { staggerChildren: 0.1 } },
-};
+const fadeUp = { hidden: { opacity: 0, y: 40 }, show: { opacity: 1, y: 0, transition: { duration: 0.5 } } };
+const stagger = { hidden: {}, show: { transition: { staggerChildren: 0.1 } } };
 
 function SkeletonGrid({ count = 4 }) {
   return (
     <div className="products-grid">
       {Array.from({ length: count }).map((_, i) => (
         <div key={i} className="skeleton-card">
-          <div className="skeleton-img" />
-          <div className="skeleton-text" />
-          <div className="skeleton-text-short" />
-          <div className="skeleton-price" />
+          <div className="skeleton-img" /><div className="skeleton-text" /><div className="skeleton-text-short" /><div className="skeleton-price" />
         </div>
       ))}
     </div>
@@ -37,149 +26,112 @@ function SkeletonGrid({ count = 4 }) {
 }
 
 export default function Home() {
-  const [phones, setPhones] = useState([]);
-  const [accessories, setAccessories] = useState([]);
+  const navigate = useNavigate();
+  const [products, setProducts] = useState([]);
+  const [searchTerm, setSearchTerm] = useState('');
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    Promise.all([
-      api.get('/products?category=smartphones'),
-      api.get('/products?category=accessoires'),
-    ]).then(([p, a]) => {
-      setPhones(p.data);
-      setAccessories(a.data);
+    api.get('/products?sort=newest').then(res => {
+      setProducts(res.data.slice(0, 20));
     }).catch(() => {}).finally(() => setLoading(false));
   }, []);
 
+  const handleSearch = (e) => {
+    e.preventDefault();
+    if (searchTerm.trim()) navigate(`/products?search=${encodeURIComponent(searchTerm.trim())}`);
+  };
+
+  const categories = [
+    { to: '/products?category=Smartphones', icon: BsPhone, title: 'Smartphones', desc: 'iPhone, Samsung, Xiaomi', count: null },
+    { to: '/products?category=Tablettes', icon: FiTablet, title: 'Tablettes', desc: 'iPad, Samsung Tab', count: null },
+    { to: '/products?category=Ordinateurs', icon: BsLaptop, title: 'Ordinateurs', desc: 'MacBook, PC Portable', count: null },
+    { to: '/products?category=Accessoires', icon: BsHeadphones, title: 'Accessoires', desc: 'Chargeurs, coques', count: null },
+  ];
+
   return (
     <motion.div initial="hidden" animate="show">
-      <HeroSlider />
       <PromoPopup />
 
-      <motion.section className="marketplace-cta" variants={fadeUp} initial="hidden" whileInView="show" viewport={{ once: true }}>
+      {/* Hero Search */}
+      <section className="marketplace-hero">
         <div className="container">
-          <div className="marketplace-cta-grid">
-            <Link to="/vendre" className="marketplace-cta-card cta-sell">
-              <div className="cta-icon"><FiTrendingUp size={32} /></div>
-              <h3>Vous vendez un téléphone ?</h3>
-              <p>Publiez votre annonce gratuitement et touchez des acheteurs sérieux.</p>
-              <span className="cta-btn">Vendre maintenant <FiArrowRight size={16} /></span>
-            </Link>
-            <Link to="/products" className="marketplace-cta-card cta-buy">
-              <div className="cta-icon"><FiShoppingBag size={32} /></div>
-              <h3>Vous cherchez un téléphone ?</h3>
-              <p>Trouvez votre prochain smartphone au meilleur prix chez nos vendeurs vérifiés.</p>
-              <span className="cta-btn">Acheter maintenant <FiArrowRight size={16} /></span>
-            </Link>
-          </div>
+          <motion.div className="marketplace-hero-content" variants={fadeUp}>
+            <span className="hero-badge">Marketplace Officiel</span>
+            <h1>Achetez et vendez des <span className="gradient-text">téléphones d'occasion</span> en toute confiance</h1>
+            <p>Des milliers d'annonces vérifiées. Paiement sécurisé. Livraison rapide à Casablanca.</p>
+            <form onSubmit={handleSearch} className="hero-search">
+              <FiSearch size={18} />
+              <input type="text" value={searchTerm} onChange={e => setSearchTerm(e.target.value)} placeholder="Rechercher un téléphone, une marque..." />
+              <button type="submit">Rechercher</button>
+            </form>
+            <div className="hero-ctas">
+              <Link to="/products" className="btn btn-primary btn-lg">Parcourir les annonces <FiArrowRight size={18} /></Link>
+              <Link to="/vendre" className="btn btn-outline btn-lg"><FiTrendingUp size={18} /> Vendre mon téléphone</Link>
+            </div>
+          </motion.div>
         </div>
-      </motion.section>
+      </section>
 
-      <motion.section variants={fadeUp} className="container">
-        <motion.div className="category-grid" variants={stagger} initial="hidden" whileInView="show" viewport={{ once: true }}>
-          {[
-            { to: '/products?category=Smartphones', icon: BsPhone, title: 'Smartphones', desc: 'iPhone, Samsung, Xiaomi' },
-            { to: '/products?category=Tablettes', icon: FiTablet, title: 'Tablettes', desc: 'iPad, Samsung Tab' },
-            { to: '/products?category=Ordinateurs', icon: BsLaptop, title: 'Ordinateurs', desc: 'MacBook, PC Portable' },
-            { to: '/products?category=Accessoires', icon: BsHeadphones, title: 'Accessoires', desc: 'Chargeurs, coques, etc.' },
-          ].map((cat) => (
-            <motion.div key={cat.title} variants={fadeUp}>
-              <Link to={cat.to} className="category-card">
-                <div>
+      {/* Categories */}
+      <motion.section className="section" variants={fadeUp} initial="hidden" whileInView="show" viewport={{ once: true }}>
+        <div className="container">
+          <motion.div className="category-grid" variants={stagger}>
+            {categories.map((cat) => (
+              <motion.div key={cat.title} variants={fadeUp}>
+                <Link to={cat.to} className="category-card">
                   <div className="cat-icon"><cat.icon /></div>
                   <h3>{cat.title}</h3>
                   <p>{cat.desc}</p>
-                </div>
-              </Link>
-            </motion.div>
-          ))}
-        </motion.div>
-      </motion.section>
-
-      <TrustBar />
-
-      <motion.section className="products-section" variants={fadeUp} initial="hidden" whileInView="show" viewport={{ once: true }}>
-        <div className="container">
-          <div className="products-header">
-            <div>
-              <h2 className="section-title"><FiSmartphone size={28} style={{ verticalAlign: 'middle', marginRight: 10 }} />Smartphones</h2>
-              <p className="section-subtitle" style={{ marginBottom: 0 }}>Nos téléphones reconditionnés, testés et garantis.</p>
-            </div>
-            <Link to="/products?category=smartphones" className="btn btn-secondary">
-              Voir tout <FiArrowRight size={16} />
-            </Link>
-          </div>
-          {loading ? <SkeletonGrid count={4} /> : phones.length > 0 ? (
-            <div className="products-grid">
-              {phones.slice(0, 4).map((p, i) => <ProductCard key={p.id} product={p} index={i} />)}
-            </div>
-          ) : (
-            <div className="empty-state">
-              <div className="icon"><FiSmartphone size={48} /></div>
-              <p>Aucun téléphone disponible pour le moment.</p>
-            </div>
-          )}
-        </div>
-      </motion.section>
-
-      <div className="section-divider">
-        <div className="divider-line" />
-        <div className="divider-content">
-          <FiHeadphones size={20} />
-          <span>Accessoires &amp; Protections</span>
-          <FiHeadphones size={20} />
-        </div>
-        <div className="divider-line" />
-      </div>
-
-      <motion.section className="products-section products-section-accessories" variants={fadeUp} initial="hidden" whileInView="show" viewport={{ once: true }}>
-        <div className="container">
-          <div className="products-header">
-            <div>
-              <h2 className="section-title">Accessoires</h2>
-              <p className="section-subtitle" style={{ marginBottom: 0 }}>Chargeurs, coques, kits Bluetooth et protections.</p>
-            </div>
-            <Link to="/products?category=accessoires" className="btn btn-secondary">
-              Voir tout <FiArrowRight size={16} />
-            </Link>
-          </div>
-          {loading ? <SkeletonGrid count={4} /> : accessories.length > 0 ? (
-            <div className="products-grid">
-              {accessories.slice(0, 4).map((p, i) => <ProductCard key={p.id} product={p} index={i} />)}
-            </div>
-          ) : (
-            <div className="empty-state">
-              <div className="icon"><FiHeadphones size={48} /></div>
-              <p>Aucun accessoire disponible pour le moment.</p>
-            </div>
-          )}
-        </div>
-      </motion.section>
-
-      <TestimonialsSection />
-      <NewsletterSection />
-
-      <motion.section className="features" variants={fadeUp} initial="hidden" whileInView="show" viewport={{ once: true }}>
-        <div className="container">
-          <div style={{ textAlign: 'center', marginBottom: '48px' }}>
-            <h2 className="section-title">Pourquoi nous choisir ?</h2>
-            <p className="section-subtitle">La qualité au meilleur prix, c'est notre promesse.</p>
-          </div>
-          <motion.div className="features-grid" variants={stagger} initial="hidden" whileInView="show" viewport={{ once: true }}>
-            {[
-              { icon: FiStar, title: 'Vendez en toute sérénité', desc: 'Créez votre compte vendeur gratuitement et gérez vos annonces depuis votre tableau de bord.' },
-              { icon: FiShield, title: 'Garantie incluse', desc: 'Chaque produit est couvert par une garantie minimum de 15 jours pour votre tranquilité.' },
-              { icon: FiTruck, title: 'Livraison rapide', desc: 'Après la confirmation, Expédition sur Casablanca Gratuit sous 24h. Suivi de commande en temps réel et retour facile.' },
-            ].map((feat) => (
-              <motion.div key={feat.title} className="feature-card" variants={fadeUp}>
-                <div className="feature-icon"><feat.icon size={24} /></div>
-                <h3>{feat.title}</h3>
-                <p>{feat.desc}</p>
+                </Link>
               </motion.div>
             ))}
           </motion.div>
         </div>
       </motion.section>
+
+      <TrustBar />
+
+      {/* Latest products */}
+      <motion.section className="section" variants={fadeUp} initial="hidden" whileInView="show" viewport={{ once: true }}>
+        <div className="container">
+          <div className="section-header">
+            <div>
+              <h2 className="section-title">Dernières annonces</h2>
+              <p className="section-subtitle">{products.length} téléphones disponibles à la vente</p>
+            </div>
+            <Link to="/products" className="btn btn-secondary">Voir tout <FiArrowRight size={16} /></Link>
+          </div>
+          {loading ? <SkeletonGrid count={8} /> : products.length > 0 ? (
+            <div className="products-grid">
+              {products.map((p, i) => <ProductCard key={p.id} product={p} index={i} />)}
+            </div>
+          ) : (
+            <div className="empty-state"><FiSmartphone size={48} /><p>Aucune annonce pour le moment.</p></div>
+          )}
+        </div>
+      </motion.section>
+
+      {/* Sell CTA */}
+      <motion.section className="section sell-promo" variants={fadeUp} initial="hidden" whileInView="show" viewport={{ once: true }}>
+        <div className="container">
+          <div className="sell-promo-grid">
+            <div className="sell-promo-content">
+              <h2>Vous avez un téléphone à vendre ?</h2>
+              <p>Publiez votre annonce gratuitement et trouvez un acheteur rapidement. Zero commission.</p>
+              <Link to="/vendre" className="btn btn-primary btn-lg">Vendre maintenant <FiArrowRight size={18} /></Link>
+            </div>
+            <div className="sell-promo-stats">
+              <div className="stat-badge"><FiStar size={18} /> Gratuit</div>
+              <div className="stat-badge"><FiShoppingBag size={18} /> Sans commission</div>
+              <div className="stat-badge"><FiShield size={18} /> Paiement sécurisé</div>
+            </div>
+          </div>
+        </div>
+      </motion.section>
+
+      <TestimonialsSection />
+      <NewsletterSection />
     </motion.div>
   );
 }

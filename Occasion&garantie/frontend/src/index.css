@@ -1019,6 +1019,92 @@ input, textarea, select, button { font-family: inherit; }
 }
 .upload-remove:hover { background: #ef4444; }
 
+/* Marketplace Hero */
+.marketplace-hero {
+  padding: 80px 0 60px; text-align: center;
+  background: linear-gradient(135deg, var(--bg-card), var(--bg-secondary));
+  position: relative; overflow: hidden;
+}
+.marketplace-hero::before {
+  content: ''; position: absolute; inset: 0;
+  background: radial-gradient(ellipse at 50% 0%, var(--primary-light) 0%, transparent 60%);
+  opacity: 0.5; pointer-events: none;
+}
+.marketplace-hero-content { position: relative; z-index: 1; max-width: 720px; margin: 0 auto; }
+.hero-badge {
+  display: inline-block; padding: 6px 16px; border-radius: 99px;
+  background: var(--primary-light); color: var(--primary); font-size: 12px;
+  font-weight: 600; margin-bottom: 20px;
+}
+.marketplace-hero h1 { font-size: 42px; font-weight: 800; line-height: 1.2; margin-bottom: 16px; }
+.marketplace-hero p { font-size: 18px; color: var(--text-secondary); max-width: 520px; margin: 0 auto 28px; }
+.hero-search {
+  display: flex; align-items: center; gap: 8px; max-width: 520px; margin: 0 auto 24px;
+  background: var(--bg-card); border: 1px solid var(--border); border-radius: var(--radius-xl);
+  padding: 6px 6px 6px 18px; transition: var(--transition);
+}
+.hero-search:focus-within { border-color: var(--primary); box-shadow: 0 0 0 3px var(--primary-light); }
+.hero-search input { flex: 1; border: none; background: none; outline: none; font-size: 15px; color: inherit; font-family: var(--font); }
+.hero-search button {
+  padding: 10px 24px; border: none; border-radius: var(--radius-lg);
+  background: var(--primary); color: white; font-weight: 600; font-size: 14px; cursor: pointer;
+  transition: var(--transition);
+}
+.hero-search button:hover { background: var(--primary-hover); }
+.hero-ctas { display: flex; gap: 12px; justify-content: center; flex-wrap: wrap; }
+
+/* Product status badges */
+.product-badge {
+  position: absolute; top: 8px; right: 8px; z-index: 2;
+  padding: 3px 10px; border-radius: 99px; font-size: 10px; font-weight: 700;
+  text-transform: uppercase; letter-spacing: 0.5px;
+}
+.badge-en_attente { background: #fef3c7; color: #92400e; }
+.badge-vendu { background: #fef2f2; color: #991b1b; }
+[data-theme="dark"] .badge-en_attente { background: rgba(217,119,6,0.2); color: #fbbf24; }
+[data-theme="dark"] .badge-vendu { background: rgba(220,38,38,0.2); color: #f87171; }
+.product-sold-overlay {
+  position: absolute; inset: 0; background: rgba(0,0,0,0.5); z-index: 1;
+  display: flex; align-items: center; justify-content: center;
+  color: white; font-size: 20px; font-weight: 800; text-transform: uppercase;
+  letter-spacing: 2px;
+}
+.product-card.product-sold { opacity: 0.75; }
+
+/* Status toggle button in dashboard */
+.status-toggle {
+  padding: 4px 14px; border: none; border-radius: 99px; color: white;
+  font-size: 11px; font-weight: 700; cursor: pointer; text-transform: uppercase;
+  letter-spacing: 0.5px; transition: var(--transition);
+}
+.status-toggle:hover { opacity: 0.85; transform: scale(1.05); }
+
+/* Sell promo section */
+.sell-promo { background: var(--bg-secondary); }
+.sell-promo-grid {
+  display: grid; grid-template-columns: 1fr 1fr; gap: 48px; align-items: center;
+}
+.sell-promo-content h2 { font-size: 28px; font-weight: 800; margin-bottom: 12px; }
+.sell-promo-content p { font-size: 15px; color: var(--text-secondary); margin-bottom: 24px; }
+.sell-promo-stats { display: flex; flex-direction: column; gap: 16px; }
+.stat-badge {
+  display: flex; align-items: center; gap: 12px; padding: 16px 20px;
+  background: var(--bg-card); border: 1px solid var(--border); border-radius: var(--radius);
+  font-weight: 600; font-size: 14px;
+}
+@media (max-width: 768px) {
+  .marketplace-hero h1 { font-size: 28px; }
+  .hero-search { flex-direction: column; padding: 12px; }
+  .hero-search button { width: 100%; }
+  .sell-promo-grid { grid-template-columns: 1fr; text-align: center; }
+}
+
+/* Section header with action */
+.section-header {
+  display: flex; justify-content: space-between; align-items: flex-start;
+  margin-bottom: 24px; flex-wrap: wrap; gap: 12px;
+}
+
 /* ============ Page Transition ============ */
 .page-enter { opacity: 0; }
 .page-enter-active { opacity: 1; transition: opacity 0.3s ease; }
