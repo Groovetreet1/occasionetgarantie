@@ -13,6 +13,7 @@ const reservationRoutes = require('./routes/reservations');
 const adminRoutes = require('./routes/admin');
 const premiumRoutes = require('./routes/premium');
 const sellerRoutes = require('./routes/seller');
+const chatRoutes = require('./routes/chat');
 
 const app = express();
 app.set('trust proxy', 1);
@@ -49,6 +50,7 @@ app.use('/api/reservations', reservationRoutes);
 app.use('/api/admin', adminRoutes);
 app.use('/api/premium', premiumRoutes);
 app.use('/api/seller', sellerRoutes);
+app.use('/api/chat', chatRoutes);
 
 app.get('/ads.txt', (req, res) => {
   res.type('text/plain').send('google.com, pub-3266333749754332, DIRECT, f08c47fec0942fa0');

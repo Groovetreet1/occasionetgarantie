@@ -81,6 +81,7 @@ router.get('/:slug', async (req, res) => {
     const [rows] = await pool.query(
       `SELECT p.*, c.name as category_name,
               u.id as seller_id, u.full_name as seller_full_name, u.store_name as seller_name, u.store_logo as seller_logo,
+              u.phone as seller_phone,
               (u.premium = 1 AND (u.premium_expires_at IS NULL OR u.premium_expires_at > NOW())) as seller_premium
        FROM products p
        LEFT JOIN categories c ON p.category_id = c.id

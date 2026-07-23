@@ -1,5 +1,5 @@
 import { Link, NavLink, useNavigate, useLocation } from 'react-router-dom';
-import { FiUser, FiLogOut, FiSettings, FiChevronDown, FiSmartphone, FiMonitor, FiHeadphones, FiTablet, FiShoppingBag, FiTrendingUp, FiStar } from 'react-icons/fi';
+import { FiUser, FiLogOut, FiSettings, FiChevronDown, FiSmartphone, FiMonitor, FiHeadphones, FiTablet, FiShoppingBag, FiTrendingUp, FiStar, FiMessageCircle } from 'react-icons/fi';
 import { useState, useRef, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useAuth } from '../context/AuthContext';
@@ -118,6 +118,9 @@ export default function Navbar() {
                       <NavLink to="/profile" onClick={() => setDropdownOpen(false)}>
                         <FiUser size={14} /> Mon Profil
                       </NavLink>
+                      <NavLink to="/messenger" onClick={() => setDropdownOpen(false)}>
+                        <FiMessageCircle size={14} /> Messages
+                      </NavLink>
                       {user.premium ? (
                         <span className="navbar-premium-badge" onClick={() => setDropdownOpen(false)}>
                           <FiStar size={14} /> Premium
@@ -176,6 +179,7 @@ export default function Navbar() {
         {user ? (
           <>
             <NavLink to="/profile" onClick={closeMenu}><FiUser size={14} /> Mon Profil</NavLink>
+            <NavLink to="/messenger" onClick={closeMenu}><FiMessageCircle size={14} /> Messages</NavLink>
             {user.premium ? (
               <span className="navbar-premium-badge" style={{ padding: '16px', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 8, fontSize: 14 }}>
                 <FiStar size={14} /> Premium

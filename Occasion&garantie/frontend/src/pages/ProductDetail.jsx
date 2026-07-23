@@ -1,8 +1,7 @@
-import { useParams, Link } from 'react-router-dom';
+import { useParams, Link, useNavigate } from 'react-router-dom';
 import { useEffect, useState } from 'react';
-import { FiArrowLeft, FiShoppingBag, FiShield, FiCheck, FiMonitor, FiCpu, FiHardDrive, FiBattery, FiCamera, FiDroplet, FiX, FiChevronLeft, FiChevronRight, FiLock, FiUserPlus, FiUser } from 'react-icons/fi';
+import { FiArrowLeft, FiShoppingBag, FiShield, FiCheck, FiMonitor, FiCpu, FiHardDrive, FiBattery, FiCamera, FiDroplet, FiX, FiChevronLeft, FiChevronRight, FiUser, FiMessageCircle } from 'react-icons/fi';
 import { BsWhatsapp } from 'react-icons/bs';
-import { MdPayment } from 'react-icons/md';
 import api from '../api/axios';
 import { useAuth } from '../context/AuthContext';
 
@@ -15,34 +14,19 @@ const stateLabels = {
 };
 
 const specIcons = {
-  Ecran: FiMonitor,
-  Processeur: FiCpu,
-  RAM: FiHardDrive,
-  Stockage: FiHardDrive,
-  Batterie: FiBattery,
-  Appareil: FiCamera,
-  Couleur: FiDroplet,
-  GPU: FiMonitor,
-  OS: FiMonitor,
+  Ecran: FiMonitor, Processeur: FiCpu, RAM: FiHardDrive,
+  Stockage: FiHardDrive, Batterie: FiBattery, Appareil: FiCamera,
+  Couleur: FiDroplet, GPU: FiMonitor, OS: FiMonitor,
 };
-
-const WHATSAPP_NUMBER = '212669017295';
 
 export default function ProductDetail() {
   const { slug } = useParams();
   const { user } = useAuth();
+  const navigate = useNavigate();
   const [product, setProduct] = useState(null);
   const [loading, setLoading] = useState(true);
   const [selectedImage, setSelectedImage] = useState(null);
   const [lightboxIndex, setLightboxIndex] = useState(0);
-  const [reserving, setReserving] = useState(false);
-  const [reserved, setReserved] = useState(false);
-  const [reserveMsg, setReserveMsg] = useState('');
-  const [bankInfo, setBankInfo] = useState(null);
-  const [reservationId, setReservationId] = useState(null);
-  const [screenshot, setScreenshot] = useState(null);
-  const [uploading, setUploading] = useState(false);
-  const [uploadDone, setUploadDone] = useState(false);
 
   useEffect(() => {
     window.scrollTo(0, 0);
@@ -52,6 +36,21 @@ export default function ProductDetail() {
       .catch(() => {})
       .finally(() => setLoading(false));
   }, [slug]);
+
+  const handleStartChat = async () => {
+    if (!user) return navigate('/login');
+    if (!product.seller_id) return;
+    try {
+      const { data } = await api.post('/chat/conversations', {
+        sellerId: product.seller_id,
+        productId: product.id,
+        productName: product.name,
+      });
+      navigate(`/messenger/${data.id}`);
+    } catch (err) {
+      alert(err.response?.data?.message || 'Erreur');
+    }
+  };
 
   if (loading) return <div className="auth-page"><div className="spinner" /></div>;
 
@@ -69,9 +68,9 @@ export default function ProductDetail() {
 
   const formatPrice = (p) => new Intl.NumberFormat('fr-FR', { style: 'currency', currency: 'MAD' }).format(p).replace('MAD', '').trim() + ' DH';
   const API_BASE = import.meta.env.VITE_API_URL || '';
-  const imgUrl = product.image ? `${API_BASE}/uploads/${product.image}` : null;
-  const waMsg = encodeURIComponent(`Bonjour ! Je suis intéressé(e) par : ${product.name} (${formatPrice(product.price)}) - ${window.location.href}`);
-  const waUrl = `https://wa.me/${WHATSAPP_NUMBER}?text=${waMsg}`;
+  const waMsg = encodeURIComponent(`Bonjour ! Je suis intéresse(e) par : ${product.name} (${formatPrice(product.price)})`);
+  const sellerPhone = product.seller_phone ? product.seller_phone.replace(/^0+/, '') : null;
+  const waUrl = sellerPhone ? `https://wa.me/${sellerPhone}?text=${waMsg}` : null;
   const specs = typeof product.specs === 'string' ? JSON.parse(product.specs) : (product.specs || {});
 
   const allImages = [];
@@ -82,55 +81,10 @@ export default function ProductDetail() {
     });
   }
 
-  const openLightbox = (index) => {
-    setLightboxIndex(index);
-    setSelectedImage(allImages[index]);
-  };
-
+  const openLightbox = (i) => { setLightboxIndex(i); setSelectedImage(allImages[i]); };
   const closeLightbox = () => setSelectedImage(null);
-
-  const prevImage = () => {
-    setLightboxIndex((i) => (i - 1 + allImages.length) % allImages.length);
-  };
-
-  const nextImage = () => {
-    setLightboxIndex((i) => (i + 1) % allImages.length);
-  };
-
-  const handleReserve = async () => {
-    if (!user) return;
-    setReserving(true);
-    setReserveMsg('');
-    try {
-      const { data } = await api.post('/reservations', { productId: product.id });
-      setReserved(true);
-      setReservationId(data.reservationId);
-      setBankInfo(data.bank);
-      setReserveMsg(data.message);
-    } catch (err) {
-      setReserveMsg(err.response?.data?.message || 'Erreur lors de la reservation.');
-    } finally {
-      setReserving(false);
-    }
-  };
-
-  const handleUploadScreenshot = async (e) => {
-    const file = e.target.files[0];
-    if (!file || !reservationId) return;
-    setUploading(true);
-    const formData = new FormData();
-    formData.append('screenshot', file);
-    try {
-      await api.post(`/reservations/${reservationId}/screenshot`, formData, {
-        headers: { 'Content-Type': 'multipart/form-data' },
-      });
-      setUploadDone(true);
-    } catch (err) {
-      setReserveMsg(err.response?.data?.message || 'Erreur lors de l\'upload.');
-    } finally {
-      setUploading(false);
-    }
-  };
+  const prevImage = () => setLightboxIndex((i) => (i - 1 + allImages.length) % allImages.length);
+  const nextImage = () => setLightboxIndex((i) => (i + 1) % allImages.length);
 
   return (
     <>
@@ -143,7 +97,7 @@ export default function ProductDetail() {
           <div className="product-detail-grid">
             <div>
               <div className="product-detail-image" style={{ cursor: allImages.length > 0 ? 'pointer' : 'default' }} onClick={() => allImages.length > 0 && openLightbox(0)}>
-                {imgUrl ? (
+                {product.image ? (
                   <img src={`${API_BASE}/uploads/${product.image}`} alt={product.name} style={{ width: '100%', height: '100%', objectFit: 'contain' }} />
                 ) : (
                   <FiShoppingBag size={80} style={{ opacity: 0.15 }} />
@@ -152,7 +106,6 @@ export default function ProductDetail() {
                   <FiShield size={14} /> Garantie {product.warranty}
                 </span>
               </div>
-
               {allImages.length > 1 && (
                 <div className="product-detail-thumbs">
                   {allImages.map((img, i) => (
@@ -174,22 +127,12 @@ export default function ProductDetail() {
               </div>
 
               <div className="product-detail-tags">
-                <span className="product-detail-tag state">
-                  {stateLabels[product.state] || product.state}
-                </span>
-                <span className="product-detail-tag verified">
-                  <FiCheck size={12} /> Vérifié
-                </span>
-                {product.brand && (
-                  <span className="product-detail-tag brand">
-                    {product.brand}
-                  </span>
-                )}
+                <span className="product-detail-tag state">{stateLabels[product.state] || product.state}</span>
+                <span className="product-detail-tag verified"><FiCheck size={12} /> Vérifié</span>
+                {product.brand && <span className="product-detail-tag brand">{product.brand}</span>}
               </div>
 
-              <p className="product-detail-desc">
-                {product.description}
-              </p>
+              <p className="product-detail-desc">{product.description}</p>
 
               {specs && Object.keys(specs).length > 0 && (
                 <div className="product-detail-specs">
@@ -199,13 +142,9 @@ export default function ProductDetail() {
                       const Icon = specIcons[key] || FiCpu;
                       return (
                         <div key={key} style={{
-                          padding: '12px 16px',
-                          background: 'var(--bg-card)',
-                          border: '1px solid var(--border)',
-                          borderRadius: 'var(--radius)',
-                          display: 'flex',
-                          alignItems: 'center',
-                          gap: '12px',
+                          padding: '12px 16px', background: 'var(--bg-card)',
+                          border: '1px solid var(--border)', borderRadius: 'var(--radius)',
+                          display: 'flex', alignItems: 'center', gap: '12px',
                         }}>
                           <Icon size={18} style={{ color: 'var(--primary)', flexShrink: 0 }} />
                           <div>
@@ -222,7 +161,7 @@ export default function ProductDetail() {
               {product.seller_name && (
                 <div className="product-seller-info">
                   <h4>Vendu par</h4>
-                  <Link to={`/seller/${product.seller_id || product.seller_id_}`} className="seller-badge">
+                  <Link to={`/seller/${product.seller_id}`} className="seller-badge">
                     <div className="seller-avatar-mini">
                       {product.seller_logo ? <img src={`/uploads/avatars/${product.seller_logo}`} alt="" /> : <FiUser size={18} />}
                     </div>
@@ -234,113 +173,45 @@ export default function ProductDetail() {
                 </div>
               )}
 
-              <a
-                href={waUrl}
-                target="_blank"
-                rel="noopener noreferrer"
-                className="btn"
-                style={{
-                  width: '100%',
-                  background: 'var(--gradient)',
-                  color: 'white',
-                  fontSize: '18px',
-                  padding: '16px 36px',
-                  justifyContent: 'center',
-                  boxShadow: 'var(--shadow-glow)',
-                }}
-                onMouseOver={(e) => e.currentTarget.style.background = 'var(--gradient-hover)'}
-                onMouseOut={(e) => e.currentTarget.style.background = 'var(--gradient)'}
-              >
-                <BsWhatsapp size={22} /> Acheter via WhatsApp
-              </a>
-              <p style={{ textAlign: 'center', color: 'var(--text-muted)', fontSize: '12px', marginTop: '8px' }}>
+              {waUrl && (
+                <a
+                  href={waUrl}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="btn"
+                  style={{
+                    width: '100%', background: '#25D366', color: 'white',
+                    fontSize: '18px', padding: '16px 36px', justifyContent: 'center',
+                    boxShadow: '0 4px 16px rgba(37,211,102,0.35)',
+                  }}
+                  onMouseOver={(e) => e.currentTarget.style.background = '#1da851'}
+                  onMouseOut={(e) => e.currentTarget.style.background = '#25D366'}
+                >
+                  <BsWhatsapp size={22} /> Contacter le vendeur
+                </a>
+              )}
+
+              {product.seller_id && (
+                <button
+                  onClick={handleStartChat}
+                  className="btn"
+                  style={{
+                    width: '100%', marginTop: '10px',
+                    background: 'var(--gradient)', color: 'white',
+                    fontSize: '16px', padding: '14px 36px', justifyContent: 'center',
+                    border: 'none', cursor: 'pointer', fontFamily: 'var(--font)',
+                    boxShadow: 'var(--shadow-glow)',
+                  }}
+                  onMouseOver={(e) => e.currentTarget.style.background = 'var(--gradient-hover)'}
+                  onMouseOut={(e) => e.currentTarget.style.background = 'var(--gradient)'}
+                >
+                  <FiMessageCircle size={20} /> Envoyer un message
+                </button>
+              )}
+
+              <p style={{ textAlign: 'center', color: 'var(--text-muted)', fontSize: '12px', marginTop: '10px' }}>
                 Réponse sous 24h | Paiement sécurisé
               </p>
-
-              {product.price >= 500 && (
-                <div style={{ marginTop: '24px', borderTop: '1px solid var(--border)', paddingTop: '20px' }}>
-                <h3 style={{ fontSize: '16px', fontWeight: 700, marginBottom: '8px', display: 'flex', alignItems: 'center', gap: '8px' }}>
-                  <MdPayment size={20} style={{ color: 'var(--primary)' }} /> Reserver ce produit
-                </h3>
-                <p style={{ fontSize: '13px', color: 'var(--text-secondary)', marginBottom: '12px' }}>
-                  Versez seulement <strong>200 DH</strong> pour reserver ce produit. Le montant sera deduit du prix total.
-                </p>
-                {!user ? (
-                  <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
-                    <Link to="/login" className="btn btn-primary" style={{ justifyContent: 'center', fontSize: '14px' }}>
-                      <FiLock size={16} /> Connectez-vous pour reserver
-                    </Link>
-                    <Link to="/signup" className="btn btn-secondary" style={{ justifyContent: 'center', fontSize: '13px' }}>
-                      <FiUserPlus size={16} /> Creer un compte
-                    </Link>
-                  </div>
-                ) : !reserved ? (
-                  <>
-                    {reserveMsg && <div className="alert alert-error">{reserveMsg}</div>}
-                    <button
-                      onClick={handleReserve}
-                      disabled={reserving}
-                      className="btn"
-                      style={{
-                        width: '100%',
-                        background: 'var(--success)',
-                        color: 'white',
-                        justifyContent: 'center',
-                        fontSize: '15px',
-                        padding: '14px',
-                      }}
-                    >
-                      {reserving ? 'Reservation...' : 'Reserver (200 DH)'}
-                    </button>
-                  </>
-                ) : uploadDone ? (
-                  <div className="alert alert-success" style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-                    <FiCheck size={18} /> Screenshot envoye. Reservation confirmee.
-                  </div>
-                ) : (
-                  <>
-                    <div style={{
-                      background: 'var(--bg-secondary)',
-                      border: '1px solid var(--border-light)',
-                      borderRadius: 'var(--radius)',
-                      padding: '16px',
-                      marginBottom: '16px',
-                    }}>
-                      <h4 style={{ fontSize: '13px', fontWeight: 600, marginBottom: '8px', color: 'var(--text-primary)' }}>
-                        Virement bancaire
-                      </h4>
-                      <table className="product-detail-table" style={{ width: '100%', fontSize: '13px' }}>
-                        <tbody>
-                          {bankInfo && (
-                            <>
-                              <tr><td style={{ color: 'var(--text-muted)', padding: '4px 8px 4px 0', whiteSpace: 'nowrap' }}>Banque</td>
-                                <td style={{ fontWeight: 600 }}>{bankInfo.bank}</td></tr>
-                              <tr><td style={{ color: 'var(--text-muted)', padding: '4px 8px 4px 0', whiteSpace: 'nowrap' }}>Titulaire</td>
-                                <td style={{ fontWeight: 600 }}>{bankInfo.holder}</td></tr>
-                              <tr><td style={{ color: 'var(--text-muted)', padding: '4px 8px 4px 0', whiteSpace: 'nowrap' }}>RIB</td>
-                                <td style={{ fontWeight: 600, fontFamily: 'monospace', fontSize: '14px', letterSpacing: '1px' }}>{bankInfo.rib}</td></tr>
-                              <tr><td style={{ color: 'var(--text-muted)', padding: '4px 8px 4px 0', whiteSpace: 'nowrap' }}>Montant</td>
-                                <td style={{ fontWeight: 600, color: 'var(--success)' }}>{bankInfo.amount} DH</td></tr>
-                            </>
-                          )}
-                        </tbody>
-                      </table>
-                    </div>
-                    <p style={{ fontSize: '12px', color: 'var(--text-secondary)', marginBottom: '10px' }}>
-                      Apres le virement, envoyez la capture d'ecran ci-dessous :
-                    </p>
-                    <label className="btn" style={{
-                      width: '100%', justifyContent: 'center', fontSize: '14px', cursor: 'pointer',
-                      background: 'var(--primary)', color: '#000',
-                    }}>
-                      {uploading ? 'Envoi...' : 'Choisir une photo'}
-                      <input type="file" accept="image/*" onChange={handleUploadScreenshot} hidden disabled={uploading} />
-                    </label>
-                    {reserveMsg && <div className="alert alert-error" style={{ marginTop: '8px' }}>{reserveMsg}</div>}
-                  </>
-                )}
-              </div>
-              )}
             </div>
           </div>
         </div>
