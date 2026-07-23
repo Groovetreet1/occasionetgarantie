@@ -4,6 +4,7 @@ import Navbar from './components/Navbar';
 import Footer from './components/Footer';
 import WhatsAppFloat from './components/WhatsAppFloat';
 import AdminRoute from './components/AdminRoute';
+import SellerRoute from './components/SellerRoute';
 import Home from './pages/Home';
 import Products from './pages/Products';
 import ProductDetail from './pages/ProductDetail';
@@ -17,6 +18,10 @@ import Profile from './pages/Profile';
 import NotFound from './pages/NotFound';
 import AdminDashboard from './pages/AdminDashboard';
 import AdminProductForm from './pages/AdminProductForm';
+import SellPage from './pages/SellPage';
+import SellerDashboard from './pages/SellerDashboard';
+import SellerProductForm from './pages/SellerProductForm';
+import SellerProfile from './pages/SellerProfile';
 
 const pageVariants = {
   initial: { opacity: 0, y: 12 },
@@ -58,6 +63,11 @@ export default function App() {
           <Route path="/admin" element={<AnimatedPage><AdminRoute><AdminDashboard /></AdminRoute></AnimatedPage>} />
           <Route path="/admin/products/new" element={<AnimatedPage><AdminRoute><AdminProductForm /></AdminRoute></AnimatedPage>} />
           <Route path="/admin/products/edit/:id" element={<AnimatedPage><AdminRoute><AdminProductForm /></AdminRoute></AnimatedPage>} />
+          <Route path="/vendre" element={<AnimatedPage><SellPage /></AnimatedPage>} />
+          <Route path="/seller" element={<AnimatedPage><SellerRoute><SellerDashboard /></SellerRoute></AnimatedPage>} />
+          <Route path="/seller/products/new" element={<AnimatedPage><SellerRoute><SellerProductForm /></SellerRoute></AnimatedPage>} />
+          <Route path="/seller/products/edit/:id" element={<AnimatedPage><SellerRoute><SellerProductForm /></SellerRoute></AnimatedPage>} />
+          <Route path="/seller/:id" element={<AnimatedPage><SellerProfile /></AnimatedPage>} />
           <Route path="*" element={<AnimatedPage><NotFound /></AnimatedPage>} />
         </Routes>
       </AnimatePresence>

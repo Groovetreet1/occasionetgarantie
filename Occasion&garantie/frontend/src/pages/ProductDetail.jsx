@@ -1,6 +1,6 @@
 import { useParams, Link } from 'react-router-dom';
 import { useEffect, useState } from 'react';
-import { FiArrowLeft, FiShoppingBag, FiShield, FiCheck, FiMonitor, FiCpu, FiHardDrive, FiBattery, FiCamera, FiDroplet, FiX, FiChevronLeft, FiChevronRight, FiLock, FiUserPlus } from 'react-icons/fi';
+import { FiArrowLeft, FiShoppingBag, FiShield, FiCheck, FiMonitor, FiCpu, FiHardDrive, FiBattery, FiCamera, FiDroplet, FiX, FiChevronLeft, FiChevronRight, FiLock, FiUserPlus, FiUser } from 'react-icons/fi';
 import { BsWhatsapp } from 'react-icons/bs';
 import { MdPayment } from 'react-icons/md';
 import api from '../api/axios';
@@ -216,6 +216,21 @@ export default function ProductDetail() {
                       );
                     })}
                   </div>
+                </div>
+              )}
+
+              {product.seller_name && (
+                <div className="product-seller-info">
+                  <h4>Vendu par</h4>
+                  <Link to={`/seller/${product.seller_id || product.seller_id_}`} className="seller-badge">
+                    <div className="seller-avatar-mini">
+                      {product.seller_logo ? <img src={`/uploads/avatars/${product.seller_logo}`} alt="" /> : <FiUser size={18} />}
+                    </div>
+                    <div>
+                      <strong>{product.seller_name}</strong>
+                      <small>Voir profil du vendeur</small>
+                    </div>
+                  </Link>
                 </div>
               )}
 

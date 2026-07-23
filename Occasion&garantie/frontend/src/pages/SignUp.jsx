@@ -1,12 +1,14 @@
 import { useState } from 'react';
-import { Link, Navigate, useNavigate } from 'react-router-dom';
-import { FiUserPlus, FiMail, FiLock, FiPhone } from 'react-icons/fi';
+import { Link, Navigate, useNavigate, useSearchParams } from 'react-router-dom';
+import { FiUserPlus, FiMail, FiLock, FiPhone, FiTrendingUp } from 'react-icons/fi';
 import { useAuth } from '../context/AuthContext';
 import api from '../api/axios';
 
 export default function SignUp() {
   const { user } = useAuth();
   const navigate = useNavigate();
+  const [searchParams] = useSearchParams();
+  const isSeller = searchParams.get('role') === 'seller';
   const [fullName, setFullName] = useState('');
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
@@ -21,8 +23,8 @@ export default function SignUp() {
     setError('');
     setLoading(true);
     try {
-      await api.post('/auth/signup', { fullName, email, password, phone });
-      navigate(`/verify-code?email=${encodeURIComponent(email)}`);
+      await api.post('/auth/signup', { fullName, email, password, phone, role: isSeller ? 'seller' : undefined });
+      navigate(`/verify-code?email=${encodeURIComponent(email)}${isSeller ? '&role=seller' : ''}`);
     } catch (err) {
       setError(err.response?.data?.message || 'Erreur lors de l\'inscription.');
     } finally {
@@ -34,10 +36,15 @@ export default function SignUp() {
     <section className="auth-page">
       <div className="auth-container">
         <div className="auth-header">
-          <h1>Creer un compte</h1>
-          <p>Rejoignez Occasion & Garantie</p>
+          <h1>{isSeller ? 'Creer un compte vendeur' : 'Creer un compte'}</h1>
+          <p>{isSeller ? 'Commencez a vendre vos telephones gratuitement' : 'Rejoignez Occasion & Garantie'}</p>
         </div>
         <div className="auth-card">
+          {isSeller && (
+            <div className="seller-badge-header">
+              <FiTrendingUp size={18} /> Compte Vendeur
+            </div>
+          )}
           {error && <div className="alert alert-error">{error}</div>}
           <form onSubmit={handleSubmit}>
             <div className="form-group">
@@ -57,7 +64,7 @@ export default function SignUp() {
               <input type="tel" value={phone} onChange={(e) => setPhone(e.target.value)} placeholder="+212 6XX XXX XXX" required />
             </div>
             <button type="submit" className="form-submit" disabled={loading}>
-              {loading ? 'Inscription...' : 'Creer mon compte'}
+              {loading ? 'Inscription...' : isSeller ? 'Creer mon compte vendeur' : 'Creer mon compte'}
             </button>
           </form>
           <div className="form-footer">

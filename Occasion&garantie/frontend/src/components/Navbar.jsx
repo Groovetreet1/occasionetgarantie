@@ -1,5 +1,5 @@
 import { Link, NavLink, useNavigate, useLocation } from 'react-router-dom';
-import { FiUser, FiLogOut, FiSettings, FiChevronDown, FiSmartphone, FiMonitor, FiHeadphones, FiTablet } from 'react-icons/fi';
+import { FiUser, FiLogOut, FiSettings, FiChevronDown, FiSmartphone, FiMonitor, FiHeadphones, FiTablet, FiShoppingBag, FiTrendingUp } from 'react-icons/fi';
 import { useState, useRef, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useAuth } from '../context/AuthContext';
@@ -94,6 +94,7 @@ export default function Navbar() {
               </AnimatePresence>
             </div>
             <NavLink to="/about">À propos</NavLink>
+            <NavLink to="/vendre" className="navbar-sell-link"><FiTrendingUp size={14} /> Vendre</NavLink>
           </div>
 
           <div className="navbar-actions">
@@ -115,6 +116,11 @@ export default function Navbar() {
                       <NavLink to="/profile" onClick={() => setDropdownOpen(false)}>
                         <FiUser size={14} /> Mon Profil
                       </NavLink>
+                      {(user.role === 'seller' || user.role === 'admin') && (
+                        <NavLink to="/seller" onClick={() => setDropdownOpen(false)}>
+                          <FiShoppingBag size={14} /> Tableau de Bord
+                        </NavLink>
+                      )}
                       {user.role === 'admin' && (
                         <NavLink to="/admin" onClick={() => setDropdownOpen(false)}>
                           <FiSettings size={14} /> Administration
@@ -154,10 +160,14 @@ export default function Navbar() {
           );
         })}
         <NavLink to="/about" onClick={closeMenu}>À propos</NavLink>
+        <NavLink to="/vendre" onClick={closeMenu} className="navbar-mobile-sell"><FiTrendingUp size={14} /> Vendre</NavLink>
         <div className="navbar-mobile-divider" />
         {user ? (
           <>
             <NavLink to="/profile" onClick={closeMenu}><FiUser size={14} /> Mon Profil</NavLink>
+            {(user.role === 'seller' || user.role === 'admin') && (
+              <NavLink to="/seller" onClick={closeMenu}><FiShoppingBag size={14} /> Tableau de Bord</NavLink>
+            )}
             {user.role === 'admin' && (
               <NavLink to="/admin" onClick={closeMenu}><FiSettings size={14} /> Admin</NavLink>
             )}

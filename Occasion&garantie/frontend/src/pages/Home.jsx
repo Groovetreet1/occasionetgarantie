@@ -1,7 +1,7 @@
 import { Link } from 'react-router-dom';
 import { useEffect, useState } from 'react';
 import { motion } from 'framer-motion';
-import { FiSmartphone, FiHeadphones, FiTablet, FiShield, FiRefreshCw, FiTruck, FiArrowRight } from 'react-icons/fi';
+import { FiSmartphone, FiHeadphones, FiTablet, FiShield, FiRefreshCw, FiTruck, FiArrowRight, FiTrendingUp, FiShoppingBag, FiStar } from 'react-icons/fi';
 import { BsPhone, BsLaptop, BsHeadphones } from 'react-icons/bs';
 import api from '../api/axios';
 import ProductCard from '../components/ProductCard';
@@ -55,6 +55,25 @@ export default function Home() {
     <motion.div initial="hidden" animate="show">
       <HeroSlider />
       <PromoPopup />
+
+      <motion.section className="marketplace-cta" variants={fadeUp} initial="hidden" whileInView="show" viewport={{ once: true }}>
+        <div className="container">
+          <div className="marketplace-cta-grid">
+            <Link to="/vendre" className="marketplace-cta-card cta-sell">
+              <div className="cta-icon"><FiTrendingUp size={32} /></div>
+              <h3>Vous vendez un téléphone ?</h3>
+              <p>Publiez votre annonce gratuitement et touchez des acheteurs sérieux.</p>
+              <span className="cta-btn">Vendre maintenant <FiArrowRight size={16} /></span>
+            </Link>
+            <Link to="/products" className="marketplace-cta-card cta-buy">
+              <div className="cta-icon"><FiShoppingBag size={32} /></div>
+              <h3>Vous cherchez un téléphone ?</h3>
+              <p>Trouvez votre prochain smartphone au meilleur prix chez nos vendeurs vérifiés.</p>
+              <span className="cta-btn">Acheter maintenant <FiArrowRight size={16} /></span>
+            </Link>
+          </div>
+        </div>
+      </motion.section>
 
       <motion.section variants={fadeUp} className="container">
         <motion.div className="category-grid" variants={stagger} initial="hidden" whileInView="show" viewport={{ once: true }}>
@@ -148,8 +167,8 @@ export default function Home() {
           </div>
           <motion.div className="features-grid" variants={stagger} initial="hidden" whileInView="show" viewport={{ once: true }}>
             {[
+              { icon: FiStar, title: 'Vendez en toute sérénité', desc: 'Créez votre compte vendeur gratuitement et gérez vos annonces depuis votre tableau de bord.' },
               { icon: FiShield, title: 'Garantie incluse', desc: 'Chaque produit est couvert par une garantie minimum de 15 jours pour votre tranquilité.' },
-              { icon: FiRefreshCw, title: 'Testé et vérifié', desc: 'Nos experts vérifient chaque article avant mise en vente. Qualité irréprochable.' },
               { icon: FiTruck, title: 'Livraison rapide', desc: 'Après la confirmation, Expédition sur Casablanca Gratuit sous 24h. Suivi de commande en temps réel et retour facile.' },
             ].map((feat) => (
               <motion.div key={feat.title} className="feature-card" variants={fadeUp}>
