@@ -108,9 +108,19 @@ router.get('/:slug', async (req, res) => {
        LEFT JOIN categories c ON p.category_id = c.id
        LEFT JOIN users u ON p.seller_id = u.id
        WHERE p.slug = ?`;
-    const [rows] = await pool.query(sql, [req.params.slug]);
-    if (rows.length === 0) return res.status(404).json({ message: 'Produit introuvable.' });
-    res.json(rows[0]);
+    try {
+      const [rows] = await pool.query(sql, [req.params.slug]);
+      if (rows.length === 0) return res.status(404).json({ message: 'Produit introuvable.' });
+      return res.json(rows[0]);
+    } catch (e) {
+      if (e.errno === 1054 || e.code === 'ER_BAD_FIELD_ERROR') {
+        sql = sql.replace(/,\s*\(u\.premium.*?as seller_premium/i, '');
+        const [rows] = await pool.query(sql, [req.params.slug]);
+        if (rows.length === 0) return res.status(404).json({ message: 'Produit introuvable.' });
+        return res.json(rows[0]);
+      }
+      throw e;
+    }
   } catch (err) {
     res.status(500).json({ message: 'Erreur serveur.' });
   }

@@ -14,9 +14,15 @@ export default function PremiumPopup({ open, onClose }) {
   const [loading, setLoading] = useState(false);
   const [uploading, setUploading] = useState(false);
   const [msg, setMsg] = useState(null);
+  const [checkingPremium, setCheckingPremium] = useState(false);
 
   useEffect(() => {
-    if (open) { refreshUser(); setStep('info'); setMsg(null); }
+    if (open) {
+      setStep('info');
+      setMsg(null);
+      setCheckingPremium(true);
+      refreshUser().finally(() => setCheckingPremium(false));
+    }
   }, [open]);
 
   const handleStart = async () => {
@@ -73,7 +79,11 @@ export default function PremiumPopup({ open, onClose }) {
           >
             <button className="premium-close" onClick={onClose}><FiX size={20} /></button>
 
-            {step === 'info' && user?.premium ? (
+            {step === 'info' && checkingPremium ? (
+              <div className="premium-content" style={{ textAlign: 'center' }}>
+                <div className="spinner" style={{ margin: '20px auto' }} />
+              </div>
+            ) : step === 'info' && user?.premium ? (
               <div className="premium-content">
                 <div className="premium-icon-wrap premium-icon-success"><FiCheckCircle size={32} /></div>
                 <h2>Vous êtes déjà Premium</h2>
