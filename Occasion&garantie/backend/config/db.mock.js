@@ -27,7 +27,9 @@ function load() {
     if (fs.existsSync(DB_PATH)) {
       let raw = fs.readFileSync(DB_PATH, 'utf8');
       if (raw.charCodeAt(0) === 0xFEFF) raw = raw.slice(1);
-      data = JSON.parse(raw);
+      const loaded = JSON.parse(raw);
+      data = { ...defaultData, ...loaded, nextId: { ...defaultData.nextId, ...(loaded.nextId || {}) } };
+      if (!Array.isArray(data.premium_payments)) data.premium_payments = [];
     }
   } catch { data = { ...defaultData }; }
 }

@@ -823,12 +823,14 @@
   "orders": [],
   "order_items": [],
   "product_images": [],
+  "premium_payments": [],
   "nextId": {
     "users": 3,
     "products": 55,
     "orders": 1,
     "order_items": 1,
     "product_images": 1,
+    "premium_payments": 1,
     "reservations": 1
   },
   "reservations": []

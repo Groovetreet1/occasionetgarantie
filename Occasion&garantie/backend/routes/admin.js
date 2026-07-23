@@ -54,6 +54,7 @@ router.post('/premium-payments/:id/confirm', authenticate, adminOnly, async (req
 
     res.json({ message: 'Premium confirme avec succes pour 1 an.' });
   } catch (err) {
+    console.error('Confirm premium error:', err.sqlMessage || err.message, err.sql);
     res.status(500).json({ message: 'Erreur serveur.' });
   }
 });
