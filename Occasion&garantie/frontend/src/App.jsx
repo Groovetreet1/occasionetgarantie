@@ -17,6 +17,7 @@ import ResetPassword from './pages/ResetPassword';
 import Profile from './pages/Profile';
 import NotFound from './pages/NotFound';
 import AdminDashboard from './pages/AdminDashboard';
+import AdminPremium from './pages/AdminPremium';
 import AdminProductForm from './pages/AdminProductForm';
 import SellPage from './pages/SellPage';
 import SellerDashboard from './pages/SellerDashboard';
@@ -62,6 +63,7 @@ export default function App() {
           <Route path="/reset-password" element={<AnimatedPage><ResetPassword /></AnimatedPage>} />
           <Route path="/profile" element={<AnimatedPage><Profile /></AnimatedPage>} />
           <Route path="/admin" element={<AnimatedPage><AdminRoute><AdminDashboard /></AdminRoute></AnimatedPage>} />
+          <Route path="/admin/premium" element={<AnimatedPage><AdminRoute><AdminPremium /></AdminRoute></AnimatedPage>} />
           <Route path="/admin/products/new" element={<AnimatedPage><AdminRoute><AdminProductForm /></AdminRoute></AnimatedPage>} />
           <Route path="/admin/products/edit/:id" element={<AnimatedPage><AdminRoute><AdminProductForm /></AdminRoute></AnimatedPage>} />
           <Route path="/vendre" element={<AnimatedPage><SellPage /></AnimatedPage>} />

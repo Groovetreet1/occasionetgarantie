@@ -10,6 +10,7 @@ const productRoutes = require('./routes/products');
 const categoryRoutes = require('./routes/categories');
 const uploadRoutes = require('./routes/upload');
 const reservationRoutes = require('./routes/reservations');
+const adminRoutes = require('./routes/admin');
 const premiumRoutes = require('./routes/premium');
 const sellerRoutes = require('./routes/seller');
 
@@ -45,6 +46,7 @@ app.use('/api/products', productRoutes);
 app.use('/api/categories', categoryRoutes);
 app.use('/api/upload', uploadRoutes);
 app.use('/api/reservations', reservationRoutes);
+app.use('/api/admin', adminRoutes);
 app.use('/api/premium', premiumRoutes);
 app.use('/api/seller', sellerRoutes);
 

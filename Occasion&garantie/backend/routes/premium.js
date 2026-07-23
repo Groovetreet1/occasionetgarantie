@@ -94,25 +94,21 @@ router.post('/activate', authenticate, screenshotUpload.single('screenshot'), as
     if (!req.file) return res.status(400).json({ message: 'Fichier requis.' });
 
     const filename = req.file.filename;
-    const expiresAt = new Date();
-    expiresAt.setFullYear(expiresAt.getFullYear() + 1);
-
-    await pool.query('UPDATE premium_payments SET screenshot = ?, status = ? WHERE id = ?', [filename, 'actif', payments[0].id]);
-    await pool.query('UPDATE users SET premium = TRUE, premium_expires_at = ? WHERE id = ?', [expiresAt, req.user.id]);
+    await pool.query('UPDATE premium_payments SET screenshot = ? WHERE id = ?', [filename, payments[0].id]);
 
     try {
       let adminPhone = ADMIN_PHONE;
       const [admins] = await pool.query('SELECT phone FROM users WHERE role = ?', ['admin']);
       if (admins.length > 0 && admins[0].phone) adminPhone = admins[0].phone;
       if (adminPhone) {
-        const msg = `Premium #${payments[0].id} ${payments[0].full_name} ${payments[0].phone} 50DH active`;
+        const msg = `Premium #${payments[0].id} ${payments[0].full_name} ${payments[0].phone} 50DH recu, confirmer sur admin`;
         await gomobile.sendSms(adminPhone, msg);
       }
     } catch (smsErr) {
       console.error('Admin SMS failed:', smsErr.message);
     }
 
-    res.json({ message: 'Compte Premium active avec succes pour 1 an !' });
+    res.json({ message: 'Screenshot envoye. En attente de confirmation par l\'administrateur.' });
   } catch (err) {
     res.status(500).json({ message: 'Erreur serveur.' });
   }

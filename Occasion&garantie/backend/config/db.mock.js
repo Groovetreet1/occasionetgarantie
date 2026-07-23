@@ -446,6 +446,21 @@ const mockPool = {
       return [[]];
     }
 
+    // SELECT all premium_payments with JOIN (admin)
+    if (upper.startsWith('SELECT') && upper.includes('FROM PREMIUM_PAYMENTS P') && upper.includes('JOIN USERS U')) {
+      const payments = data.premium_payments.map(p => {
+        const user = data.users.find(u => u.id === p.user_id);
+        return { ...p, full_name: user?.full_name || '', email: user?.email || '', phone: user?.phone || '' };
+      }).sort((a, b) => new Date(b.created_at) - new Date(a.created_at));
+      return [payments];
+    }
+
+    // SELECT premium_payments by id
+    if (upper.startsWith('SELECT') && upper.includes('FROM PREMIUM_PAYMENTS') && upper.includes('WHERE ID =') && !upper.includes('USER_ID')) {
+      const payment = data.premium_payments.find(p => p.id === params[0]);
+      return [payment ? [payment] : []];
+    }
+
     console.log('Unhandled SQL:', sql, JSON.stringify(params));
     return [[]];
   }

@@ -122,12 +122,12 @@ export default function PremiumPopup({ open, onClose }) {
             {step === 'done' && (
               <div className="premium-content">
                 <div className="premium-icon-wrap premium-icon-success"><FiCheck size={32} /></div>
-                <h2>F&eacute;licitations !</h2>
-                <p className="premium-sub">Votre compte Premium est actif pour 1 an</p>
+                <h2>Merci !</h2>
+                <p className="premium-sub">Votre demande est en cours de v&eacute;rification</p>
                 <p style={{ fontSize: 13, color: 'var(--text-secondary)', marginBottom: 20 }}>
-                  Les publicit&eacute;s ont &eacute;t&eacute; d&eacute;sactiv&eacute;es. Merci pour votre soutien !
+                  L&rsquo;administrateur va confirmer votre paiement sous 24h. Vous recevrez une notification SMS.
                 </p>
-                <button className="form-submit" onClick={onClose}>Profiter du site</button>
+                <button className="form-submit" onClick={onClose}>OK</button>
               </div>
             )}
           </motion.div>

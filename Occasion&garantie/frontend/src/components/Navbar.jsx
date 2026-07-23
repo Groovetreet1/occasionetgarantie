@@ -133,9 +133,14 @@ export default function Navbar() {
                         </NavLink>
                       )}
                       {user.role === 'admin' && (
-                        <NavLink to="/admin" onClick={() => setDropdownOpen(false)}>
-                          <FiSettings size={14} /> Administration
-                        </NavLink>
+                        <>
+                          <NavLink to="/admin" onClick={() => setDropdownOpen(false)}>
+                            <FiSettings size={14} /> Administration
+                          </NavLink>
+                          <NavLink to="/admin/premium" onClick={() => setDropdownOpen(false)}>
+                            <FiStar size={14} /> Premium
+                          </NavLink>
+                        </>
                       )}
                       <button onClick={() => { logout(); setDropdownOpen(false); }}>
                         <FiLogOut size={14} /> Déconnexion
@@ -189,7 +194,10 @@ export default function Navbar() {
               <NavLink to="/seller" onClick={closeMenu}><FiShoppingBag size={14} /> Tableau de Bord</NavLink>
             )}
             {user.role === 'admin' && (
-              <NavLink to="/admin" onClick={closeMenu}><FiSettings size={14} /> Admin</NavLink>
+              <>
+                <NavLink to="/admin" onClick={closeMenu}><FiSettings size={14} /> Admin</NavLink>
+                <NavLink to="/admin/premium" onClick={closeMenu}><FiStar size={14} /> Premium</NavLink>
+              </>
             )}
             <button onClick={() => { logout(); closeMenu(); }} className="navbar-mobile-logout">
               <FiLogOut size={14} /> Déconnexion
