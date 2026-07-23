@@ -55,7 +55,7 @@ export default function Products() {
   const hasFilters = category !== 'Tous' || stateFilter !== 'Tous' || priceMin || priceMax;
 
   return (
-    <section className="products-section" style={{ paddingTop: '120px' }}>
+    <section className="products-section">
       <div className="container">
         <div className="products-header">
           <div>

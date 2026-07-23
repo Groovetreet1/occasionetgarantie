@@ -448,7 +448,7 @@ input, textarea, select, button { font-family: inherit; }
   .about-contact-grid { grid-template-columns: 1fr; gap: 24px; }
 }
 
-.products-section { padding: 60px 0; }
+.products-section { padding: 120px 0 80px; }
 .products-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 24px; flex-wrap: wrap; gap: 12px; }
 .products-grid {
   display: grid; grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
@@ -502,7 +502,7 @@ input, textarea, select, button { font-family: inherit; }
   .products-grid { gap: 10px; }
 }
 
-.product-detail-section { padding-top: 100px; padding-bottom: 60px; }
+.product-detail-section { padding-top: 120px; padding-bottom: 60px; }
 .product-detail-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 48px; align-items: start; }
 .product-detail-image {
   aspect-ratio: 1; border-radius: var(--radius-lg); overflow: hidden; position: relative;
@@ -922,7 +922,7 @@ input, textarea, select, button { font-family: inherit; }
 
 /* Seller pages - horizontal nav layout */
 .seller-page {
-  max-width: 1100px; margin: 0 auto; padding: 28px 32px 60px;
+  max-width: 1100px; margin: 0 auto; padding: 120px 32px 60px;
   min-height: calc(100vh - 64px);
 }
 .seller-page-header {
