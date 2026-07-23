@@ -695,6 +695,12 @@ input, textarea, select, button { font-family: inherit; }
 .lightbox-counter { position: absolute; bottom: 20px; left: 50%; transform: translateX(-50%); color: rgba(255, 255, 255, 0.6); font-size: 13px; font-weight: 600; background: rgba(0, 0, 0, 0.5); padding: 6px 16px; border-radius: 20px; }
 
 .auth-page { min-height: 100vh; display: flex; align-items: center; justify-content: center; padding: 100px 20px 40px; }
+@media (max-width: 480px) {
+  .auth-page { padding: 80px 12px 30px; align-items: flex-start; padding-top: 100px; }
+  .auth-header { margin-bottom: 20px; }
+  .auth-header h1 { font-size: 22px; }
+  .auth-card { padding: 20px; }
+}
 .auth-container { width: 100%; max-width: 420px; }
 .auth-header { text-align: center; margin-bottom: 32px; }
 .auth-header h1 { font-size: 28px; font-weight: 700; margin-bottom: 8px; }
@@ -1122,10 +1128,10 @@ select.form-control, .form-group select { cursor: pointer; appearance: auto; }
 
 /* Seller responsive */
 @media (max-width: 768px) {
-  .seller-page { padding: 16px; }
+  .seller-page { padding: 16px; padding-top: 100px; }
   .seller-page-header h1 { font-size: 18px; }
   .seller-nav-horizontal { flex-direction: column; align-items: stretch; }
-  .seller-nav-links { justify-content: center; }
+  .seller-nav-links { justify-content: center; flex-wrap: wrap; }
   .seller-nav-item { font-size: 12px; padding: 6px 10px; }
   .seller-nav-shop { border-left: none; border-top: 1px solid var(--border); margin-left: 0; padding-top: 8px; justify-content: center; }
   .seller-page-content .dashboard-stats { grid-template-columns: 1fr 1fr; gap: 8px; }
@@ -1138,7 +1144,7 @@ select.form-control, .form-group select { cursor: pointer; appearance: auto; }
   .action-btns .btn-icon { width: 28px; height: 28px; }
 }
 @media (max-width: 400px) {
-  .seller-page { padding: 12px; }
+  .seller-page { padding: 12px; padding-top: 100px; }
   .seller-page-header { flex-direction: column; align-items: stretch; }
   .seller-page-header .btn { width: 100%; justify-content: center; }
   .seller-page-content .dashboard-stats { grid-template-columns: 1fr 1fr; gap: 6px; }
@@ -1350,8 +1356,6 @@ select.form-control, .form-group select { cursor: pointer; appearance: auto; }
   .form-row.three { grid-template-columns: 1fr; }
   .form-row.two { grid-template-columns: 1fr; }
   .state-grid { grid-template-columns: 1fr 1fr; }
-  .seller-nav { width: 100%; }
-  .seller-nav-link { flex: 1; justify-content: center; font-size: 12px; padding: 8px 12px; }
   .seller-form-card { padding: 16px; }
   .seller-form { gap: 14px; }
   .seller-form-actions { flex-direction: column; }
