@@ -2,7 +2,7 @@ const express = require('express');
 const multer = require('multer');
 const path = require('path');
 const fs = require('fs');
-const { authenticate, adminOnly } = require('../middleware/auth');
+const { authenticate, sellerOrAdmin } = require('../middleware/auth');
 
 const router = express.Router();
 
@@ -28,7 +28,7 @@ const upload = multer({
   },
 });
 
-router.post('/', authenticate, adminOnly, (req, res) => {
+router.post('/', authenticate, sellerOrAdmin, (req, res) => {
   const single = req.query.single === 'true';
   const uploader = single ? upload.single('image') : upload.array('images', 10);
   uploader(req, res, (err) => {

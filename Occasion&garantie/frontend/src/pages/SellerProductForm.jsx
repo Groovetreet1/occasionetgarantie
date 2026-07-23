@@ -1,7 +1,10 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 import { motion } from 'framer-motion';
+import { FiUpload, FiX, FiImage } from 'react-icons/fi';
 import api from '../api/axios';
+
+const API_BASE = import.meta.env.VITE_API_URL || '';
 
 const categories = [
   { id: 1, name: 'Smartphones' },
@@ -20,24 +23,24 @@ const states = [
 ];
 
 const defaultSpecs = {
-  'Ecran': '',
-  'Processeur': '',
-  'RAM': '',
-  'Stockage': '',
-  'Appareil': '',
-  'Batterie': '',
+  'Ecran': '', 'Processeur': '', 'RAM': '', 'Stockage': '', 'Appareil': '', 'Batterie': '',
 };
 
 export default function SellerProductForm() {
   const { id } = useParams();
   const navigate = useNavigate();
   const isEdit = Boolean(id);
+  const fileInputRef = useRef(null);
 
   const [form, setForm] = useState({
     name: '', slug: '', description: '', price: '', old_price: '',
     category_id: '1', brand: '', state: 'tres_bon', warranty: '6 mois',
-    image: '', specs: { ...defaultSpecs },
+    specs: { ...defaultSpecs },
   });
+  const [mainImage, setMainImage] = useState(null);
+  const [gallery, setGallery] = useState([]);
+  const [existingImages, setExistingImages] = useState([]);
+  const [uploading, setUploading] = useState(false);
   const [error, setError] = useState('');
   const [saving, setSaving] = useState(false);
 
@@ -50,8 +53,12 @@ export default function SellerProductForm() {
           price: p.price || '', old_price: p.old_price || '',
           category_id: String(p.category_id || '1'), brand: p.brand || '',
           state: p.state || 'tres_bon', warranty: p.warranty || '6 mois',
-          image: p.image || '', specs: p.specs || { ...defaultSpecs },
+          specs: p.specs || { ...defaultSpecs },
         });
+        if (p.image) setExistingImages([p.image]);
+        if (p.gallery && Array.isArray(p.gallery)) {
+          setExistingImages(prev => [...new Set([...prev, ...p.gallery])]);
+        }
       }).catch(() => navigate('/seller'));
     }
   }, [id]);
@@ -68,6 +75,40 @@ export default function SellerProductForm() {
     setForm(prev => ({ ...prev, specs: { ...prev.specs, [key]: value } }));
   };
 
+  const handleFileSelect = (e) => {
+    const files = Array.from(e.target.files || []);
+    setGallery(prev => [...prev, ...files]);
+    e.target.value = '';
+  };
+
+  const removeGalleryFile = (index) => {
+    setGallery(prev => prev.filter((_, i) => i !== index));
+  };
+
+  const removeExistingImage = (img) => {
+    setExistingImages(prev => prev.filter(i => i !== img));
+  };
+
+  const uploadImages = async () => {
+    if (gallery.length === 0) return { image: null, gallery: [] };
+
+    setUploading(true);
+    const formData = new FormData();
+    gallery.forEach(file => formData.append('images', file));
+
+    try {
+      const res = await api.post('/upload?single=false', formData, {
+        headers: { 'Content-Type': 'multipart/form-data' },
+      });
+      const allExisting = [...existingImages, ...res.data.urls];
+      return { image: allExisting[0], gallery: allExisting };
+    } catch (err) {
+      throw new Error(err.response?.data?.message || 'Erreur upload');
+    } finally {
+      setUploading(false);
+    }
+  };
+
   const handleSubmit = async (e) => {
     e.preventDefault();
     setError('');
@@ -79,11 +120,22 @@ export default function SellerProductForm() {
 
     setSaving(true);
     try {
+      let image = existingImages[0] || null;
+      let galleryUrls = existingImages;
+
+      if (gallery.length > 0) {
+        const uploaded = await uploadImages();
+        image = uploaded.image || image;
+        galleryUrls = uploaded.gallery;
+      }
+
       const payload = {
         ...form,
         price: Number(form.price),
         old_price: form.old_price ? Number(form.old_price) : null,
         category_id: Number(form.category_id),
+        image,
+        gallery: galleryUrls,
         stock: 1,
         active: true,
       };
@@ -110,14 +162,38 @@ export default function SellerProductForm() {
         {error && <div className="alert alert-error">{error}</div>}
 
         <form onSubmit={handleSubmit} className="card admin-form">
+          {/* Upload zone */}
+          <div className="form-group">
+            <label>Photos du produit</label>
+            <div className="upload-zone" onClick={() => fileInputRef.current?.click()}>
+              <FiUpload size={28} />
+              <p>Cliquez pour ajouter des photos</p>
+              <small>JPG, PNG, WebP - Max 5MB par photo</small>
+            </div>
+            <input ref={fileInputRef} type="file" multiple accept="image/*" onChange={handleFileSelect} style={{ display: 'none' }} />
+
+            {(existingImages.length > 0 || gallery.length > 0) && (
+              <div className="upload-preview-grid">
+                {existingImages.map((img, i) => (
+                  <div key={`e-${i}`} className="upload-preview-item">
+                    <img src={`${API_BASE}/uploads/${img}`} alt="" />
+                    <button type="button" className="upload-remove" onClick={() => removeExistingImage(img)}><FiX /></button>
+                  </div>
+                ))}
+                {gallery.map((file, i) => (
+                  <div key={`n-${i}`} className="upload-preview-item">
+                    <img src={URL.createObjectURL(file)} alt="" />
+                    <button type="button" className="upload-remove" onClick={() => removeGalleryFile(i)}><FiX /></button>
+                  </div>
+                ))}
+              </div>
+            )}
+          </div>
+
           <div className="form-grid">
             <div className="form-group">
               <label>Nom du produit *</label>
               <input name="name" value={form.name} onChange={handleChange} className="form-control" placeholder="iPhone 12 64Go" />
-            </div>
-            <div className="form-group">
-              <label>Slug (URL)</label>
-              <input name="slug" value={form.slug} onChange={handleChange} className="form-control" placeholder="iphone-12-64go" />
             </div>
             <div className="form-group">
               <label>Prix (DH) *</label>
@@ -149,15 +225,9 @@ export default function SellerProductForm() {
             </div>
           </div>
 
-          <div className="form-group" style={{ gridColumn: '1 / -1' }}>
-            <label>Description</label>
-            <textarea name="description" value={form.description} onChange={handleChange} className="form-control" rows={4} placeholder="Décrivez l'état du produit..." />
-          </div>
-
           <div className="form-group">
-            <label>Image (nom du fichier)</label>
-            <input name="image" value={form.image} onChange={handleChange} className="form-control" placeholder="iphone-12.jpg" />
-            <small className="text-secondary">Mettez le fichier dans /uploads/products/</small>
+            <label>Description</label>
+            <textarea name="description" value={form.description} onChange={handleChange} className="form-control" rows={4} placeholder="Décrivez l'état du produit, les éventuels défauts, accessoires inclus..." />
           </div>
 
           <h3 style={{ marginTop: 24 }}>Caractéristiques</h3>
@@ -173,8 +243,8 @@ export default function SellerProductForm() {
 
           <div className="form-actions">
             <button type="button" className="btn btn-secondary" onClick={() => navigate('/seller')}>Annuler</button>
-            <button type="submit" className="btn btn-primary" disabled={saving}>
-              {saving ? 'Enregistrement...' : isEdit ? 'Mettre à jour' : 'Publier'}
+            <button type="submit" className="btn btn-primary" disabled={saving || uploading}>
+              {uploading ? 'Upload des photos...' : saving ? 'Enregistrement...' : isEdit ? 'Mettre à jour' : 'Publier'}
             </button>
           </div>
         </form>
