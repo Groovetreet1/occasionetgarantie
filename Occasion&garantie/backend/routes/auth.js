@@ -171,9 +171,16 @@ router.post('/login', [
 
 router.get('/me', authenticate, async (req, res) => {
   try {
-    const [users] = await pool.query('SELECT id, full_name, email, phone, role, phone_verified, created_at, store_name, premium, premium_expires_at FROM users WHERE id = ?', [req.user.id]);
-    if (users.length === 0) return res.status(404).json({ message: 'Utilisateur introuvable.' });
-    res.json(users[0]);
+    try {
+      const [users] = await pool.query('SELECT id, full_name, email, phone, role, phone_verified, created_at, store_name, premium, premium_expires_at FROM users WHERE id = ?', [req.user.id]);
+      if (users.length === 0) return res.status(404).json({ message: 'Utilisateur introuvable.' });
+      return res.json(users[0]);
+    } catch (e) {
+      if (e.errno !== 1054) throw e;
+      const [users] = await pool.query('SELECT id, full_name, email, phone, role, phone_verified, created_at, store_name FROM users WHERE id = ?', [req.user.id]);
+      if (users.length === 0) return res.status(404).json({ message: 'Utilisateur introuvable.' });
+      res.json({ ...users[0], premium: false, premium_expires_at: null });
+    }
   } catch (err) {
     res.status(500).json({ message: 'Erreur serveur.' });
   }

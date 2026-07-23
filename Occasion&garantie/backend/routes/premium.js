@@ -39,11 +39,16 @@ const screenshotUpload = multer({
 
 router.get('/status', authenticate, async (req, res) => {
   try {
-    const [users] = await pool.query('SELECT premium, premium_expires_at FROM users WHERE id = ?', [req.user.id]);
-    if (users.length === 0) return res.status(404).json({ message: 'Utilisateur introuvable.' });
-    const user = users[0];
-    const isPremium = user.premium === 1 && (!user.premium_expires_at || new Date(user.premium_expires_at) > new Date());
-    res.json({ premium: isPremium, expiresAt: user.premium_expires_at });
+    try {
+      const [users] = await pool.query('SELECT premium, premium_expires_at FROM users WHERE id = ?', [req.user.id]);
+      if (users.length === 0) return res.status(404).json({ message: 'Utilisateur introuvable.' });
+      const user = users[0];
+      const isPremium = user.premium === 1 && (!user.premium_expires_at || new Date(user.premium_expires_at) > new Date());
+      return res.json({ premium: isPremium, expiresAt: user.premium_expires_at });
+    } catch (e) {
+      if (e.errno !== 1054) throw e;
+      res.json({ premium: false, expiresAt: null });
+    }
   } catch (err) {
     res.status(500).json({ message: 'Erreur serveur.' });
   }
@@ -51,34 +56,53 @@ router.get('/status', authenticate, async (req, res) => {
 
 router.post('/initiate', authenticate, async (req, res) => {
   try {
-    const [users] = await pool.query('SELECT premium, premium_expires_at FROM users WHERE id = ?', [req.user.id]);
-    if (users.length === 0) return res.status(404).json({ message: 'Utilisateur introuvable.' });
-    const user = users[0];
-    if (user.premium === 1 && (!user.premium_expires_at || new Date(user.premium_expires_at) > new Date())) {
-      return res.status(400).json({ message: 'Vous avez deja un abonnement premium actif.' });
+    try {
+      const [users] = await pool.query('SELECT premium, premium_expires_at FROM users WHERE id = ?', [req.user.id]);
+      if (users.length === 0) return res.status(404).json({ message: 'Utilisateur introuvable.' });
+      if (users[0].premium === 1 && (!users[0].premium_expires_at || new Date(users[0].premium_expires_at) > new Date())) {
+        return res.status(400).json({ message: 'Vous avez deja un abonnement premium actif.' });
+      }
+    } catch (e) {
+      if (e.errno !== 1054) throw e;
     }
 
-    const [existing] = await pool.query('SELECT id FROM premium_payments WHERE user_id = ? AND status = ?', [req.user.id, 'en_attente']);
-    if (existing.length > 0) {
-      return res.json({
-        message: `Vous avez deja une demande en attente. Versez ${PREMIUM_AMOUNT} DH sur le compte ci-dessous.`,
-        paymentId: existing[0].id,
+    try {
+      const [existing] = await pool.query('SELECT id FROM premium_payments WHERE user_id = ? AND status = ?', [req.user.id, 'en_attente']);
+      if (existing.length > 0) {
+        return res.json({
+          message: `Vous avez deja une demande en attente. Versez ${PREMIUM_AMOUNT} DH sur le compte ci-dessous.`,
+          paymentId: existing[0].id,
+          amount: PREMIUM_AMOUNT,
+          bank: BANK_INFO,
+        });
+      }
+    } catch (e) {
+      if (e.errno === 1146) { /* table doesn't exist, will create below */ }
+      else throw e;
+    }
+
+    try {
+      const [result] = await pool.query(
+        'INSERT INTO premium_payments (user_id, amount, status) VALUES (?, ?, ?)',
+        [req.user.id, PREMIUM_AMOUNT, 'en_attente']
+      );
+      return res.status(201).json({
+        message: `Demande creee. Versez ${PREMIUM_AMOUNT} DH sur le compte ci-dessous.`,
+        paymentId: result.insertId,
         amount: PREMIUM_AMOUNT,
         bank: BANK_INFO,
       });
+    } catch (e) {
+      if (e.errno === 1146) {
+        return res.json({
+          message: `Versez ${PREMIUM_AMOUNT} DH sur le compte ci-dessous. Contactez le support apres le virement.`,
+          paymentId: null,
+          amount: PREMIUM_AMOUNT,
+          bank: BANK_INFO,
+        });
+      }
+      throw e;
     }
-
-    const [result] = await pool.query(
-      'INSERT INTO premium_payments (user_id, amount, status) VALUES (?, ?, ?)',
-      [req.user.id, PREMIUM_AMOUNT, 'en_attente']
-    );
-
-    res.status(201).json({
-      message: `Demande creee. Versez ${PREMIUM_AMOUNT} DH sur le compte ci-dessous.`,
-      paymentId: result.insertId,
-      amount: PREMIUM_AMOUNT,
-      bank: BANK_INFO,
-    });
   } catch (err) {
     res.status(500).json({ message: 'Erreur serveur.' });
   }
@@ -86,22 +110,30 @@ router.post('/initiate', authenticate, async (req, res) => {
 
 router.post('/activate', authenticate, screenshotUpload.single('screenshot'), async (req, res) => {
   try {
-    const [payments] = await pool.query(
-      'SELECT p.*, u.full_name, u.phone FROM premium_payments p JOIN users u ON p.user_id = u.id WHERE p.user_id = ? AND p.status = ? ORDER BY p.id DESC LIMIT 1',
-      [req.user.id, 'en_attente']
-    );
-    if (payments.length === 0) return res.status(404).json({ message: 'Aucune demande en attente.' });
+    let paymentRow;
+    try {
+      const [payments] = await pool.query(
+        'SELECT p.*, u.full_name, u.phone FROM premium_payments p JOIN users u ON p.user_id = u.id WHERE p.user_id = ? AND p.status = ? ORDER BY p.id DESC LIMIT 1',
+        [req.user.id, 'en_attente']
+      );
+      if (payments.length === 0) return res.status(404).json({ message: 'Aucune demande en attente.' });
+      paymentRow = payments[0];
+    } catch (e) {
+      if (e.errno === 1146) return res.status(400).json({ message: 'Systeme de paiement non configure. Contactez le support.' });
+      throw e;
+    }
+
     if (!req.file) return res.status(400).json({ message: 'Fichier requis.' });
 
     const filename = req.file.filename;
-    await pool.query('UPDATE premium_payments SET screenshot = ? WHERE id = ?', [filename, payments[0].id]);
+    await pool.query('UPDATE premium_payments SET screenshot = ? WHERE id = ?', [filename, paymentRow.id]);
 
     try {
       let adminPhone = ADMIN_PHONE;
       const [admins] = await pool.query('SELECT phone FROM users WHERE role = ?', ['admin']);
       if (admins.length > 0 && admins[0].phone) adminPhone = admins[0].phone;
       if (adminPhone) {
-        const msg = `Premium #${payments[0].id} ${payments[0].full_name} ${payments[0].phone} 50DH recu, confirmer sur admin`;
+        const msg = `Premium #${paymentRow.id} ${paymentRow.full_name} ${paymentRow.phone} 50DH recu, confirmer sur admin`;
         await gomobile.sendSms(adminPhone, msg);
       }
     } catch (smsErr) {

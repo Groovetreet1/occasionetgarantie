@@ -6,10 +6,15 @@ const gomobile = require('../services/gomobile');
 
 router.get('/premium-payments', authenticate, adminOnly, async (req, res) => {
   try {
-    const [rows] = await pool.query(
-      'SELECT p.*, u.full_name, u.email, u.phone FROM premium_payments p JOIN users u ON p.user_id = u.id ORDER BY p.created_at DESC'
-    );
-    res.json(rows);
+    try {
+      const [rows] = await pool.query(
+        'SELECT p.*, u.full_name, u.email, u.phone FROM premium_payments p JOIN users u ON p.user_id = u.id ORDER BY p.created_at DESC'
+      );
+      return res.json(rows);
+    } catch (e) {
+      if (e.errno === 1146) return res.json([]);
+      throw e;
+    }
   } catch (err) {
     res.status(500).json({ message: 'Erreur serveur.' });
   }
