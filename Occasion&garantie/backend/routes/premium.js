@@ -7,6 +7,25 @@ const pool = require('../config/db');
 const { authenticate } = require('../middleware/auth');
 const gomobile = require('../services/gomobile');
 
+// Auto-create premium_payments table if missing
+(async () => {
+  try {
+    await pool.query(`CREATE TABLE IF NOT EXISTS premium_payments (
+      id INT AUTO_INCREMENT PRIMARY KEY,
+      user_id INT NOT NULL,
+      amount DECIMAL(10,2) NOT NULL DEFAULT 50.00,
+      screenshot VARCHAR(255),
+      status ENUM('en_attente','actif','rejete') DEFAULT 'en_attente',
+      rejection_reason VARCHAR(500) DEFAULT NULL,
+      created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+      FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE
+    )`);
+    console.log('premium_payments table ready');
+  } catch (e) {
+    console.log('premium_payments table check skipped:', e.message);
+  }
+})();
+
 const PREMIUM_AMOUNT = 50;
 const ADMIN_PHONE = process.env.ADMIN_PHONE;
 
