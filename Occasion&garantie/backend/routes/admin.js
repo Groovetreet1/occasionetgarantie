@@ -12,7 +12,7 @@ router.get('/premium-payments', authenticate, adminOnly, async (req, res) => {
       );
       return res.json(rows);
     } catch (e) {
-      if (e.errno === 1146) return res.json([]);
+      if (e.errno === 1146 || e.code === 'ER_NO_SUCH_TABLE') return res.json([]);
       throw e;
     }
   } catch (err) {

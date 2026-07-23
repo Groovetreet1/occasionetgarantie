@@ -171,16 +171,21 @@ router.post('/login', [
 
 router.get('/me', authenticate, async (req, res) => {
   try {
+    let user;
     try {
       const [users] = await pool.query('SELECT id, full_name, email, phone, role, phone_verified, created_at, store_name, premium, premium_expires_at FROM users WHERE id = ?', [req.user.id]);
       if (users.length === 0) return res.status(404).json({ message: 'Utilisateur introuvable.' });
-      return res.json(users[0]);
+      user = users[0];
     } catch (e) {
-      if (e.errno !== 1054) throw e;
-      const [users] = await pool.query('SELECT id, full_name, email, phone, role, phone_verified, created_at, store_name FROM users WHERE id = ?', [req.user.id]);
-      if (users.length === 0) return res.status(404).json({ message: 'Utilisateur introuvable.' });
-      res.json({ ...users[0], premium: false, premium_expires_at: null });
+      if (e.errno === 1054 || e.code === 'ER_BAD_FIELD_ERROR') {
+        const [users] = await pool.query('SELECT id, full_name, email, phone, role, phone_verified, created_at, store_name FROM users WHERE id = ?', [req.user.id]);
+        if (users.length === 0) return res.status(404).json({ message: 'Utilisateur introuvable.' });
+        user = { ...users[0], premium: false, premium_expires_at: null };
+      } else {
+        throw e;
+      }
     }
+    res.json(user);
   } catch (err) {
     res.status(500).json({ message: 'Erreur serveur.' });
   }

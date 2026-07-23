@@ -46,8 +46,10 @@ router.get('/status', authenticate, async (req, res) => {
       const isPremium = user.premium === 1 && (!user.premium_expires_at || new Date(user.premium_expires_at) > new Date());
       return res.json({ premium: isPremium, expiresAt: user.premium_expires_at });
     } catch (e) {
-      if (e.errno !== 1054) throw e;
-      res.json({ premium: false, expiresAt: null });
+      if (e.errno === 1054 || e.code === 'ER_BAD_FIELD_ERROR') {
+        return res.json({ premium: false, expiresAt: null });
+      }
+      throw e;
     }
   } catch (err) {
     res.status(500).json({ message: 'Erreur serveur.' });
@@ -63,7 +65,7 @@ router.post('/initiate', authenticate, async (req, res) => {
         return res.status(400).json({ message: 'Vous avez deja un abonnement premium actif.' });
       }
     } catch (e) {
-      if (e.errno !== 1054) throw e;
+      if (!(e.errno === 1054 || e.code === 'ER_BAD_FIELD_ERROR')) throw e;
     }
 
     try {
@@ -77,8 +79,7 @@ router.post('/initiate', authenticate, async (req, res) => {
         });
       }
     } catch (e) {
-      if (e.errno === 1146) { /* table doesn't exist, will create below */ }
-      else throw e;
+      if (!(e.errno === 1146 || e.code === 'ER_NO_SUCH_TABLE')) throw e;
     }
 
     try {
@@ -93,7 +94,7 @@ router.post('/initiate', authenticate, async (req, res) => {
         bank: BANK_INFO,
       });
     } catch (e) {
-      if (e.errno === 1146) {
+      if (e.errno === 1146 || e.code === 'ER_NO_SUCH_TABLE') {
         return res.json({
           message: `Versez ${PREMIUM_AMOUNT} DH sur le compte ci-dessous. Contactez le support apres le virement.`,
           paymentId: null,
@@ -119,7 +120,7 @@ router.post('/activate', authenticate, screenshotUpload.single('screenshot'), as
       if (payments.length === 0) return res.status(404).json({ message: 'Aucune demande en attente.' });
       paymentRow = payments[0];
     } catch (e) {
-      if (e.errno === 1146) return res.status(400).json({ message: 'Systeme de paiement non configure. Contactez le support.' });
+      if (e.errno === 1146 || e.code === 'ER_NO_SUCH_TABLE') return res.status(400).json({ message: 'Systeme de paiement non configure. Contactez le support.' });
       throw e;
     }
 
