@@ -1198,7 +1198,7 @@ select.form-control, .form-group select { cursor: pointer; appearance: auto; }
 }
 .navbar-sell-link:hover { opacity: 0.9; }
 .navbar-mobile-sell {
-  display: flex; align-items: center; gap: 8px; padding: 10px 20px;
+  display: flex; align-items: center; justify-content: center; gap: 8px; padding: 16px;
   color: var(--primary) !important; font-weight: 600;
 }
 .product-seller {

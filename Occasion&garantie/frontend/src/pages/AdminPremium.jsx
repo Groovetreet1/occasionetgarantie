@@ -37,7 +37,7 @@ export default function AdminPremium() {
       <div className="container" style={{ position: 'relative', zIndex: 1 }}>
         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '32px', flexWrap: 'wrap', gap: '12px' }}>
           <div>
-            <Link to="/admin" className="btn btn-ghost" style={{ marginBottom: '8px' }}><FiArrowLeft /> Dashboard</Link>
+            <Link to="/" className="btn btn-ghost" style={{ marginBottom: '8px' }}><FiArrowLeft /> Retour au site</Link>
             <h1 style={{ fontSize: '28px', fontWeight: 800 }}>Gestion Premium</h1>
             <p style={{ color: 'var(--text-secondary)' }}>{payments.length} demande{payments.length > 1 ? 's' : ''}</p>
           </div>

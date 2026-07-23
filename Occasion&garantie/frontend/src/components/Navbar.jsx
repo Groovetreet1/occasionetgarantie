@@ -127,20 +127,15 @@ export default function Navbar() {
                           <FiStar size={14} /> Passer Premium
                         </button>
                       )}
-                      {(user.role === 'seller' || user.role === 'admin') && (
+                      {(user.role === 'seller') && (
                         <NavLink to="/seller" onClick={() => setDropdownOpen(false)}>
                           <FiShoppingBag size={14} /> Tableau de Bord
                         </NavLink>
                       )}
                       {user.role === 'admin' && (
-                        <>
-                          <NavLink to="/admin" onClick={() => setDropdownOpen(false)}>
-                            <FiSettings size={14} /> Administration
-                          </NavLink>
-                          <NavLink to="/admin/premium" onClick={() => setDropdownOpen(false)}>
-                            <FiStar size={14} /> Premium
-                          </NavLink>
-                        </>
+                        <NavLink to="/admin" onClick={() => setDropdownOpen(false)}>
+                          <FiStar size={14} /> Premium
+                        </NavLink>
                       )}
                       <button onClick={() => { logout(); setDropdownOpen(false); }}>
                         <FiLogOut size={14} /> Déconnexion
@@ -182,22 +177,19 @@ export default function Navbar() {
           <>
             <NavLink to="/profile" onClick={closeMenu}><FiUser size={14} /> Mon Profil</NavLink>
             {user.premium ? (
-              <span className="navbar-premium-badge" style={{ padding: '10px 20px', display: 'flex', alignItems: 'center', gap: 8, fontSize: 14 }}>
+              <span className="navbar-premium-badge" style={{ padding: '16px', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 8, fontSize: 14 }}>
                 <FiStar size={14} /> Premium
               </span>
             ) : (
-              <button onClick={() => { closeMenu(); setShowPremium(true); }} style={{ padding: '10px 20px', display: 'flex', alignItems: 'center', gap: 8, fontSize: 14, background: 'none', border: 'none', color: 'inherit', cursor: 'pointer', width: '100%', textAlign: 'left' }}>
+              <button onClick={() => { closeMenu(); setShowPremium(true); }} style={{ padding: '16px', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 8, fontSize: 14, background: 'none', border: 'none', color: 'inherit', cursor: 'pointer', width: '100%' }}>
                 <FiStar size={14} /> Passer Premium
               </button>
             )}
-            {(user.role === 'seller' || user.role === 'admin') && (
+            {(user.role === 'seller') && (
               <NavLink to="/seller" onClick={closeMenu}><FiShoppingBag size={14} /> Tableau de Bord</NavLink>
             )}
             {user.role === 'admin' && (
-              <>
-                <NavLink to="/admin" onClick={closeMenu}><FiSettings size={14} /> Admin</NavLink>
-                <NavLink to="/admin/premium" onClick={closeMenu}><FiStar size={14} /> Premium</NavLink>
-              </>
+              <NavLink to="/admin" onClick={closeMenu}><FiStar size={14} /> Premium</NavLink>
             )}
             <button onClick={() => { logout(); closeMenu(); }} className="navbar-mobile-logout">
               <FiLogOut size={14} /> Déconnexion
