@@ -14,7 +14,8 @@ router.get('/', async (req, res) => {
     const { category, search, min, max, state, sort, seller } = req.query;
     let sql = `
       SELECT p.*, c.name as category_name,
-             u.store_name as seller_name, u.store_logo as seller_logo
+             u.store_name as seller_name, u.store_logo as seller_logo,
+             (u.premium = 1 AND (u.premium_expires_at IS NULL OR u.premium_expires_at > NOW())) as seller_premium
       FROM products p
       LEFT JOIN categories c ON p.category_id = c.id
       LEFT JOIN users u ON p.seller_id = u.id
@@ -32,7 +33,7 @@ router.get('/', async (req, res) => {
     if (sort === 'price_asc') sql += ' ORDER BY p.price ASC';
     else if (sort === 'price_desc') sql += ' ORDER BY p.price DESC';
     else if (sort === 'newest') sql += ' ORDER BY p.created_at DESC';
-    else sql += ' ORDER BY p.featured DESC, p.created_at DESC';
+    else sql += ' ORDER BY seller_premium DESC, p.featured DESC, p.created_at DESC';
 
     const [rows] = await pool.query(sql, params);
     res.json(rows);
@@ -45,11 +46,13 @@ router.get('/', async (req, res) => {
 router.get('/featured', async (req, res) => {
   try {
     const [rows] = await pool.query(
-      `SELECT p.*, c.name as category_name, u.store_name as seller_name, u.store_logo as seller_logo
+      `SELECT p.*, c.name as category_name, u.store_name as seller_name, u.store_logo as seller_logo,
+              (u.premium = 1 AND (u.premium_expires_at IS NULL OR u.premium_expires_at > NOW())) as seller_premium
        FROM products p
        LEFT JOIN categories c ON p.category_id = c.id
        LEFT JOIN users u ON p.seller_id = u.id
-       WHERE p.featured = TRUE AND p.active = TRUE AND p.status = 'disponible' LIMIT 8`
+       WHERE p.featured = TRUE AND p.active = TRUE AND p.status = 'disponible'
+       ORDER BY seller_premium DESC, p.created_at DESC LIMIT 8`
     );
     res.json(rows);
   } catch (err) {
@@ -77,7 +80,8 @@ router.get('/:slug', async (req, res) => {
   try {
     const [rows] = await pool.query(
       `SELECT p.*, c.name as category_name,
-              u.id as seller_id, u.full_name as seller_full_name, u.store_name as seller_name, u.store_logo as seller_logo
+              u.id as seller_id, u.full_name as seller_full_name, u.store_name as seller_name, u.store_logo as seller_logo,
+              (u.premium = 1 AND (u.premium_expires_at IS NULL OR u.premium_expires_at > NOW())) as seller_premium
        FROM products p
        LEFT JOIN categories c ON p.category_id = c.id
        LEFT JOIN users u ON p.seller_id = u.id

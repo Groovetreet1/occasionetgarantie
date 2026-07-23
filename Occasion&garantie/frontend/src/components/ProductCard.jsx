@@ -1,6 +1,6 @@
 import { Link } from 'react-router-dom';
 import { motion } from 'framer-motion';
-import { FiShoppingBag, FiUser, FiShield } from 'react-icons/fi';
+import { FiShoppingBag, FiUser, FiShield, FiStar } from 'react-icons/fi';
 
 const API_BASE = import.meta.env.VITE_API_URL || '';
 
@@ -45,7 +45,7 @@ export default function ProductCard({ product, index = 0 }) {
           <h3 className="product-card-title">{product.name}</h3>
 
           {product.seller_name && (
-            <span className="product-card-seller"><FiUser size={11} /> {product.seller_name}</span>
+            <span className="product-card-seller"><FiUser size={11} /> {product.seller_name} {product.seller_premium ? <FiStar size={11} style={{ color: 'var(--warning)', marginLeft: 3 }} /> : null}</span>
           )}
 
           <div className="product-card-price-row">
