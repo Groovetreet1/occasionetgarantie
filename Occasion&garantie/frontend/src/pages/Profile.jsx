@@ -155,7 +155,7 @@ export default function Profile() {
           <p>Gerer vos informations personnelles</p>
         </motion.div>
 
-        <div style={{ display: 'flex', gap: 8, marginBottom: 20 }}>
+        <div className="profile-tabs" style={{ display: 'flex', gap: 8, marginBottom: 20 }}>
           <button type="button" onClick={() => setActiveTab('profile')} className={activeTab === 'profile' ? 'btn btn-primary' : 'btn btn-outline'} style={{ flex: 1, justifyContent: 'center' }}>
             <FiUser size={16} /> Profil
           </button>
@@ -204,7 +204,7 @@ export default function Profile() {
 
             <div className="form-group">
               <label><FiPhone size={14} /> Telephone</label>
-              <div style={{ display: 'flex', gap: 8 }}>
+              <div className="profile-phone-row" style={{ display: 'flex', gap: 8 }}>
                 <input type="tel" value={phone} disabled style={{ opacity: 0.6, cursor: 'not-allowed', flex: 1 }} />
                 <button type="button" className="btn btn-outline" onClick={() => setShowPhoneModal(true)} style={{ whiteSpace: 'nowrap' }}>
                   Changer
@@ -263,7 +263,7 @@ export default function Profile() {
           position: 'fixed', inset: 0, background: 'rgba(0,0,0,0.5)', zIndex: 1000,
           display: 'flex', alignItems: 'center', justifyContent: 'center', padding: 16,
         }} onClick={() => { setShowPhoneModal(false); setPhoneStep('form'); setNewPhone(''); setPhoneCode(''); }}>
-          <div style={{
+          <div className="profile-modal-box" style={{
             background: 'var(--bg-card)', borderRadius: 16, padding: 24, maxWidth: 400, width: '100%',
             boxShadow: '0 20px 60px rgba(0,0,0,0.3)',
           }} onClick={(e) => e.stopPropagation()}>
