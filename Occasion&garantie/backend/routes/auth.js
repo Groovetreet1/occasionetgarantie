@@ -53,7 +53,7 @@ router.post('/signup', [
   body('phone').trim().notEmpty().withMessage('Le numéro de téléphone est requis.'),
 ], validate, async (req, res) => {
   try {
-    const { fullName, email, password, phone, role } = req.body;
+    const { fullName, email, password, phone, role, storeName } = req.body;
     const [existing] = await pool.query('SELECT id FROM users WHERE email = ?', [email]);
     if (existing.length > 0) {
       return res.status(400).json({ message: 'Cet email est déjà utilisé.' });
@@ -64,8 +64,8 @@ router.post('/signup', [
     const userRole = (role === 'seller') ? 'seller' : 'client';
 
     const [result] = await pool.query(
-      'INSERT INTO users (full_name, email, password, phone, phone_verified, verification_token, verification_expires, role) VALUES (?, ?, ?, ?, ?, ?, ?, ?)',
-      [fullName, email, hashed, phone, false, code, expiresAt, userRole]
+      'INSERT INTO users (full_name, email, password, phone, phone_verified, verification_token, verification_expires, role, store_name) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)',
+      [fullName, email, hashed, phone, false, code, expiresAt, userRole, (role === 'seller' && storeName) ? storeName : null]
     );
 
     try {
@@ -171,7 +171,7 @@ router.post('/login', [
 
 router.get('/me', authenticate, async (req, res) => {
   try {
-    const [users] = await pool.query('SELECT id, full_name, email, phone, role, phone_verified, created_at FROM users WHERE id = ?', [req.user.id]);
+    const [users] = await pool.query('SELECT id, full_name, email, phone, role, phone_verified, created_at, store_name FROM users WHERE id = ?', [req.user.id]);
     if (users.length === 0) return res.status(404).json({ message: 'Utilisateur introuvable.' });
     res.json(users[0]);
   } catch (err) {

@@ -11,7 +11,6 @@ export default function SellerDashboard() {
   const [products, setProducts] = useState([]);
   const [loading, setLoading] = useState(true);
   const [storeName, setStoreName] = useState('');
-  const [saving, setSaving] = useState(false);
 
   useEffect(() => {
     Promise.all([
@@ -23,18 +22,6 @@ export default function SellerDashboard() {
       setStoreName(p.data.store_name || '');
     }).catch(() => {}).finally(() => setLoading(false));
   }, []);
-
-  const handleSaveStore = async (e) => {
-    e.preventDefault();
-    setSaving(true);
-    try {
-      const res = await api.put('/seller/me', { store_name: storeName });
-      alert(res.data.message);
-    } catch (err) {
-      alert(err.response?.data?.message || 'Erreur');
-    }
-    setSaving(false);
-  };
 
   const handleDelete = async (id) => {
     if (!window.confirm('Supprimer ce produit ?')) return;
@@ -70,20 +57,14 @@ export default function SellerDashboard() {
           </Link>
         </div>
 
-        {/* Store profile */}
-        <div className="card dashboard-store-section">
-          <h3><FiTrendingUp size={18} /> Boutique</h3>
-          <form onSubmit={handleSaveStore} className="store-form">
-            <div className="form-group">
-              <label>Nom de votre boutique</label>
-              <input type="text" value={storeName} onChange={e => setStoreName(e.target.value)}
-                placeholder="Ex: PhoneStore Casablanca" className="form-control" />
-            </div>
-            <button type="submit" className="btn btn-primary" disabled={saving}>
-              {saving ? 'Enregistrement...' : 'Enregistrer'}
-            </button>
-          </form>
-        </div>
+        {/* Store info */}
+        {storeName && (
+          <div className="card dashboard-store-section">
+            <h3><FiTrendingUp size={18} /> Boutique</h3>
+            <p style={{ marginTop: 8 }}><strong>{storeName}</strong></p>
+            <small className="text-secondary">Pour modifier le nom de votre boutique, contactez le support.</small>
+          </div>
+        )}
 
         {/* Stats */}
         {profile && (

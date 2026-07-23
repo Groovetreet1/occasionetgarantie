@@ -1,5 +1,5 @@
 import { useState, useEffect, useRef } from 'react';
-import { FiUser, FiMail, FiPhone, FiLock, FiSave, FiArrowLeft, FiCamera, FiX } from 'react-icons/fi';
+import { FiUser, FiMail, FiPhone, FiLock, FiSave, FiArrowLeft, FiCamera, FiX, FiShoppingBag } from 'react-icons/fi';
 import { motion } from 'framer-motion';
 import { Link, useNavigate } from 'react-router-dom';
 import api from '../api/axios';
@@ -14,6 +14,8 @@ export default function Profile() {
   const [email, setEmail] = useState('');
   const [phone, setPhone] = useState('');
   const [avatar, setAvatar] = useState('');
+  const [storeName, setStoreName] = useState('');
+  const [role, setRole] = useState('');
   const [oldPassword, setOldPassword] = useState('');
   const [newPassword, setNewPassword] = useState('');
   const [confirmPassword, setConfirmPassword] = useState('');
@@ -39,6 +41,8 @@ export default function Profile() {
         setEmail(res.data.email || '');
         setPhone(res.data.phone || '');
         setAvatar(res.data.avatar || '');
+        setStoreName(res.data.store_name || '');
+        setRole(res.data.role || '');
       })
       .catch(() => { localStorage.removeItem('token'); navigate('/login'); })
       .finally(() => setLoading(false));
@@ -207,6 +211,16 @@ export default function Profile() {
                 </button>
               </div>
             </div>
+
+            {(role === 'seller' || role === 'admin') && storeName && (
+              <div className="form-group">
+                <label><FiShoppingBag size={14} /> Boutique</label>
+                <input type="text" value={storeName} disabled style={{ opacity: 0.6, cursor: 'not-allowed' }} />
+                <small style={{ color: 'var(--text-muted)', fontSize: 11 }}>
+                  Pour modifier le nom de votre boutique, contactez le support.
+                </small>
+              </div>
+            )}
 
             <motion.button className="form-submit" type="submit" disabled={saving} whileTap={{ scale: 0.97 }}>
               <FiSave size={16} /> {saving ? 'Enregistrement...' : 'Enregistrer le profil'}

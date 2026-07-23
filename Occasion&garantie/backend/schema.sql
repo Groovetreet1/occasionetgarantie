@@ -36,6 +36,7 @@ CREATE TABLE products (
   seller_id INT,
   image VARCHAR(255),
   images JSON,
+  gallery JSON,
   brand VARCHAR(100),
   state ENUM('neuf', 'comme_neuf', 'tres_bon', 'bon', 'acceptable') DEFAULT 'tres_bon',
   warranty VARCHAR(100) DEFAULT '6 mois',

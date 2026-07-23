@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { Link, Navigate, useNavigate, useSearchParams } from 'react-router-dom';
-import { FiUserPlus, FiMail, FiLock, FiPhone, FiTrendingUp } from 'react-icons/fi';
+import { FiUserPlus, FiMail, FiLock, FiPhone, FiTrendingUp, FiShoppingBag } from 'react-icons/fi';
 import { useAuth } from '../context/AuthContext';
 import api from '../api/axios';
 
@@ -13,6 +13,7 @@ export default function SignUp() {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [phone, setPhone] = useState('');
+  const [storeName, setStoreName] = useState('');
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
 
@@ -23,7 +24,7 @@ export default function SignUp() {
     setError('');
     setLoading(true);
     try {
-      await api.post('/auth/signup', { fullName, email, password, phone, role: isSeller ? 'seller' : undefined });
+      await api.post('/auth/signup', { fullName, email, password, phone, role: isSeller ? 'seller' : undefined, storeName: isSeller ? storeName : undefined });
       navigate(`/verify-code?email=${encodeURIComponent(email)}${isSeller ? '&role=seller' : ''}`);
     } catch (err) {
       setError(err.response?.data?.message || 'Erreur lors de l\'inscription.');
@@ -63,6 +64,12 @@ export default function SignUp() {
               <label><FiPhone size={14} /> Telephone</label>
               <input type="tel" value={phone} onChange={(e) => setPhone(e.target.value)} placeholder="+212 6XX XXX XXX" required />
             </div>
+            {isSeller && (
+              <div className="form-group">
+                <label><FiShoppingBag size={14} /> Nom de la boutique</label>
+                <input type="text" value={storeName} onChange={(e) => setStoreName(e.target.value)} placeholder="Ex: PhoneStore Casablanca" required />
+              </div>
+            )}
             <button type="submit" className="form-submit" disabled={loading}>
               {loading ? 'Inscription...' : isSeller ? 'Creer mon compte vendeur' : 'Creer mon compte'}
             </button>
