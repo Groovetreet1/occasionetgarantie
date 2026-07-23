@@ -1,17 +1,23 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { FiX, FiShield, FiCheck, FiLock, FiUpload, FiStar } from 'react-icons/fi';
+import { FiX, FiShield, FiCheck, FiLock, FiUpload, FiStar, FiCheckCircle } from 'react-icons/fi';
 import api from '../api/axios';
+import { useAuth } from '../context/AuthContext';
 
 const PREMIUM_AMOUNT = 50;
 
 export default function PremiumPopup({ open, onClose }) {
+  const { user, refreshUser } = useAuth();
   const [step, setStep] = useState('info');
   const [paymentId, setPaymentId] = useState(null);
   const [bankInfo, setBankInfo] = useState(null);
   const [loading, setLoading] = useState(false);
   const [uploading, setUploading] = useState(false);
   const [msg, setMsg] = useState(null);
+
+  useEffect(() => {
+    if (open) { refreshUser(); setStep('info'); setMsg(null); }
+  }, [open]);
 
   const handleStart = async () => {
     setLoading(true);
@@ -67,7 +73,19 @@ export default function PremiumPopup({ open, onClose }) {
           >
             <button className="premium-close" onClick={onClose}><FiX size={20} /></button>
 
-            {step === 'info' && (
+            {step === 'info' && user?.premium ? (
+              <div className="premium-content">
+                <div className="premium-icon-wrap premium-icon-success"><FiCheckCircle size={32} /></div>
+                <h2>Vous êtes déjà Premium</h2>
+                <p className="premium-sub">Merci pour votre confiance !</p>
+                <ul className="premium-benefits">
+                  <li><FiCheck size={16} /> Navigation sans publicité</li>
+                  <li><FiShield size={16} /> Accès prioritaire</li>
+                  <li><FiStar size={16} /> Badge Premium sur votre profil</li>
+                </ul>
+                <button className="form-submit" onClick={onClose}>Fermer</button>
+              </div>
+            ) : step === 'info' && (
               <div className="premium-content">
                 <div className="premium-icon-wrap"><FiStar size={32} /></div>
                 <h2>Passer en Premium</h2>
