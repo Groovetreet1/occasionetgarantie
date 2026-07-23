@@ -921,32 +921,29 @@ input, textarea, select, button { font-family: inherit; }
 /* Seller layout with sidebar */
 .seller-layout { display: flex; min-height: calc(100vh - 64px); position: relative; }
 
-/* Sidebar overlay (mobile) */
+/* Overlay */
 .sidebar-overlay {
   position: fixed; inset: 0; background: rgba(0,0,0,0.4); z-index: 98;
   display: none;
 }
 
-/* Sidebar */
+/* Sidebar - hidden by default, slides in when .open */
 .seller-sidebar {
   width: 240px; background: var(--bg-card); border-right: 1px solid var(--border);
   display: flex; flex-direction: column; position: fixed; top: 64px; left: 0;
-  height: calc(100vh - 64px); z-index: 97; transition: transform 0.25s ease;
+  height: calc(100vh - 64px); z-index: 97;
+  transform: translateX(-100%); transition: transform 0.2s ease;
   overflow-y: auto;
 }
+.seller-sidebar.open { transform: translateX(0); }
 
 .sidebar-header {
   display: flex; align-items: center; justify-content: space-between;
   padding: 16px 16px 12px; border-bottom: 1px solid var(--border);
 }
-.sidebar-logo {
-  font-size: 18px; font-weight: 800; text-decoration: none; color: inherit;
-  display: flex; align-items: center; gap: 4px;
-}
-.sidebar-logo span {
-  width: 28px; height: 28px; background: var(--primary); color: white;
-  border-radius: 8px; display: flex; align-items: center; justify-content: center;
-  font-size: 14px;
+.sidebar-title {
+  font-size: 14px; font-weight: 700; color: var(--text-muted);
+  text-transform: uppercase; letter-spacing: 0.5px;
 }
 .sidebar-close {
   background: none; border: none; color: var(--text-muted); cursor: pointer;
@@ -982,9 +979,9 @@ input, textarea, select, button { font-family: inherit; }
   padding: 8px; border-top: 1px solid var(--border);
 }
 
-/* Main content area */
+/* Main content area - margin shifts with sidebar */
 .seller-main {
-  flex: 1; transition: margin-left 0.25s ease; display: flex; flex-direction: column;
+  flex: 1; transition: margin-left 0.2s ease; display: flex; flex-direction: column;
 }
 .seller-main.sidebar-open { margin-left: 240px; }
 .seller-main.sidebar-closed { margin-left: 0; }
@@ -1054,8 +1051,6 @@ input, textarea, select, button { font-family: inherit; }
 /* Sidebar responsive */
 @media (max-width: 768px) {
   .sidebar-overlay { display: block; }
-  .seller-sidebar { transform: translateX(-100%); }
-  .seller-sidebar.open { transform: translateX(0); }
   .seller-main.sidebar-open { margin-left: 0; }
   .seller-main.sidebar-closed { margin-left: 0; }
   .seller-topbar { padding: 10px 12px; gap: 8px; flex-wrap: wrap; }

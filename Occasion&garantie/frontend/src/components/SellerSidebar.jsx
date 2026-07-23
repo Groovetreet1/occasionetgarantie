@@ -1,5 +1,5 @@
 import { Link, useLocation } from 'react-router-dom';
-import { FiBarChart2, FiTrendingUp, FiPlus, FiUser, FiShoppingBag, FiChevronLeft, FiMenu, FiX } from 'react-icons/fi';
+import { FiBarChart2, FiTrendingUp, FiPlus, FiUser, FiShoppingBag, FiX } from 'react-icons/fi';
 import { useAuth } from '../context/AuthContext';
 
 const links = [
@@ -18,10 +18,8 @@ export default function SellerSidebar({ open, onToggle }) {
       {open && <div className="sidebar-overlay" onClick={onToggle} />}
       <aside className={`seller-sidebar ${open ? 'open' : ''}`}>
         <div className="sidebar-header">
-          <Link to="/" className="sidebar-logo"><span>O</span>G</Link>
-          <button className="sidebar-close" onClick={onToggle}>
-            {open ? <FiX size={18} /> : <FiMenu size={18} />}
-          </button>
+          <span className="sidebar-title">Administration</span>
+          <button className="sidebar-close" onClick={onToggle}><FiX size={18} /></button>
         </div>
 
         <div className="sidebar-user">
