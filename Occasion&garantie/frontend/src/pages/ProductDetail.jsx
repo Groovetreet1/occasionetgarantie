@@ -309,7 +309,7 @@ export default function ProductDetail() {
                       <h4 style={{ fontSize: '13px', fontWeight: 600, marginBottom: '8px', color: 'var(--text-primary)' }}>
                         Virement bancaire
                       </h4>
-                      <table style={{ width: '100%', fontSize: '13px' }}>
+                      <table className="product-detail-table" style={{ width: '100%', fontSize: '13px' }}>
                         <tbody>
                           {bankInfo && (
                             <>
