@@ -16,7 +16,8 @@ const defaultData = {
   orders: [],
   order_items: [],
   product_images: [],
-  nextId: { users: 1, products: 1, orders: 1, order_items: 1, product_images: 1 },
+  premium_payments: [],
+  nextId: { users: 1, products: 1, orders: 1, order_items: 1, product_images: 1, premium_payments: 1 },
 };
 
 let data = { ...defaultData };
@@ -376,6 +377,58 @@ const mockPool = {
 
     // UPDATE users SET store_name, store_logo
     if (upper.startsWith('UPDATE USERS SET') && (upper.includes('STORE_NAME') || upper.includes('STORE_LOGO'))) {
+      const id = Number(params[params.length - 1]);
+      const idx = data.users.findIndex(u => u.id === id);
+      if (idx !== -1) {
+        const assignments = parseCols(sql);
+        let paramIdx = 0;
+        assignments.forEach(a => {
+          const eq = a.indexOf('=');
+          const col = a.substring(0, eq).trim().toLowerCase();
+          let val = a.substring(eq + 1).trim();
+          if (val === '?') { val = params[paramIdx]; paramIdx++; }
+          data.users[idx][col] = val;
+        });
+        save();
+      }
+      return [[]];
+    }
+
+    // INSERT INTO premium_payments
+    if (upper.startsWith('INSERT INTO PREMIUM_PAYMENTS')) {
+      const newPayment = { id: data.nextId.premium_payments++, user_id: params[0], amount: params[1], status: params[2], created_at: new Date().toISOString() };
+      data.premium_payments.push(newPayment);
+      save();
+      return [{ insertId: newPayment.id }];
+    }
+
+    // SELECT premium_payments by user_id and status
+    if (upper.startsWith('SELECT') && upper.includes('FROM PREMIUM_PAYMENTS') && upper.includes('WHERE USER_ID =') && upper.includes('STATUS =')) {
+      const payments = data.premium_payments.filter(p => p.user_id === params[0] && p.status === params[1]).sort((a, b) => b.id - a.id);
+      return [payments.length > 0 ? [payments[0]] : []];
+    }
+
+    // UPDATE premium_payments SET
+    if (upper.startsWith('UPDATE PREMIUM_PAYMENTS SET')) {
+      const id = Number(params[params.length - 1]);
+      const idx = data.premium_payments.findIndex(p => p.id === id);
+      if (idx !== -1) {
+        const assignments = parseCols(sql);
+        let paramIdx = 0;
+        assignments.forEach(a => {
+          const eq = a.indexOf('=');
+          const col = a.substring(0, eq).trim().toLowerCase();
+          let val = a.substring(eq + 1).trim();
+          if (val === '?') { val = params[paramIdx]; paramIdx++; }
+          data.premium_payments[idx][col] = val;
+        });
+        save();
+      }
+      return [[]];
+    }
+
+    // UPDATE users SET premium
+    if (upper.startsWith('UPDATE USERS SET') && (upper.includes('PREMIUM'))) {
       const id = Number(params[params.length - 1]);
       const idx = data.users.findIndex(u => u.id === id);
       if (idx !== -1) {

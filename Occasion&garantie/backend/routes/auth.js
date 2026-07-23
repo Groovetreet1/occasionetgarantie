@@ -171,7 +171,7 @@ router.post('/login', [
 
 router.get('/me', authenticate, async (req, res) => {
   try {
-    const [users] = await pool.query('SELECT id, full_name, email, phone, role, phone_verified, created_at, store_name FROM users WHERE id = ?', [req.user.id]);
+    const [users] = await pool.query('SELECT id, full_name, email, phone, role, phone_verified, created_at, store_name, premium, premium_expires_at FROM users WHERE id = ?', [req.user.id]);
     if (users.length === 0) return res.status(404).json({ message: 'Utilisateur introuvable.' });
     res.json(users[0]);
   } catch (err) {

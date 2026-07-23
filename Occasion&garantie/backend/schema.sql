@@ -14,7 +14,19 @@ CREATE TABLE users (
   verification_expires BIGINT,
   store_name VARCHAR(100),
   store_logo VARCHAR(255),
+  premium BOOLEAN DEFAULT FALSE,
+  premium_expires_at DATETIME DEFAULT NULL,
   created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+);
+
+CREATE TABLE premium_payments (
+  id INT AUTO_INCREMENT PRIMARY KEY,
+  user_id INT NOT NULL,
+  amount DECIMAL(10,2) NOT NULL DEFAULT 50.00,
+  screenshot VARCHAR(255),
+  status ENUM('en_attente', 'actif') DEFAULT 'en_attente',
+  created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+  FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE
 );
 
 CREATE TABLE categories (

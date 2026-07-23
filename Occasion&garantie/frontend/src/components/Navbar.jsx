@@ -1,9 +1,10 @@
 import { Link, NavLink, useNavigate, useLocation } from 'react-router-dom';
-import { FiUser, FiLogOut, FiSettings, FiChevronDown, FiSmartphone, FiMonitor, FiHeadphones, FiTablet, FiShoppingBag, FiTrendingUp } from 'react-icons/fi';
+import { FiUser, FiLogOut, FiSettings, FiChevronDown, FiSmartphone, FiMonitor, FiHeadphones, FiTablet, FiShoppingBag, FiTrendingUp, FiStar } from 'react-icons/fi';
 import { useState, useRef, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useAuth } from '../context/AuthContext';
 import ThemeToggle from './ThemeToggle';
+import PremiumPopup from './PremiumPopup';
 
 const categories = [
   { name: 'Smartphones', icon: FiSmartphone, slug: 'Smartphones' },
@@ -21,6 +22,7 @@ export default function Navbar() {
   const [dropdownOpen, setDropdownOpen] = useState(false);
   const [prodsOpen, setProdsOpen] = useState(false);
   const [scrolled, setScrolled] = useState(false);
+  const [showPremium, setShowPremium] = useState(false);
   const navRef = useRef(null);
   const panelRef = useRef(null);
   const dropdownRef = useRef(null);
@@ -116,6 +118,15 @@ export default function Navbar() {
                       <NavLink to="/profile" onClick={() => setDropdownOpen(false)}>
                         <FiUser size={14} /> Mon Profil
                       </NavLink>
+                      {user.premium ? (
+                        <span className="navbar-premium-badge" onClick={() => setDropdownOpen(false)}>
+                          <FiStar size={14} /> Premium
+                        </span>
+                      ) : (
+                        <button onClick={() => { setDropdownOpen(false); setShowPremium(true); }} className="navbar-premium-btn">
+                          <FiStar size={14} /> Passer Premium
+                        </button>
+                      )}
                       {(user.role === 'seller' || user.role === 'admin') && (
                         <NavLink to="/seller" onClick={() => setDropdownOpen(false)}>
                           <FiShoppingBag size={14} /> Tableau de Bord
@@ -165,6 +176,15 @@ export default function Navbar() {
         {user ? (
           <>
             <NavLink to="/profile" onClick={closeMenu}><FiUser size={14} /> Mon Profil</NavLink>
+            {user.premium ? (
+              <span className="navbar-premium-badge" style={{ padding: '10px 20px', display: 'flex', alignItems: 'center', gap: 8, fontSize: 14 }}>
+                <FiStar size={14} /> Premium
+              </span>
+            ) : (
+              <button onClick={() => { closeMenu(); setShowPremium(true); }} style={{ padding: '10px 20px', display: 'flex', alignItems: 'center', gap: 8, fontSize: 14, background: 'none', border: 'none', color: 'inherit', cursor: 'pointer', width: '100%', textAlign: 'left' }}>
+                <FiStar size={14} /> Passer Premium
+              </button>
+            )}
             {(user.role === 'seller' || user.role === 'admin') && (
               <NavLink to="/seller" onClick={closeMenu}><FiShoppingBag size={14} /> Tableau de Bord</NavLink>
             )}
@@ -182,6 +202,8 @@ export default function Navbar() {
           </>
         )}
       </div>
+
+      <PremiumPopup open={showPremium} onClose={() => setShowPremium(false)} />
     </>
   );
 }

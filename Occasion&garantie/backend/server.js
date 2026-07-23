@@ -10,6 +10,7 @@ const productRoutes = require('./routes/products');
 const categoryRoutes = require('./routes/categories');
 const uploadRoutes = require('./routes/upload');
 const reservationRoutes = require('./routes/reservations');
+const premiumRoutes = require('./routes/premium');
 const sellerRoutes = require('./routes/seller');
 
 const app = express();
@@ -44,6 +45,7 @@ app.use('/api/products', productRoutes);
 app.use('/api/categories', categoryRoutes);
 app.use('/api/upload', uploadRoutes);
 app.use('/api/reservations', reservationRoutes);
+app.use('/api/premium', premiumRoutes);
 app.use('/api/seller', sellerRoutes);
 
 app.get('/ads.txt', (req, res) => {

@@ -1,0 +1,121 @@
+const express = require('express');
+const router = express.Router();
+const multer = require('multer');
+const path = require('path');
+const fs = require('fs');
+const pool = require('../config/db');
+const { authenticate } = require('../middleware/auth');
+const gomobile = require('../services/gomobile');
+
+const PREMIUM_AMOUNT = 50;
+const ADMIN_PHONE = process.env.ADMIN_PHONE;
+
+const BANK_INFO = {
+  bank: 'CIH Bank',
+  holder: 'OCCASION ET GARANTIE BOUTIQUE',
+  rib: '230780409210621100460062',
+  amount: PREMIUM_AMOUNT,
+};
+
+const SCREENSHOT_DIR = path.join(__dirname, '..', 'uploads', 'premium');
+if (!fs.existsSync(SCREENSHOT_DIR)) fs.mkdirSync(SCREENSHOT_DIR, { recursive: true });
+
+const screenshotUpload = multer({
+  storage: multer.diskStorage({
+    destination: (req, file, cb) => cb(null, SCREENSHOT_DIR),
+    filename: (req, file, cb) => {
+      const ext = path.extname(file.originalname);
+      cb(null, `premium-${req.user.id}-${Date.now()}${ext}`);
+    },
+  }),
+  limits: { fileSize: 5 * 1024 * 1024 },
+  fileFilter: (req, file, cb) => {
+    const allowed = ['.jpg', '.jpeg', '.png', '.webp'];
+    const ext = path.extname(file.originalname).toLowerCase();
+    if (allowed.includes(ext)) cb(null, true);
+    else cb(new Error('Format non supporte. Utilisez JPG, PNG ou WebP.'));
+  },
+});
+
+router.get('/status', authenticate, async (req, res) => {
+  try {
+    const [users] = await pool.query('SELECT premium, premium_expires_at FROM users WHERE id = ?', [req.user.id]);
+    if (users.length === 0) return res.status(404).json({ message: 'Utilisateur introuvable.' });
+    const user = users[0];
+    const isPremium = user.premium === 1 && (!user.premium_expires_at || new Date(user.premium_expires_at) > new Date());
+    res.json({ premium: isPremium, expiresAt: user.premium_expires_at });
+  } catch (err) {
+    res.status(500).json({ message: 'Erreur serveur.' });
+  }
+});
+
+router.post('/initiate', authenticate, async (req, res) => {
+  try {
+    const [users] = await pool.query('SELECT premium, premium_expires_at FROM users WHERE id = ?', [req.user.id]);
+    if (users.length === 0) return res.status(404).json({ message: 'Utilisateur introuvable.' });
+    const user = users[0];
+    if (user.premium === 1 && (!user.premium_expires_at || new Date(user.premium_expires_at) > new Date())) {
+      return res.status(400).json({ message: 'Vous avez deja un abonnement premium actif.' });
+    }
+
+    const [existing] = await pool.query('SELECT id FROM premium_payments WHERE user_id = ? AND status = ?', [req.user.id, 'en_attente']);
+    if (existing.length > 0) {
+      return res.json({
+        message: `Vous avez deja une demande en attente. Versez ${PREMIUM_AMOUNT} DH sur le compte ci-dessous.`,
+        paymentId: existing[0].id,
+        amount: PREMIUM_AMOUNT,
+        bank: BANK_INFO,
+      });
+    }
+
+    const [result] = await pool.query(
+      'INSERT INTO premium_payments (user_id, amount, status) VALUES (?, ?, ?)',
+      [req.user.id, PREMIUM_AMOUNT, 'en_attente']
+    );
+
+    res.status(201).json({
+      message: `Demande creee. Versez ${PREMIUM_AMOUNT} DH sur le compte ci-dessous.`,
+      paymentId: result.insertId,
+      amount: PREMIUM_AMOUNT,
+      bank: BANK_INFO,
+    });
+  } catch (err) {
+    res.status(500).json({ message: 'Erreur serveur.' });
+  }
+});
+
+router.post('/activate', authenticate, screenshotUpload.single('screenshot'), async (req, res) => {
+  try {
+    const [payments] = await pool.query(
+      'SELECT p.*, u.full_name, u.phone FROM premium_payments p JOIN users u ON p.user_id = u.id WHERE p.user_id = ? AND p.status = ? ORDER BY p.id DESC LIMIT 1',
+      [req.user.id, 'en_attente']
+    );
+    if (payments.length === 0) return res.status(404).json({ message: 'Aucune demande en attente.' });
+    if (!req.file) return res.status(400).json({ message: 'Fichier requis.' });
+
+    const filename = req.file.filename;
+    const expiresAt = new Date();
+    expiresAt.setFullYear(expiresAt.getFullYear() + 1);
+
+    await pool.query('UPDATE premium_payments SET screenshot = ?, status = ? WHERE id = ?', [filename, 'actif', payments[0].id]);
+    await pool.query('UPDATE users SET premium = TRUE, premium_expires_at = ? WHERE id = ?', [expiresAt, req.user.id]);
+
+    try {
+      let adminPhone = ADMIN_PHONE;
+      const [admins] = await pool.query('SELECT phone FROM users WHERE role = ?', ['admin']);
+      if (admins.length > 0 && admins[0].phone) adminPhone = admins[0].phone;
+      if (adminPhone) {
+        const msg = `Premium #${payments[0].id} ${payments[0].full_name} ${payments[0].phone} 50DH active`;
+        await gomobile.sendSms(adminPhone, msg);
+      }
+    } catch (smsErr) {
+      console.error('Admin SMS failed:', smsErr.message);
+    }
+
+    res.json({ message: 'Compte Premium active avec succes pour 1 an !' });
+  } catch (err) {
+    res.status(500).json({ message: 'Erreur serveur.' });
+  }
+});
+
+module.exports = router;
