@@ -3,14 +3,12 @@ import { FiUser, FiMail, FiPhone, FiLock, FiSave, FiArrowLeft, FiCamera, FiX, Fi
 import { motion } from 'framer-motion';
 import { Link, useNavigate } from 'react-router-dom';
 import api from '../api/axios';
-import { useAuth } from '../context/AuthContext';
 
 const container = { hidden: {}, show: { transition: { staggerChildren: 0.06 } } };
 const item = { hidden: { opacity: 0, y: 20 }, show: { opacity: 1, y: 0, transition: { duration: 0.4 } } };
 
 export default function Profile() {
   const navigate = useNavigate();
-  const { user, refreshUser } = useAuth();
   const fileRef = useRef();
   const [name, setName] = useState('');
   const [email, setEmail] = useState('');
@@ -221,20 +219,6 @@ export default function Profile() {
                 <small style={{ color: 'var(--text-muted)', fontSize: 11 }}>
                   Pour modifier le nom de votre boutique, contactez le support.
                 </small>
-              </div>
-            )}
-
-            {user && (
-              <div className={`premium-status-card ${user.premium ? 'active' : ''}`}>
-                <FiStar size={18} />
-                <div>
-                  <strong>{user.premium ? 'Compte Premium' : 'Compte Gratuit'}</strong>
-                  {user.premium ? (
-                    <small>Publicit&eacute;s d&eacute;sactiv&eacute;es. Merci !</small>
-                  ) : (
-                    <small>Cliquez sur "Passer Premium" dans le menu pour supprimer les pubs.</small>
-                  )}
-                </div>
               </div>
             )}
 
