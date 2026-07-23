@@ -1,17 +1,23 @@
 const express = require('express');
 const pool = require('../config/db');
-const { authenticate, adminOnly } = require('../middleware/auth');
+const { authenticate } = require('../middleware/auth');
 
 const router = express.Router();
+
+function isAdminOrSeller(req) {
+  return req.user && (req.user.role === 'admin' || req.user.role === 'seller');
+}
 
 // Public: list products
 router.get('/', async (req, res) => {
   try {
-    const { category, search, min, max, state, sort } = req.query;
+    const { category, search, min, max, state, sort, seller } = req.query;
     let sql = `
-      SELECT p.*, c.name as category_name
+      SELECT p.*, c.name as category_name,
+             u.store_name as seller_name, u.store_logo as seller_logo
       FROM products p
       LEFT JOIN categories c ON p.category_id = c.id
+      LEFT JOIN users u ON p.seller_id = u.id
       WHERE p.active = TRUE
     `;
     const params = [];
@@ -21,6 +27,7 @@ router.get('/', async (req, res) => {
     if (min) { sql += ' AND p.price >= ?'; params.push(min); }
     if (max) { sql += ' AND p.price <= ?'; params.push(max); }
     if (state) { sql += ' AND p.state = ?'; params.push(state); }
+    if (seller) { sql += ' AND p.seller_id = ?'; params.push(seller); }
 
     if (sort === 'price_asc') sql += ' ORDER BY p.price ASC';
     else if (sort === 'price_desc') sql += ' ORDER BY p.price DESC';
@@ -38,7 +45,11 @@ router.get('/', async (req, res) => {
 router.get('/featured', async (req, res) => {
   try {
     const [rows] = await pool.query(
-      'SELECT p.*, c.name as category_name FROM products p LEFT JOIN categories c ON p.category_id = c.id WHERE p.featured = TRUE AND p.active = TRUE LIMIT 8'
+      `SELECT p.*, c.name as category_name, u.store_name as seller_name, u.store_logo as seller_logo
+       FROM products p
+       LEFT JOIN categories c ON p.category_id = c.id
+       LEFT JOIN users u ON p.seller_id = u.id
+       WHERE p.featured = TRUE AND p.active = TRUE LIMIT 8`
     );
     res.json(rows);
   } catch (err) {
@@ -46,12 +57,16 @@ router.get('/featured', async (req, res) => {
   }
 });
 
-// Admin: get product by ID (for edit form)
-router.get('/id/:id', authenticate, adminOnly, async (req, res) => {
+// Authenticated: get product by ID (for edit form)
+router.get('/id/:id', authenticate, async (req, res) => {
   try {
     const [rows] = await pool.query('SELECT * FROM products WHERE id = ?', [req.params.id]);
     if (rows.length === 0) return res.status(404).json({ message: 'Produit introuvable.' });
-    res.json(rows[0]);
+    const p = rows[0];
+    if (req.user.role !== 'admin' && p.seller_id !== req.user.id) {
+      return res.status(403).json({ message: 'Accès refusé.' });
+    }
+    res.json(p);
   } catch (err) {
     res.status(500).json({ message: 'Erreur serveur.' });
   }
@@ -61,7 +76,12 @@ router.get('/id/:id', authenticate, adminOnly, async (req, res) => {
 router.get('/:slug', async (req, res) => {
   try {
     const [rows] = await pool.query(
-      'SELECT p.*, c.name as category_name FROM products p LEFT JOIN categories c ON p.category_id = c.id WHERE p.slug = ?',
+      `SELECT p.*, c.name as category_name,
+              u.id as seller_id, u.full_name as seller_full_name, u.store_name as seller_name, u.store_logo as seller_logo
+       FROM products p
+       LEFT JOIN categories c ON p.category_id = c.id
+       LEFT JOIN users u ON p.seller_id = u.id
+       WHERE p.slug = ?`,
       [req.params.slug]
     );
     if (rows.length === 0) return res.status(404).json({ message: 'Produit introuvable.' });
@@ -71,14 +91,18 @@ router.get('/:slug', async (req, res) => {
   }
 });
 
-// Admin: create product
-router.post('/', authenticate, adminOnly, async (req, res) => {
+// Authenticated: create product (admin or seller)
+router.post('/', authenticate, async (req, res) => {
+  if (!isAdminOrSeller(req)) {
+    return res.status(403).json({ message: 'Accès réservé aux vendeurs et administrateurs.' });
+  }
   try {
     const { name, slug, description, price, old_price, category_id, brand, state, warranty, stock, featured, image, gallery, specs } = req.body;
+    const sellerId = req.user.role === 'admin' ? (req.body.seller_id || null) : req.user.id;
     const [result] = await pool.query(
-      `INSERT INTO products (name, slug, description, price, old_price, category_id, brand, state, warranty, stock, featured, image, gallery, specs)
-       VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
-      [name, slug, description, price, old_price || null, category_id || null, brand || null, state || 'tres_bon', warranty || '6 mois', stock || 1, featured || false, image || null, gallery ? JSON.stringify(gallery) : null, specs ? JSON.stringify(specs) : null]
+      `INSERT INTO products (name, slug, description, price, old_price, category_id, seller_id, brand, state, warranty, stock, featured, image, gallery, specs)
+       VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
+      [name, slug, description, price, old_price || null, category_id || null, sellerId, brand || null, state || 'tres_bon', warranty || '6 mois', stock || 1, featured || false, image || null, gallery ? JSON.stringify(gallery) : null, specs ? JSON.stringify(specs) : null]
     );
     res.status(201).json({ id: result.insertId, message: 'Produit ajouté.' });
   } catch (err) {
@@ -86,9 +110,14 @@ router.post('/', authenticate, adminOnly, async (req, res) => {
   }
 });
 
-// Admin: update product
-router.put('/:id', authenticate, adminOnly, async (req, res) => {
+// Authenticated: update product (admin or owner seller)
+router.put('/:id', authenticate, async (req, res) => {
   try {
+    const [rows] = await pool.query('SELECT seller_id FROM products WHERE id = ?', [req.params.id]);
+    if (rows.length === 0) return res.status(404).json({ message: 'Produit introuvable.' });
+    if (req.user.role !== 'admin' && rows[0].seller_id !== req.user.id) {
+      return res.status(403).json({ message: 'Vous ne pouvez modifier que vos propres produits.' });
+    }
     const { name, slug, description, price, old_price, category_id, brand, state, warranty, stock, featured, image, gallery, specs } = req.body;
     await pool.query(
       `UPDATE products SET name=?, slug=?, description=?, price=?, old_price=?, category_id=?, brand=?, state=?, warranty=?, stock=?, featured=?, image=?, gallery=?, specs=? WHERE id = ?`,
@@ -100,9 +129,14 @@ router.put('/:id', authenticate, adminOnly, async (req, res) => {
   }
 });
 
-// Admin: delete product
-router.delete('/:id', authenticate, adminOnly, async (req, res) => {
+// Authenticated: delete product (admin or owner seller)
+router.delete('/:id', authenticate, async (req, res) => {
   try {
+    const [rows] = await pool.query('SELECT seller_id FROM products WHERE id = ?', [req.params.id]);
+    if (rows.length === 0) return res.status(404).json({ message: 'Produit introuvable.' });
+    if (req.user.role !== 'admin' && rows[0].seller_id !== req.user.id) {
+      return res.status(403).json({ message: 'Vous ne pouvez supprimer que vos propres produits.' });
+    }
     await pool.query('DELETE FROM products WHERE id = ?', [req.params.id]);
     res.json({ message: 'Produit supprimé.' });
   } catch (err) {

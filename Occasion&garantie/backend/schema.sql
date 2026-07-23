@@ -8,10 +8,12 @@ CREATE TABLE users (
   password VARCHAR(255) NOT NULL,
   phone VARCHAR(20),
   avatar VARCHAR(255),
-  role ENUM('client', 'admin') DEFAULT 'client',
+  role ENUM('client', 'admin', 'seller') DEFAULT 'client',
   phone_verified BOOLEAN DEFAULT FALSE,
   verification_token VARCHAR(128),
   verification_expires BIGINT,
+  store_name VARCHAR(100),
+  store_logo VARCHAR(255),
   created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );
 
@@ -31,6 +33,7 @@ CREATE TABLE products (
   price DECIMAL(10,2) NOT NULL,
   old_price DECIMAL(10,2),
   category_id INT,
+  seller_id INT,
   image VARCHAR(255),
   images JSON,
   brand VARCHAR(100),
@@ -41,7 +44,8 @@ CREATE TABLE products (
   active BOOLEAN DEFAULT TRUE,
   specs JSON,
   created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-  FOREIGN KEY (category_id) REFERENCES categories(id) ON DELETE SET NULL
+  FOREIGN KEY (category_id) REFERENCES categories(id) ON DELETE SET NULL,
+  FOREIGN KEY (seller_id) REFERENCES users(id) ON DELETE SET NULL
 );
 
 CREATE TABLE product_images (

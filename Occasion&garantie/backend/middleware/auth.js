@@ -22,4 +22,11 @@ const adminOnly = (req, res, next) => {
   next();
 };
 
-module.exports = { authenticate, adminOnly };
+const sellerOrAdmin = (req, res, next) => {
+  if (req.user.role !== 'admin' && req.user.role !== 'seller') {
+    return res.status(403).json({ message: 'Accès réservé aux vendeurs et administrateurs.' });
+  }
+  next();
+};
+
+module.exports = { authenticate, adminOnly, sellerOrAdmin };

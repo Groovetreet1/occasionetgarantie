@@ -102,7 +102,7 @@ const mockPool = {
     }
 
     // SELECT products with LEFT JOIN (public)
-    if (upper.startsWith('SELECT') && upper.includes('FROM PRODUCTS') && upper.includes('LEFT JOIN CATEGORIES')) {
+    if (upper.startsWith('SELECT') && upper.includes('FROM PRODUCTS') && upper.includes('LEFT JOIN')) {
       let results = [...data.products];
 
       if (upper.includes('WHERE P.ACTIVE = TRUE')) {
@@ -115,9 +115,12 @@ const mockPool = {
         results = results.filter(p => p.featured === true);
       }
       if (upper.includes('AND LOWER(C.NAME) = ?')) {
-        const nameParam = params[params.length - 1];
+        const nameParam = params.find(p => typeof p === 'string' && p.length > 2);
         const cat = data.categories.find(c => c.name.toLowerCase() === nameParam);
         if (cat) results = results.filter(p => p.category_id === cat.id);
+      }
+      if (upper.includes('P.SELLER_ID =')) {
+        results = results.filter(p => p.seller_id === Number(params[params.length - 1]));
       }
       if (upper.includes('P.FEATURED DESC')) {
         results.sort((a, b) => (b.featured ? 1 : 0) - (a.featured ? 1 : 0));
@@ -125,7 +128,8 @@ const mockPool = {
 
       results = results.map(p => {
         const cat = data.categories.find(c => c.id === p.category_id);
-        const item = { ...p, category_name: cat ? cat.name : null };
+        const seller = data.users.find(u => u.id === p.seller_id);
+        const item = { ...p, category_name: cat ? cat.name : null, seller_name: seller ? seller.store_name || seller.full_name : null, seller_logo: seller ? seller.store_logo : null, seller_full_name: seller ? seller.full_name : null };
         if (typeof item.gallery === 'string') try { item.gallery = JSON.parse(item.gallery); } catch { item.gallery = null; }
         if (typeof item.specs === 'string') try { item.specs = JSON.parse(item.specs); } catch { item.specs = null; }
         return item;
@@ -164,25 +168,13 @@ const mockPool = {
 
     // INSERT INTO products
     if (upper.startsWith('INSERT INTO PRODUCTS')) {
-      const newProduct = {
-        id: data.nextId.products++,
-        name: params[0],
-        slug: params[1],
-        description: params[2],
-        price: params[3],
-        old_price: params[4] || null,
-        category_id: params[5] || null,
-        brand: params[6] || null,
-        state: params[7] || 'tres_bon',
-        warranty: params[8] || '6 mois',
-        stock: params[9] || 1,
-        featured: params[10] || false,
-        image: params[11] || null,
-        gallery: params[12] || null,
-        specs: params[13] || null,
-        active: true,
-        created_at: new Date().toISOString(),
-      };
+      const colsMatch = sql.match(/\(([^)]+)\)\s*VALUES/i);
+      const colNames = colsMatch ? colsMatch[1].split(',').map(c => c.trim().toLowerCase()) : [];
+      const newProduct = { id: data.nextId.products++, active: true, created_at: new Date().toISOString() };
+      colNames.forEach((col, i) => {
+        if (col === 'gallery' || col === 'specs') newProduct[col] = typeof params[i] === 'string' ? params[i] : (params[i] ? JSON.stringify(params[i]) : null);
+        else newProduct[col] = params[i] !== undefined ? params[i] : null;
+      });
       data.products.push(newProduct);
       save();
       return [{ insertId: newProduct.id }];
@@ -344,6 +336,57 @@ const mockPool = {
           if (col !== 'screenshot_views' || val !== undefined) {
             data.reservations[idx][col] = val;
           }
+        });
+        save();
+      }
+      return [[]];
+    }
+
+    // SELECT COUNT(*) from products
+    if (upper.includes('SELECT') && upper.includes('COUNT(*)') && upper.includes('FROM PRODUCTS')) {
+      let filtered = [...data.products];
+      if (upper.includes('SELLER_ID =')) {
+        filtered = filtered.filter(p => p.seller_id === Number(params[0]));
+      }
+      if (upper.includes('ACTIVE=TRUE') || upper.includes('ACTIVE = TRUE')) {
+        filtered = filtered.filter(p => p.active !== false);
+      }
+      return [[{ total: filtered.length, active_count: filtered.filter(p => p.active !== false).length }]];
+    }
+
+    // SELECT products simple with seller_id filter (seller dashboard)
+    if (upper.startsWith('SELECT') && upper.includes('FROM PRODUCTS') && upper.includes('SELLER_ID =') && !upper.includes('JOIN')) {
+      let results = data.products.filter(p => p.seller_id === Number(params[0]));
+      if (upper.includes('LIMIT 5')) results = results.slice(0, 5);
+      results = results.map(p => {
+        const cat = data.categories.find(c => c.id === p.category_id);
+        const item = { ...p, category_name: cat ? cat.name : null };
+        if (typeof item.gallery === 'string') try { item.gallery = JSON.parse(item.gallery); } catch { item.gallery = null; }
+        if (typeof item.specs === 'string') try { item.specs = JSON.parse(item.specs); } catch { item.specs = null; }
+        return item;
+      });
+      return [results];
+    }
+
+    // SELECT users by id and role (seller profile)
+    if (upper.startsWith('SELECT') && upper.includes('FROM USERS') && upper.includes('WHERE ID =') && upper.includes('ROLE =')) {
+      const user = data.users.find(u => u.id === Number(params[0]) && u.role === params[1]);
+      return [user ? [user] : []];
+    }
+
+    // UPDATE users SET store_name, store_logo
+    if (upper.startsWith('UPDATE USERS SET') && (upper.includes('STORE_NAME') || upper.includes('STORE_LOGO'))) {
+      const id = Number(params[params.length - 1]);
+      const idx = data.users.findIndex(u => u.id === id);
+      if (idx !== -1) {
+        const assignments = parseCols(sql);
+        let paramIdx = 0;
+        assignments.forEach(a => {
+          const eq = a.indexOf('=');
+          const col = a.substring(0, eq).trim().toLowerCase();
+          let val = a.substring(eq + 1).trim();
+          if (val === '?') { val = params[paramIdx]; paramIdx++; }
+          data.users[idx][col] = val;
         });
         save();
       }

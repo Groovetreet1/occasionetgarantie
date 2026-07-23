@@ -53,7 +53,7 @@ router.post('/signup', [
   body('phone').trim().notEmpty().withMessage('Le numéro de téléphone est requis.'),
 ], validate, async (req, res) => {
   try {
-    const { fullName, email, password, phone } = req.body;
+    const { fullName, email, password, phone, role } = req.body;
     const [existing] = await pool.query('SELECT id FROM users WHERE email = ?', [email]);
     if (existing.length > 0) {
       return res.status(400).json({ message: 'Cet email est déjà utilisé.' });
@@ -61,10 +61,11 @@ router.post('/signup', [
     const hashed = await bcrypt.hash(password, 10);
     const code = generateCode();
     const expiresAt = Date.now() + CODE_EXPIRY;
+    const userRole = (role === 'seller') ? 'seller' : 'client';
 
     const [result] = await pool.query(
-      'INSERT INTO users (full_name, email, password, phone, phone_verified, verification_token, verification_expires) VALUES (?, ?, ?, ?, ?, ?, ?)',
-      [fullName, email, hashed, phone, false, code, expiresAt]
+      'INSERT INTO users (full_name, email, password, phone, phone_verified, verification_token, verification_expires, role) VALUES (?, ?, ?, ?, ?, ?, ?, ?)',
+      [fullName, email, hashed, phone, false, code, expiresAt, userRole]
     );
 
     try {
