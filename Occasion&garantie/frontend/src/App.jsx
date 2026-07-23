@@ -22,6 +22,7 @@ import SellPage from './pages/SellPage';
 import SellerDashboard from './pages/SellerDashboard';
 import SellerProductForm from './pages/SellerProductForm';
 import SellerProfile from './pages/SellerProfile';
+import SellerStats from './pages/SellerStats';
 
 const pageVariants = {
   initial: { opacity: 0, y: 12 },
@@ -65,6 +66,7 @@ export default function App() {
           <Route path="/admin/products/edit/:id" element={<AnimatedPage><AdminRoute><AdminProductForm /></AdminRoute></AnimatedPage>} />
           <Route path="/vendre" element={<AnimatedPage><SellPage /></AnimatedPage>} />
           <Route path="/seller" element={<AnimatedPage><SellerRoute><SellerDashboard /></SellerRoute></AnimatedPage>} />
+          <Route path="/seller/stats" element={<AnimatedPage><SellerRoute><SellerStats /></SellerRoute></AnimatedPage>} />
           <Route path="/seller/products/new" element={<AnimatedPage><SellerRoute><SellerProductForm /></SellerRoute></AnimatedPage>} />
           <Route path="/seller/products/edit/:id" element={<AnimatedPage><SellerRoute><SellerProductForm /></SellerRoute></AnimatedPage>} />
           <Route path="/seller/:id" element={<AnimatedPage><SellerProfile /></AnimatedPage>} />

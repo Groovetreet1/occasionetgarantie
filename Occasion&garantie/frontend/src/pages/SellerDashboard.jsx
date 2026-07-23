@@ -1,7 +1,7 @@
 import { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
 import { motion } from 'framer-motion';
-import { FiPlus, FiEdit2, FiTrash2, FiPackage, FiTrendingUp, FiCheckCircle, FiXCircle } from 'react-icons/fi';
+import { FiPlus, FiEdit2, FiTrash2, FiPackage, FiTrendingUp, FiCheckCircle, FiXCircle, FiBarChart2 } from 'react-icons/fi';
 import api from '../api/axios';
 import { useAuth } from '../context/AuthContext';
 
@@ -56,6 +56,11 @@ export default function SellerDashboard() {
   return (
     <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="seller-dashboard">
       <div className="container">
+        <div className="seller-nav">
+          <Link to="/seller" className="seller-nav-link active"><FiBarChart2 size={16} /> Tableau de Bord</Link>
+          <Link to="/seller/stats" className="seller-nav-link"><FiTrendingUp size={16} /> Statistiques</Link>
+        </div>
+
         <div className="dashboard-header">
           <div>
             <h1>Tableau de Bord</h1>

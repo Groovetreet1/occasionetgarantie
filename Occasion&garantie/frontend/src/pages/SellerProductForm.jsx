@@ -1,25 +1,25 @@
 import { useState, useEffect, useRef } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 import { motion } from 'framer-motion';
-import { FiUpload, FiX, FiImage } from 'react-icons/fi';
+import { FiUpload, FiX, FiImage, FiSmartphone, FiMonitor, FiHeadphones, FiTablet, FiPackage } from 'react-icons/fi';
 import api from '../api/axios';
 
 const API_BASE = import.meta.env.VITE_API_URL || '';
 
 const categories = [
-  { id: 1, name: 'Smartphones' },
-  { id: 2, name: 'Tablettes' },
-  { id: 3, name: 'Ordinateurs' },
-  { id: 4, name: 'Accessoires' },
-  { id: 5, name: 'Gaming' },
+  { id: 1, name: 'Smartphones', icon: FiSmartphone },
+  { id: 2, name: 'Tablettes', icon: FiTablet },
+  { id: 3, name: 'Ordinateurs', icon: FiMonitor },
+  { id: 4, name: 'Accessoires', icon: FiHeadphones },
+  { id: 5, name: 'Gaming', icon: FiPackage },
 ];
 
 const states = [
-  { value: 'neuf', label: 'Neuf' },
-  { value: 'comme_neuf', label: 'Comme neuf' },
-  { value: 'tres_bon', label: 'Très bon état' },
-  { value: 'bon', label: 'Bon état' },
-  { value: 'acceptable', label: 'Acceptable' },
+  { value: 'neuf', label: 'Neuf', desc: 'Jamais utilisé, emballage d\'origine' },
+  { value: 'comme_neuf', label: 'Comme neuf', desc: 'Utilisé quelques jours, sans défaut' },
+  { value: 'tres_bon', label: 'Très bon état', desc: 'Légères traces d\'utilisation' },
+  { value: 'bon', label: 'Bon état', desc: 'Quelques rayures visibles' },
+  { value: 'acceptable', label: 'Acceptable', desc: 'Défauts esthétiques, fonctionne parfaitement' },
 ];
 
 const defaultSpecs = {
@@ -37,7 +37,6 @@ export default function SellerProductForm() {
     category_id: '1', brand: '', state: 'tres_bon', warranty: '6 mois',
     specs: { ...defaultSpecs },
   });
-  const [mainImage, setMainImage] = useState(null);
   const [gallery, setGallery] = useState([]);
   const [existingImages, setExistingImages] = useState([]);
   const [uploading, setUploading] = useState(false);
@@ -91,11 +90,9 @@ export default function SellerProductForm() {
 
   const uploadImages = async () => {
     if (gallery.length === 0) return { image: null, gallery: [] };
-
     setUploading(true);
     const formData = new FormData();
     gallery.forEach(file => formData.append('images', file));
-
     try {
       const res = await api.post('/upload?single=false', formData, {
         headers: { 'Content-Type': 'multipart/form-data' },
@@ -112,23 +109,19 @@ export default function SellerProductForm() {
   const handleSubmit = async (e) => {
     e.preventDefault();
     setError('');
-
     if (!form.name || !form.price) {
       setError('Le nom et le prix sont requis.');
       return;
     }
-
     setSaving(true);
     try {
       let image = existingImages[0] || null;
       let galleryUrls = existingImages;
-
       if (gallery.length > 0) {
         const uploaded = await uploadImages();
         image = uploaded.image || image;
         galleryUrls = uploaded.gallery;
       }
-
       const payload = {
         ...form,
         price: Number(form.price),
@@ -139,7 +132,6 @@ export default function SellerProductForm() {
         stock: 1,
         active: true,
       };
-
       if (isEdit) {
         await api.put(`/products/${id}`, payload);
       } else {
@@ -153,25 +145,25 @@ export default function SellerProductForm() {
   };
 
   return (
-    <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="seller-product-form">
-      <div className="container">
+    <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }}>
+      <div className="container" style={{ paddingTop: 32, paddingBottom: 60 }}>
         <div className="dashboard-header">
-          <h1>{isEdit ? 'Modifier' : 'Nouveau'} produit</h1>
+          <h1>{isEdit ? 'Modifier le produit' : 'Nouvelle annonce'}</h1>
+          <button className="btn btn-outline" onClick={() => navigate('/seller')}>← Retour</button>
         </div>
 
         {error && <div className="alert alert-error">{error}</div>}
 
-        <form onSubmit={handleSubmit} className="card admin-form">
-          {/* Upload zone */}
-          <div className="form-group">
-            <label>Photos du produit</label>
+        <form onSubmit={handleSubmit} className="seller-form">
+          {/* Photos */}
+          <div className="seller-form-card">
+            <h3>Photos</h3>
             <div className="upload-zone" onClick={() => fileInputRef.current?.click()}>
               <FiUpload size={28} />
-              <p>Cliquez pour ajouter des photos</p>
-              <small>JPG, PNG, WebP - Max 5MB par photo</small>
+              <p>Ajoutez des photos du produit</p>
+              <small>JPG, PNG, WebP - 5MB max par photo</small>
             </div>
             <input ref={fileInputRef} type="file" multiple accept="image/*" onChange={handleFileSelect} style={{ display: 'none' }} />
-
             {(existingImages.length > 0 || gallery.length > 0) && (
               <div className="upload-preview-grid">
                 {existingImages.map((img, i) => (
@@ -190,61 +182,99 @@ export default function SellerProductForm() {
             )}
           </div>
 
-          <div className="form-grid">
-            <div className="form-group">
-              <label>Nom du produit *</label>
-              <input name="name" value={form.name} onChange={handleChange} className="form-control" placeholder="iPhone 12 64Go" />
-            </div>
-            <div className="form-group">
-              <label>Prix (DH) *</label>
-              <input name="price" type="number" value={form.price} onChange={handleChange} className="form-control" placeholder="3500" />
-            </div>
-            <div className="form-group">
-              <label>Ancien prix (DH)</label>
-              <input name="old_price" type="number" value={form.old_price} onChange={handleChange} className="form-control" placeholder="5500" />
-            </div>
-            <div className="form-group">
-              <label>Catégorie</label>
-              <select name="category_id" value={form.category_id} onChange={handleChange} className="form-control">
-                {categories.map(c => <option key={c.id} value={c.id}>{c.name}</option>)}
-              </select>
-            </div>
-            <div className="form-group">
-              <label>Marque</label>
-              <input name="brand" value={form.brand} onChange={handleChange} className="form-control" placeholder="Apple, Samsung..." />
-            </div>
-            <div className="form-group">
-              <label>État</label>
-              <select name="state" value={form.state} onChange={handleChange} className="form-control">
-                {states.map(s => <option key={s.value} value={s.value}>{s.label}</option>)}
-              </select>
-            </div>
-            <div className="form-group">
-              <label>Garantie</label>
-              <input name="warranty" value={form.warranty} onChange={handleChange} className="form-control" />
-            </div>
-          </div>
-
-          <div className="form-group">
-            <label>Description</label>
-            <textarea name="description" value={form.description} onChange={handleChange} className="form-control" rows={4} placeholder="Décrivez l'état du produit, les éventuels défauts, accessoires inclus..." />
-          </div>
-
-          <h3 style={{ marginTop: 24 }}>Caractéristiques</h3>
-          <div className="form-grid">
-            {Object.entries(defaultSpecs).map(([key]) => (
-              <div key={key} className="form-group">
-                <label>{key}</label>
-                <input value={form.specs[key] || ''} onChange={e => handleSpecChange(key, e.target.value)}
-                  className="form-control" placeholder={`Ex: 6.1" Super Retina`} />
+          {/* Infos */}
+          <div className="seller-form-card">
+            <h3>Informations</h3>
+            <div className="form-row">
+              <div className="form-group">
+                <label>Nom du produit *</label>
+                <input name="name" value={form.name} onChange={handleChange} className="form-control" placeholder="Ex: iPhone 13 128Go" />
               </div>
-            ))}
+              <div className="form-group">
+                <label>Marque</label>
+                <input name="brand" value={form.brand} onChange={handleChange} className="form-control" placeholder="Ex: Apple, Samsung" list="brands" />
+                <datalist id="brands">
+                  <option value="Apple" /><option value="Samsung" /><option value="Xiaomi" />
+                  <option value="Huawei" /><option value="OnePlus" /><option value="Oppo" />
+                  <option value="Google" /><option value="Sony" /><option value="Nokia" />
+                </datalist>
+              </div>
+            </div>
+            <div className="form-group">
+              <label>Description</label>
+              <textarea name="description" value={form.description} onChange={handleChange} className="form-control form-textarea"
+                rows={5} placeholder="Décrivez l'état du produit, les éventuels défauts, les accessoires inclus, la couleur, etc. Plus vous donnez de détails, plus l'acheteur sera rassuré." />
+              <small className="text-secondary">{form.description.length} caractères</small>
+            </div>
           </div>
 
-          <div className="form-actions">
+          {/* Prix & Catégorie */}
+          <div className="seller-form-card">
+            <h3>Prix & Catégorie</h3>
+            <div className="form-row three">
+              <div className="form-group">
+                <label>Prix de vente (DH) *</label>
+                <div className="input-with-suffix"><input name="price" type="number" value={form.price} onChange={handleChange} className="form-control" placeholder="3500" /><span>DH</span></div>
+              </div>
+              <div className="form-group">
+                <label>Ancien prix (DH)</label>
+                <div className="input-with-suffix"><input name="old_price" type="number" value={form.old_price} onChange={handleChange} className="form-control" placeholder="5500" /><span>DH</span></div>
+              </div>
+              <div className="form-group">
+                <label>Catégorie</label>
+                <select name="category_id" value={form.category_id} onChange={handleChange} className="form-control">
+                  {categories.map(c => <option key={c.id} value={c.id}>{c.name}</option>)}
+                </select>
+              </div>
+            </div>
+          </div>
+
+          {/* État & Garantie */}
+          <div className="seller-form-card">
+            <h3>État & Garantie</h3>
+            <div className="state-grid">
+              {states.map(s => (
+                <label key={s.value} className={`state-option ${form.state === s.value ? 'active' : ''}`}>
+                  <input type="radio" name="state" value={s.value} checked={form.state === s.value} onChange={handleChange} />
+                  <strong>{s.label}</strong>
+                  <span>{s.desc}</span>
+                </label>
+              ))}
+            </div>
+            <div className="form-row" style={{ marginTop: 16 }}>
+              <div className="form-group">
+                <label>Garantie</label>
+                <select name="warranty" value={form.warranty} onChange={handleChange} className="form-control">
+                  <option value="1 mois">1 mois</option>
+                  <option value="3 mois">3 mois</option>
+                  <option value="6 mois">6 mois</option>
+                  <option value="12 mois">12 mois</option>
+                  <option value="24 mois">24 mois</option>
+                  <option value="Sans garantie">Sans garantie</option>
+                </select>
+              </div>
+            </div>
+          </div>
+
+          {/* Caractéristiques */}
+          <div className="seller-form-card">
+            <h3>Caractéristiques techniques</h3>
+            <div className="form-row two">
+              {Object.entries(defaultSpecs).map(([key]) => (
+                <div key={key} className="form-group">
+                  <label>{key}</label>
+                  <input value={form.specs[key] || ''} onChange={e => handleSpecChange(key, e.target.value)}
+                    className="form-control" placeholder={`Ex: 6.1" Super Retina`} />
+                </div>
+              ))}
+            </div>
+          </div>
+
+          {/* Submit */}
+          <div className="seller-form-actions">
             <button type="button" className="btn btn-secondary" onClick={() => navigate('/seller')}>Annuler</button>
-            <button type="submit" className="btn btn-primary" disabled={saving || uploading}>
-              {uploading ? 'Upload des photos...' : saving ? 'Enregistrement...' : isEdit ? 'Mettre à jour' : 'Publier'}
+            <button type="submit" className="btn btn-primary btn-lg" disabled={saving || uploading}>
+              {uploading ? 'Upload des photos...' : saving ? 'Enregistrement...' : isEdit ? 'Mettre à jour' : 'Publier l\'annonce'}
             </button>
           </div>
         </form>
