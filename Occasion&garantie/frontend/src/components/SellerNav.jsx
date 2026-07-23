@@ -14,22 +14,22 @@ export default function SellerNav() {
   const { user } = useAuth();
 
   return (
-    <div className="seller-nav-horizontal">
-      <div className="seller-nav-links">
+    <div className="seller-sidebar">
+      <div className="seller-sidebar-links">
         {links.map(link => {
           const isActive = location.pathname === link.to || (link.to !== '/seller' && location.pathname.startsWith(link.to));
           const Icon = link.icon;
           return (
-            <Link key={link.to} to={link.to} className={`seller-nav-item ${isActive ? 'active' : ''}`}>
-              <Icon size={16} />
+            <Link key={link.to} to={link.to} className={`seller-sidebar-item ${isActive ? 'active' : ''}`}>
+              <Icon size={18} />
               <span>{link.label}</span>
             </Link>
           );
         })}
       </div>
       {user && (
-        <Link to={`/seller/${user.id}`} className="seller-nav-shop">
-          <FiShoppingBag size={16} /> <span>Boutique</span>
+        <Link to={`/seller/${user.id}`} className="seller-sidebar-shop">
+          <FiShoppingBag size={18} /> <span>Voir ma boutique</span>
         </Link>
       )}
     </div>

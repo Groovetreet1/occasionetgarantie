@@ -1061,46 +1061,51 @@ select.form-control, .form-group select { cursor: pointer; appearance: auto; }
 .sell-cta .btn-primary { background: rgba(255,255,255,0.2); color: white; border: 1px solid rgba(255,255,255,0.3); }
 .sell-cta .btn-primary:hover { background: rgba(255,255,255,0.3); }
 
-/* Seller pages - horizontal nav layout */
+/* Seller pages - sidebar layout */
 .seller-page {
   max-width: 1100px; margin: 0 auto; padding: 120px 32px 60px;
-  min-height: calc(100vh - 64px);
+  min-height: calc(100vh - 64px); display: flex; gap: 0; align-items: flex-start;
 }
+
+/* Sidebar */
+.seller-sidebar {
+  width: 200px; flex-shrink: 0; position: sticky; top: 100px;
+  background: var(--bg-card); border: 1px solid var(--border);
+  border-radius: var(--radius-lg); overflow: hidden;
+}
+.seller-sidebar-links { display: flex; flex-direction: column; }
+.seller-sidebar-item {
+  display: flex; align-items: center; gap: 10px; padding: 12px 16px;
+  font-size: 13px; font-weight: 500; text-decoration: none;
+  color: var(--text-secondary); transition: var(--transition);
+  border-left: 3px solid transparent;
+}
+.seller-sidebar-item:hover { background: var(--primary-light); color: var(--primary); }
+.seller-sidebar-item.active {
+  background: var(--primary-light); color: var(--primary);
+  border-left-color: var(--primary); font-weight: 600;
+}
+.seller-sidebar-shop {
+  display: flex; align-items: center; gap: 10px; padding: 12px 16px;
+  font-size: 13px; font-weight: 500; text-decoration: none;
+  color: var(--text-secondary); transition: var(--transition);
+  border-top: 1px solid var(--border);
+}
+.seller-sidebar-shop:hover { color: var(--primary); }
+
+/* Content area */
+.seller-page-content {
+  flex: 1; min-width: 0; padding-left: 24px;
+}
+
 .seller-page-header {
   display: flex; justify-content: space-between; align-items: center;
   margin-bottom: 20px; gap: 12px; flex-wrap: wrap;
 }
 .seller-page-header h1 { font-size: 22px; font-weight: 700; }
 .seller-page-header p { font-size: 13px; margin-top: 2px; }
-.seller-page-content { margin-top: 24px; }
 
-/* Horizontal seller nav */
-.seller-nav-horizontal {
-  display: flex; align-items: center; justify-content: space-between; gap: 12px;
-  background: var(--bg-card); border: 1px solid var(--border); border-radius: var(--radius-lg);
-  padding: 4px; flex-wrap: wrap;
-}
-.seller-nav-links {
-  display: flex; align-items: center; gap: 2px; flex-wrap: wrap;
-}
-.seller-nav-item {
-  display: flex; align-items: center; gap: 6px; padding: 8px 14px;
-  border-radius: var(--radius); font-size: 13px; font-weight: 500;
-  text-decoration: none; color: var(--text-secondary); transition: var(--transition);
-  white-space: nowrap;
-}
-.seller-nav-item:hover { background: var(--primary-light); color: var(--primary); }
-.seller-nav-item.active { background: var(--primary); color: white; }
-.seller-nav-item.active:hover { background: var(--primary-hover); }
-.seller-nav-shop {
-  display: flex; align-items: center; gap: 6px; padding: 8px 14px;
-  border-radius: var(--radius); font-size: 13px; font-weight: 500;
-  text-decoration: none; color: var(--text-secondary); transition: var(--transition);
-  border-left: 1px solid var(--border); margin-left: 4px;
-}
-.seller-nav-shop:hover { color: var(--primary); }
-
-/* Dashboard styles within layout */
+/* Dashboard styles */
 .dashboard-header { display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 24px; flex-wrap: wrap; gap: 12px; }
 .dashboard-header h1 { font-size: 20px; font-weight: 700; }
 .dashboard-store-section { padding: 20px; margin-bottom: 20px; }
@@ -1146,16 +1151,18 @@ select.form-control, .form-group select { cursor: pointer; appearance: auto; }
 }
 
 /* Seller responsive */
+@media (max-width: 900px) {
+  .seller-page { flex-direction: column; padding: 100px 16px 40px; }
+  .seller-sidebar { width: 100%; position: static; display: flex; flex-direction: row; overflow-x: auto; border-radius: var(--radius); }
+  .seller-sidebar-links { flex-direction: row; flex: 1; }
+  .seller-sidebar-item { border-left: none; border-bottom: 3px solid transparent; white-space: nowrap; font-size: 12px; padding: 10px 12px; }
+  .seller-sidebar-item.active { border-left-color: transparent; border-bottom-color: var(--primary); }
+  .seller-sidebar-shop { border-top: none; border-left: 1px solid var(--border); white-space: nowrap; padding: 10px 12px; }
+  .seller-page-content { padding-left: 0; margin-top: 16px; }
+}
 @media (max-width: 768px) {
-  .seller-page { padding: 16px; padding-top: 100px; }
   .seller-page-header h1 { font-size: 18px; }
-  .seller-nav-horizontal { flex-direction: column; align-items: stretch; }
-  .seller-nav-links { justify-content: center; flex-wrap: wrap; }
-  .seller-nav-item { font-size: 12px; padding: 6px 10px; }
-  .seller-nav-shop { border-left: none; border-top: 1px solid var(--border); margin-left: 0; padding-top: 8px; justify-content: center; }
   .seller-page-content .dashboard-stats { grid-template-columns: 1fr 1fr; gap: 8px; }
-  .seller-page-content .dashboard-store-section { padding: 14px; margin-bottom: 14px; }
-  .seller-page-content .dashboard-store-section h3 { font-size: 14px; }
   .seller-page-content .dashboard-products h3 { font-size: 15px; }
   .seller-page-content .dashboard-products { margin-top: 20px; }
   .admin-table { font-size: 12px; min-width: 500px; }
@@ -1163,7 +1170,6 @@ select.form-control, .form-group select { cursor: pointer; appearance: auto; }
   .action-btns .btn-icon { width: 28px; height: 28px; }
 }
 @media (max-width: 400px) {
-  .seller-page { padding: 12px; padding-top: 100px; }
   .seller-page-header { flex-direction: column; align-items: stretch; }
   .seller-page-header .btn { width: 100%; justify-content: center; }
   .seller-page-content .dashboard-stats { grid-template-columns: 1fr 1fr; gap: 6px; }
@@ -1440,7 +1446,7 @@ select.form-control, .form-group select { cursor: pointer; appearance: auto; }
 /* Print styles */
 @media print {
   .navbar, .footer, .whatsapp-float, .navbar-mobile-panel, .navbar-hamburger, .navbar-auth,
-  .btn, .seller-nav-horizontal, .seller-nav, .seller-sidebar, .sidebar-toggle-btn, .seller-topbar, .dashboard-header .btn, .seller-form-actions, .upload-zone { display: none !important; }
+  .btn, .seller-sidebar, .seller-nav, .sidebar-toggle-btn, .seller-topbar, .dashboard-header .btn, .seller-form-actions, .upload-zone { display: none !important; }
   .container { max-width: 100% !important; padding: 0 !important; }
   .stats-report { gap: 16px; }
   .seller-main { margin-left: 0 !important; }

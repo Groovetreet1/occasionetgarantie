@@ -68,14 +68,6 @@ export default function SellerDashboard() {
       <SellerNav />
 
       <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="seller-page-content">
-        {storeName && (
-          <div className="card dashboard-store-section">
-            <h3>Boutique</h3>
-            <p><strong>{storeName}</strong></p>
-            <small className="text-secondary">Pour modifier le nom de votre boutique, contactez le support.</small>
-          </div>
-        )}
-
         {profile && (
           <div className="dashboard-stats">
             <div className="stat-card">
