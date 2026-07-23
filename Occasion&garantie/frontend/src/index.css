@@ -1002,7 +1002,8 @@ input, textarea, select, button { font-family: inherit; }
 .seller-topbar-title { flex: 1; }
 .seller-topbar-title h1 { font-size: 16px; font-weight: 700; }
 .seller-topbar-title span { font-size: 11px; color: var(--text-muted); }
-.seller-content { flex: 1; padding: 24px; overflow-y: auto; }
+.seller-content { flex: 1; padding: 24px; overflow-y: auto; width: 100%; max-width: 960px; margin: 0 auto; }
+.seller-content.dashboard-wide { max-width: 1200px; }
 
 /* Dashboard styles within layout */
 .dashboard-header { display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 24px; flex-wrap: wrap; gap: 12px; }

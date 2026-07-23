@@ -81,7 +81,7 @@ export default function SellerDashboard() {
           </Link>
         </div>
 
-        <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="seller-content">
+        <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="seller-content dashboard-wide">
           {storeName && (
             <div className="card dashboard-store-section">
               <h3>Boutique</h3>
