@@ -24,7 +24,8 @@ CREATE TABLE premium_payments (
   user_id INT NOT NULL,
   amount DECIMAL(10,2) NOT NULL DEFAULT 50.00,
   screenshot VARCHAR(255),
-  status ENUM('en_attente', 'actif') DEFAULT 'en_attente',
+  status ENUM('en_attente', 'actif', 'rejete') DEFAULT 'en_attente',
+  rejection_reason VARCHAR(500) DEFAULT NULL,
   created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
   FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE
 );

@@ -1,57 +1,32 @@
-require('dotenv').config();
 const mysql = require('mysql2/promise');
+require('dotenv').config();
 
-async function migrate() {
-  const dbConfig = {
-    host: process.env.DB_HOST || 'localhost',
-    port: parseInt(process.env.DB_PORT || '3306'),
-    user: process.env.DB_USER || 'root',
-    password: process.env.DB_PASSWORD || '',
-    database: process.env.DB_NAME || 'occasion_garantie',
-  };
-  if (process.env.DB_SSL === 'true') dbConfig.ssl = { rejectUnauthorized: false };
-
-  const pool = mysql.createPool(dbConfig);
-
+(async () => {
   try {
-    await pool.query(`ALTER TABLE users ADD COLUMN premium BOOLEAN DEFAULT FALSE`);
-    console.log('✓ Column premium added to users');
+    const pool = mysql.createPool({
+      host: process.env.DB_HOST || 'localhost',
+      port: parseInt(process.env.DB_PORT || '3306'),
+      user: process.env.DB_USER || 'root',
+      password: process.env.DB_PASSWORD || '',
+      database: process.env.DB_NAME || 'occasion_garantie',
+      ssl: process.env.DB_SSL === 'true' ? { rejectUnauthorized: false } : undefined,
+      waitForConnections: true,
+      connectionLimit: 5,
+      queueLimit: 0
+    });
+
+    await pool.query("ALTER TABLE premium_payments MODIFY COLUMN status ENUM('en_attente','actif','rejete') DEFAULT 'en_attente'");
+
+    console.log('status ENUM altered');
+
+    await pool.query('ALTER TABLE premium_payments ADD COLUMN IF NOT EXISTS rejection_reason VARCHAR(500) DEFAULT NULL AFTER status');
+    console.log('rejection_reason column added');
+
+    await pool.end();
+    console.log('Migration done');
+    process.exit(0);
   } catch (e) {
-    if (e.errno === 1060) console.log('→ Column premium already exists');
-    else throw e;
+    console.error('Migration error:', e.message, e.code, e.sqlMessage);
+    process.exit(1);
   }
-
-  try {
-    await pool.query(`ALTER TABLE users ADD COLUMN premium_expires_at DATETIME DEFAULT NULL`);
-    console.log('✓ Column premium_expires_at added to users');
-  } catch (e) {
-    if (e.errno === 1060) console.log('→ Column premium_expires_at already exists');
-    else throw e;
-  }
-
-  try {
-    await pool.query(`
-      CREATE TABLE IF NOT EXISTS premium_payments (
-        id INT AUTO_INCREMENT PRIMARY KEY,
-        user_id INT NOT NULL,
-        amount DECIMAL(10,2) NOT NULL DEFAULT 50.00,
-        screenshot VARCHAR(255),
-        status ENUM('en_attente', 'actif') DEFAULT 'en_attente',
-        created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-        FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE
-      )
-    `);
-    console.log('✓ Table premium_payments created');
-  } catch (e) {
-    if (e.errno === 1050) console.log('→ Table premium_payments already exists');
-    else throw e;
-  }
-
-  console.log('\nMigration completed successfully!');
-  await pool.end();
-}
-
-migrate().catch((err) => {
-  console.error('Migration failed:', err.message);
-  process.exit(1);
-});
+})();

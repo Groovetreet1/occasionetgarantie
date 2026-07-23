@@ -396,7 +396,7 @@ const mockPool = {
 
     // INSERT INTO premium_payments
     if (upper.startsWith('INSERT INTO PREMIUM_PAYMENTS')) {
-      const newPayment = { id: data.nextId.premium_payments++, user_id: params[0], amount: params[1], status: params[2], created_at: new Date().toISOString() };
+      const newPayment = { id: data.nextId.premium_payments++, user_id: params[0], amount: params[1], status: params[2], rejection_reason: null, created_at: new Date().toISOString() };
       data.premium_payments.push(newPayment);
       save();
       return [{ insertId: newPayment.id }];

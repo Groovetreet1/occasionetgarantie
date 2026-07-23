@@ -49,4 +49,31 @@ router.post('/premium-payments/:id/confirm', authenticate, adminOnly, async (req
   }
 });
 
+router.post('/premium-payments/:id/reject', authenticate, adminOnly, async (req, res) => {
+  try {
+    const paymentId = Number(req.params.id);
+    const { reason } = req.body;
+    const [payments] = await pool.query('SELECT * FROM premium_payments WHERE id = ?', [paymentId]);
+    if (payments.length === 0) return res.status(404).json({ message: 'Paiement introuvable.' });
+    if (payments[0].status !== 'en_attente') return res.status(400).json({ message: 'Deja traite.' });
+
+    const rejectionReason = reason || 'Paiement non valide. Veuillez reessayer avec un virement correct de 50 DH.';
+    await pool.query('UPDATE premium_payments SET status = ?, rejection_reason = ? WHERE id = ?', ['rejete', rejectionReason, paymentId]);
+
+    try {
+      const [userRow] = await pool.query('SELECT phone, full_name FROM users WHERE id = ?', [payments[0].user_id]);
+      if (userRow.length > 0 && userRow[0].phone) {
+        const msg = `Bonjour ${userRow[0].full_name}, votre demande Premium a ete refusee. Raison: ${rejectionReason}`;
+        await gomobile.sendSms(userRow[0].phone, msg);
+      }
+    } catch (smsErr) {
+      console.error('SMS failed:', smsErr.message);
+    }
+
+    res.json({ message: 'Paiement rejete.', reason: rejectionReason });
+  } catch (err) {
+    res.status(500).json({ message: 'Erreur serveur.' });
+  }
+});
+
 module.exports = router;

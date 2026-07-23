@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
-import { FiCheck, FiX, FiClock, FiArrowLeft, FiStar, FiEye } from 'react-icons/fi';
+import { FiCheck, FiX, FiClock, FiArrowLeft, FiStar, FiEye, FiThumbsDown } from 'react-icons/fi';
 import api from '../api/axios';
 
 const API_BASE = import.meta.env.VITE_API_URL || '';
@@ -8,7 +8,8 @@ const API_BASE = import.meta.env.VITE_API_URL || '';
 export default function AdminPremium() {
   const [payments, setPayments] = useState([]);
   const [loading, setLoading] = useState(true);
-  const [confirming, setConfirming] = useState(null);
+  const [actionId, setActionId] = useState(null);
+  const [rejectModal, setRejectModal] = useState(null);
 
   useEffect(() => {
     api.get('/admin/premium-payments')
@@ -19,14 +20,27 @@ export default function AdminPremium() {
 
   const handleConfirm = async (id) => {
     if (!window.confirm('Confirmer ce paiement Premium ?')) return;
-    setConfirming(id);
+    setActionId(id);
     try {
       await api.post(`/admin/premium-payments/${id}/confirm`);
       setPayments(payments.map(p => p.id === id ? { ...p, status: 'actif' } : p));
     } catch (err) {
       alert(err.response?.data?.message || 'Erreur');
     } finally {
-      setConfirming(null);
+      setActionId(null);
+    }
+  };
+
+  const handleReject = async (id, reason) => {
+    setActionId(id);
+    try {
+      const res = await api.post(`/admin/premium-payments/${id}/reject`, { reason });
+      setPayments(payments.map(p => p.id === id ? { ...p, status: 'rejete', rejection_reason: reason } : p));
+      setRejectModal(null);
+    } catch (err) {
+      alert(err.response?.data?.message || 'Erreur');
+    } finally {
+      setActionId(null);
     }
   };
 
@@ -54,7 +68,7 @@ export default function AdminPremium() {
                 <tr style={{ borderBottom: '1px solid var(--border)', color: 'var(--text-muted)', textTransform: 'uppercase', fontSize: '11px', letterSpacing: '0.5px' }}>
                   <th style={{ padding: '12px 8px', textAlign: 'left' }}>ID</th>
                   <th style={{ padding: '12px 8px', textAlign: 'left' }}>Client</th>
-                  <th style={{ padding: '12px 8px', textAlign: 'left' }}>T&eacute;l&eacute;phone</th>
+                  <th style={{ padding: '12px 8px', textAlign: 'left' }}>Téléphone</th>
                   <th style={{ padding: '12px 8px', textAlign: 'left' }}>Montant</th>
                   <th style={{ padding: '12px 8px', textAlign: 'left' }}>Date</th>
                   <th style={{ padding: '12px 8px', textAlign: 'left' }}>Statut</th>
@@ -73,6 +87,8 @@ export default function AdminPremium() {
                     <td style={{ padding: '12px 8px' }}>
                       {p.status === 'actif' ? (
                         <span style={{ color: 'var(--success)', display: 'flex', alignItems: 'center', gap: 4 }}><FiCheck size={14} /> Actif</span>
+                      ) : p.status === 'rejete' ? (
+                        <span title={p.rejection_reason} style={{ color: 'var(--error)', display: 'flex', alignItems: 'center', gap: 4, cursor: 'help' }}><FiX size={14} /> Rejeté</span>
                       ) : (
                         <span style={{ color: '#d97706', display: 'flex', alignItems: 'center', gap: 4 }}><FiClock size={14} /> En attente</span>
                       )}
@@ -88,16 +104,28 @@ export default function AdminPremium() {
                     </td>
                     <td style={{ padding: '12px 8px' }}>
                       {p.status === 'en_attente' ? (
-                        <button
-                          onClick={() => handleConfirm(p.id)}
-                          disabled={confirming === p.id}
-                          className="btn btn-primary"
-                          style={{ padding: '6px 14px', fontSize: '12px' }}
-                        >
-                          {confirming === p.id ? '...' : <><FiCheck size={14} /> Confirmer</>}
-                        </button>
+                        <div style={{ display: 'flex', gap: '6px' }}>
+                          <button
+                            onClick={() => handleConfirm(p.id)}
+                            disabled={actionId === p.id}
+                            className="btn btn-primary"
+                            style={{ padding: '6px 14px', fontSize: '12px' }}
+                          >
+                            {actionId === p.id ? '...' : <><FiCheck size={14} /> Confirmer</>}
+                          </button>
+                          <button
+                            onClick={() => setRejectModal(p)}
+                            disabled={actionId === p.id}
+                            className="btn"
+                            style={{ padding: '6px 14px', fontSize: '12px', background: 'rgba(239,68,68,0.15)', color: 'var(--error)', border: 'none' }}
+                          >
+                            <FiThumbsDown size={14} /> Rejeter
+                          </button>
+                        </div>
+                      ) : p.status === 'rejete' ? (
+                        <span style={{ color: 'var(--error)', fontSize: '12px', fontWeight: 600 }} title={p.rejection_reason}>Rejeté</span>
                       ) : (
-                        <span style={{ color: 'var(--success)', fontSize: '12px', fontWeight: 600 }}>Confirm&eacute;</span>
+                        <span style={{ color: 'var(--success)', fontSize: '12px', fontWeight: 600 }}>Confirmé</span>
                       )}
                     </td>
                   </tr>
@@ -107,6 +135,70 @@ export default function AdminPremium() {
           </div>
         )}
       </div>
+
+      {rejectModal && (
+        <div style={{
+          position: 'fixed', inset: 0, zIndex: 99999,
+          display: 'flex', alignItems: 'center', justifyContent: 'center',
+          background: 'rgba(0,0,0,0.5)', padding: '20px'
+        }} onClick={() => setRejectModal(null)}>
+          <div style={{
+            background: 'var(--bg-card)', borderRadius: 'var(--radius-lg)',
+            padding: '32px', maxWidth: '480px', width: '100%',
+            border: '1px solid var(--border)'
+          }} onClick={e => e.stopPropagation()}>
+            <h2 style={{ fontSize: '20px', fontWeight: 700, marginBottom: '8px' }}>Rejeter la demande Premium</h2>
+            <p style={{ color: 'var(--text-secondary)', fontSize: '14px', marginBottom: '20px' }}>
+              Client: <strong>{rejectModal.full_name}</strong> &middot; {Number(rejectModal.amount).toLocaleString()} DH
+            </p>
+            <RejectForm
+              paymentId={rejectModal.id}
+              onSubmit={(reason) => handleReject(rejectModal.id, reason)}
+              onCancel={() => setRejectModal(null)}
+              loading={actionId === rejectModal.id}
+            />
+          </div>
+        </div>
+      )}
     </section>
+  );
+}
+
+function RejectForm({ onSubmit, onCancel, loading }) {
+  const [reason, setReason] = useState('');
+
+  const defaultReason = 'Paiement non valide. Veuillez reessayer avec un virement correct de 50 DH.';
+
+  return (
+    <div>
+      <label style={{ display: 'block', fontSize: '13px', fontWeight: 600, marginBottom: '6px', color: 'var(--text-secondary)' }}>
+        Raison du rejet (optionnelle)
+      </label>
+      <textarea
+        value={reason}
+        onChange={e => setReason(e.target.value)}
+        placeholder={defaultReason}
+        rows={3}
+        style={{
+          width: '100%', padding: '12px', borderRadius: '10px',
+          border: '1px solid var(--border)', background: 'var(--bg)',
+          color: 'var(--text-primary)', fontFamily: 'var(--font)',
+          fontSize: '14px', resize: 'vertical', marginBottom: '16px'
+        }}
+      />
+      <div style={{ display: 'flex', gap: '10px', justifyContent: 'flex-end' }}>
+        <button onClick={onCancel} className="btn btn-ghost" disabled={loading} style={{ padding: '10px 20px' }}>
+          Annuler
+        </button>
+        <button
+          onClick={() => onSubmit(reason.trim() || defaultReason)}
+          disabled={loading}
+          className="btn"
+          style={{ padding: '10px 20px', background: 'rgba(239,68,68,0.15)', color: 'var(--error)', border: 'none', fontWeight: 600 }}
+        >
+          {loading ? '...' : 'Rejeter la demande'}
+        </button>
+      </div>
+    </div>
   );
 }
