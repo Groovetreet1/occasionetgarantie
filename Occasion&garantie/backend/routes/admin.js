@@ -31,7 +31,16 @@ router.post('/premium-payments/:id/confirm', authenticate, adminOnly, async (req
     expiresAt.setFullYear(expiresAt.getFullYear() + 1);
 
     await pool.query('UPDATE premium_payments SET status = ? WHERE id = ?', ['actif', paymentId]);
-    await pool.query('UPDATE users SET premium = TRUE, premium_expires_at = ? WHERE id = ?', [expiresAt, payments[0].user_id]);
+
+    try {
+      await pool.query('UPDATE users SET premium = TRUE, premium_expires_at = ? WHERE id = ?', [expiresAt, payments[0].user_id]);
+    } catch (userErr) {
+      if (userErr.errno === 1054 || userErr.code === 'ER_BAD_FIELD_ERROR') {
+        await pool.query('UPDATE users SET premium = TRUE WHERE id = ?', [payments[0].user_id]);
+      } else {
+        throw userErr;
+      }
+    }
 
     try {
       const [userRow] = await pool.query('SELECT phone, full_name FROM users WHERE id = ?', [payments[0].user_id]);
