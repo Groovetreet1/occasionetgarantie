@@ -1,5 +1,5 @@
 import { useState, useEffect, useRef } from 'react';
-import { FiUser, FiMail, FiPhone, FiLock, FiSave, FiArrowLeft, FiCamera, FiX, FiShoppingBag, FiStar } from 'react-icons/fi';
+import { FiUser, FiMail, FiPhone, FiLock, FiSave, FiArrowLeft, FiCamera, FiX, FiShoppingBag, FiStar, FiTrash2 } from 'react-icons/fi';
 import { motion } from 'framer-motion';
 import { Link, useNavigate } from 'react-router-dom';
 import api from '../api/axios';
@@ -162,6 +162,9 @@ export default function Profile() {
           <button type="button" onClick={() => setActiveTab('password')} className={activeTab === 'password' ? 'btn btn-primary' : 'btn btn-outline'} style={{ flex: 1, justifyContent: 'center' }}>
             <FiLock size={16} /> Mot de passe
           </button>
+          <button type="button" onClick={() => setActiveTab('delete')} className={activeTab === 'delete' ? 'btn btn-primary' : 'btn btn-outline'} style={{ flex: 1, justifyContent: 'center', color: activeTab === 'delete' ? '#fff' : 'var(--error)', background: activeTab === 'delete' ? 'var(--error)' : 'transparent' }}>
+            <FiTrash2 size={16} /> Supprimer
+          </button>
         </div>
 
         {activeTab === 'profile' && (
@@ -256,6 +259,10 @@ export default function Profile() {
             </motion.button>
           </motion.form>
         )}
+
+        {activeTab === 'delete' && (
+          <DeleteAccount onDeleted={() => { localStorage.clear(); navigate('/'); }} />
+        )}
       </div>
 
       {showPhoneModal && (
@@ -307,5 +314,86 @@ export default function Profile() {
         </div>
       )}
     </motion.section>
+  );
+}
+
+function DeleteAccount({ onDeleted }) {
+  const [password, setPassword] = useState('');
+  const [deleting, setDeleting] = useState(false);
+  const [step, setStep] = useState('confirm');
+  const [error, setError] = useState('');
+
+  const handleDelete = async () => {
+    if (step === 'confirm') { setStep('password'); return; }
+    setDeleting(true);
+    setError('');
+    try {
+      await api.delete('/auth/account', { data: { password } });
+      onDeleted();
+    } catch (err) {
+      setError(err.response?.data?.message || 'Erreur lors de la suppression.');
+      setDeleting(false);
+    }
+  };
+
+  return (
+    <motion.div variants={item} className="auth-card">
+      <h3 style={{ marginBottom: 16, fontSize: 15, display: 'flex', alignItems: 'center', gap: 8, color: 'var(--error)' }}>
+        <FiTrash2 size={16} /> Supprimer mon compte
+      </h3>
+
+      {error && <div className="alert alert-error">{error}</div>}
+
+      {step === 'confirm' ? (
+        <div>
+          <p style={{ fontSize: 14, color: 'var(--text-secondary)', marginBottom: 16 }}>
+            Cette action est <strong>irreversible</strong>. Toutes vos donnees (produits, conversations, annonces) seront definitivement supprimees.
+          </p>
+          <motion.button
+            className="form-submit"
+            onClick={handleDelete}
+            whileTap={{ scale: 0.97 }}
+            style={{ background: 'var(--error)', color: '#fff' }}
+          >
+            <FiTrash2 size={16} /> Supprimer mon compte
+          </motion.button>
+        </div>
+      ) : (
+        <div>
+          <p style={{ fontSize: 14, color: 'var(--text-secondary)', marginBottom: 12 }}>
+            Confirmez avec votre mot de passe pour supprimer definitivement votre compte.
+          </p>
+          <div className="form-group">
+            <label>Mot de passe</label>
+            <input
+              type="password"
+              value={password}
+              onChange={(e) => setPassword(e.target.value)}
+              placeholder="Votre mot de passe"
+              autoFocus
+            />
+          </div>
+          <div style={{ display: 'flex', gap: 10 }}>
+            <button
+              className="btn btn-outline"
+              onClick={() => { setStep('confirm'); setPassword(''); setError(''); }}
+              disabled={deleting}
+              style={{ flex: 1, justifyContent: 'center', padding: '12px' }}
+            >
+              Annuler
+            </button>
+            <motion.button
+              className="form-submit"
+              onClick={handleDelete}
+              disabled={!password || deleting}
+              whileTap={{ scale: 0.97 }}
+              style={{ flex: 1, background: 'var(--error)', color: '#fff' }}
+            >
+              {deleting ? 'Suppression...' : 'Confirmer la suppression'}
+            </motion.button>
+          </div>
+        </div>
+      )}
+    </motion.div>
   );
 }

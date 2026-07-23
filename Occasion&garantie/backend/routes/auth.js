@@ -352,4 +352,23 @@ router.post('/reset-password', [
   }
 });
 
+router.delete('/account', authenticate, async (req, res) => {
+  try {
+    const { password } = req.body;
+    if (!password) return res.status(400).json({ message: 'Mot de passe requis pour supprimer le compte.' });
+
+    const [users] = await pool.query('SELECT password FROM users WHERE id = ?', [req.user.id]);
+    if (users.length === 0) return res.status(404).json({ message: 'Utilisateur introuvable.' });
+
+    const valid = await bcrypt.compare(password, users[0].password);
+    if (!valid) return res.status(400).json({ message: 'Mot de passe incorrect.' });
+
+    await pool.query('DELETE FROM users WHERE id = ?', [req.user.id]);
+
+    res.json({ message: 'Compte supprime avec succes.' });
+  } catch (err) {
+    res.status(500).json({ message: 'Erreur serveur.' });
+  }
+});
+
 module.exports = router;
