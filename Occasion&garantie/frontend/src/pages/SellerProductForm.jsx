@@ -203,15 +203,17 @@ export default function SellerProductForm() {
 
             <div className="seller-form-card">
               <h3>Prix & Catégorie</h3>
-              <div className="form-row three">
+              <div className={`form-row ${isEdit ? 'three' : 'two'}`}>
                 <div className="form-group">
                   <label>Prix (DH) *</label>
                   <div className="input-with-suffix"><input name="price" type="number" value={form.price} onChange={handleChange} className="form-control" placeholder="3500" /><span>DH</span></div>
                 </div>
-                <div className="form-group">
-                  <label>Ancien prix (DH)</label>
-                  <div className="input-with-suffix"><input name="old_price" type="number" value={form.old_price} onChange={handleChange} className="form-control" placeholder="5500" /><span>DH</span></div>
-                </div>
+                {isEdit && (
+                  <div className="form-group">
+                    <label>Ancien prix (DH)</label>
+                    <div className="input-with-suffix"><input name="old_price" type="number" value={form.old_price} onChange={handleChange} className="form-control" placeholder="5500" /><span>DH</span></div>
+                  </div>
+                )}
                 <div className="form-group">
                   <label>Catégorie</label>
                   <select name="category_id" value={form.category_id} onChange={handleChange} className="form-control">
