@@ -612,9 +612,21 @@ input, textarea, select, button { font-family: inherit; }
   .cat-pill { font-size: 12px; padding: 5px 14px; }
   .products-page-search { max-width: 100%; }
 }
-@media (max-width: 400px) {
-  .product-grid-modern { gap: 8px; }
-  .cat-pill { font-size: 11px; padding: 4px 10px; }
+@media (max-width: 480px) {
+  .product-grid-modern { grid-template-columns: repeat(2, 1fr); gap: 8px; }
+}
+@media (max-width: 360px) {
+  .product-grid-modern { grid-template-columns: 1fr 1fr; gap: 6px; }
+  .product-card-body { padding: 8px 8px 10px; }
+  .product-card-title { font-size: 11px; }
+  .product-card-price { font-size: 13px; }
+  .product-card-old { font-size: 10px; }
+  .badge-discount { font-size: 8px; padding: 1px 5px; top: 4px; right: 4px; }
+  .badge-pending { font-size: 8px; padding: 1px 5px; top: 4px; left: 4px; }
+  .meta-chip { font-size: 8px; padding: 1px 5px; }
+  .product-card-img-wrap { padding: 8px; }
+  .product-card-cat { font-size: 8px; }
+  .product-card-seller { font-size: 9px; }
 }
 
 .product-detail-section { padding-top: 120px; padding-bottom: 60px; }
