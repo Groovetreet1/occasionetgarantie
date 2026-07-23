@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
-import { FiCheck, FiX, FiClock, FiArrowLeft, FiStar, FiEye, FiThumbsDown } from 'react-icons/fi';
+import { FiCheck, FiX, FiClock, FiArrowLeft, FiStar, FiEye, FiThumbsDown, FiTrash2 } from 'react-icons/fi';
 import api from '../api/axios';
 
 const API_BASE = import.meta.env.VITE_API_URL || '';
@@ -37,6 +37,19 @@ export default function AdminPremium() {
       const res = await api.post(`/admin/premium-payments/${id}/reject`, { reason });
       setPayments(payments.map(p => p.id === id ? { ...p, status: 'rejete', rejection_reason: reason } : p));
       setRejectModal(null);
+    } catch (err) {
+      alert(err.response?.data?.message || 'Erreur');
+    } finally {
+      setActionId(null);
+    }
+  };
+
+  const handleDelete = async (id) => {
+    if (!window.confirm('Supprimer definitivement cette demande ?')) return;
+    setActionId(id);
+    try {
+      await api.delete(`/admin/premium-payments/${id}`);
+      setPayments(payments.filter(p => p.id !== id));
     } catch (err) {
       alert(err.response?.data?.message || 'Erreur');
     } finally {
@@ -127,6 +140,19 @@ export default function AdminPremium() {
                       ) : (
                         <span style={{ color: 'var(--success)', fontSize: '12px', fontWeight: 600 }}>Confirmé</span>
                       )}
+                      <button
+                        onClick={() => handleDelete(p.id)}
+                        disabled={actionId === p.id}
+                        style={{
+                          marginLeft: '8px',
+                          background: 'none', border: 'none',
+                          color: 'var(--text-muted)', cursor: 'pointer',
+                          padding: '4px', verticalAlign: 'middle'
+                        }}
+                        title="Supprimer"
+                      >
+                        <FiTrash2 size={14} />
+                      </button>
                     </td>
                   </tr>
                 ))}

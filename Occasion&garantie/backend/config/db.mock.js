@@ -457,6 +457,14 @@ const mockPool = {
       return [payments];
     }
 
+    // DELETE premium_payments by id
+    if (upper.startsWith('DELETE FROM PREMIUM_PAYMENTS')) {
+      const id = Number(params[0]);
+      data.premium_payments = data.premium_payments.filter(p => p.id !== id);
+      save();
+      return [[]];
+    }
+
     // SELECT premium_payments by id
     if (upper.startsWith('SELECT') && upper.includes('FROM PREMIUM_PAYMENTS') && upper.includes('WHERE ID =') && !upper.includes('USER_ID')) {
       const payment = data.premium_payments.find(p => p.id === params[0]);

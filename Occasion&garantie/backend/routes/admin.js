@@ -4,6 +4,17 @@ const pool = require('../config/db');
 const { authenticate, adminOnly } = require('../middleware/auth');
 const gomobile = require('../services/gomobile');
 
+router.delete('/premium-payments/:id', authenticate, adminOnly, async (req, res) => {
+  try {
+    const paymentId = Number(req.params.id);
+    await pool.query('DELETE FROM premium_payments WHERE id = ?', [paymentId]);
+    res.json({ message: 'Paiement supprime.' });
+  } catch (err) {
+    console.error('Delete premium error:', err.sqlMessage || err.message);
+    res.status(500).json({ message: 'Erreur serveur.' });
+  }
+});
+
 router.get('/premium-payments', authenticate, adminOnly, async (req, res) => {
   try {
     try {

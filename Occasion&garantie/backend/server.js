@@ -14,6 +14,16 @@ const adminRoutes = require('./routes/admin');
 const premiumRoutes = require('./routes/premium');
 const sellerRoutes = require('./routes/seller');
 const chatRoutes = require('./routes/chat');
+const pool = require('./config/db');
+
+(async () => {
+  try {
+    await pool.query('ALTER TABLE users ADD COLUMN premium BOOLEAN DEFAULT FALSE');
+  } catch {}
+  try {
+    await pool.query('ALTER TABLE users ADD COLUMN premium_expires_at DATETIME NULL');
+  } catch {}
+})();
 
 const app = express();
 app.set('trust proxy', 1);
