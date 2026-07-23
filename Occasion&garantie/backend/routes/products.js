@@ -35,26 +35,48 @@ router.get('/', async (req, res) => {
     else if (sort === 'newest') sql += ' ORDER BY p.created_at DESC';
     else sql += ' ORDER BY seller_premium DESC, p.featured DESC, p.created_at DESC';
 
-    const [rows] = await pool.query(sql, params);
-    res.json(rows);
+    try {
+      const [rows] = await pool.query(sql, params);
+      return res.json(rows);
+    } catch (e) {
+      if (e.errno === 1054 || e.code === 'ER_BAD_FIELD_ERROR') {
+        sql = sql.replace(/,\s*\(u\.premium.*?as seller_premium/i, '');
+        sql = sql.replace(/ORDER BY seller_premium DESC,\s*/i, 'ORDER BY ');
+        const [rows] = await pool.query(sql, params);
+        return res.json(rows);
+      }
+      throw e;
+    }
   } catch (err) {
     res.status(500).json({ message: 'Erreur serveur.', error: err.message });
   }
 });
 
+function fallbackSql(sql) {
+  return sql.replace(/,\s*\(u\.premium.*?as seller_premium/i, '').replace(/ORDER BY seller_premium DESC,\s*/i, 'ORDER BY ');
+}
+
 // Public: featured products (only disponible)
 router.get('/featured', async (req, res) => {
   try {
-    const [rows] = await pool.query(
-      `SELECT p.*, c.name as category_name, u.store_name as seller_name, u.store_logo as seller_logo,
+    let sql = `SELECT p.*, c.name as category_name, u.store_name as seller_name, u.store_logo as seller_logo,
               (u.premium = 1 AND (u.premium_expires_at IS NULL OR u.premium_expires_at > NOW())) as seller_premium
        FROM products p
        LEFT JOIN categories c ON p.category_id = c.id
        LEFT JOIN users u ON p.seller_id = u.id
        WHERE p.featured = TRUE AND p.active = TRUE AND p.status = 'disponible'
-       ORDER BY seller_premium DESC, p.created_at DESC LIMIT 8`
-    );
-    res.json(rows);
+       ORDER BY seller_premium DESC, p.created_at DESC LIMIT 8`;
+    try {
+      const [rows] = await pool.query(sql);
+      return res.json(rows);
+    } catch (e) {
+      if (e.errno === 1054 || e.code === 'ER_BAD_FIELD_ERROR') {
+        sql = fallbackSql(sql);
+        const [rows] = await pool.query(sql);
+        return res.json(rows);
+      }
+      throw e;
+    }
   } catch (err) {
     res.status(500).json({ message: 'Erreur serveur.' });
   }
@@ -78,17 +100,15 @@ router.get('/id/:id', authenticate, async (req, res) => {
 // Public: single product by slug (show any status)
 router.get('/:slug', async (req, res) => {
   try {
-    const [rows] = await pool.query(
-      `SELECT p.*, c.name as category_name,
+    let sql = `SELECT p.*, c.name as category_name,
               u.id as seller_id, u.full_name as seller_full_name, u.store_name as seller_name, u.store_logo as seller_logo,
               u.phone as seller_phone,
               (u.premium = 1 AND (u.premium_expires_at IS NULL OR u.premium_expires_at > NOW())) as seller_premium
        FROM products p
        LEFT JOIN categories c ON p.category_id = c.id
        LEFT JOIN users u ON p.seller_id = u.id
-       WHERE p.slug = ?`,
-      [req.params.slug]
-    );
+       WHERE p.slug = ?`;
+    const [rows] = await pool.query(sql, [req.params.slug]);
     if (rows.length === 0) return res.status(404).json({ message: 'Produit introuvable.' });
     res.json(rows[0]);
   } catch (err) {
