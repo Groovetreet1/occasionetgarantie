@@ -1,8 +1,8 @@
 import { useEffect, useState, useRef } from 'react';
 import { motion } from 'framer-motion';
-import { FiPackage, FiTrendingUp, FiClock, FiCheckCircle, FiDownload, FiMenu } from 'react-icons/fi';
+import { FiPackage, FiTrendingUp, FiClock, FiCheckCircle, FiDownload } from 'react-icons/fi';
 import api from '../api/axios';
-import SellerSidebar from '../components/SellerSidebar';
+import SellerNav from '../components/SellerNav';
 
 const statusColors = { disponible: '#059669', en_attente: '#d97706', vendu: '#dc2626' };
 const statusLabels = { disponible: 'Disponible', en_attente: 'En attente', vendu: 'Vendu' };
@@ -10,17 +10,7 @@ const statusLabels = { disponible: 'Disponible', en_attente: 'En attente', vendu
 export default function SellerStats() {
   const [products, setProducts] = useState([]);
   const [loading, setLoading] = useState(true);
-  const [sidebarOpen, setSidebarOpen] = useState(true);
   const statsRef = useRef(null);
-
-  useEffect(() => {
-    const saved = localStorage.getItem('sellerSidebar');
-    if (saved !== null) setSidebarOpen(saved === '1');
-  }, []);
-
-  useEffect(() => {
-    localStorage.setItem('sellerSidebar', sidebarOpen ? '1' : '0');
-  }, [sidebarOpen]);
 
   useEffect(() => {
     api.get('/seller/me/products').then(res => {
@@ -44,22 +34,17 @@ export default function SellerStats() {
   if (loading) return <div className="loading-spinner" />;
 
   return (
-    <div className="seller-layout">
-      <SellerSidebar open={sidebarOpen} onToggle={() => setSidebarOpen(!sidebarOpen)} />
-      <main className={`seller-main ${sidebarOpen ? 'sidebar-open' : 'sidebar-closed'}`}>
-        <div className="seller-topbar">
-          <button className="sidebar-toggle-btn" onClick={() => setSidebarOpen(!sidebarOpen)}>
-            <FiMenu size={20} />
-          </button>
-          <div className="seller-topbar-title">
-            <h1>Statistiques</h1>
-          </div>
-          <button className="btn btn-outline" onClick={handlePrint}>
-            <FiDownload size={16} /> Exporter PDF
-          </button>
-        </div>
+    <div className="seller-page">
+      <div className="seller-page-header">
+        <h1>Statistiques</h1>
+        <button className="btn btn-outline" onClick={handlePrint}>
+          <FiDownload size={16} /> Exporter PDF
+        </button>
+      </div>
 
-        <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="seller-content" ref={statsRef}>
+      <SellerNav />
+
+      <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="seller-page-content" ref={statsRef}>
           <div className="stats-report">
             <div className="stats-overview">
               <div className="stat-card large" style={{ borderTop: '3px solid var(--primary)' }}>
@@ -151,8 +136,7 @@ export default function SellerStats() {
               </div>
             </div>
           </div>
-        </motion.div>
-      </main>
+      </motion.div>
     </div>
   );
 }

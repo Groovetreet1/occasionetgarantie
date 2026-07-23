@@ -1,9 +1,9 @@
 import { useState, useEffect, useRef } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 import { motion } from 'framer-motion';
-import { FiUpload, FiX, FiMenu } from 'react-icons/fi';
+import { FiUpload, FiX } from 'react-icons/fi';
 import api from '../api/axios';
-import SellerSidebar from '../components/SellerSidebar';
+import SellerNav from '../components/SellerNav';
 
 const API_BASE = import.meta.env.VITE_API_URL || '';
 
@@ -35,16 +35,6 @@ export default function SellerProductForm() {
   const [uploading, setUploading] = useState(false);
   const [error, setError] = useState('');
   const [saving, setSaving] = useState(false);
-  const [sidebarOpen, setSidebarOpen] = useState(true);
-
-  useEffect(() => {
-    const saved = localStorage.getItem('sellerSidebar');
-    if (saved !== null) setSidebarOpen(saved === '1');
-  }, []);
-
-  useEffect(() => {
-    localStorage.setItem('sellerSidebar', sidebarOpen ? '1' : '0');
-  }, [sidebarOpen]);
 
   useEffect(() => {
     if (isEdit) {
@@ -148,20 +138,15 @@ export default function SellerProductForm() {
   };
 
   return (
-    <div className="seller-layout">
-      <SellerSidebar open={sidebarOpen} onToggle={() => setSidebarOpen(!sidebarOpen)} />
-      <main className={`seller-main ${sidebarOpen ? 'sidebar-open' : 'sidebar-closed'}`}>
-        <div className="seller-topbar">
-          <button className="sidebar-toggle-btn" onClick={() => setSidebarOpen(!sidebarOpen)}>
-            <FiMenu size={20} />
-          </button>
-          <div className="seller-topbar-title">
-            <h1>{isEdit ? 'Modifier le produit' : 'Nouvelle annonce'}</h1>
-          </div>
-          <button className="btn btn-outline" onClick={() => navigate('/seller')}>← Retour</button>
-        </div>
+    <div className="seller-page">
+      <div className="seller-page-header">
+        <h1>{isEdit ? 'Modifier le produit' : 'Nouvelle annonce'}</h1>
+        <button className="btn btn-outline" onClick={() => navigate('/seller')}>← Retour</button>
+      </div>
 
-        <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="seller-content">
+      <SellerNav />
+
+      <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="seller-page-content">
           {error && <div className="alert alert-error">{error}</div>}
 
           <form onSubmit={handleSubmit} className="seller-form">
@@ -286,8 +271,7 @@ export default function SellerProductForm() {
               </button>
             </div>
           </form>
-        </motion.div>
-      </main>
+      </motion.div>
     </div>
   );
 }
