@@ -417,14 +417,12 @@ router.post('/buy-credits', authenticate, async (req, res) => {
 
     const credits = creditAmount * 10;
 
-    await pool.query('UPDATE users SET credit_balance = credit_balance + ? WHERE id = ?', [credits, req.user.id]);
     await pool.query(
-      'INSERT INTO credit_transactions (user_id, type, amount, description) VALUES (?, ?, ?, ?)',
-      [req.user.id, 'purchase', credits, `Achat de ${credits} credits (${creditAmount} DH)`]
+      'INSERT INTO credit_purchases (user_id, amount_dh, credits) VALUES (?, ?, ?)',
+      [req.user.id, creditAmount, credits]
     );
 
-    const [users] = await pool.query('SELECT credit_balance FROM users WHERE id = ?', [req.user.id]);
-    res.json({ message: `${credits} credits ajoutes a votre compte.`, credit_balance: users[0].credit_balance });
+    res.json({ message: `Demande d'achat de ${credits} credits envoyee. L'administrateur va la confirmer sous 24h.` });
   } catch (err) {
     res.status(500).json({ message: 'Erreur serveur.' });
   }
@@ -438,6 +436,35 @@ router.get('/my-credits', authenticate, async (req, res) => {
       [req.user.id]
     );
     res.json({ credit_balance: users[0]?.credit_balance || 0, transactions: txns });
+  } catch (err) {
+    res.status(500).json({ message: 'Erreur serveur.' });
+  }
+});
+
+router.post('/request-installment', authenticate, async (req, res) => {
+  try {
+    const { product_id, months } = req.body;
+    if (!product_id || !months || ![3, 6, 12].includes(months)) {
+      return res.status(400).json({ message: 'Parametres invalides. Mois: 3, 6 ou 12.' });
+    }
+
+    const [products] = await pool.query('SELECT id, price, seller_id, name FROM products WHERE id = ?', [product_id]);
+    if (products.length === 0) return res.status(404).json({ message: 'Produit introuvable.' });
+
+    const totalPrice = Number(products[0].price);
+    const downPayment = Math.round(totalPrice * 0.3);
+    const remaining = totalPrice - downPayment;
+    const monthlyAmount = Math.round(remaining / months);
+
+    await pool.query(
+      'INSERT INTO installments (product_id, buyer_id, seller_id, total_price, down_payment, monthly_amount, months) VALUES (?, ?, ?, ?, ?, ?, ?)',
+      [product_id, req.user.id, products[0].seller_id, totalPrice, downPayment, monthlyAmount, months]
+    );
+
+    res.json({
+      message: 'Demande de paiement echelonne envoyee.',
+      details: { totalPrice, downPayment, monthlyAmount, months }
+    });
   } catch (err) {
     res.status(500).json({ message: 'Erreur serveur.' });
   }

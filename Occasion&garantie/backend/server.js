@@ -46,6 +46,41 @@ const pool = require('./config/db');
   } catch (e) {
     console.log('credit_transactions table check skipped:', e.message);
   }
+  try {
+    await pool.query(`CREATE TABLE IF NOT EXISTS credit_purchases (
+      id INT AUTO_INCREMENT PRIMARY KEY,
+      user_id INT NOT NULL,
+      amount_dh DECIMAL(10,2) NOT NULL,
+      credits INT NOT NULL,
+      status VARCHAR(20) DEFAULT 'en_attente',
+      rejection_reason VARCHAR(255),
+      created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+      confirmed_at TIMESTAMP NULL
+    )`);
+    console.log('credit_purchases table ready');
+  } catch (e) {
+    console.log('credit_purchases table check skipped:', e.message);
+  }
+  try {
+    await pool.query(`CREATE TABLE IF NOT EXISTS installments (
+      id INT AUTO_INCREMENT PRIMARY KEY,
+      product_id INT NOT NULL,
+      buyer_id INT NOT NULL,
+      seller_id INT NOT NULL,
+      total_price DECIMAL(10,2) NOT NULL,
+      down_payment DECIMAL(10,2) DEFAULT 0,
+      monthly_amount DECIMAL(10,2) NOT NULL,
+      months INT NOT NULL DEFAULT 3,
+      status VARCHAR(20) DEFAULT 'en_attente',
+      paid_months INT DEFAULT 0,
+      rejection_reason VARCHAR(255),
+      created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+      updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
+    )`);
+    console.log('installments table ready');
+  } catch (e) {
+    console.log('installments table check skipped:', e.message);
+  }
 })();
 
 const app = express();

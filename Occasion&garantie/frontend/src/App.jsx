@@ -17,6 +17,8 @@ import ResetPassword from './pages/ResetPassword';
 import Profile from './pages/Profile';
 import NotFound from './pages/NotFound';
 import AdminPremium from './pages/AdminPremium';
+import AdminCreditPurchases from './pages/AdminCreditPurchases';
+import AdminInstallments from './pages/AdminInstallments';
 import SellPage from './pages/SellPage';
 import SellerDashboard from './pages/SellerDashboard';
 import SellerProductForm from './pages/SellerProductForm';
@@ -63,6 +65,8 @@ export default function App() {
           <Route path="/profile" element={<AnimatedPage><Profile /></AnimatedPage>} />
           <Route path="/admin" element={<Navigate to="/admin/premium" replace />} />
           <Route path="/admin/premium" element={<AnimatedPage><AdminRoute><AdminPremium /></AdminRoute></AnimatedPage>} />
+          <Route path="/admin/credits" element={<AnimatedPage><AdminRoute><AdminCreditPurchases /></AdminRoute></AnimatedPage>} />
+          <Route path="/admin/installments" element={<AnimatedPage><AdminRoute><AdminInstallments /></AdminRoute></AnimatedPage>} />
           <Route path="/vendre" element={<AnimatedPage><SellPage /></AnimatedPage>} />
           <Route path="/seller" element={<AnimatedPage><SellerRoute><SellerDashboard /></SellerRoute></AnimatedPage>} />
           <Route path="/seller/stats" element={<AnimatedPage><SellerRoute><SellerStats /></SellerRoute></AnimatedPage>} />

@@ -109,7 +109,7 @@ export default function SellerDashboard() {
             </div>
           </div>
           )}
-          {profile.created_at && new Date(profile.created_at).getTime() + 3 * 30 * 24 * 60 * 60 * 1000 > Date.now() && (
+          {profile?.created_at && new Date(profile.created_at).getTime() + 3 * 30 * 24 * 60 * 60 * 1000 > Date.now() && (
             <div style={{ fontSize: 13, color: 'var(--primary)', background: 'var(--bg-secondary)', padding: '10px 14px', borderRadius: 'var(--radius)', border: '1px solid var(--border)', marginTop: 12 }}>
               <FiCheckCircle size={14} style={{ verticalAlign: 'middle', marginRight: 6 }} />
               Periode gratuite — 0% deduction pendant vos 3 premiers mois !
@@ -155,7 +155,6 @@ export default function SellerDashboard() {
               </div>
             </div>
           )}
-        )}
 
         <div className="dashboard-products">
           <h3>Mes annonces ({products.length})</h3>

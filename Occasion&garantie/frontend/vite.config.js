@@ -12,8 +12,8 @@ export default defineConfig({
   server: {
     port: 4001,
     proxy: {
-      '/api': 'http://localhost:4000',
-      '/uploads': 'http://localhost:4000'
+      '/api': 'http://localhost:5000',
+      '/uploads': 'http://localhost:5000'
     }
   },
   build: {

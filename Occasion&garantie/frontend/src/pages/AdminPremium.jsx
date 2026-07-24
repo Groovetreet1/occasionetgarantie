@@ -68,6 +68,11 @@ export default function AdminPremium() {
             <h1 style={{ fontSize: '28px', fontWeight: 800 }}>Gestion Premium</h1>
             <p style={{ color: 'var(--text-secondary)' }}>{payments.length} demande{payments.length > 1 ? 's' : ''}</p>
           </div>
+          <div style={{ display: 'flex', gap: 8 }}>
+            <Link to="/admin/premium" className="btn btn-primary" style={{ fontSize: 13 }}>Premium</Link>
+            <Link to="/admin/credits" className="btn btn-outline" style={{ fontSize: 13 }}>Credits</Link>
+            <Link to="/admin/installments" className="btn btn-outline" style={{ fontSize: 13 }}>Echelonnement</Link>
+          </div>
         </div>
 
         {loading ? (
