@@ -138,6 +138,27 @@ router.post('/', authenticate, async (req, res) => {
   try {
     const { name, slug, description, price, old_price, category_id, brand, state, warranty, stock, featured, image, gallery, specs } = req.body;
     const sellerId = req.user.role === 'admin' ? (req.body.seller_id || null) : req.user.id;
+
+    // Credit deduction for sellers > 3 months (5% of price)
+    if (req.user.role === 'seller' && price) {
+      try {
+        const [sellers] = await pool.query('SELECT created_at, credit_balance FROM users WHERE id = ?', [sellerId]);
+        if (sellers.length > 0) {
+          const monthsSinceCreation = (Date.now() - new Date(sellers[0].created_at).getTime()) / (1000 * 60 * 60 * 24 * 30.44);
+          if (monthsSinceCreation > 3) {
+            const creditCost = Math.ceil(Number(price) * 0.05 * 10);
+            if (sellers[0].credit_balance < creditCost) {
+              return res.status(400).json({ message: `Credits insuffisants. Besoin de ${creditCost} credits (5% du prix). Ajoutez des credits depuis votre tableau de bord.` });
+            }
+            await pool.query('UPDATE users SET credit_balance = credit_balance - ? WHERE id = ?', [creditCost, sellerId]);
+            await pool.query('INSERT INTO credit_transactions (user_id, type, amount, description) VALUES (?, ?, ?, ?)', [sellerId, 'deduction', -creditCost, `Deduction 5% sur "${name}" (${price} DH)`]);
+          }
+        }
+      } catch (e) {
+        console.log('Credit deduction skipped:', e.message);
+      }
+    }
+
     const [result] = await pool.query(
       `INSERT INTO products (name, slug, description, price, old_price, category_id, seller_id, brand, state, warranty, stock, featured, image, gallery, specs, status)
        VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,

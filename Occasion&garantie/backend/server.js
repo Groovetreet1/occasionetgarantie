@@ -31,19 +31,20 @@ const pool = require('./config/db');
     await pool.query('ALTER TABLE users ADD COLUMN terms_accepted BOOLEAN DEFAULT FALSE');
   } catch {}
   try {
-    await pool.query(`CREATE TABLE IF NOT EXISTS commissions (
+    await pool.query('ALTER TABLE users ADD COLUMN credit_balance DECIMAL(10,2) DEFAULT 0');
+  } catch {}
+  try {
+    await pool.query(`CREATE TABLE IF NOT EXISTS credit_transactions (
       id INT AUTO_INCREMENT PRIMARY KEY,
-      product_id INT NOT NULL,
-      seller_id INT NOT NULL,
+      user_id INT NOT NULL,
+      type VARCHAR(20) NOT NULL,
       amount DECIMAL(10,2) NOT NULL,
-      rate DECIMAL(5,2) NOT NULL DEFAULT 5.00,
-      status VARCHAR(20) DEFAULT 'en_attente',
-      created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-      paid_at TIMESTAMP NULL
+      description VARCHAR(255),
+      created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
     )`);
-    console.log('commissions table ready');
+    console.log('credit_transactions table ready');
   } catch (e) {
-    console.log('commissions table check skipped:', e.message);
+    console.log('credit_transactions table check skipped:', e.message);
   }
 })();
 

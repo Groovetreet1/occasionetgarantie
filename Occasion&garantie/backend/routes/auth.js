@@ -60,6 +60,10 @@ router.post('/signup', [
     if (existing.length > 0) {
       return res.status(400).json({ message: 'Cet email est déjà utilisé.' });
     }
+    const [phoneCount] = await pool.query('SELECT COUNT(*) as cnt FROM users WHERE phone = ?', [phone]);
+    if (phoneCount[0].cnt >= 2) {
+      return res.status(400).json({ message: 'Ce numero de telephone a atteint la limite de 2 comptes.' });
+    }
     const hashed = await bcrypt.hash(password, 10);
     const code = generateCode();
     const expiresAt = Date.now() + CODE_EXPIRY;
@@ -400,6 +404,40 @@ router.post('/verify-upgrade', authenticate, [
     );
     const [users] = await pool.query('SELECT id, full_name, email, phone, role, phone_verified, created_at, store_name, premium, premium_expires_at, avatar FROM users WHERE id = ?', [req.user.id]);
     res.json({ message: 'Compte vendeur active avec succes.', token, user: users[0] });
+  } catch (err) {
+    res.status(500).json({ message: 'Erreur serveur.' });
+  }
+});
+
+router.post('/buy-credits', authenticate, async (req, res) => {
+  try {
+    const { amount } = req.body;
+    const creditAmount = Number(amount);
+    if (!creditAmount || creditAmount < 50) return res.status(400).json({ message: 'Montant minimum: 50 DH.' });
+
+    const credits = creditAmount * 10;
+
+    await pool.query('UPDATE users SET credit_balance = credit_balance + ? WHERE id = ?', [credits, req.user.id]);
+    await pool.query(
+      'INSERT INTO credit_transactions (user_id, type, amount, description) VALUES (?, ?, ?, ?)',
+      [req.user.id, 'purchase', credits, `Achat de ${credits} credits (${creditAmount} DH)`]
+    );
+
+    const [users] = await pool.query('SELECT credit_balance FROM users WHERE id = ?', [req.user.id]);
+    res.json({ message: `${credits} credits ajoutes a votre compte.`, credit_balance: users[0].credit_balance });
+  } catch (err) {
+    res.status(500).json({ message: 'Erreur serveur.' });
+  }
+});
+
+router.get('/my-credits', authenticate, async (req, res) => {
+  try {
+    const [users] = await pool.query('SELECT credit_balance FROM users WHERE id = ?', [req.user.id]);
+    const [txns] = await pool.query(
+      'SELECT * FROM credit_transactions WHERE user_id = ? ORDER BY created_at DESC LIMIT 50',
+      [req.user.id]
+    );
+    res.json({ credit_balance: users[0]?.credit_balance || 0, transactions: txns });
   } catch (err) {
     res.status(500).json({ message: 'Erreur serveur.' });
   }
