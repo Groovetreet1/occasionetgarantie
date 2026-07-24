@@ -216,6 +216,18 @@ router.delete('/credit-purchases/:id', authenticate, adminOnly, async (req, res)
   }
 });
 
+// ---- Check user credit balance (debug) ----
+router.get('/users/:id/credits', authenticate, adminOnly, async (req, res) => {
+  try {
+    const userId = Number(req.params.id);
+    const [rows] = await pool.query('SELECT id, full_name, email, credit_balance FROM users WHERE id = ?', [userId]);
+    if (rows.length === 0) return res.status(404).json({ message: 'Utilisateur introuvable.' });
+    res.json(rows[0]);
+  } catch (err) {
+    res.status(500).json({ message: 'Erreur serveur.', error: err.message });
+  }
+});
+
 // ---- Delete user + all their data ----
 router.delete('/users/:id', authenticate, adminOnly, async (req, res) => {
   try {
