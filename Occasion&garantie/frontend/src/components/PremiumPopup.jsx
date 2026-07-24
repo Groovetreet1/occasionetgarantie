@@ -1,10 +1,27 @@
 import { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { FiX, FiShield, FiCheck, FiLock, FiUpload, FiStar, FiCheckCircle } from 'react-icons/fi';
+import { FiX, FiShield, FiCheck, FiLock, FiUpload, FiStar, FiCheckCircle, FiCopy } from 'react-icons/fi';
 import api from '../api/axios';
 import { useAuth } from '../context/AuthContext';
 
 const PREMIUM_AMOUNT = 50;
+
+const copyText = async (text) => {
+  try {
+    await navigator.clipboard.writeText(text);
+    return true;
+  } catch {
+    const ta = document.createElement('textarea');
+    ta.value = text;
+    ta.style.position = 'fixed';
+    ta.style.opacity = '0';
+    document.body.appendChild(ta);
+    ta.select();
+    document.execCommand('copy');
+    document.body.removeChild(ta);
+    return true;
+  }
+};
 
 export default function PremiumPopup({ open, onClose }) {
   const { user, refreshUser } = useAuth();
@@ -15,6 +32,7 @@ export default function PremiumPopup({ open, onClose }) {
   const [uploading, setUploading] = useState(false);
   const [msg, setMsg] = useState(null);
   const [checkingPremium, setCheckingPremium] = useState(false);
+  const [copiedField, setCopiedField] = useState(null);
 
   useEffect(() => {
     if (open) {
@@ -129,9 +147,24 @@ export default function PremiumPopup({ open, onClose }) {
 
                 {bankInfo && (
                   <div className="premium-bank-info">
-                    <div className="premium-bank-row"><span>Banque</span><strong>{bankInfo.bank}</strong></div>
-                    <div className="premium-bank-row"><span>Titulaire</span><strong>{bankInfo.holder}</strong></div>
-                    <div className="premium-bank-row"><span>RIB</span><strong className="premium-rib">{bankInfo.rib}</strong></div>
+                    <div className="premium-bank-row">
+                      <span>Banque</span>
+                      <strong>{bankInfo.bank}</strong>
+                    </div>
+                    <div className="premium-bank-row">
+                      <span>Titulaire</span>
+                      <strong>{bankInfo.holder}</strong>
+                      <button className="premium-copy-btn" onClick={async () => { await copyText(bankInfo.holder); setCopiedField('holder'); setTimeout(() => setCopiedField(null), 1500); }} title="Copier">
+                        {copiedField === 'holder' ? <FiCheck size={14} /> : <FiCopy size={14} />}
+                      </button>
+                    </div>
+                    <div className="premium-bank-row">
+                      <span>RIB</span>
+                      <strong className="premium-rib">{bankInfo.rib}</strong>
+                      <button className="premium-copy-btn" onClick={async () => { await copyText(bankInfo.rib); setCopiedField('rib'); setTimeout(() => setCopiedField(null), 1500); }} title="Copier">
+                        {copiedField === 'rib' ? <FiCheck size={14} /> : <FiCopy size={14} />}
+                      </button>
+                    </div>
                     <div className="premium-bank-row"><span>Montant</span><strong>{bankInfo.amount} DH</strong></div>
                   </div>
                 )}

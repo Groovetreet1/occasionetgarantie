@@ -1510,6 +1510,13 @@ select.form-control, .form-group select { cursor: pointer; appearance: auto; }
 }
 .premium-bank-row span { color: var(--text-muted); }
 .premium-bank-row strong { font-weight: 600; }
+.premium-bank-row .premium-copy-btn {
+  background: none; border: 1px solid var(--border); border-radius: 6px;
+  cursor: pointer; color: var(--text-muted); padding: 4px 6px;
+  display: inline-flex; align-items: center; flex-shrink: 0; margin-left: 8px;
+  transition: var(--transition);
+}
+.premium-bank-row .premium-copy-btn:hover { color: var(--primary); border-color: var(--primary); }
 .premium-rib { font-family: monospace; font-size: 13px; letter-spacing: 0.5px; word-break: break-all; max-width: 200px; text-align: right; }
 .premium-upload-label { font-size: 13px; color: var(--text-secondary); margin-bottom: 12px; }
 .premium-upload-btn {
