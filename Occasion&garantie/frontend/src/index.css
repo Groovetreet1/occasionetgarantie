@@ -656,7 +656,7 @@ input, textarea, select, button { font-family: inherit; }
 .product-detail-tag.state { background: var(--primary-light); color: var(--primary); border: 1px solid rgba(245, 158, 11, 0.2); }
 .product-detail-tag.verified { background: rgba(16, 185, 129, 0.1); color: var(--success); border: 1px solid rgba(16, 185, 129, 0.2); }
 .product-detail-tag.brand { background: var(--bg-card); border: 1px solid var(--border-light); color: var(--text-secondary); }
-.product-detail-desc { color: var(--text-secondary); line-height: 1.7; margin-bottom: 28px; font-size: 15px; }
+.product-detail-desc { color: var(--text-secondary); line-height: 1.7; margin-bottom: 28px; font-size: 15px; word-break: break-word; overflow-wrap: break-word; }
 .product-detail-specs { margin-bottom: 28px; }
 .product-detail-specs h3 { font-size: 17px; font-weight: 600; margin-bottom: 14px; }
 .product-detail-specs-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
@@ -1653,6 +1653,7 @@ select.form-control, .form-group select { cursor: pointer; appearance: auto; }
 .messenger-msg {
   max-width: 70%; padding: 10px 14px;
   border-radius: 16px; font-size: 14px; line-height: 1.4;
+  word-break: break-word; overflow-wrap: break-word;
   word-wrap: break-word;
 }
 .messenger-msg.mine {
@@ -1670,6 +1671,9 @@ select.form-control, .form-group select { cursor: pointer; appearance: auto; }
   font-size: 10px; color: inherit; opacity: 0.6;
   margin-top: 4px; text-align: right;
 }
+
+.messenger-typing { opacity: 0.7; font-style: italic; }
+.messenger-typing .messenger-msg-text em { font-weight: 600; font-style: normal; }
 .messenger-input-bar {
   display: flex; gap: 10px; padding: 16px 20px;
   border-top: 1px solid var(--border);

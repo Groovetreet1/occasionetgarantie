@@ -96,6 +96,44 @@ router.get('/conversations/:id/messages', authenticate, async (req, res) => {
   }
 });
 
+const typing = {};
+
+router.post('/conversations/:id/typing', authenticate, async (req, res) => {
+  try {
+    const convId = req.params.id;
+    const [convs] = await pool.query(
+      'SELECT * FROM conversations WHERE id = ? AND (buyer_id = ? OR seller_id = ?)',
+      [convId, req.user.id, req.user.id]
+    );
+    if (convs.length === 0) return res.status(403).json({ message: 'Acces refuse.' });
+    typing[convId] = { userId: req.user.id, name: req.user.fullName || req.user.full_name, at: Date.now() };
+    res.json({ ok: true });
+  } catch (err) {
+    res.status(500).json({ message: 'Erreur serveur.' });
+  }
+});
+
+router.get('/conversations/:id/typing', authenticate, async (req, res) => {
+  try {
+    const convId = req.params.id;
+    const entry = typing[convId];
+    if (entry && Date.now() - entry.at < 3000) {
+      return res.json({ typing: true, name: entry.name });
+    }
+    delete typing[convId];
+    res.json({ typing: false });
+  } catch (err) {
+    res.status(500).json({ message: 'Erreur serveur.' });
+  }
+});
+
+setInterval(() => {
+  const now = Date.now();
+  for (const id in typing) {
+    if (now - typing[id].at > 3000) delete typing[id];
+  }
+}, 2000);
+
 router.post('/conversations/:id/messages', authenticate, async (req, res) => {
   try {
     const { text } = req.body;

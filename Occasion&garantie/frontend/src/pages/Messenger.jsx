@@ -1,4 +1,4 @@
-import { useEffect, useState, useRef } from 'react';
+import { useEffect, useState, useRef, useCallback } from 'react';
 import { useParams, Link } from 'react-router-dom';
 import { FiMessageCircle, FiSend, FiArrowLeft, FiUser, FiStar, FiTrash2, FiShoppingBag } from 'react-icons/fi';
 import { BsWhatsapp } from 'react-icons/bs';
@@ -14,15 +14,18 @@ export default function Messenger() {
   const [text, setText] = useState('');
   const [sending, setSending] = useState(false);
   const [loading, setLoading] = useState(true);
-  const [convLoading, setConvLoading] = useState(false);
   const [showMobileList, setShowMobileList] = useState(true);
+  const [typingName, setTypingName] = useState('');
   const messagesEndRef = useRef(null);
+  const messagesContainerRef = useRef(null);
   const inputRef = useRef(null);
   const pollRef = useRef(null);
+  const typingRef = useRef(null);
+  const isAtBottomRef = useRef(true);
 
   useEffect(() => {
     loadConversations();
-    return () => clearInterval(pollRef.current);
+    return () => { clearInterval(pollRef.current); clearTimeout(typingRef.current); };
   }, []);
 
   useEffect(() => {
@@ -36,13 +39,26 @@ export default function Messenger() {
     if (activeConv) {
       loadMessages();
       clearInterval(pollRef.current);
-      pollRef.current = setInterval(loadMessages, 5000);
+      pollRef.current = setInterval(() => {
+        loadMessages();
+        checkTyping();
+      }, 5000);
       setShowMobileList(false);
     }
-    return () => clearInterval(pollRef.current);
+    return () => { clearInterval(pollRef.current); clearTimeout(typingRef.current); };
   }, [activeConv]);
 
-  useEffect(() => { messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' }); }, [messages]);
+  useEffect(() => {
+    if (isAtBottomRef.current) {
+      messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
+    }
+  }, [messages]);
+
+  const handleScroll = useCallback(() => {
+    const el = messagesContainerRef.current;
+    if (!el) return;
+    isAtBottomRef.current = el.scrollHeight - el.scrollTop - el.clientHeight < 60;
+  }, []);
 
   const loadConversations = async () => {
     try {
@@ -57,6 +73,32 @@ export default function Messenger() {
       const { data } = await api.get(`/chat/conversations/${activeConv}/messages`);
       setMessages(data);
     } catch {}
+  };
+
+  const checkTyping = async () => {
+    if (!activeConv) return;
+    try {
+      const { data } = await api.get(`/chat/conversations/${activeConv}/typing`);
+      if (data.typing && data.name !== user?.fullName && data.name !== user?.full_name) {
+        setTypingName(data.name);
+      } else {
+        setTypingName('');
+      }
+    } catch {}
+  };
+
+  const sendTyping = async () => {
+    if (!activeConv) return;
+    try {
+      await api.post(`/chat/conversations/${activeConv}/typing`);
+    } catch {}
+  };
+
+  let typingDebounce = null;
+  const handleInputChange = (e) => {
+    setText(e.target.value);
+    clearTimeout(typingDebounce);
+    typingDebounce = setTimeout(sendTyping, 300);
   };
 
   const handleSend = async () => {
@@ -137,8 +179,6 @@ export default function Messenger() {
                 <FiShoppingBag size={16} /> Voir les produits
               </Link>
             </div>
-          ) : convLoading ? (
-            <div style={{ padding: '60px', textAlign: 'center' }}><div className="spinner" /></div>
           ) : (
             <>
               <div className="messenger-chat-header">
@@ -165,7 +205,7 @@ export default function Messenger() {
                 )}
               </div>
 
-              <div className="messenger-messages">
+              <div className="messenger-messages" ref={messagesContainerRef} onScroll={handleScroll}>
                 {messages.length === 0 ? (
                   <div style={{ textAlign: 'center', color: 'var(--text-muted)', padding: '40px', fontSize: '14px' }}>
                     Aucun message. Envoyez le premier message !
@@ -179,6 +219,11 @@ export default function Messenger() {
                     </div>
                   );
                 })}
+                {typingName && (
+                  <div className="messenger-msg theirs messenger-typing">
+                    <div className="messenger-msg-text"><em>{typingName}</em> écrit...</div>
+                  </div>
+                )}
                 <div ref={messagesEndRef} />
               </div>
 
@@ -188,7 +233,7 @@ export default function Messenger() {
                   type="text"
                   placeholder="Écrivez un message..."
                   value={text}
-                  onChange={(e) => setText(e.target.value)}
+                  onChange={handleInputChange}
                   onKeyDown={handleKeyDown}
                   disabled={sending}
                   className="messenger-input"
