@@ -391,7 +391,13 @@ router.post('/verify-upgrade', authenticate, [
     await pool.query('UPDATE users SET role = ? WHERE id = ?', ['seller', req.user.id]);
     if (storeName) await pool.query('UPDATE users SET store_name = ? WHERE id = ?', [storeName, req.user.id]);
 
-    res.json({ message: 'Compte vendeur active avec succes.' });
+    const token = jwt.sign(
+      { id: req.user.id, email: req.user.email, role: 'seller' },
+      process.env.JWT_SECRET,
+      { expiresIn: '7d' }
+    );
+    const [users] = await pool.query('SELECT id, full_name, email, phone, role, phone_verified, created_at, store_name, premium, premium_expires_at, avatar FROM users WHERE id = ?', [req.user.id]);
+    res.json({ message: 'Compte vendeur active avec succes.', token, user: users[0] });
   } catch (err) {
     res.status(500).json({ message: 'Erreur serveur.' });
   }

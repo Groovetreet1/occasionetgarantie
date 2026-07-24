@@ -37,6 +37,7 @@ export default function SellPage() {
     setMsg(null);
     try {
       const { data } = await api.post('/auth/verify-upgrade', { code, storeName: storeName || undefined });
+      if (data.token) localStorage.setItem('token', data.token);
       setMsg({ type: 'success', text: data.message });
       await refreshUser();
       setStep('done');
