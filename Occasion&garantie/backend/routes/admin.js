@@ -133,22 +133,30 @@ router.post('/credit-purchases/:id/confirm', authenticate, adminOnly, async (req
     const userId = purchases[0].user_id;
 
     try {
-      await pool.query('ALTER TABLE users ADD COLUMN credit_balance DECIMAL(10,2) DEFAULT 0');
-    } catch {}
+      await pool.query('ALTER TABLE users ADD COLUMN credit_balance DECIMAL(15,2) DEFAULT 0');
+    } catch (e) {
+      if (e.code !== 'ER_DUP_FIELDNAME' && e.errno !== 1060) {
+        console.log('ALTER credit_balance skipped:', e.message);
+      }
+    }
 
     await pool.query('UPDATE credit_purchases SET status = ?, confirmed_at = NOW() WHERE id = ?', ['confirme', purchaseId]);
 
-    let updated = false;
+    // Read current balance, add credits in JS, write back (most robust)
+    let currentBalance = 0;
     try {
-      const [result] = await pool.query('UPDATE users SET credit_balance = COALESCE(credit_balance, 0) + ? WHERE id = ?', [creditsToAdd, userId]);
-      updated = result.affectedRows > 0;
+      const [rows] = await pool.query('SELECT credit_balance FROM users WHERE id = ?', [userId]);
+      if (rows.length > 0 && rows[0].credit_balance !== null && rows[0].credit_balance !== undefined) {
+        currentBalance = Number(rows[0].credit_balance);
+      }
     } catch (e) {
-      if (e.errno === 1054 || e.code === 'ER_BAD_FIELD_ERROR') {
-        try { await pool.query('ALTER TABLE users ADD COLUMN credit_balance DECIMAL(10,2) DEFAULT 0'); } catch {}
-        await pool.query('UPDATE users SET credit_balance = ? WHERE id = ?', [creditsToAdd, userId]);
-        updated = true;
+      if (e.code === 'ER_BAD_FIELD_ERROR' || e.errno === 1054) {
+        try { await pool.query('ALTER TABLE users ADD COLUMN credit_balance DECIMAL(15,2) DEFAULT 0'); } catch {}
       } else throw e;
     }
+
+    const newBalance = currentBalance + creditsToAdd;
+    await pool.query('UPDATE users SET credit_balance = ? WHERE id = ?', [newBalance, userId]);
 
     try {
       await pool.query('INSERT INTO credit_transactions (user_id, type, amount, description) VALUES (?, ?, ?, ?)',
@@ -156,15 +164,6 @@ router.post('/credit-purchases/:id/confirm', authenticate, adminOnly, async (req
       );
     } catch (e) {
       if (e.errno === 1146 || e.code === 'ER_NO_SUCH_TABLE') {}
-      else throw e;
-    }
-
-    let newBalance = 0;
-    try {
-      const [updatedUser] = await pool.query('SELECT credit_balance FROM users WHERE id = ?', [userId]);
-      newBalance = updatedUser[0]?.credit_balance || creditsToAdd;
-    } catch (e) {
-      if (e.errno === 1054 || e.code === 'ER_BAD_FIELD_ERROR') newBalance = creditsToAdd;
       else throw e;
     }
 
