@@ -129,22 +129,33 @@ router.post('/credit-purchases/:id/confirm', authenticate, adminOnly, async (req
     if (purchases.length === 0) return res.status(404).json({ message: 'Demande introuvable.' });
     if (purchases[0].status !== 'en_attente') return res.status(400).json({ message: 'Deja traitee.' });
 
+    try {
+      await pool.query('ALTER TABLE users ADD COLUMN credit_balance DECIMAL(10,2) DEFAULT 0');
+    } catch {}
+    try {
+      await pool.query('UPDATE users SET credit_balance = COALESCE(credit_balance, 0) WHERE id = ?', [purchases[0].user_id]);
+    } catch {}
+
     await pool.query('UPDATE credit_purchases SET status = ?, confirmed_at = NOW() WHERE id = ?', ['confirme', purchaseId]);
-    await pool.query('UPDATE users SET credit_balance = credit_balance + ? WHERE id = ?', [purchases[0].credits, purchases[0].user_id]);
+    await pool.query('UPDATE users SET credit_balance = COALESCE(credit_balance, 0) + ? WHERE id = ?', [purchases[0].credits, purchases[0].user_id]);
     await pool.query('INSERT INTO credit_transactions (user_id, type, amount, description) VALUES (?, ?, ?, ?)',
       [purchases[0].user_id, 'purchase', purchases[0].credits, `Achat de ${purchases[0].credits} credits (${purchases[0].amount_dh} DH) confirme par admin`]
     );
 
+    const [updatedUser] = await pool.query('SELECT credit_balance FROM users WHERE id = ?', [purchases[0].user_id]);
+    const newBalance = updatedUser[0]?.credit_balance || 0;
+
     try {
       const [userRow] = await pool.query('SELECT phone, full_name FROM users WHERE id = ?', [purchases[0].user_id]);
       if (userRow.length > 0 && userRow[0].phone) {
-        const msg = `Bonjour ${userRow[0].full_name}, votre achat de ${purchases[0].credits} credits est confirme !`;
+        const msg = `Bonjour ${userRow[0].full_name}, votre achat de ${purchases[0].credits} credits est confirme ! Solde: ${newBalance} credits.`;
         await gomobile.sendSms(userRow[0].phone, msg);
       }
     } catch (smsErr) { console.error('SMS failed:', smsErr.message); }
 
-    res.json({ message: 'Achat confirme, credits ajoutes.' });
+    res.json({ message: 'Achat confirme, credits ajoutes.', credit_balance: newBalance });
   } catch (err) {
+    console.error('Confirm credit error:', err.sqlMessage || err.message);
     res.status(500).json({ message: 'Erreur serveur.' });
   }
 });

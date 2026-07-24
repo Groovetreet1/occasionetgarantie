@@ -1,7 +1,9 @@
 import { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
-import { FiCheck, FiX, FiClock, FiArrowLeft, FiCreditCard, FiThumbsDown, FiTrash2 } from 'react-icons/fi';
+import { FiCheck, FiX, FiClock, FiArrowLeft, FiCreditCard, FiThumbsDown, FiTrash2, FiEye } from 'react-icons/fi';
 import api from '../api/axios';
+
+const API_BASE = import.meta.env.VITE_API_URL || '';
 
 export default function AdminCreditPurchases() {
   const [purchases, setPurchases] = useState([]);
@@ -88,6 +90,7 @@ export default function AdminCreditPurchases() {
                   <th style={{ padding: '12px 8px', textAlign: 'left' }}>Credits</th>
                   <th style={{ padding: '12px 8px', textAlign: 'left' }}>Date</th>
                   <th style={{ padding: '12px 8px', textAlign: 'left' }}>Statut</th>
+                  <th style={{ padding: '12px 8px', textAlign: 'left' }}>Screenshot</th>
                   <th style={{ padding: '12px 8px', textAlign: 'left' }}>Action</th>
                 </tr>
               </thead>
@@ -106,6 +109,15 @@ export default function AdminCreditPurchases() {
                         <span title={p.rejection_reason} style={{ color: 'var(--error)', display: 'flex', alignItems: 'center', gap: 4, cursor: 'help' }}><FiX size={14} /> Rejete</span>
                       ) : (
                         <span style={{ color: '#d97706', display: 'flex', alignItems: 'center', gap: 4 }}><FiClock size={14} /> En attente</span>
+                      )}
+                    </td>
+                    <td style={{ padding: '12px 8px' }}>
+                      {p.screenshot ? (
+                        <a href={`${API_BASE}/uploads/credits/${p.screenshot}`} target="_blank" rel="noopener noreferrer" className="btn btn-secondary" style={{ padding: '4px 10px', fontSize: '12px' }}>
+                          <FiEye size={14} /> Voir
+                        </a>
+                      ) : (
+                        <span style={{ color: 'var(--text-muted)' }}>-</span>
                       )}
                     </td>
                     <td style={{ padding: '12px 8px' }}>

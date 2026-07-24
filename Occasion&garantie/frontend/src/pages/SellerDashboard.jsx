@@ -1,10 +1,19 @@
 import { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
-import { motion } from 'framer-motion';
-import { FiPlus, FiEdit2, FiTrash2, FiPackage, FiCheckCircle, FiPercent, FiCreditCard, FiDollarSign } from 'react-icons/fi';
+import { motion, AnimatePresence } from 'framer-motion';
+import { FiPlus, FiEdit2, FiTrash2, FiPackage, FiCheckCircle, FiPercent, FiCreditCard, FiDollarSign, FiX, FiCopy, FiCheck, FiUpload, FiLock } from 'react-icons/fi';
 import api from '../api/axios';
 import { useAuth } from '../context/AuthContext';
 import SellerNav from '../components/SellerNav';
+
+const copyText = async (text) => {
+  try { await navigator.clipboard.writeText(text); return true; } catch {
+    const ta = document.createElement('textarea');
+    ta.value = text; ta.style.position = 'fixed'; ta.style.opacity = '0';
+    document.body.appendChild(ta); ta.select(); document.execCommand('copy');
+    document.body.removeChild(ta); return true;
+  }
+};
 
 const statusColors = {
   disponible: '#059669',
@@ -23,6 +32,10 @@ export default function SellerDashboard() {
   const [showBuyCredits, setShowBuyCredits] = useState(false);
   const [buyAmount, setBuyAmount] = useState(100);
   const [buyLoading, setBuyLoading] = useState(false);
+  const [creditPayment, setCreditPayment] = useState(null);
+  const [uploadingScreenshot, setUploadingScreenshot] = useState(false);
+  const [uploadMsg, setUploadMsg] = useState(null);
+  const [copiedField, setCopiedField] = useState(null);
   useEffect(() => {
     Promise.all([
       api.get('/seller/me'),
@@ -41,13 +54,34 @@ export default function SellerDashboard() {
   const handleBuyCredits = async () => {
     setBuyLoading(true);
     try {
-      await api.post('/auth/buy-credits', { amount: buyAmount });
+      const { data } = await api.post('/auth/buy-credits', { amount: buyAmount });
       setShowBuyCredits(false);
-      alert('Demande d\'achat envoyee ! L\'administrateur va la confirmer sous 24h.');
+      setCreditPayment(data);
     } catch (err) {
       alert(err.response?.data?.message || 'Erreur');
     } finally {
       setBuyLoading(false);
+    }
+  };
+
+  const handleUploadCreditScreenshot = async (e) => {
+    const file = e.target.files?.[0];
+    if (!file || !creditPayment) return;
+    setUploadingScreenshot(true);
+    setUploadMsg(null);
+    const fd = new FormData();
+    fd.append('screenshot', file);
+    fd.append('purchaseId', creditPayment.purchaseId);
+    try {
+      await api.post('/auth/upload-credit-screenshot', fd, {
+        headers: { 'Content-Type': 'multipart/form-data' },
+      });
+      setUploadMsg({ type: 'success', text: 'Screenshot envoye. En attente de confirmation admin.' });
+      setTimeout(() => { setCreditPayment(null); setUploadMsg(null); }, 2500);
+    } catch (err) {
+      setUploadMsg({ type: 'error', text: err.response?.data?.message || 'Erreur.' });
+    } finally {
+      setUploadingScreenshot(false);
     }
   };
 
@@ -126,6 +160,83 @@ export default function SellerDashboard() {
               <FiCreditCard size={16} /> Acheter des credits
             </button>
           </div>
+
+          <AnimatePresence>
+          {creditPayment && (
+            <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}
+              style={{ position: 'fixed', inset: 0, background: 'rgba(0,0,0,0.5)', zIndex: 1001, display: 'flex', alignItems: 'center', justifyContent: 'center', padding: 16 }}
+              onClick={() => setCreditPayment(null)}>
+              <motion.div initial={{ opacity: 0, scale: 0.9 }} animate={{ opacity: 1, scale: 1 }} exit={{ opacity: 0, scale: 0.9 }}
+                style={{ background: 'var(--bg-card)', borderRadius: 16, padding: 28, maxWidth: 440, width: '100%', boxShadow: '0 20px 60px rgba(0,0,0,0.3)' }}
+                onClick={e => e.stopPropagation()}>
+                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 16 }}>
+                  <h3 style={{ fontSize: 18, fontWeight: 700 }}>Paiement</h3>
+                  <button onClick={() => setCreditPayment(null)} style={{ background: 'none', border: 'none', color: 'var(--text-muted)', cursor: 'pointer' }}><FiX size={20} /></button>
+                </div>
+                <div style={{ textAlign: 'center', marginBottom: 16 }}>
+                  <div style={{ width: 48, height: 48, borderRadius: '50%', background: 'rgba(59,130,246,0.1)', display: 'flex', alignItems: 'center', justifyContent: 'center', margin: '0 auto 8px' }}>
+                    <FiLock size={22} color="#3b82f6" />
+                  </div>
+                  <p style={{ fontSize: 14, color: 'var(--text-secondary)', margin: 0 }}>Virement bancaire de <strong>{creditPayment.amount_dh} DH</strong></p>
+                </div>
+
+                <div style={{ background: 'var(--bg-secondary)', borderRadius: 12, padding: 16, marginBottom: 16 }}>
+                  <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 10 }}>
+                    <span style={{ fontSize: 13, color: 'var(--text-muted)' }}>Banque</span>
+                    <strong style={{ fontSize: 14 }}>{creditPayment.bank?.bank}</strong>
+                  </div>
+                  <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 10 }}>
+                    <span style={{ fontSize: 13, color: 'var(--text-muted)' }}>Titulaire</span>
+                    <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
+                      <strong style={{ fontSize: 14 }}>{creditPayment.bank?.holder}</strong>
+                      <button onClick={async () => { await copyText(creditPayment.bank?.holder); setCopiedField('holder'); setTimeout(() => setCopiedField(null), 1500); }}
+                        style={{ background: 'none', border: 'none', color: 'var(--text-muted)', cursor: 'pointer', padding: 2 }}>
+                        {copiedField === 'holder' ? <FiCheck size={14} color="var(--success)" /> : <FiCopy size={14} />}
+                      </button>
+                    </div>
+                  </div>
+                  <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                    <span style={{ fontSize: 13, color: 'var(--text-muted)' }}>RIB</span>
+                    <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
+                      <strong style={{ fontSize: 13, fontFamily: 'monospace', wordBreak: 'break-all' }}>{creditPayment.bank?.rib}</strong>
+                      <button onClick={async () => { await copyText(creditPayment.bank?.rib); setCopiedField('rib'); setTimeout(() => setCopiedField(null), 1500); }}
+                        style={{ background: 'none', border: 'none', color: 'var(--text-muted)', cursor: 'pointer', padding: 2 }}>
+                        {copiedField === 'rib' ? <FiCheck size={14} color="var(--success)" /> : <FiCopy size={14} />}
+                      </button>
+                    </div>
+                  </div>
+                </div>
+
+                <p style={{ fontSize: 13, color: 'var(--text-secondary)', marginBottom: 12 }}>
+                  Apres le virement, envoyez la capture d'ecran :
+                </p>
+
+                <label style={{
+                  display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 8,
+                  padding: '14px', borderRadius: 12, border: '2px dashed var(--border)',
+                  background: 'var(--bg-secondary)', cursor: 'pointer', fontWeight: 600,
+                  fontSize: 14, color: uploadingScreenshot ? 'var(--text-muted)' : 'var(--primary)',
+                  marginBottom: 12,
+                }}>
+                  {uploadingScreenshot ? 'Envoi...' : <><FiUpload size={16} /> Envoyer la capture</>}
+                  <input type="file" accept="image/*" onChange={handleUploadCreditScreenshot} hidden disabled={uploadingScreenshot} />
+                </label>
+
+                {uploadMsg && (
+                  <div style={{ padding: '10px 14px', borderRadius: 10, fontSize: 13, marginBottom: 12,
+                    background: uploadMsg.type === 'success' ? 'rgba(5,150,105,0.1)' : 'rgba(239,68,68,0.1)',
+                    color: uploadMsg.type === 'success' ? 'var(--success)' : 'var(--error)' }}>
+                    {uploadMsg.text}
+                  </div>
+                )}
+
+                <p style={{ fontSize: 12, color: 'var(--text-muted)', textAlign: 'center', margin: 0 }}>
+                  Vous recevrez <strong>{creditPayment.credits} credits</strong> apres confirmation admin
+                </p>
+              </motion.div>
+            </motion.div>
+          )}
+          </AnimatePresence>
 
           {showBuyCredits && (
             <div style={{ position: 'fixed', inset: 0, background: 'rgba(0,0,0,0.5)', zIndex: 1000, display: 'flex', alignItems: 'center', justifyContent: 'center', padding: 16 }} onClick={() => setShowBuyCredits(false)}>

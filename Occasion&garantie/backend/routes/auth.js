@@ -409,6 +409,12 @@ router.post('/verify-upgrade', authenticate, [
   }
 });
 
+const CREDIT_BANK_INFO = {
+  bank: 'CIH Bank',
+  holder: 'OCCASION ET GARANTIE BOUTIQUE',
+  rib: '230780409210621100460062',
+};
+
 router.post('/buy-credits', authenticate, async (req, res) => {
   try {
     const { amount } = req.body;
@@ -417,7 +423,11 @@ router.post('/buy-credits', authenticate, async (req, res) => {
 
     const credits = creditAmount * 10;
 
-    await pool.query(
+    try {
+      await pool.query('ALTER TABLE credit_purchases ADD COLUMN screenshot VARCHAR(255) DEFAULT NULL');
+    } catch {}
+
+    const [result] = await pool.query(
       'INSERT INTO credit_purchases (user_id, amount_dh, credits) VALUES (?, ?, ?)',
       [req.user.id, creditAmount, credits]
     );
@@ -425,9 +435,60 @@ router.post('/buy-credits', authenticate, async (req, res) => {
     const [users] = await pool.query('SELECT credit_balance FROM users WHERE id = ?', [req.user.id]);
 
     res.json({
-      message: `Demande d'achat de ${credits} credits envoyee. L'administrateur va la confirmer sous 24h.`,
+      message: `Versez ${creditAmount} DH sur le compte ci-dessous.`,
+      purchaseId: result.insertId,
+      credits,
+      amount_dh: creditAmount,
+      bank: CREDIT_BANK_INFO,
       credit_balance: users[0]?.credit_balance || 0
     });
+  } catch (err) {
+    res.status(500).json({ message: 'Erreur serveur.' });
+  }
+});
+
+const CREDIT_SCREENSHOT_DIR = path.join(__dirname, '..', 'uploads', 'credits');
+if (!fs.existsSync(CREDIT_SCREENSHOT_DIR)) fs.mkdirSync(CREDIT_SCREENSHOT_DIR, { recursive: true });
+
+const creditUpload = multer({
+  storage: multer.diskStorage({
+    destination: (req, file, cb) => cb(null, CREDIT_SCREENSHOT_DIR),
+    filename: (req, file, cb) => {
+      const ext = path.extname(file.originalname);
+      cb(null, `credit-${req.user.id}-${Date.now()}${ext}`);
+    },
+  }),
+  limits: { fileSize: 5 * 1024 * 1024 },
+  fileFilter: (req, file, cb) => {
+    const allowed = ['.jpg', '.jpeg', '.png', '.webp'];
+    const ext = path.extname(file.originalname).toLowerCase();
+    if (allowed.includes(ext)) cb(null, true);
+    else cb(new Error('Format non supporte. Utilisez JPG, PNG ou WebP.'));
+  },
+});
+
+router.post('/upload-credit-screenshot', authenticate, creditUpload.single('screenshot'), async (req, res) => {
+  try {
+    if (!req.file) return res.status(400).json({ message: 'Fichier requis.' });
+    const { purchaseId } = req.body;
+    if (!purchaseId) return res.status(400).json({ message: 'ID de demande requis.' });
+
+    const [purchases] = await pool.query('SELECT * FROM credit_purchases WHERE id = ? AND user_id = ?', [purchaseId, req.user.id]);
+    if (purchases.length === 0) return res.status(404).json({ message: 'Demande introuvable.' });
+    if (purchases[0].status !== 'en_attente') return res.status(400).json({ message: 'Deja traitee.' });
+
+    const filename = req.file.filename;
+    await pool.query('UPDATE credit_purchases SET screenshot = ? WHERE id = ?', [filename, purchaseId]);
+
+    try {
+      const [adminRow] = await pool.query('SELECT phone FROM users WHERE role = ?', ['admin']);
+      if (adminRow.length > 0 && adminRow[0].phone) {
+        const msg = `Achat credits #${purchaseId}: ${purchases[0].credits} credits, ${purchases[0].amount_dh} DH recu, confirmer sur admin`;
+        await gomobile.sendSms(adminRow[0].phone, msg);
+      }
+    } catch (smsErr) { console.error('Admin SMS failed:', smsErr.message); }
+
+    res.json({ message: 'Screenshot envoye. En attente de confirmation par l\'administrateur.' });
   } catch (err) {
     res.status(500).json({ message: 'Erreur serveur.' });
   }
