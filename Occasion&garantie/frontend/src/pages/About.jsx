@@ -1,8 +1,31 @@
+import { useState } from 'react';
 import { Link } from 'react-router-dom';
-import { FiShield, FiRefreshCw, FiTruck, FiMapPin, FiPhone, FiMail, FiClock, FiCheckCircle, FiUsers, FiAward } from 'react-icons/fi';
+import { FiShield, FiRefreshCw, FiTruck, FiMapPin, FiPhone, FiMail, FiClock, FiCheckCircle, FiUsers, FiAward, FiSend } from 'react-icons/fi';
 import { BsWhatsapp } from 'react-icons/bs';
+import api from '../api/axios';
 
 export default function About() {
+  const [cfName, setCfName] = useState('');
+  const [cfEmail, setCfEmail] = useState('');
+  const [cfMsg, setCfMsg] = useState('');
+  const [cfLoading, setCfLoading] = useState(false);
+  const [cfDone, setCfDone] = useState(false);
+
+  const handleContactSubmit = async (e) => {
+    e.preventDefault();
+    if (!cfName.trim() || !cfEmail.trim() || !cfMsg.trim()) return;
+    setCfLoading(true);
+    try {
+      await api.post('/contact', { name: cfName, email: cfEmail, message: cfMsg });
+      setCfDone(true);
+      setCfName('');
+      setCfEmail('');
+      setCfMsg('');
+    } catch {
+      alert('Erreur lors de l\'envoi. Reessayez.');
+    } finally { setCfLoading(false); }
+  };
+
   return (
     <>
       <section className="about-hero">
@@ -118,13 +141,25 @@ export default function About() {
                 <BsWhatsapp size={20} /> Nous écrire sur WhatsApp
               </a>
             </div>
-            <div style={{ background: 'var(--bg-card)', border: '1px solid var(--border)', borderRadius: 'var(--radius-lg)', padding: '24px', display: 'flex', flexDirection: 'column', gap: '14px' }}>
+            <form onSubmit={handleContactSubmit} style={{ background: 'var(--bg-card)', border: '1px solid var(--border)', borderRadius: 'var(--radius-lg)', padding: '24px', display: 'flex', flexDirection: 'column', gap: '14px' }}>
               <h3 style={{ fontSize: '16px', fontWeight: 600 }}>Envoyez-nous un message</h3>
-              <input type="text" placeholder="Votre nom" style={{ width: '100%', padding: '10px 14px', background: 'var(--bg-secondary)', border: '1px solid var(--border)', borderRadius: 'var(--radius)', color: 'var(--text-primary)', fontSize: '14px', fontFamily: 'inherit', outline: 'none' }} />
-              <input type="email" placeholder="Votre email" style={{ width: '100%', padding: '10px 14px', background: 'var(--bg-secondary)', border: '1px solid var(--border)', borderRadius: 'var(--radius)', color: 'var(--text-primary)', fontSize: '14px', fontFamily: 'inherit', outline: 'none' }} />
-              <textarea rows={4} placeholder="Votre message" style={{ width: '100%', padding: '10px 14px', background: 'var(--bg-secondary)', border: '1px solid var(--border)', borderRadius: 'var(--radius)', color: 'var(--text-primary)', fontSize: '14px', fontFamily: 'inherit', outline: 'none', resize: 'vertical' }} />
-              <button className="btn btn-primary" style={{ justifyContent: 'center' }}>Envoyer</button>
-            </div>
+              {cfDone ? (
+                <div style={{ textAlign: 'center', padding: '20px', color: 'var(--success)' }}>
+                  <FiSend size={32} style={{ marginBottom: '8px' }} />
+                  <p>Message envoye ! Nous vous repondrons dans les plus brefs delais.</p>
+                  <button type="button" className="btn btn-ghost" onClick={() => setCfDone(false)} style={{ marginTop: '8px' }}>Envoyer un autre message</button>
+                </div>
+              ) : (
+                <>
+                  <input type="text" placeholder="Votre nom" value={cfName} onChange={e => setCfName(e.target.value)} required style={{ width: '100%', padding: '10px 14px', background: 'var(--bg-secondary)', border: '1px solid var(--border)', borderRadius: 'var(--radius)', color: 'var(--text-primary)', fontSize: '14px', fontFamily: 'inherit', outline: 'none' }} />
+                  <input type="email" placeholder="Votre email" value={cfEmail} onChange={e => setCfEmail(e.target.value)} required style={{ width: '100%', padding: '10px 14px', background: 'var(--bg-secondary)', border: '1px solid var(--border)', borderRadius: 'var(--radius)', color: 'var(--text-primary)', fontSize: '14px', fontFamily: 'inherit', outline: 'none' }} />
+                  <textarea rows={4} placeholder="Votre message" value={cfMsg} onChange={e => setCfMsg(e.target.value)} required style={{ width: '100%', padding: '10px 14px', background: 'var(--bg-secondary)', border: '1px solid var(--border)', borderRadius: 'var(--radius)', color: 'var(--text-primary)', fontSize: '14px', fontFamily: 'inherit', outline: 'none', resize: 'vertical' }} />
+                  <button type="submit" className="btn btn-primary" style={{ justifyContent: 'center' }} disabled={cfLoading}>
+                    {cfLoading ? 'Envoi...' : 'Envoyer'}
+                  </button>
+                </>
+              )}
+            </form>
           </div>
         </div>
       </section>

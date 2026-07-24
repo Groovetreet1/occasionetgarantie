@@ -14,6 +14,7 @@ const adminRoutes = require('./routes/admin');
 const premiumRoutes = require('./routes/premium');
 const sellerRoutes = require('./routes/seller');
 const chatRoutes = require('./routes/chat');
+const contactRoutes = require('./routes/contact');
 const pool = require('./config/db');
 
 (async () => {
@@ -61,6 +62,7 @@ app.use('/api/admin', adminRoutes);
 app.use('/api/premium', premiumRoutes);
 app.use('/api/seller', sellerRoutes);
 app.use('/api/chat', chatRoutes);
+app.use('/api/contact', contactRoutes);
 
 app.get('/ads.txt', (req, res) => {
   res.type('text/plain').send('google.com, pub-3266333749754332, DIRECT, f08c47fec0942fa0');
