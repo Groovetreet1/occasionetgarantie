@@ -171,7 +171,7 @@ router.put('/:id', authenticate, async (req, res) => {
 // Authenticated: quick status update
 router.patch('/:id/status', authenticate, async (req, res) => {
   try {
-    const [rows] = await pool.query('SELECT seller_id FROM products WHERE id = ?', [req.params.id]);
+    const [rows] = await pool.query('SELECT seller_id, price FROM products WHERE id = ?', [req.params.id]);
     if (rows.length === 0) return res.status(404).json({ message: 'Produit introuvable.' });
     if (req.user.role !== 'admin' && rows[0].seller_id !== req.user.id) {
       return res.status(403).json({ message: 'Vous ne pouvez modifier que vos propres produits.' });
@@ -181,6 +181,26 @@ router.patch('/:id/status', authenticate, async (req, res) => {
       return res.status(400).json({ message: 'Statut invalide.' });
     }
     await pool.query('UPDATE products SET status = ? WHERE id = ?', [status, req.params.id]);
+
+    // Commission logic: when marked as sold
+    if (status === 'vendu') {
+      try {
+        const [sellers] = await pool.query('SELECT created_at FROM users WHERE id = ?', [rows[0].seller_id]);
+        if (sellers.length > 0) {
+          const monthsSinceCreation = (Date.now() - new Date(sellers[0].created_at).getTime()) / (1000 * 60 * 60 * 24 * 30.44);
+          if (monthsSinceCreation > 3) {
+            const commissionAmount = Math.round(rows[0].price * 0.05 * 100) / 100;
+            await pool.query(
+              'INSERT INTO commissions (product_id, seller_id, amount, rate) VALUES (?, ?, ?, ?)',
+              [Number(req.params.id), rows[0].seller_id, commissionAmount, 5.00]
+            );
+          }
+        }
+      } catch (e) {
+        console.log('Commission skipped:', e.message);
+      }
+    }
+
     res.json({ message: 'Statut mis à jour.', status });
   } catch (err) {
     res.status(500).json({ message: 'Erreur serveur.', error: err.message });

@@ -30,6 +30,21 @@ const pool = require('./config/db');
   try {
     await pool.query('ALTER TABLE users ADD COLUMN terms_accepted BOOLEAN DEFAULT FALSE');
   } catch {}
+  try {
+    await pool.query(`CREATE TABLE IF NOT EXISTS commissions (
+      id INT AUTO_INCREMENT PRIMARY KEY,
+      product_id INT NOT NULL,
+      seller_id INT NOT NULL,
+      amount DECIMAL(10,2) NOT NULL,
+      rate DECIMAL(5,2) NOT NULL DEFAULT 5.00,
+      status VARCHAR(20) DEFAULT 'en_attente',
+      created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+      paid_at TIMESTAMP NULL
+    )`);
+    console.log('commissions table ready');
+  } catch (e) {
+    console.log('commissions table check skipped:', e.message);
+  }
 })();
 
 const app = express();

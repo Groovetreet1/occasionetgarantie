@@ -94,4 +94,26 @@ router.get('/:id/products', async (req, res) => {
   }
 });
 
+// Get seller commissions
+router.get('/me/commissions', authenticate, async (req, res) => {
+  if (req.user.role !== 'seller' && req.user.role !== 'admin') {
+    return res.status(403).json({ message: 'Accès réservé aux vendeurs.' });
+  }
+  try {
+    const [rows] = await pool.query(
+      `SELECT c.*, p.name as product_name FROM commissions c
+       LEFT JOIN products p ON c.product_id = p.id
+       WHERE c.seller_id = ? ORDER BY c.created_at DESC`,
+      [req.user.id]
+    );
+    const [totalRow] = await pool.query(
+      'SELECT COALESCE(SUM(amount), 0) as total_commission, COUNT(*) as count FROM commissions WHERE seller_id = ?',
+      [req.user.id]
+    );
+    res.json({ commissions: rows, summary: totalRow[0] });
+  } catch (err) {
+    res.status(500).json({ message: 'Erreur serveur.', error: err.message });
+  }
+});
+
 module.exports = router;

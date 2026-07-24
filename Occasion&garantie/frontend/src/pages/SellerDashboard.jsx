@@ -1,7 +1,7 @@
 import { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
 import { motion } from 'framer-motion';
-import { FiPlus, FiEdit2, FiTrash2, FiPackage, FiCheckCircle } from 'react-icons/fi';
+import { FiPlus, FiEdit2, FiTrash2, FiPackage, FiCheckCircle, FiPercent } from 'react-icons/fi';
 import api from '../api/axios';
 import { useAuth } from '../context/AuthContext';
 import SellerNav from '../components/SellerNav';
@@ -18,14 +18,17 @@ export default function SellerDashboard() {
   const [products, setProducts] = useState([]);
   const [loading, setLoading] = useState(true);
   const [storeName, setStoreName] = useState('');
+  const [commissions, setCommissions] = useState({ commissions: [], summary: { total_commission: 0, count: 0 } });
   useEffect(() => {
     Promise.all([
       api.get('/seller/me'),
       api.get('/seller/me/products'),
-    ]).then(([p, pr]) => {
+      api.get('/seller/me/commissions'),
+    ]).then(([p, pr, c]) => {
       setProfile(p.data);
       setProducts(pr.data);
       setStoreName(p.data.store_name || '');
+      setCommissions(c.data);
     }).catch(() => {}).finally(() => setLoading(false));
   }, []);
 
@@ -80,7 +83,18 @@ export default function SellerDashboard() {
               <span className="stat-value">{profile.stats?.active_count || 0}</span>
               <span className="stat-label">Annonces actives</span>
             </div>
+            <div className="stat-card">
+              <FiPercent size={20} />
+              <span className="stat-value">{commissions.summary.total_commission} DH</span>
+              <span className="stat-label">Commission ({commissions.summary.count} ventes)</span>
+            </div>
           </div>
+          {profile.created_at && (Date.now() - new Date(profile.created_at).getTime()) < 3 * 30 * 24 * 60 * 60 * 1000 && (
+            <div style={{ fontSize: 13, color: 'var(--primary)', background: 'var(--bg-secondary)', padding: '10px 14px', borderRadius: 'var(--radius)', border: '1px solid var(--border)', marginTop: 12 }}>
+              <FiCheckCircle size={14} style={{ verticalAlign: 'middle', marginRight: 6 }} />
+              Periode gratuite — 0% commission pendant vos 3 premiers mois !
+            </div>
+          )}
         )}
 
         <div className="dashboard-products">
