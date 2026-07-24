@@ -352,6 +352,51 @@ router.post('/reset-password', [
   }
 });
 
+const sellerUpgradeCodes = new Map();
+
+router.post('/upgrade-seller', authenticate, async (req, res) => {
+  try {
+    const [users] = await pool.query('SELECT phone, role FROM users WHERE id = ?', [req.user.id]);
+    if (users.length === 0) return res.status(400).json({ message: 'Utilisateur introuvable.' });
+    if (users[0].role === 'seller' || users[0].role === 'admin') return res.json({ message: 'Vous êtes déjà vendeur.' });
+
+    const code = generateCode();
+    const expiresAt = Date.now() + CODE_EXPIRY;
+    sellerUpgradeCodes.set(req.user.id, { code, expiresAt });
+
+    try {
+      await gomobile.sendSms(users[0].phone, `Code verification vendeur Occasion & Garantie : ${code}`);
+    } catch (smsErr) {
+      console.log('SMS upgrade failed:', smsErr.message);
+    }
+
+    res.json({ message: 'Code de verification envoye par SMS.', phone: users[0].phone });
+  } catch (err) {
+    res.status(500).json({ message: 'Erreur serveur.' });
+  }
+});
+
+router.post('/verify-upgrade', authenticate, [
+  body('code').trim().isLength({ min: 6, max: 6 }).withMessage('Code invalide.'),
+  body('storeName').optional().trim(),
+], validate, async (req, res) => {
+  try {
+    const { code, storeName } = req.body;
+    const saved = sellerUpgradeCodes.get(req.user.id);
+    if (!saved) return res.status(400).json({ message: 'Aucun code envoye. Demandez un nouveau code.' });
+    if (saved.code !== code) return res.status(400).json({ message: 'Code incorrect.' });
+    if (Date.now() > saved.expiresAt) return res.status(400).json({ message: 'Code expire. Demandez un nouveau code.' });
+
+    sellerUpgradeCodes.delete(req.user.id);
+    await pool.query('UPDATE users SET role = ? WHERE id = ?', ['seller', req.user.id]);
+    if (storeName) await pool.query('UPDATE users SET store_name = ? WHERE id = ?', [storeName, req.user.id]);
+
+    res.json({ message: 'Compte vendeur active avec succes.' });
+  } catch (err) {
+    res.status(500).json({ message: 'Erreur serveur.' });
+  }
+});
+
 router.delete('/account', authenticate, async (req, res) => {
   try {
     const { password } = req.body;
