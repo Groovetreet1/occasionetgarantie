@@ -422,7 +422,12 @@ router.post('/buy-credits', authenticate, async (req, res) => {
       [req.user.id, creditAmount, credits]
     );
 
-    res.json({ message: `Demande d'achat de ${credits} credits envoyee. L'administrateur va la confirmer sous 24h.` });
+    const [users] = await pool.query('SELECT credit_balance FROM users WHERE id = ?', [req.user.id]);
+
+    res.json({
+      message: `Demande d'achat de ${credits} credits envoyee. L'administrateur va la confirmer sous 24h.`,
+      credit_balance: users[0]?.credit_balance || 0
+    });
   } catch (err) {
     res.status(500).json({ message: 'Erreur serveur.' });
   }

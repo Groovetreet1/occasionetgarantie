@@ -183,6 +183,25 @@ router.delete('/credit-purchases/:id', authenticate, adminOnly, async (req, res)
   }
 });
 
+// ---- Admin stats ----
+router.get('/products', authenticate, adminOnly, async (req, res) => {
+  try {
+    const [rows] = await pool.query('SELECT p.*, u.full_name as seller_name, u.store_name FROM products p LEFT JOIN users u ON p.user_id = u.id ORDER BY p.id DESC');
+    res.json(rows);
+  } catch (err) {
+    res.status(500).json({ message: 'Erreur serveur.' });
+  }
+});
+
+router.get('/users', authenticate, adminOnly, async (req, res) => {
+  try {
+    const [rows] = await pool.query('SELECT id, full_name, email, phone, role, phone_verified, created_at, store_name, premium, credit_balance, terms_accepted FROM users ORDER BY id ASC');
+    res.json(rows);
+  } catch (err) {
+    res.status(500).json({ message: 'Erreur serveur.' });
+  }
+});
+
 // ---- Installments (admin confirm/reject) ----
 router.get('/installments', authenticate, adminOnly, async (req, res) => {
   try {

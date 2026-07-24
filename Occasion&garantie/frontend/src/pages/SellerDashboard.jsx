@@ -41,9 +41,9 @@ export default function SellerDashboard() {
   const handleBuyCredits = async () => {
     setBuyLoading(true);
     try {
-      const { data } = await api.post('/auth/buy-credits', { amount: buyAmount });
-      setCreditBalance(data.credit_balance);
+      await api.post('/auth/buy-credits', { amount: buyAmount });
       setShowBuyCredits(false);
+      alert('Demande d\'achat envoyee ! L\'administrateur va la confirmer sous 24h.');
     } catch (err) {
       alert(err.response?.data?.message || 'Erreur');
     } finally {
