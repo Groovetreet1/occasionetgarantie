@@ -1,6 +1,6 @@
 import { useParams, Link, useNavigate } from 'react-router-dom';
 import { useEffect, useState } from 'react';
-import { FiArrowLeft, FiShoppingBag, FiShield, FiCheck, FiMonitor, FiCpu, FiHardDrive, FiBattery, FiCamera, FiDroplet, FiX, FiChevronLeft, FiChevronRight, FiUser, FiMessageCircle } from 'react-icons/fi';
+import { FiArrowLeft, FiShoppingBag, FiShield, FiCheck, FiMonitor, FiCpu, FiHardDrive, FiBattery, FiCamera, FiDroplet, FiX, FiChevronLeft, FiChevronRight, FiUser, FiMessageCircle, FiStar } from 'react-icons/fi';
 import { BsWhatsapp } from 'react-icons/bs';
 import api from '../api/axios';
 import { useAuth } from '../context/AuthContext';
@@ -167,6 +167,7 @@ export default function ProductDetail() {
                     </div>
                     <div>
                       <strong>{product.seller_name}</strong>
+                      {product.seller_premium ? <FiStar size={18} style={{ color: '#FFD700', marginLeft: 4, verticalAlign: 'middle' }} /> : null}
                       <small>Voir profil du vendeur</small>
                     </div>
                   </Link>

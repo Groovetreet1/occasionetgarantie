@@ -24,6 +24,9 @@ const pool = require('./config/db');
   try {
     await pool.query('ALTER TABLE users ADD COLUMN premium_expires_at DATETIME NULL');
   } catch {}
+  try {
+    await pool.query('ALTER TABLE users ADD COLUMN avatar VARCHAR(255) DEFAULT NULL');
+  } catch {}
 })();
 
 const app = express();
