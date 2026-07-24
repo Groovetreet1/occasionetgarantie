@@ -17,7 +17,10 @@ const defaultData = {
   order_items: [],
   product_images: [],
   premium_payments: [],
-  nextId: { users: 1, products: 1, orders: 1, order_items: 1, product_images: 1, premium_payments: 1 },
+  credit_purchases: [],
+  credit_transactions: [],
+  installments: [],
+  nextId: { users: 1, products: 1, orders: 1, order_items: 1, product_images: 1, premium_payments: 1, credit_purchases: 1, credit_transactions: 1, installments: 1 },
 };
 
 let data = { ...defaultData };
@@ -185,27 +188,41 @@ const mockPool = {
 
     // UPDATE users SET ... WHERE id = ?
     if (upper.startsWith('UPDATE USERS SET') && upper.includes('WHERE ID =')) {
-      const id = params[params.length - 1];
-      const idx = data.users.findIndex(u => u.id === Number(id));
+      const id = Number(params[params.length - 1]);
+      const idx = data.users.findIndex(u => u.id === id);
       if (idx !== -1) {
         const setClause = sql.substring(sql.toUpperCase().indexOf('SET') + 3, sql.toUpperCase().indexOf('WHERE')).trim();
-        const assignments = setClause.split(',').map(s => s.trim());
-        let paramIdx = 0;
-        assignments.forEach(assignment => {
-          const eqIdx = assignment.indexOf('=');
-          const col = assignment.substring(0, eqIdx).trim().toLowerCase();
-          let val = assignment.substring(eqIdx + 1).trim();
-          if (val === '?') {
-            val = params[paramIdx];
-            paramIdx++;
-          } else if (val.toUpperCase() === 'NULL') {
-            val = null;
+        // Handle COALESCE expressions and complex formulas
+        if (setClause.includes('COALESCE') || setClause.includes('credit_balance')) {
+          const eqIdx = setClause.indexOf('=');
+          const col = setClause.substring(0, eqIdx).trim().toLowerCase();
+          const expr = setClause.substring(eqIdx + 1).trim().toUpperCase();
+          if (col === 'credit_balance' && (expr.includes('COALESCE') || expr.includes('+'))) {
+            const current = Number(data.users[idx][col] || 0);
+            const val = Number(params[0] || 0);
+            data.users[idx][col] = current + val;
+          } else if (col === 'credit_balance') {
+            data.users[idx][col] = Number(params[0] || 0);
           }
-          data.users[idx][col] = val;
-        });
+        } else {
+          const assignments = setClause.split(',').map(s => s.trim());
+          let paramIdx = 0;
+          assignments.forEach(assignment => {
+            const eqIdx = assignment.indexOf('=');
+            const col = assignment.substring(0, eqIdx).trim().toLowerCase();
+            let val = assignment.substring(eqIdx + 1).trim();
+            if (val === '?') {
+              val = params[paramIdx];
+              paramIdx++;
+            } else if (val.toUpperCase() === 'NULL') {
+              val = null;
+            }
+            data.users[idx][col] = val;
+          });
+        }
         save();
       }
-      return [[]];
+      return [{}];
     }
 
     // UPDATE products SET ... WHERE slug = ? (seed)
@@ -469,6 +486,144 @@ const mockPool = {
     if (upper.startsWith('SELECT') && upper.includes('FROM PREMIUM_PAYMENTS') && upper.includes('WHERE ID =') && !upper.includes('USER_ID')) {
       const payment = data.premium_payments.find(p => p.id === params[0]);
       return [payment ? [payment] : []];
+    }
+
+    // ====== CREDIT SYSTEM HANDLERS ======
+
+    // SELECT credit_balance or specific cols from users
+    if (upper.startsWith('SELECT') && upper.includes('FROM USERS') && upper.includes('CREDIT_BALANCE')) {
+      const user = data.users.find(u => u.id === params[0]);
+      return [user ? [user] : []];
+    }
+
+    // SELECT from credit_purchases with JOIN users
+    if (upper.startsWith('SELECT') && upper.includes('FROM CREDIT_PURCHASES C') && upper.includes('JOIN USERS U')) {
+      const rows = data.credit_purchases.map(c => {
+        const user = data.users.find(u => u.id === c.user_id);
+        return { ...c, full_name: user?.full_name || '', email: user?.email || '', phone: user?.phone || '' };
+      }).sort((a, b) => new Date(b.created_at) - new Date(a.created_at));
+      return [rows];
+    }
+
+    // SELECT * FROM credit_purchases WHERE id = ?
+    if (upper.startsWith('SELECT') && upper.includes('FROM CREDIT_PURCHASES') && upper.includes('WHERE ID =') && !upper.includes('USER_ID')) {
+      const row = data.credit_purchases.find(c => c.id === params[0]);
+      return [row ? [row] : []];
+    }
+
+    // SELECT * FROM credit_purchases WHERE id = ? AND user_id = ?
+    if (upper.startsWith('SELECT') && upper.includes('FROM CREDIT_PURCHASES') && upper.includes('WHERE ID =') && upper.includes('USER_ID =')) {
+      const row = data.credit_purchases.find(c => c.id === params[0] && c.user_id === params[1]);
+      return [row ? [row] : []];
+    }
+
+    // SELECT * FROM credit_transactions WHERE user_id = ?
+    if (upper.startsWith('SELECT') && upper.includes('FROM CREDIT_TRANSACTIONS') && upper.includes('WHERE USER_ID =')) {
+      const rows = data.credit_transactions.filter(t => t.user_id === params[0]).sort((a, b) => new Date(b.created_at) - new Date(a.created_at));
+      return [rows];
+    }
+
+    // INSERT INTO credit_purchases
+    if (upper.startsWith('INSERT INTO CREDIT_PURCHASES')) {
+      const colsMatch = sql.match(/\(([^)]+)\)\s*VALUES/i);
+      const colNames = colsMatch ? colsMatch[1].split(',').map(c => c.trim().toLowerCase()) : [];
+      const newRow = { id: data.nextId.credit_purchases++, status: 'en_attente', created_at: new Date().toISOString() };
+      colNames.forEach((col, i) => {
+        newRow[col] = params[i];
+      });
+      data.credit_purchases.push(newRow);
+      save();
+      return [{ insertId: newRow.id }];
+    }
+
+    // INSERT INTO credit_transactions
+    if (upper.startsWith('INSERT INTO CREDIT_TRANSACTIONS')) {
+      const colsMatch = sql.match(/\(([^)]+)\)\s*VALUES/i);
+      const colNames = colsMatch ? colsMatch[1].split(',').map(c => c.trim().toLowerCase()) : [];
+      const newRow = { id: data.nextId.credit_transactions++, created_at: new Date().toISOString() };
+      colNames.forEach((col, i) => {
+        newRow[col] = params[i];
+      });
+      data.credit_transactions.push(newRow);
+      save();
+      return [{ insertId: newRow.id }];
+    }
+
+    // UPDATE credit_purchases SET ... WHERE id = ?
+    if (upper.startsWith('UPDATE CREDIT_PURCHASES SET') && upper.includes('WHERE ID =')) {
+      const id = Number(params[params.length - 1]);
+      const idx = data.credit_purchases.findIndex(c => c.id === id);
+      if (idx !== -1) {
+        const setClause = sql.substring(sql.toUpperCase().indexOf('SET') + 3, sql.toUpperCase().indexOf('WHERE')).trim();
+        const assignments = setClause.split(',').map(s => s.trim());
+        let paramIdx = 0;
+        assignments.forEach(a => {
+          const eq = a.indexOf('=');
+          const col = a.substring(0, eq).trim().toLowerCase();
+          let val = a.substring(eq + 1).trim();
+          if (val.toUpperCase() === 'NOW()') val = new Date().toISOString();
+          else if (val.includes('?')) { val = params[paramIdx]; paramIdx++; }
+          data.credit_purchases[idx][col] = val;
+        });
+        save();
+      }
+      return [[]];
+    }
+
+    // DELETE FROM credit_purchases WHERE id = ?
+    if (upper.startsWith('DELETE FROM CREDIT_PURCHASES')) {
+      data.credit_purchases = data.credit_purchases.filter(c => c.id !== Number(params[0]));
+      save();
+      return [[]];
+    }
+
+    // ====== INSTALLMENTS HANDLERS ======
+    if (upper.startsWith('SELECT') && upper.includes('FROM INSTALLMENTS I') && upper.includes('JOIN PRODUCTS P')) {
+      const rows = data.installments.map(i => {
+        const p = data.products.find(x => x.id === i.product_id);
+        const buyer = data.users.find(u => u.id === i.buyer_id);
+        const seller = data.users.find(u => u.id === i.seller_id);
+        return { ...i, product_name: p?.name || '', product_price: p?.price || 0, buyer_name: buyer?.full_name || '', buyer_email: buyer?.email || '', buyer_phone: buyer?.phone || '', seller_name: seller?.store_name || seller?.full_name || '' };
+      }).sort((a, b) => new Date(b.created_at) - new Date(a.created_at));
+      return [rows];
+    }
+
+    // SELECT * FROM installments WHERE id = ?
+    if (upper.startsWith('SELECT') && upper.includes('FROM INSTALLMENTS') && upper.includes('WHERE ID =')) {
+      const row = data.installments.find(i => i.id === params[0]);
+      return [row ? [row] : []];
+    }
+
+    // INSERT INTO installments
+    if (upper.startsWith('INSERT INTO INSTALLMENTS')) {
+      const colsMatch = sql.match(/\(([^)]+)\)\s*VALUES/i);
+      const colNames = colsMatch ? colsMatch[1].split(',').map(c => c.trim().toLowerCase()) : [];
+      const newRow = { id: data.nextId.installments++, status: 'en_attente', created_at: new Date().toISOString() };
+      colNames.forEach((col, i) => { newRow[col] = params[i]; });
+      data.installments.push(newRow);
+      save();
+      return [{ insertId: newRow.id }];
+    }
+
+    // UPDATE installments SET ... WHERE id = ?
+    if (upper.startsWith('UPDATE INSTALLMENTS SET') && upper.includes('WHERE ID =')) {
+      const id = Number(params[params.length - 1]);
+      const idx = data.installments.findIndex(i => i.id === id);
+      if (idx !== -1) {
+        const setClause = sql.substring(sql.toUpperCase().indexOf('SET') + 3, sql.toUpperCase().indexOf('WHERE')).trim();
+        const assignments = setClause.split(',').map(s => s.trim());
+        let paramIdx = 0;
+        assignments.forEach(a => {
+          const eq = a.indexOf('=');
+          const col = a.substring(0, eq).trim().toLowerCase();
+          let val = a.substring(eq + 1).trim();
+          if (val.toUpperCase() === 'NOW()') val = new Date().toISOString();
+          else if (val.includes('?')) { val = params[paramIdx]; paramIdx++; }
+          data.installments[idx][col] = val;
+        });
+        save();
+      }
+      return [[]];
     }
 
     console.log('Unhandled SQL:', sql, JSON.stringify(params));
