@@ -129,26 +129,49 @@ router.post('/credit-purchases/:id/confirm', authenticate, adminOnly, async (req
     if (purchases.length === 0) return res.status(404).json({ message: 'Demande introuvable.' });
     if (purchases[0].status !== 'en_attente') return res.status(400).json({ message: 'Deja traitee.' });
 
+    const creditsToAdd = Number(purchases[0].credits);
+    const userId = purchases[0].user_id;
+
     try {
       await pool.query('ALTER TABLE users ADD COLUMN credit_balance DECIMAL(10,2) DEFAULT 0');
     } catch {}
-    try {
-      await pool.query('UPDATE users SET credit_balance = COALESCE(credit_balance, 0) WHERE id = ?', [purchases[0].user_id]);
-    } catch {}
 
     await pool.query('UPDATE credit_purchases SET status = ?, confirmed_at = NOW() WHERE id = ?', ['confirme', purchaseId]);
-    await pool.query('UPDATE users SET credit_balance = COALESCE(credit_balance, 0) + ? WHERE id = ?', [purchases[0].credits, purchases[0].user_id]);
-    await pool.query('INSERT INTO credit_transactions (user_id, type, amount, description) VALUES (?, ?, ?, ?)',
-      [purchases[0].user_id, 'purchase', purchases[0].credits, `Achat de ${purchases[0].credits} credits (${purchases[0].amount_dh} DH) confirme par admin`]
-    );
 
-    const [updatedUser] = await pool.query('SELECT credit_balance FROM users WHERE id = ?', [purchases[0].user_id]);
-    const newBalance = updatedUser[0]?.credit_balance || 0;
+    let updated = false;
+    try {
+      const [result] = await pool.query('UPDATE users SET credit_balance = COALESCE(credit_balance, 0) + ? WHERE id = ?', [creditsToAdd, userId]);
+      updated = result.affectedRows > 0;
+    } catch (e) {
+      if (e.errno === 1054 || e.code === 'ER_BAD_FIELD_ERROR') {
+        try { await pool.query('ALTER TABLE users ADD COLUMN credit_balance DECIMAL(10,2) DEFAULT 0'); } catch {}
+        await pool.query('UPDATE users SET credit_balance = ? WHERE id = ?', [creditsToAdd, userId]);
+        updated = true;
+      } else throw e;
+    }
 
     try {
-      const [userRow] = await pool.query('SELECT phone, full_name FROM users WHERE id = ?', [purchases[0].user_id]);
+      await pool.query('INSERT INTO credit_transactions (user_id, type, amount, description) VALUES (?, ?, ?, ?)',
+        [userId, 'purchase', creditsToAdd, `Achat de ${creditsToAdd} credits (${purchases[0].amount_dh} DH) confirme par admin`]
+      );
+    } catch (e) {
+      if (e.errno === 1146 || e.code === 'ER_NO_SUCH_TABLE') {}
+      else throw e;
+    }
+
+    let newBalance = 0;
+    try {
+      const [updatedUser] = await pool.query('SELECT credit_balance FROM users WHERE id = ?', [userId]);
+      newBalance = updatedUser[0]?.credit_balance || creditsToAdd;
+    } catch (e) {
+      if (e.errno === 1054 || e.code === 'ER_BAD_FIELD_ERROR') newBalance = creditsToAdd;
+      else throw e;
+    }
+
+    try {
+      const [userRow] = await pool.query('SELECT phone, full_name FROM users WHERE id = ?', [userId]);
       if (userRow.length > 0 && userRow[0].phone) {
-        const msg = `Bonjour ${userRow[0].full_name}, votre achat de ${purchases[0].credits} credits est confirme ! Solde: ${newBalance} credits.`;
+        const msg = `Bonjour ${userRow[0].full_name}, votre achat de ${creditsToAdd} credits est confirme ! Solde: ${newBalance} credits.`;
         await gomobile.sendSms(userRow[0].phone, msg);
       }
     } catch (smsErr) { console.error('SMS failed:', smsErr.message); }

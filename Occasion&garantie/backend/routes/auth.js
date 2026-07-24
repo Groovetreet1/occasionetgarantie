@@ -496,12 +496,28 @@ router.post('/upload-credit-screenshot', authenticate, creditUpload.single('scre
 
 router.get('/my-credits', authenticate, async (req, res) => {
   try {
-    const [users] = await pool.query('SELECT credit_balance FROM users WHERE id = ?', [req.user.id]);
-    const [txns] = await pool.query(
-      'SELECT * FROM credit_transactions WHERE user_id = ? ORDER BY created_at DESC LIMIT 50',
-      [req.user.id]
-    );
-    res.json({ credit_balance: users[0]?.credit_balance || 0, transactions: txns });
+    let balance = 0;
+    try {
+      const [users] = await pool.query('SELECT credit_balance FROM users WHERE id = ?', [req.user.id]);
+      balance = users[0]?.credit_balance || 0;
+    } catch (e) {
+      if (e.errno === 1054 || e.code === 'ER_BAD_FIELD_ERROR') {
+        try { await pool.query('ALTER TABLE users ADD COLUMN credit_balance DECIMAL(10,2) DEFAULT 0'); } catch {}
+        balance = 0;
+      } else throw e;
+    }
+    let txns = [];
+    try {
+      const [rows] = await pool.query(
+        'SELECT * FROM credit_transactions WHERE user_id = ? ORDER BY created_at DESC LIMIT 50',
+        [req.user.id]
+      );
+      txns = rows;
+    } catch (e) {
+      if (e.errno === 1146 || e.code === 'ER_NO_SUCH_TABLE') txns = [];
+      else throw e;
+    }
+    res.json({ credit_balance: balance, transactions: txns });
   } catch (err) {
     res.status(500).json({ message: 'Erreur serveur.' });
   }
