@@ -48,7 +48,7 @@ export default function AdminDashboardPage() {
     { title: 'Utilisateurs', icon: FiUsers, color: '#dc2626', bg: 'rgba(220,38,38,0.1)', items: [
       { label: 'Total utilisateurs', value: stats.users },
       { label: 'Vendeurs', value: stats.sellers },
-    ], link: '/admin/products' },
+    ], link: '/admin/users' },
   ];
 
   if (loading) return <section className="admin-dashboard"><div className="container" style={{ padding: '60px 0' }}><div className="spinner" /></div></section>;
@@ -109,6 +109,7 @@ export default function AdminDashboardPage() {
             <Link to="/admin/credits" className="btn btn-outline"><FiCreditCard size={16} /> Achats de credits</Link>
             <Link to="/admin/installments" className="btn btn-outline"><FiClock size={16} /> Paiements echelonnes</Link>
             <Link to="/admin/products" className="btn btn-outline"><FiPackage size={16} /> Tous les produits</Link>
+            <Link to="/admin/users" className="btn btn-outline"><FiUsers size={16} /> Utilisateurs</Link>
           </div>
         </div>
       </div>

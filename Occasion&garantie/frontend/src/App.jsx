@@ -20,6 +20,7 @@ import AdminPremium from './pages/AdminPremium';
 import AdminCreditPurchases from './pages/AdminCreditPurchases';
 import AdminInstallments from './pages/AdminInstallments';
 import AdminDashboardPage from './pages/AdminDashboardPage';
+import AdminUsers from './pages/AdminUsers';
 import SellPage from './pages/SellPage';
 import SellerDashboard from './pages/SellerDashboard';
 import SellerProductForm from './pages/SellerProductForm';
@@ -68,6 +69,7 @@ export default function App() {
           <Route path="/admin/premium" element={<AnimatedPage><AdminRoute><AdminPremium /></AdminRoute></AnimatedPage>} />
           <Route path="/admin/credits" element={<AnimatedPage><AdminRoute><AdminCreditPurchases /></AdminRoute></AnimatedPage>} />
           <Route path="/admin/installments" element={<AnimatedPage><AdminRoute><AdminInstallments /></AdminRoute></AnimatedPage>} />
+          <Route path="/admin/users" element={<AnimatedPage><AdminRoute><AdminUsers /></AdminRoute></AnimatedPage>} />
           <Route path="/vendre" element={<AnimatedPage><SellPage /></AnimatedPage>} />
           <Route path="/seller" element={<AnimatedPage><SellerRoute><SellerDashboard /></SellerRoute></AnimatedPage>} />
           <Route path="/seller/stats" element={<AnimatedPage><SellerRoute><SellerStats /></SellerRoute></AnimatedPage>} />

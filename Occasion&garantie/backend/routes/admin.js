@@ -194,6 +194,41 @@ router.delete('/credit-purchases/:id', authenticate, adminOnly, async (req, res)
   }
 });
 
+// ---- Delete user + all their data ----
+router.delete('/users/:id', authenticate, adminOnly, async (req, res) => {
+  try {
+    const userId = Number(req.params.id);
+    if (userId === 1) return res.status(400).json({ message: 'Impossible de supprimer le super admin.' });
+
+    const [userRows] = await pool.query('SELECT full_name FROM users WHERE id = ?', [userId]);
+    if (userRows.length === 0) return res.status(404).json({ message: 'Utilisateur introuvable.' });
+
+    await pool.query('DELETE FROM messages WHERE sender_id = ? OR receiver_id = ?', [userId, userId]);
+    await pool.query('DELETE FROM conversations WHERE user1_id = ? OR user2_id = ?', [userId, userId]);
+    await pool.query('DELETE FROM premium_payments WHERE user_id = ?', [userId]);
+    await pool.query('DELETE FROM credit_transactions WHERE user_id = ?', [userId]);
+    await pool.query('DELETE FROM credit_purchases WHERE user_id = ?', [userId]);
+    await pool.query('DELETE FROM installments WHERE buyer_id = ? OR seller_id = ?', [userId, userId]);
+    await pool.query('DELETE FROM reservations WHERE user_id = ?', [userId]);
+
+    const [products] = await pool.query('SELECT id, image FROM products WHERE user_id = ?', [userId]);
+    for (const p of products) {
+      if (p.image) {
+        try { fs.unlinkSync(path.join(__dirname, '..', 'uploads', p.image)); } catch {}
+      }
+    }
+    await pool.query('DELETE FROM product_images WHERE product_id IN (SELECT id FROM products WHERE user_id = ?)', [userId]);
+    await pool.query('DELETE FROM commissions WHERE seller_id = ?', [userId]);
+    await pool.query('DELETE FROM products WHERE user_id = ?', [userId]);
+    await pool.query('DELETE FROM users WHERE id = ?', [userId]);
+
+    res.json({ message: `Compte de "${userRows[0].full_name}" et toutes ses donnees supprime.` });
+  } catch (err) {
+    console.error('Delete user error:', err.sqlMessage || err.message);
+    res.status(500).json({ message: 'Erreur serveur.' });
+  }
+});
+
 // ---- Admin stats ----
 router.get('/products', authenticate, adminOnly, async (req, res) => {
   try {
