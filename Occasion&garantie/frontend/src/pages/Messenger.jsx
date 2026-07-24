@@ -20,13 +20,24 @@ export default function Messenger() {
   const messagesContainerRef = useRef(null);
   const inputRef = useRef(null);
   const pollRef = useRef(null);
-  const typingRef = useRef(null);
   const typingDebounceRef = useRef(null);
-  const isAtBottomRef = useRef(true);
+  const prevMsgCountRef = useRef(0);
+
+  const scrollToBottom = (smooth = true) => {
+    setTimeout(() => {
+      messagesEndRef.current?.scrollIntoView({ behavior: smooth ? 'smooth' : 'instant' });
+    }, 50);
+  };
+
+  const isNearBottom = () => {
+    const el = messagesContainerRef.current;
+    if (!el) return true;
+    return el.scrollHeight - el.scrollTop - el.clientHeight < 100;
+  };
 
   useEffect(() => {
     loadConversations();
-    return () => { clearInterval(pollRef.current); clearTimeout(typingRef.current); };
+    return () => clearInterval(pollRef.current);
   }, []);
 
   useEffect(() => {
@@ -47,20 +58,16 @@ export default function Messenger() {
       }, 3000);
       setShowMobileList(false);
     }
-    return () => { clearInterval(pollRef.current); clearTimeout(typingRef.current); };
+    return () => clearInterval(pollRef.current);
   }, [activeConv]);
 
   useEffect(() => {
-    if (isAtBottomRef.current) {
-      messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
+    if (messages.length === 0) return;
+    if (messages.length > prevMsgCountRef.current) {
+      scrollToBottom(true);
     }
+    prevMsgCountRef.current = messages.length;
   }, [messages]);
-
-  const handleScroll = useCallback(() => {
-    const el = messagesContainerRef.current;
-    if (!el) return;
-    isAtBottomRef.current = el.scrollHeight - el.scrollTop - el.clientHeight < 60;
-  }, []);
 
   const loadConversations = async () => {
     try {
@@ -73,7 +80,11 @@ export default function Messenger() {
     if (!activeConv) return;
     try {
       const { data } = await api.get(`/chat/conversations/${activeConv}/messages`);
-      setMessages(data);
+      if (data.length > prevMsgCountRef.current) {
+        setMessages(data);
+      } else if (isNearBottom()) {
+        setMessages(data);
+      }
     } catch {}
   };
 
@@ -109,7 +120,9 @@ export default function Messenger() {
     setText('');
     try {
       const { data } = await api.post(`/chat/conversations/${activeConv}/messages`, { text: msgText });
+      prevMsgCountRef.current++;
       setMessages((prev) => [...prev, data]);
+      setTimeout(scrollToBottom, 100);
       loadConversations();
       setTimeout(() => inputRef.current?.focus(), 100);
     } catch (err) {
@@ -206,7 +219,7 @@ export default function Messenger() {
                 )}
               </div>
 
-              <div className="messenger-messages" ref={messagesContainerRef} onScroll={handleScroll}>
+              <div className="messenger-messages" ref={messagesContainerRef}>
                 {messages.length === 0 ? (
                   <div style={{ textAlign: 'center', color: 'var(--text-muted)', padding: '40px', fontSize: '14px' }}>
                     Aucun message. Envoyez le premier message !
