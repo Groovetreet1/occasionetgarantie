@@ -118,7 +118,7 @@ router.get('/conversations/:id/typing', authenticate, async (req, res) => {
     const convId = req.params.id;
     const entry = typing[convId];
     if (entry && Date.now() - entry.at < 3000) {
-      return res.json({ typing: true, name: entry.name });
+      return res.json({ typing: true, name: entry.name, userId: entry.userId });
     }
     delete typing[convId];
     res.json({ typing: false });
@@ -144,6 +144,8 @@ router.post('/conversations/:id/messages', authenticate, async (req, res) => {
       [req.params.id, req.user.id, req.user.id]
     );
     if (convs.length === 0) return res.status(403).json({ message: 'Acces refuse.' });
+
+    delete typing[req.params.id];
 
     const [result] = await pool.query(
       'INSERT INTO messages (conversation_id, sender_id, text) VALUES (?, ?, ?)',

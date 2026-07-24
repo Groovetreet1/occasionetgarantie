@@ -21,6 +21,7 @@ export default function Messenger() {
   const inputRef = useRef(null);
   const pollRef = useRef(null);
   const typingRef = useRef(null);
+  const typingDebounceRef = useRef(null);
   const isAtBottomRef = useRef(true);
 
   useEffect(() => {
@@ -38,11 +39,12 @@ export default function Messenger() {
   useEffect(() => {
     if (activeConv) {
       loadMessages();
+      checkTyping();
       clearInterval(pollRef.current);
       pollRef.current = setInterval(() => {
         loadMessages();
         checkTyping();
-      }, 5000);
+      }, 3000);
       setShowMobileList(false);
     }
     return () => { clearInterval(pollRef.current); clearTimeout(typingRef.current); };
@@ -79,7 +81,7 @@ export default function Messenger() {
     if (!activeConv) return;
     try {
       const { data } = await api.get(`/chat/conversations/${activeConv}/typing`);
-      if (data.typing && data.name !== user?.fullName && data.name !== user?.full_name) {
+      if (data.typing && data.userId !== user?.id) {
         setTypingName(data.name);
       } else {
         setTypingName('');
@@ -94,11 +96,10 @@ export default function Messenger() {
     } catch {}
   };
 
-  let typingDebounce = null;
   const handleInputChange = (e) => {
     setText(e.target.value);
-    clearTimeout(typingDebounce);
-    typingDebounce = setTimeout(sendTyping, 300);
+    clearTimeout(typingDebounceRef.current);
+    typingDebounceRef.current = setTimeout(sendTyping, 300);
   };
 
   const handleSend = async () => {
