@@ -51,9 +51,11 @@ router.post('/signup', [
   body('email').isEmail().withMessage('Email invalide.').normalizeEmail(),
   body('password').isLength({ min: 6 }).withMessage('Le mot de passe doit contenir au moins 6 caractères.'),
   body('phone').trim().notEmpty().withMessage('Le numéro de téléphone est requis.'),
+  body('termsAccepted').isBoolean().withMessage('Vous devez accepter les conditions generales.'),
 ], validate, async (req, res) => {
   try {
-    const { fullName, email, password, phone, role, storeName } = req.body;
+    const { fullName, email, password, phone, role, storeName, termsAccepted } = req.body;
+    if (!termsAccepted) return res.status(400).json({ message: 'Vous devez accepter les conditions generales.' });
     const [existing] = await pool.query('SELECT id FROM users WHERE email = ?', [email]);
     if (existing.length > 0) {
       return res.status(400).json({ message: 'Cet email est déjà utilisé.' });
@@ -64,8 +66,8 @@ router.post('/signup', [
     const userRole = (role === 'seller') ? 'seller' : 'client';
 
     const [result] = await pool.query(
-      'INSERT INTO users (full_name, email, password, phone, phone_verified, verification_token, verification_expires, role, store_name) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)',
-      [fullName, email, hashed, phone, false, code, expiresAt, userRole, (role === 'seller' && storeName) ? storeName : null]
+      'INSERT INTO users (full_name, email, password, phone, phone_verified, verification_token, verification_expires, role, store_name, terms_accepted) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)',
+      [fullName, email, hashed, phone, false, code, expiresAt, userRole, (role === 'seller' && storeName) ? storeName : null, true]
     );
 
     try {

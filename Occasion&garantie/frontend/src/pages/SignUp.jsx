@@ -1,8 +1,9 @@
 import { useState } from 'react';
 import { Link, Navigate, useNavigate, useSearchParams } from 'react-router-dom';
-import { FiUserPlus, FiMail, FiLock, FiPhone, FiTrendingUp, FiShoppingBag } from 'react-icons/fi';
+import { FiUserPlus, FiMail, FiLock, FiPhone, FiTrendingUp, FiShoppingBag, FiFileText } from 'react-icons/fi';
 import { useAuth } from '../context/AuthContext';
 import api from '../api/axios';
+import TermsPopup from '../components/TermsPopup';
 
 export default function SignUp() {
   const { user } = useAuth();
@@ -16,15 +17,21 @@ export default function SignUp() {
   const [storeName, setStoreName] = useState('');
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
+  const [showTerms, setShowTerms] = useState(false);
 
   if (user) return <Navigate to="/" replace />;
 
   const handleSubmit = async (e) => {
     e.preventDefault();
+    setShowTerms(true);
+  };
+
+  const handleAcceptTerms = async () => {
+    setShowTerms(false);
     setError('');
     setLoading(true);
     try {
-      await api.post('/auth/signup', { fullName, email, password, phone, role: isSeller ? 'seller' : undefined, storeName: isSeller ? storeName : undefined });
+      await api.post('/auth/signup', { fullName, email, password, phone, role: isSeller ? 'seller' : undefined, storeName: isSeller ? storeName : undefined, termsAccepted: true });
       navigate(`/verify-code?email=${encodeURIComponent(email)}${isSeller ? '&role=seller' : ''}`);
     } catch (err) {
       setError(err.response?.data?.message || 'Erreur lors de l\'inscription.');
@@ -70,8 +77,14 @@ export default function SignUp() {
                 <input type="text" value={storeName} onChange={(e) => setStoreName(e.target.value)} placeholder="Ex: PhoneStore Casablanca" required />
               </div>
             )}
+            <div style={{ fontSize: 12, color: 'var(--text-muted)', marginBottom: 12, lineHeight: 1.5 }}>
+              En cliquant sur "Creer mon compte", vous acceptez nos{' '}
+              <button type="button" onClick={() => setShowTerms(true)} style={{ background: 'none', border: 'none', color: 'var(--primary)', textDecoration: 'underline', cursor: 'pointer', fontFamily: 'inherit', fontSize: 12, padding: 0 }}>
+                conditions generales
+              </button>
+            </div>
             <button type="submit" className="form-submit" disabled={loading}>
-              {loading ? 'Inscription...' : isSeller ? 'Creer mon compte vendeur' : 'Creer mon compte'}
+              <FiFileText size={16} /> {loading ? 'Inscription...' : isSeller ? 'Creer mon compte vendeur' : 'Creer mon compte'}
             </button>
           </form>
           <div className="form-footer">
@@ -79,6 +92,12 @@ export default function SignUp() {
           </div>
         </div>
       </div>
+
+      <TermsPopup
+        open={showTerms}
+        onAccept={handleAcceptTerms}
+        onClose={() => setShowTerms(false)}
+      />
     </section>
   );
 }

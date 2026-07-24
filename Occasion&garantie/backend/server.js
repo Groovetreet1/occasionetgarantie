@@ -27,6 +27,9 @@ const pool = require('./config/db');
   try {
     await pool.query('ALTER TABLE users ADD COLUMN avatar VARCHAR(255) DEFAULT NULL');
   } catch {}
+  try {
+    await pool.query('ALTER TABLE users ADD COLUMN terms_accepted BOOLEAN DEFAULT FALSE');
+  } catch {}
 })();
 
 const app = express();
