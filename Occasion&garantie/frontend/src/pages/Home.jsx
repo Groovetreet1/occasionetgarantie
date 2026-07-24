@@ -91,11 +91,6 @@ export default function Home() {
         </div>
       </motion.section>
 
-      <TrustBar />
-
-      {/* Ad banner */}
-      <AdBanner slot="xxxxxxxxxx" className="ad-banner-home" />
-
       {/* Latest products */}
       <motion.section className="section" variants={fadeUp} initial="hidden" whileInView="show" viewport={{ once: true }}>
         <div className="container">
@@ -115,6 +110,8 @@ export default function Home() {
           )}
         </div>
       </motion.section>
+
+      <TrustBar />
 
       {/* Ad banner */}
       <AdBanner slot="xxxxxxxxxx" className="ad-banner-home" />
