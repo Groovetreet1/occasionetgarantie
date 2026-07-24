@@ -4,6 +4,19 @@ const pool = require('../config/db');
 const { authenticate, adminOnly } = require('../middleware/auth');
 const gomobile = require('../services/gomobile');
 
+router.post('/clean-db', authenticate, adminOnly, async (req, res) => {
+  try {
+    const tables = ['messages', 'conversations', 'product_images', 'order_items', 'orders', 'premium_payments', 'products', 'reservations'];
+    for (const t of tables) {
+      try { await pool.query(`DELETE FROM \`${t}\``); } catch {}
+    }
+    await pool.query('DELETE FROM users WHERE id != 1');
+    res.json({ message: 'DB cleaned. Admin only.' });
+  } catch (err) {
+    res.status(500).json({ message: 'Erreur serveur.' });
+  }
+});
+
 router.delete('/premium-payments/:id', authenticate, adminOnly, async (req, res) => {
   try {
     const paymentId = Number(req.params.id);
