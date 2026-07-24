@@ -37,18 +37,18 @@ export default function SellerDashboard() {
   const [uploadMsg, setUploadMsg] = useState(null);
   const [copiedField, setCopiedField] = useState(null);
   useEffect(() => {
-    Promise.all([
+    Promise.allSettled([
       api.get('/seller/me'),
       api.get('/seller/me/products'),
       api.get('/seller/me/commissions'),
       api.get('/auth/my-credits'),
-    ]).then(([p, pr, c, cr]) => {
-      setProfile(p.data);
-      setProducts(pr.data);
-      setStoreName(p.data.store_name || '');
-      setCommissions(c.data);
-      setCreditBalance(cr.data.credit_balance);
-    }).catch(() => {}).finally(() => setLoading(false));
+    ]).then((results) => {
+      const [p, pr, c, cr] = results;
+      if (p.status === 'fulfilled') { setProfile(p.value.data); setStoreName(p.value.data.store_name || ''); }
+      if (pr.status === 'fulfilled') setProducts(pr.value.data);
+      if (c.status === 'fulfilled') setCommissions(c.value.data);
+      if (cr.status === 'fulfilled') setCreditBalance(cr.value.data.credit_balance);
+    }).finally(() => setLoading(false));
   }, []);
 
   const handleBuyCredits = async () => {

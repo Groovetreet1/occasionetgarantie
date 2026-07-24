@@ -517,8 +517,9 @@ router.get('/my-credits', authenticate, async (req, res) => {
       if (e.errno === 1146 || e.code === 'ER_NO_SUCH_TABLE') txns = [];
       else throw e;
     }
-    res.json({ credit_balance: balance, transactions: txns });
+    res.json({ credit_balance: balance, transactions: txns, debug_user_id: req.user.id, debug_email: req.user.email });
   } catch (err) {
+    console.error('/my-credits error:', err.sqlMessage || err.message);
     res.status(500).json({ message: 'Erreur serveur.' });
   }
 });

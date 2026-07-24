@@ -112,6 +112,9 @@ router.get('/me/commissions', authenticate, async (req, res) => {
     );
     res.json({ commissions: rows, summary: totalRow[0] });
   } catch (err) {
+    if (err.errno === 1146 || err.code === 'ER_NO_SUCH_TABLE') {
+      return res.json({ commissions: [], summary: { total_commission: 0, count: 0 } });
+    }
     res.status(500).json({ message: 'Erreur serveur.', error: err.message });
   }
 });
