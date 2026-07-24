@@ -3,23 +3,21 @@ import { Link } from 'react-router-dom';
 import { FiShield, FiRefreshCw, FiTruck, FiMapPin, FiPhone, FiMail, FiClock, FiCheckCircle, FiUsers, FiAward, FiSend } from 'react-icons/fi';
 import { BsWhatsapp } from 'react-icons/bs';
 import api from '../api/axios';
+import { useAuth } from '../context/AuthContext';
 
 export default function About() {
-  const [cfName, setCfName] = useState('');
-  const [cfEmail, setCfEmail] = useState('');
+  const { user } = useAuth();
   const [cfMsg, setCfMsg] = useState('');
   const [cfLoading, setCfLoading] = useState(false);
   const [cfDone, setCfDone] = useState(false);
 
   const handleContactSubmit = async (e) => {
     e.preventDefault();
-    if (!cfName.trim() || !cfEmail.trim() || !cfMsg.trim()) return;
+    if (!cfMsg.trim()) return;
     setCfLoading(true);
     try {
-      await api.post('/contact', { name: cfName, email: cfEmail, message: cfMsg });
+      await api.post('/contact', { message: cfMsg });
       setCfDone(true);
-      setCfName('');
-      setCfEmail('');
       setCfMsg('');
     } catch {
       alert('Erreur lors de l\'envoi. Reessayez.');
@@ -149,15 +147,21 @@ export default function About() {
                   <p>Message envoye ! Nous vous repondrons dans les plus brefs delais.</p>
                   <button type="button" className="btn btn-ghost" onClick={() => setCfDone(false)} style={{ marginTop: '8px' }}>Envoyer un autre message</button>
                 </div>
-              ) : (
+              ) : user ? (
                 <>
-                  <input type="text" placeholder="Votre nom" value={cfName} onChange={e => setCfName(e.target.value)} required style={{ width: '100%', padding: '10px 14px', background: 'var(--bg-secondary)', border: '1px solid var(--border)', borderRadius: 'var(--radius)', color: 'var(--text-primary)', fontSize: '14px', fontFamily: 'inherit', outline: 'none' }} />
-                  <input type="email" placeholder="Votre email" value={cfEmail} onChange={e => setCfEmail(e.target.value)} required style={{ width: '100%', padding: '10px 14px', background: 'var(--bg-secondary)', border: '1px solid var(--border)', borderRadius: 'var(--radius)', color: 'var(--text-primary)', fontSize: '14px', fontFamily: 'inherit', outline: 'none' }} />
+                  <div style={{ fontSize: '13px', color: 'var(--text-secondary)', padding: '8px 14px', background: 'var(--bg-secondary)', borderRadius: 'var(--radius)', border: '1px solid var(--border)' }}>
+                    Envoyé depuis <strong>{user.fullName || user.full_name}</strong> &lt;{user.email}&gt;
+                  </div>
                   <textarea rows={4} placeholder="Votre message" value={cfMsg} onChange={e => setCfMsg(e.target.value)} required style={{ width: '100%', padding: '10px 14px', background: 'var(--bg-secondary)', border: '1px solid var(--border)', borderRadius: 'var(--radius)', color: 'var(--text-primary)', fontSize: '14px', fontFamily: 'inherit', outline: 'none', resize: 'vertical' }} />
                   <button type="submit" className="btn btn-primary" style={{ justifyContent: 'center' }} disabled={cfLoading}>
                     {cfLoading ? 'Envoi...' : 'Envoyer'}
                   </button>
                 </>
+              ) : (
+                <div style={{ textAlign: 'center', padding: '20px', color: 'var(--text-secondary)' }}>
+                  <p>Vous devez etre connecte pour envoyer un message.</p>
+                  <Link to="/login" className="btn btn-primary" style={{ marginTop: '12px', display: 'inline-flex' }}>Se connecter</Link>
+                </div>
               )}
             </form>
           </div>

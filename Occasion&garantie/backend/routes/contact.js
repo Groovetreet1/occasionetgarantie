@@ -1,11 +1,13 @@
 const express = require('express');
 const router = express.Router();
 const pool = require('../config/db');
+const { authenticate } = require('../middleware/auth');
 
 (async () => {
   try {
     await pool.query(`CREATE TABLE IF NOT EXISTS contact_messages (
       id INT AUTO_INCREMENT PRIMARY KEY,
+      user_id INT NOT NULL,
       name VARCHAR(100) NOT NULL,
       email VARCHAR(200) NOT NULL,
       message TEXT NOT NULL,
@@ -17,32 +19,30 @@ const pool = require('../config/db');
   }
 })();
 
-router.post('/', async (req, res) => {
+router.post('/', authenticate, async (req, res) => {
   try {
-    const { name, email, message } = req.body;
-    if (!name || !name.trim()) return res.status(400).json({ message: 'Nom requis.' });
-    if (!email || !email.trim()) return res.status(400).json({ message: 'Email requis.' });
+    const { message } = req.body;
     if (!message || !message.trim()) return res.status(400).json({ message: 'Message requis.' });
 
+    const [users] = await pool.query('SELECT full_name, email FROM users WHERE id = ?', [req.user.id]);
+    if (users.length === 0) return res.status(400).json({ message: 'Utilisateur introuvable.' });
+
+    const { full_name, email } = users[0];
+
     await pool.query(
-      'INSERT INTO contact_messages (name, email, message) VALUES (?, ?, ?)',
-      [name.trim(), email.trim(), message.trim()]
+      'INSERT INTO contact_messages (user_id, name, email, message) VALUES (?, ?, ?, ?)',
+      [req.user.id, full_name, email, message.trim()]
     );
 
     try {
-      const nodemailer = require('nodemailer');
-      if (process.env.SMTP_HOST) {
-        const transporter = nodemailer.createTransport({
-          host: process.env.SMTP_HOST,
-          port: Number(process.env.SMTP_PORT) || 587,
-          secure: process.env.SMTP_SECURE === 'true',
-          auth: { user: process.env.SMTP_USER, pass: process.env.SMTP_PASS },
-        });
-        await transporter.sendMail({
-          from: `"${name}" <${email}>`,
+      if (process.env.RESEND_API_KEY) {
+        const { Resend } = require('resend');
+        const resend = new Resend(process.env.RESEND_API_KEY);
+        await resend.emails.send({
+          from: 'Occasion & Garantie <onboarding@resend.dev>',
           to: process.env.CONTACT_EMAIL || 'contact-occasionetgarantie@proton.me',
-          subject: `[Occasion & Garantie] Message de ${name}`,
-          text: `Nom: ${name}\nEmail: ${email}\n\nMessage:\n${message}`,
+          subject: `[Occasion & Garantie] Message de ${full_name}`,
+          text: `Nom: ${full_name}\nEmail: ${email}\n\nMessage:\n${message}`,
         });
       }
     } catch (mailErr) {
