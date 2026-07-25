@@ -6,6 +6,7 @@ const rateLimit = require('express-rate-limit');
 const path = require('path');
 
 const authRoutes = require('./routes/auth');
+const { authenticate, adminOnly } = require('./middleware/auth');
 const productRoutes = require('./routes/products');
 const categoryRoutes = require('./routes/categories');
 const uploadRoutes = require('./routes/upload');
@@ -137,6 +138,16 @@ app.use('/api/chat', chatRoutes);
 app.use('/api/contact', contactRoutes);
 app.use('/api/newsletter', require('./routes/newsletter'));
 
+const { startNewsletterCron, sendNewsletterToAll } = require('./services/newsletterCron');
+app.post('/api/newsletter/trigger', authenticate, adminOnly, async (req, res) => {
+  try {
+    await sendNewsletterToAll();
+    res.json({ message: 'Newsletter envoyee.' });
+  } catch (err) {
+    res.status(500).json({ message: 'Erreur.' });
+  }
+});
+
 app.get('/ads.txt', (req, res) => {
   res.type('text/plain').send('google.com, pub-3266333749754332, DIRECT, f08c47fec0942fa0');
 });
@@ -160,4 +171,5 @@ app.use((err, req, res, next) => {
 
 app.listen(PORT, () => {
   console.log(`Server running on http://localhost:${PORT}`);
+  try { startNewsletterCron(); } catch (e) { console.log('Newsletter cron init:', e.message); }
 });
