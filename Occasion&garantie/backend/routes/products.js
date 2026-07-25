@@ -11,6 +11,16 @@ function isAdminOrSeller(req) {
   return req.user && (req.user.role === 'admin' || req.user.role === 'seller');
 }
 
+const ALLOWED_CATEGORY_IDS = [1, 2, 3, 4, 5];
+
+async function validateCategory(categoryId) {
+  if (!categoryId) return 'Categorie requise. Seuls les produits electronique (Smartphones, Tablettes, Ordinateurs, Accessoires, Gaming) sont autorises.';
+  if (!ALLOWED_CATEGORY_IDS.includes(Number(categoryId))) return 'Categorie invalide. Seuls les produits electronique sont autorises.';
+  const [rows] = await pool.query('SELECT id FROM categories WHERE id = ?', [categoryId]);
+  if (rows.length === 0) return 'Categorie introuvable.';
+  return null;
+}
+
 // Public: list products (only disponible)
 router.get('/', async (req, res) => {
   try {
@@ -116,6 +126,9 @@ router.post('/', authenticate, async (req, res) => {
     const { name, slug, description, price, old_price, category_id, brand, state, warranty, stock, featured, image, gallery, specs } = req.body;
     const sellerId = req.user.role === 'admin' ? (req.body.seller_id || null) : req.user.id;
 
+    const catError = await validateCategory(category_id);
+    if (catError) return res.status(400).json({ message: catError });
+
     // Credit deduction for sellers > 3 months (5% of price)
     if (req.user.role === 'seller' && price) {
       try {
@@ -156,6 +169,10 @@ router.put('/:id', authenticate, async (req, res) => {
       return res.status(403).json({ message: 'Vous ne pouvez modifier que vos propres produits.' });
     }
     const { name, slug, description, price, old_price, category_id, brand, state, warranty, stock, featured, image, gallery, specs, status } = req.body;
+    if (category_id) {
+      const catError = await validateCategory(category_id);
+      if (catError) return res.status(400).json({ message: catError });
+    }
     await pool.query(
       `UPDATE products SET name=?, slug=?, description=?, price=?, old_price=?, category_id=?, brand=?, state=?, warranty=?, stock=?, featured=?, image=?, gallery=?, specs=?, status=? WHERE id = ?`,
       [name, slug, description, price, old_price || null, category_id || null, brand || null, state || 'tres_bon', warranty || '6 mois', stock || 1, featured || false, image || null, gallery ? JSON.stringify(gallery) : null, specs ? JSON.stringify(specs) : null, status || 'disponible', req.params.id]
