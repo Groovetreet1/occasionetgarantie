@@ -263,15 +263,20 @@ router.put('/profile', authenticate, [
 
 router.post('/upload-avatar', authenticate, (req, res) => {
   avatarUpload.single('avatar')(req, res, async (err) => {
-    if (err) return res.status(400).json({ message: err.message });
-    if (!req.file) return res.status(400).json({ message: 'Aucun fichier envoye.' });
     try {
+      if (err) {
+        console.error('Multer error:', err.message);
+        return res.status(400).json({ message: err.message });
+      }
+      if (!req.file) return res.status(400).json({ message: 'Aucun fichier envoye.' });
+      console.log('File received:', req.file.path, 'size:', req.file.size);
       const result = await cloudUpload(req.file.path, 'avatars');
+      console.log('Upload result:', result);
       await pool.query('UPDATE users SET avatar = ? WHERE id = ?', [result.url, req.user.id]);
       res.json({ avatar: result.url });
-    } catch (dbErr) {
-      console.error('Avatar upload error:', dbErr.message || dbErr);
-      res.status(500).json({ message: 'Erreur serveur.' });
+    } catch (catchErr) {
+      console.error('Avatar upload catch:', catchErr.message || catchErr);
+      res.status(500).json({ message: 'Erreur serveur.', detail: catchErr.message });
     }
   });
 });
