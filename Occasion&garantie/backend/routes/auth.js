@@ -52,10 +52,11 @@ router.post('/signup', [
   body('email').isEmail().withMessage('Email invalide.').normalizeEmail(),
   body('password').isLength({ min: 6 }).withMessage('Le mot de passe doit contenir au moins 6 caractères.'),
   body('phone').trim().notEmpty().withMessage('Le numéro de téléphone est requis.'),
+  body('verificationMethod').isIn(['email', 'sms']).withMessage('Methode de verification invalide.'),
   body('termsAccepted').isBoolean().withMessage('Vous devez accepter les conditions generales.'),
 ], validate, async (req, res) => {
   try {
-    const { fullName, email, password, phone, role, storeName, termsAccepted } = req.body;
+    const { fullName, email, password, phone, role, storeName, verificationMethod, termsAccepted } = req.body;
     if (!termsAccepted) return res.status(400).json({ message: 'Vous devez accepter les conditions generales.' });
     const [existing] = await pool.query('SELECT id FROM users WHERE email = ?', [email]);
     if (existing.length > 0) {
@@ -70,21 +71,37 @@ router.post('/signup', [
     const expiresAt = Date.now() + CODE_EXPIRY;
     const userRole = (role === 'seller') ? 'seller' : 'client';
 
+    try { await pool.query('ALTER TABLE users ADD COLUMN verification_method VARCHAR(10) DEFAULT \'sms\''); } catch {}
+
     const [result] = await pool.query(
-      'INSERT INTO users (full_name, email, password, phone, phone_verified, verification_token, verification_expires, role, store_name, terms_accepted) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)',
-      [fullName, email, hashed, phone, false, code, expiresAt, userRole, (role === 'seller' && storeName) ? storeName : null, true]
+      'INSERT INTO users (full_name, email, password, phone, phone_verified, verification_token, verification_expires, role, store_name, terms_accepted, verification_method) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)',
+      [fullName, email, hashed, phone, false, code, expiresAt, userRole, (role === 'seller' && storeName) ? storeName : null, true, verificationMethod]
     );
 
-    try {
-      await gomobile.sendSms(phone, `Votre code de verification Occasion & Garantie : ${code}`);
-    } catch (smsErr) {
-      console.error('SMS send failed:', smsErr.message);
+    if (verificationMethod === 'email') {
+      try {
+        await send({
+          to: email,
+          subject: 'Votre code de verification - Occasion & Garantie',
+          html: verification({ code, userName: fullName }),
+        });
+      } catch (mailErr) {
+        console.error('Email verification send failed:', mailErr.message);
+        try { await gomobile.sendSms(phone, `Votre code de verification Occasion & Garantie : ${code}`); } catch {}
+      }
+    } else {
+      try {
+        await gomobile.sendSms(phone, `Votre code de verification Occasion & Garantie : ${code}`);
+      } catch (smsErr) {
+        console.error('SMS send failed:', smsErr.message);
+      }
     }
 
     res.status(201).json({
-      message: 'Un code de verification a ete envoye par SMS.',
+      message: verificationMethod === 'email' ? 'Un code de verification a ete envoye par email.' : 'Un code de verification a ete envoye par SMS.',
       needsVerification: true,
-      email
+      email,
+      verificationMethod
     });
   } catch (err) {
     res.status(500).json({ message: 'Erreur serveur.' });
@@ -118,7 +135,7 @@ router.post('/resend-code', [
 ], validate, async (req, res) => {
   try {
     const { email } = req.body;
-    const [users] = await pool.query('SELECT id, phone, phone_verified, full_name FROM users WHERE email = ?', [email]);
+    const [users] = await pool.query('SELECT id, phone, phone_verified, full_name, COALESCE(verification_method,\'sms\') as verification_method FROM users WHERE email = ?', [email]);
     if (users.length === 0) return res.status(400).json({ message: 'Utilisateur introuvable.' });
 
     const user = users[0];
@@ -128,23 +145,26 @@ router.post('/resend-code', [
     const expiresAt = Date.now() + CODE_EXPIRY;
     await pool.query('UPDATE users SET verification_token = ?, verification_expires = ? WHERE id = ?', [code, expiresAt, user.id]);
 
-    try {
-      await gomobile.sendSms(user.phone, `Votre code de verification Occasion & Garantie : ${code}`);
-    } catch (smsErr) {
-      console.error('SMS send failed:', smsErr.message);
+    if (user.verification_method === 'email') {
+      try {
+        await send({
+          to: email,
+          subject: 'Votre code de verification - Occasion & Garantie',
+          html: verification({ code, userName: user.full_name }),
+        });
+      } catch (mailErr) {
+        console.error('Email verification send failed:', mailErr.message);
+        try { await gomobile.sendSms(user.phone, `Votre code de verification Occasion & Garantie : ${code}`); } catch {}
+      }
+    } else {
+      try {
+        await gomobile.sendSms(user.phone, `Votre code de verification Occasion & Garantie : ${code}`);
+      } catch (smsErr) {
+        console.error('SMS send failed:', smsErr.message);
+      }
     }
 
-    try {
-      await send({
-        to: email,
-        subject: 'Votre code de verification - Occasion & Garantie',
-        html: verification({ code, userName: user.full_name }),
-      });
-    } catch (mailErr) {
-      console.error('Email verification send failed:', mailErr.message);
-    }
-
-    res.json({ message: 'Un nouveau code a ete envoye par SMS et email.' });
+    res.json({ message: user.verification_method === 'email' ? 'Un nouveau code a ete envoye par email.' : 'Un nouveau code a ete envoye par SMS.', verificationMethod: user.verification_method });
   } catch (err) {
     res.status(500).json({ message: 'Erreur serveur.' });
   }

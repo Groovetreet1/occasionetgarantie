@@ -1,11 +1,12 @@
 import { useState } from 'react';
 import { useSearchParams, useNavigate, Link } from 'react-router-dom';
-import { FiSmartphone, FiCheckCircle, FiXCircle, FiRefreshCw } from 'react-icons/fi';
+import { FiSmartphone, FiMail, FiCheckCircle, FiRefreshCw } from 'react-icons/fi';
 import api from '../api/axios';
 
 export default function VerifyCode() {
   const [searchParams] = useSearchParams();
   const email = searchParams.get('email') || '';
+  const method = searchParams.get('method') || 'sms';
   const navigate = useNavigate();
   const [code, setCode] = useState('');
   const [error, setError] = useState('');
@@ -32,7 +33,7 @@ export default function VerifyCode() {
     setError('');
     setResending(true);
     try {
-      await api.post('/auth/resend-code', { email });
+      const { data } = await api.post('/auth/resend-code', { email });
       setResent(true);
     } catch (err) {
       setError(err.response?.data?.message || 'Erreur lors du renvoi.');
@@ -47,13 +48,13 @@ export default function VerifyCode() {
         <div className="auth-container">
           <div className="auth-header">
             <FiCheckCircle size={40} style={{ color: 'var(--success)', marginBottom: '8px' }} />
-            <h1>Telephone verifie</h1>
+            <h1>Compte verifie</h1>
             <p>Votre compte est maintenant actif</p>
           </div>
           <div className="auth-card" style={{ textAlign: 'center' }}>
             <FiCheckCircle size={48} style={{ color: 'var(--success)', marginBottom: '16px' }} />
             <p style={{ marginBottom: '24px', color: 'var(--text-secondary)' }}>
-              Votre telephone a ete verifie avec succes.
+              Votre compte a ete verifie avec succes.
             </p>
             <Link to="/login" className="btn btn-primary" style={{ width: '100%', justifyContent: 'center' }}>
               Se connecter
@@ -68,9 +69,9 @@ export default function VerifyCode() {
     <section className="auth-page">
       <div className="auth-container">
         <div className="auth-header">
-          <FiSmartphone size={32} style={{ color: 'var(--primary)', marginBottom: '8px' }} />
+          {method === 'email' ? <FiMail size={32} style={{ color: 'var(--primary)', marginBottom: '8px' }} /> : <FiSmartphone size={32} style={{ color: 'var(--primary)', marginBottom: '8px' }} />}
           <h1>Verification</h1>
-          <p>Entrez le code recu par SMS</p>
+          <p>Entrez le code recu par {method === 'email' ? 'email' : 'SMS'}</p>
         </div>
         <div className="auth-card">
           {error && <div className="alert alert-error">{error}</div>}
@@ -80,7 +81,7 @@ export default function VerifyCode() {
             </div>
           )}
           <p style={{ fontSize: '14px', color: 'var(--text-secondary)', marginBottom: '20px', textAlign: 'center' }}>
-            Un code a 6 chiffres a ete envoye au <strong>{email}</strong>.
+            Un code a 6 chiffres a ete envoye a <strong>{email}</strong> par {method === 'email' ? 'email' : 'SMS'}.
           </p>
           <form onSubmit={handleSubmit}>
             <div className="form-group">

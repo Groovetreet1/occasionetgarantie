@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { Link, Navigate, useNavigate, useSearchParams } from 'react-router-dom';
-import { FiUserPlus, FiMail, FiLock, FiPhone, FiTrendingUp, FiShoppingBag, FiFileText } from 'react-icons/fi';
+import { FiUserPlus, FiMail, FiLock, FiPhone, FiTrendingUp, FiShoppingBag, FiFileText, FiMessageSquare } from 'react-icons/fi';
 import { useAuth } from '../context/AuthContext';
 import api from '../api/axios';
 import TermsPopup from '../components/TermsPopup';
@@ -15,6 +15,7 @@ export default function SignUp() {
   const [password, setPassword] = useState('');
   const [phone, setPhone] = useState('');
   const [storeName, setStoreName] = useState('');
+  const [verifMethod, setVerifMethod] = useState('sms');
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
   const [showTerms, setShowTerms] = useState(false);
@@ -31,8 +32,8 @@ export default function SignUp() {
     setError('');
     setLoading(true);
     try {
-      await api.post('/auth/signup', { fullName, email, password, phone, role: isSeller ? 'seller' : undefined, storeName: isSeller ? storeName : undefined, termsAccepted: true });
-      navigate(`/verify-code?email=${encodeURIComponent(email)}${isSeller ? '&role=seller' : ''}`);
+      await api.post('/auth/signup', { fullName, email, password, phone, role: isSeller ? 'seller' : undefined, storeName: isSeller ? storeName : undefined, termsAccepted: true, verificationMethod: verifMethod });
+      navigate(`/verify-code?email=${encodeURIComponent(email)}${isSeller ? '&role=seller' : ''}${verifMethod === 'email' ? '&method=email' : ''}`);
     } catch (err) {
       setError(err.response?.data?.message || 'Erreur lors de l\'inscription.');
     } finally {
@@ -70,6 +71,19 @@ export default function SignUp() {
             <div className="form-group">
               <label><FiPhone size={14} /> Telephone</label>
               <input type="tel" value={phone} onChange={(e) => setPhone(e.target.value)} placeholder="+212 6XX XXX XXX" required />
+            </div>
+            <div className="form-group">
+              <label style={{ marginBottom: 8, display: 'block' }}>Recevoir le code par</label>
+              <div style={{ display: 'flex', gap: 12 }}>
+                <label style={{ flex: 1, display: 'flex', alignItems: 'center', gap: 8, padding: '10px 14px', border: verifMethod === 'sms' ? '2px solid var(--primary)' : '1px solid var(--border)', borderRadius: 8, cursor: 'pointer', background: verifMethod === 'sms' ? 'rgba(37,99,235,0.05)' : 'transparent' }}>
+                  <input type="radio" name="verifMethod" value="sms" checked={verifMethod === 'sms'} onChange={() => setVerifMethod('sms')} style={{ accentColor: 'var(--primary)' }} />
+                  <FiMessageSquare size={16} /> SMS
+                </label>
+                <label style={{ flex: 1, display: 'flex', alignItems: 'center', gap: 8, padding: '10px 14px', border: verifMethod === 'email' ? '2px solid var(--primary)' : '1px solid var(--border)', borderRadius: 8, cursor: 'pointer', background: verifMethod === 'email' ? 'rgba(37,99,235,0.05)' : 'transparent' }}>
+                  <input type="radio" name="verifMethod" value="email" checked={verifMethod === 'email'} onChange={() => setVerifMethod('email')} style={{ accentColor: 'var(--primary)' }} />
+                  <FiMail size={16} /> Email
+                </label>
+              </div>
             </div>
             {isSeller && (
               <div className="form-group">

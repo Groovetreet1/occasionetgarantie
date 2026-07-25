@@ -67,15 +67,17 @@ router.post('/premium-payments/:id/confirm', authenticate, adminOnly, async (req
       }
     }
 
+    // Notify client by email
     try {
-      const [userRow] = await pool.query('SELECT phone, full_name FROM users WHERE id = ?', [payments[0].user_id]);
-      if (userRow.length > 0 && userRow[0].phone) {
-        const msg = `Premium active ! Merci ${userRow[0].full_name}. Les publicites sont desactivees.`;
-        await gomobile.sendSms(userRow[0].phone, msg);
+      const [userRow] = await pool.query('SELECT email, full_name FROM users WHERE id = ?', [payments[0].user_id]);
+      if (userRow.length > 0 && userRow[0].email) {
+        await send({
+          to: userRow[0].email,
+          subject: 'Premium active - Occasion & Garantie',
+          html: `<div style="font-family:Arial;padding:20px"><h2 style="color:#2563eb">Premium activee</h2><p>Bonjour ${userRow[0].full_name}, votre compte Premium est actif pour 1 an. Les publicites sont desactivees.</p></div>`,
+        });
       }
-    } catch (smsErr) {
-      console.error('SMS failed:', smsErr.message);
-    }
+    } catch (notifErr) { console.error('Email failed:', notifErr.message); }
 
     res.json({ message: 'Premium confirme avec succes pour 1 an.' });
   } catch (err) {
@@ -96,14 +98,15 @@ router.post('/premium-payments/:id/reject', authenticate, adminOnly, async (req,
     await pool.query('UPDATE premium_payments SET status = ?, rejection_reason = ? WHERE id = ?', ['rejete', rejectionReason, paymentId]);
 
     try {
-      const [userRow] = await pool.query('SELECT phone, full_name FROM users WHERE id = ?', [payments[0].user_id]);
-      if (userRow.length > 0 && userRow[0].phone) {
-        const msg = `Bonjour ${userRow[0].full_name}, votre demande Premium a ete refusee. Raison: ${rejectionReason}`;
-        await gomobile.sendSms(userRow[0].phone, msg);
+      const [userRow] = await pool.query('SELECT email, full_name FROM users WHERE id = ?', [payments[0].user_id]);
+      if (userRow.length > 0 && userRow[0].email) {
+        await send({
+          to: userRow[0].email,
+          subject: 'Demande Premium refusee - Occasion & Garantie',
+          html: `<div style="font-family:Arial;padding:20px"><h2 style="color:#dc2626">Demande refusee</h2><p>Bonjour ${userRow[0].full_name}, votre demande Premium a ete refusee.</p><p style="color:#64748b">Raison: ${rejectionReason}</p></div>`,
+        });
       }
-    } catch (smsErr) {
-      console.error('SMS failed:', smsErr.message);
-    }
+    } catch (notifErr) { console.error('Email failed:', notifErr.message); }
 
     res.json({ message: 'Paiement rejete.', reason: rejectionReason });
   } catch (err) {
@@ -170,10 +173,6 @@ router.post('/credit-purchases/:id/confirm', authenticate, adminOnly, async (req
 
     try {
       const [userRow] = await pool.query('SELECT phone, full_name, email FROM users WHERE id = ?', [userId]);
-      if (userRow.length > 0 && userRow[0].phone) {
-        const msg = `Bonjour ${userRow[0].full_name}, votre achat de ${creditsToAdd} credits est confirme ! Solde: ${newBalance} credits.`;
-        await gomobile.sendSms(userRow[0].phone, msg);
-      }
       if (userRow.length > 0 && userRow[0].email) {
         await send({
           to: userRow[0].email,
@@ -181,7 +180,7 @@ router.post('/credit-purchases/:id/confirm', authenticate, adminOnly, async (req
           html: creditConfirmed({ userName: userRow[0].full_name, credits: creditsToAdd, amountDH: purchases[0].amount_dh, newBalance }),
         });
       }
-    } catch (smsErr) { console.error('SMS/email failed:', smsErr.message); }
+    } catch (notifErr) { console.error('Email notification failed:', notifErr.message); }
 
     res.json({ message: 'Achat confirme, credits ajoutes.', credit_balance: newBalance });
   } catch (err) {
@@ -202,12 +201,15 @@ router.post('/credit-purchases/:id/reject', authenticate, adminOnly, async (req,
     await pool.query('UPDATE credit_purchases SET status = ?, rejection_reason = ? WHERE id = ?', ['rejete', rejectionReason, purchaseId]);
 
     try {
-      const [userRow] = await pool.query('SELECT phone, full_name FROM users WHERE id = ?', [purchases[0].user_id]);
-      if (userRow.length > 0 && userRow[0].phone) {
-        const msg = `Bonjour ${userRow[0].full_name}, votre achat de credits a ete refuse. Raison: ${rejectionReason}`;
-        await gomobile.sendSms(userRow[0].phone, msg);
+      const [userRow] = await pool.query('SELECT email, full_name FROM users WHERE id = ?', [purchases[0].user_id]);
+      if (userRow.length > 0 && userRow[0].email) {
+        await send({
+          to: userRow[0].email,
+          subject: 'Achat de credits refuse - Occasion & Garantie',
+          html: `<div style="font-family:Arial;padding:20px"><h2 style="color:#dc2626">Achat refuse</h2><p>Bonjour ${userRow[0].full_name}, votre achat de credits a ete refuse.</p><p style="color:#64748b">Raison: ${rejectionReason}</p></div>`,
+        });
       }
-    } catch (smsErr) { console.error('SMS failed:', smsErr.message); }
+    } catch (notifErr) { console.error('Email failed:', notifErr.message); }
 
     res.json({ message: 'Achat rejete.', reason: rejectionReason });
   } catch (err) {
