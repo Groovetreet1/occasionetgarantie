@@ -270,6 +270,7 @@ router.post('/upload-avatar', authenticate, (req, res) => {
       await pool.query('UPDATE users SET avatar = ? WHERE id = ?', [result.url, req.user.id]);
       res.json({ avatar: result.url });
     } catch (dbErr) {
+      console.error('Avatar upload error:', dbErr.message || dbErr);
       res.status(500).json({ message: 'Erreur serveur.' });
     }
   });
