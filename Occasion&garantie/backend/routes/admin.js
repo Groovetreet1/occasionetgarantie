@@ -263,12 +263,13 @@ router.delete('/users/:id', authenticate, adminOnly, async (req, res) => {
     await safeDelete('DELETE FROM installments WHERE buyer_id = ? OR seller_id = ?', [userId, userId], 'installments');
     await safeDelete('DELETE FROM reservations WHERE user_id = ?', [userId], 'reservations');
     await safeDelete('DELETE FROM commissions WHERE seller_id = ?', [userId], 'commissions');
-    await safeDelete('DELETE FROM product_images WHERE product_id IN (SELECT id FROM products WHERE user_id = ?)', [userId], 'product_images');
-    const userEmail = userRows[0]?.email;
+    await safeDelete('DELETE FROM product_images WHERE product_id IN (SELECT id FROM products WHERE seller_id = ?)', [userId], 'product_images');
     await safeDelete('DELETE FROM contact_messages WHERE user_id = ?', [userId], 'contact_messages');
+    const userEmail = userRows[0]?.email;
     if (userEmail) await safeDelete('DELETE FROM newsletter_subscribers WHERE email = ?', [userEmail], 'newsletter_subscribers');
 
-    const [products] = await pool.query('SELECT id, image FROM products WHERE user_id = ?', [userId]);
+    let products = [];
+    try { [products] = await pool.query('SELECT id, image FROM products WHERE seller_id = ?', [userId]); } catch (e) { console.log('Delete products select skipped:', e.message); }
     for (const p of products) {
       if (p.image) {
         try { fs.unlinkSync(path.join(__dirname, '..', 'uploads', p.image)); } catch {}
@@ -283,7 +284,7 @@ router.delete('/users/:id', authenticate, adminOnly, async (req, res) => {
         } catch (e) { console.error('Cloudinary destroy error:', e.message); }
       }
     }
-    await pool.query('DELETE FROM products WHERE user_id = ?', [userId]);
+    await safeDelete('DELETE FROM products WHERE seller_id = ?', [userId], 'products');
     await pool.query('DELETE FROM users WHERE id = ?', [userId]);
 
     res.json({ message: `Compte de "${userRows[0].full_name}" et toutes ses donnees supprime.` });
