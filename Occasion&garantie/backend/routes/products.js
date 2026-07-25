@@ -242,11 +242,15 @@ router.delete('/:id', authenticate, async (req, res) => {
     const img = rows[0].image;
     if (img) {
       try { fs.unlinkSync(path.join(__dirname, '..', 'uploads', img)); } catch {}
-      if (USE_CLOUDINARY && img.startsWith('http') && img.includes('/upload/')) {
-        const parts = img.split('/upload/')[1].split('?')[0].split('/');
-        const publicId = parts.slice(1).join('/').replace(/\.[^.]+$/, '');
-        if (publicId) cloudDestroy(publicId);
-      }
+      try {
+        if (USE_CLOUDINARY && typeof img === 'string' && img.startsWith('http') && img.includes('/upload/')) {
+          const afterUpload = img.split('/upload/')[1];
+          if (afterUpload) {
+            const publicId = afterUpload.split('?')[0].split('/').slice(1).join('/').replace(/\.[^.]+$/, '');
+            if (publicId) cloudDestroy(publicId);
+          }
+        }
+      } catch (e) { console.error('Cloudinary destroy error:', e.message); }
     }
     await pool.query('DELETE FROM products WHERE id = ?', [req.params.id]);
     res.json({ message: 'Produit supprimé.' });

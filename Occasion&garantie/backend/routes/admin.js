@@ -269,11 +269,15 @@ router.delete('/users/:id', authenticate, adminOnly, async (req, res) => {
     for (const p of products) {
       if (p.image) {
         try { fs.unlinkSync(path.join(__dirname, '..', 'uploads', p.image)); } catch {}
-        if (USE_CLOUDINARY && p.image.startsWith('http') && p.image.includes('/upload/')) {
-          const parts = p.image.split('/upload/')[1].split('?')[0].split('/');
-          const publicId = parts.slice(1).join('/').replace(/\.[^.]+$/, '');
-          if (publicId) cloudDestroy(publicId);
-        }
+        try {
+          if (USE_CLOUDINARY && typeof p.image === 'string' && p.image.startsWith('http') && p.image.includes('/upload/')) {
+            const afterUpload = p.image.split('/upload/')[1];
+            if (afterUpload) {
+              const publicId = afterUpload.split('?')[0].split('/').slice(1).join('/').replace(/\.[^.]+$/, '');
+              if (publicId) cloudDestroy(publicId);
+            }
+          }
+        } catch (e) { console.error('Cloudinary destroy error:', e.message); }
       }
     }
     await pool.query('DELETE FROM products WHERE user_id = ?', [userId]);
