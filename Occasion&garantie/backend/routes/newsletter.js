@@ -82,4 +82,26 @@ router.post('/subscribe', async (req, res) => {
   }
 });
 
+router.post('/sync-audience', async (req, res) => {
+  try {
+    const [subscribers] = await pool.query('SELECT email FROM newsletter_subscribers WHERE is_active = TRUE');
+    if (subscribers.length === 0) return res.json({ message: 'Aucun abonne a synchroniser.' });
+
+    let added = 0;
+    for (const sub of subscribers) {
+      try {
+        const resend = new Resend(RESEND_API_KEY);
+        await resend.contacts.create({ email: sub.email, audience_id: AUDIENCE_ID });
+        added++;
+      } catch (e) {
+        if (e?.response?.status !== 409) console.log(`Sync skip ${sub.email}:`, e.message);
+      }
+    }
+    res.json({ message: `${added}/${subscribers.length} abonnes synchronises vers l audience Resend.` });
+  } catch (err) {
+    console.error('Sync audience error:', err.message);
+    res.status(500).json({ message: 'Erreur serveur.' });
+  }
+});
+
 module.exports = router;
