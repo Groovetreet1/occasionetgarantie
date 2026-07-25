@@ -249,7 +249,7 @@ router.delete('/users/:id', authenticate, adminOnly, async (req, res) => {
     const userId = Number(req.params.id);
     if (userId === 1) return res.status(400).json({ message: 'Impossible de supprimer le super admin.' });
 
-    const [userRows] = await pool.query('SELECT full_name FROM users WHERE id = ?', [userId]);
+    const [userRows] = await pool.query('SELECT full_name, email FROM users WHERE id = ?', [userId]);
     if (userRows.length === 0) return res.status(404).json({ message: 'Utilisateur introuvable.' });
 
     const safeDelete = async (sql, params, desc) => {
@@ -264,6 +264,9 @@ router.delete('/users/:id', authenticate, adminOnly, async (req, res) => {
     await safeDelete('DELETE FROM reservations WHERE user_id = ?', [userId], 'reservations');
     await safeDelete('DELETE FROM commissions WHERE seller_id = ?', [userId], 'commissions');
     await safeDelete('DELETE FROM product_images WHERE product_id IN (SELECT id FROM products WHERE user_id = ?)', [userId], 'product_images');
+    const userEmail = userRows[0]?.email;
+    await safeDelete('DELETE FROM contact_messages WHERE user_id = ?', [userId], 'contact_messages');
+    if (userEmail) await safeDelete('DELETE FROM newsletter_subscribers WHERE email = ?', [userEmail], 'newsletter_subscribers');
 
     const [products] = await pool.query('SELECT id, image FROM products WHERE user_id = ?', [userId]);
     for (const p of products) {
@@ -286,7 +289,7 @@ router.delete('/users/:id', authenticate, adminOnly, async (req, res) => {
     res.json({ message: `Compte de "${userRows[0].full_name}" et toutes ses donnees supprime.` });
   } catch (err) {
     console.error('Delete user error:', err.sqlMessage || err.message);
-    res.status(500).json({ message: 'Erreur serveur.' });
+    res.status(500).json({ message: 'Erreur serveur.', detail: err.sqlMessage || err.message });
   }
 });
 
