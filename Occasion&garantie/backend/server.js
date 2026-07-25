@@ -134,6 +134,7 @@ app.use('/api/', limiter);
 
 app.use('/uploads', express.static(path.join(__dirname, 'uploads')));
 app.use(express.static(path.join(__dirname, 'public')));
+app.get('/favicon.ico', (req, res) => res.redirect(301, '/favicon.png'));
 
 app.use('/api/auth', authLimiter, authRoutes);
 app.use('/api/products', productRoutes);
