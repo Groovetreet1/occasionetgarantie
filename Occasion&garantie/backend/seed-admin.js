@@ -2,7 +2,7 @@ const bcrypt = require('bcryptjs');
 const db = require('./config/db');
 
 async function seedAdmin() {
-  const email = 'contact-occasionetgarantie@proton.me';
+  const email = 'contact@contact.occasionetgarantie.store';
   const oldEmail = 'admin@og.fr';
 
   // Migrate existing admin from old email

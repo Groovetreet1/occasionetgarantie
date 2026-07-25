@@ -28,7 +28,7 @@ export default function Footer() {
           </div>
           <div className="footer-col">
             <h4>Contact</h4>
-            <a href="mailto:contact-occasionetgarantie@proton.me"><FiMail size={12} /> contact-occasionetgarantie@proton.me</a>
+            <a href="mailto:contact@contact.occasionetgarantie.store"><FiMail size={12} /> contact@contact.occasionetgarantie.store</a>
             <a href="tel:+212669017295"><FiPhone size={12} /> +212 669-017295</a>
             <p style={{ color: 'var(--text-secondary)', fontSize: '13px', marginTop: '6px', display: 'flex', alignItems: 'center', gap: '4px' }}>
               <FiMapPin size={12} /> Casablanca, Maroc

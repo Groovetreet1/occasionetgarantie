@@ -126,7 +126,7 @@ export default function About() {
                 <FiMail size={20} style={{ color: 'var(--primary)', flexShrink: 0 }} />
                 <div>
                   <div style={{ fontSize: '13px', fontWeight: 600 }}>Email</div>
-                  <div style={{ fontSize: '13px', color: 'var(--text-secondary)' }}>contact-occasionetgarantie@proton.me</div>
+                  <div style={{ fontSize: '13px', color: 'var(--text-secondary)' }}>contact@contact.occasionetgarantie.store</div>
                 </div>
               </div>
               <div style={{ display: 'flex', alignItems: 'center', gap: '14px', padding: '16px', background: 'var(--bg-card)', border: '1px solid var(--border)', borderRadius: 'var(--radius-lg)' }}>
