@@ -512,12 +512,12 @@ router.post('/upload-credit-screenshot', authenticate, creditUpload.single('scre
     await pool.query('UPDATE credit_purchases SET screenshot = ? WHERE id = ?', [filename, purchaseId]);
 
     try {
-      const [adminRow] = await pool.query('SELECT phone FROM users WHERE role = ?', ['admin']);
-      if (adminRow.length > 0 && adminRow[0].phone) {
-        const msg = `Achat credits #${purchaseId}: ${purchases[0].credits} credits, ${purchases[0].amount_dh} DH recu, confirmer sur admin`;
-        await gomobile.sendSms(adminRow[0].phone, msg);
+      const [adminRow] = await pool.query('SELECT email FROM users WHERE role = ?', ['admin']);
+      if (adminRow.length > 0 && adminRow[0].email) {
+        const html = `<!DOCTYPE html><html lang="fr"><head><meta charset="utf-8"></head><body style="margin:0;padding:0;font-family:Arial,sans-serif;background:#f5f7fa"><table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="padding:40px 16px"><tr><td align="center"><table role="presentation" width="100%" style="max-width:480px;background:#fff;border-radius:12px;padding:32px"><tr><td align="center"><div style="width:56px;height:56px;border-radius:50%;background:#fef3c7;display:flex;align-items:center;justify-content:center;margin:0 auto"><span style="font-size:24px">&#9888;</span></div><h1 style="font-size:18px;color:#1a1a2e;margin:16px 0 4px">Nouvel achat de credits</h1><p style="font-size:14px;color:#64748b;margin:0 0 20px">Un client a envoye un paiement, a confirmer</p></td></tr><tr><td><table width="100%" cellpadding="8" style="background:#f8fafc;border-radius:8px;margin-bottom:20px"><tr><td style="font-size:13px;color:#64748b">Demande</td><td style="font-size:14px;font-weight:600;color:#1a1a2e" align="right">#${purchaseId}</td></tr><tr><td style="font-size:13px;color:#64748b">Credits</td><td style="font-size:14px;font-weight:600;color:#1a1a2e" align="right">${purchases[0].credits}</td></tr><tr><td style="font-size:13px;color:#64748b">Montant</td><td style="font-size:14px;font-weight:600;color:#1a1a2e" align="right">${purchases[0].amount_dh} DH</td></tr></table><a href="https://occasionetgarantie.store/admin/credits" style="display:block;text-align:center;padding:14px;background:#2563eb;color:#fff;text-decoration:none;border-radius:8px;font-size:15px;font-weight:600">Confirmer la demande</a></td></tr><tr><td style="padding-top:16px" align="center"><p style="font-size:12px;color:#94a3b8;margin:0">Occasion &amp; Garantie — Admin</p></td></tr></table></td></tr></table></body></html>`;
+        await send({ to: adminRow[0].email, subject: `Nouvel achat de credits #${purchaseId} - ${purchases[0].amount_dh} DH`, html });
       }
-    } catch (smsErr) { console.error('Admin SMS failed:', smsErr.message); }
+    } catch (notifErr) { console.error('Admin email failed:', notifErr.message); }
 
     res.json({ message: 'Screenshot envoye. En attente de confirmation par l\'administrateur.' });
   } catch (err) {
