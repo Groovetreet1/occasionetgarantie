@@ -1,16 +1,24 @@
 import { useState } from 'react';
 import { motion } from 'framer-motion';
 import { FiSend, FiMail } from 'react-icons/fi';
+import api from '../api';
 
 export default function NewsletterSection() {
   const [email, setEmail] = useState('');
   const [sent, setSent] = useState(false);
+  const [error, setError] = useState('');
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
     if (!email) return;
-    setSent(true);
-    setTimeout(() => { setSent(false); setEmail(''); }, 3000);
+    try {
+      await api.post('/newsletter/subscribe', { email });
+      setSent(true);
+      setError('');
+      setTimeout(() => { setSent(false); setEmail(''); }, 3000);
+    } catch (err) {
+      setError(err.response?.data?.message || 'Erreur lors de l\'inscription.');
+    }
   };
 
   return (
@@ -30,6 +38,7 @@ export default function NewsletterSection() {
               <FiSend size={16} /> {sent ? 'Merci !' : "S'inscrire"}
             </motion.button>
           </form>
+          {error && <p style={{ color: '#ef4444', fontSize: '13px', marginTop: '8px' }}>{error}</p>}
         </motion.div>
       </div>
     </section>

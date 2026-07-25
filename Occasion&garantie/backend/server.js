@@ -85,6 +85,17 @@ const pool = require('./config/db');
     await pool.query("UPDATE users SET email = 'contact-occasionetgarantie@proton.me' WHERE email = 'admin@og.fr'");
     console.log('Admin email migrated');
   } catch {}
+  try {
+    await pool.query(`CREATE TABLE IF NOT EXISTS newsletter_subscribers (
+      id INT AUTO_INCREMENT PRIMARY KEY,
+      email VARCHAR(255) NOT NULL UNIQUE,
+      subscribed_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+      is_active BOOLEAN DEFAULT TRUE
+    )`);
+    console.log('newsletter_subscribers table ready');
+  } catch (e) {
+    console.log('newsletter_subscribers table check skipped:', e.message);
+  }
 })();
 
 const app = express();
@@ -124,6 +135,7 @@ app.use('/api/premium', premiumRoutes);
 app.use('/api/seller', sellerRoutes);
 app.use('/api/chat', chatRoutes);
 app.use('/api/contact', contactRoutes);
+app.use('/api/newsletter', require('./routes/newsletter'));
 
 app.get('/ads.txt', (req, res) => {
   res.type('text/plain').send('google.com, pub-3266333749754332, DIRECT, f08c47fec0942fa0');
