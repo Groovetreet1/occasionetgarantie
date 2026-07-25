@@ -7,7 +7,7 @@ function verificationTemplate({ code, userName }) {
 <tr><td align="center">
 <table role="presentation" width="100%" style="max-width:480px;background:#fff;border-radius:16px;overflow:hidden;box-shadow:0 4px 24px rgba(0,0,0,0.06)">
 <tr><td style="padding:32px 32px 0" align="center">
-<img src="https://occasionetgarantie.store/logo.png" alt="Occasion & Garantie" width="48" height="48" style="border-radius:12px">
+<img src="https://www.occasionetgarantie.store/logo.png" alt="Occasion & Garantie" width="48" height="48" style="border-radius:12px">
 <h1 style="font-size:20px;font-weight:700;color:#1a1a2e;margin:16px 0 4px">Vérification de compte</h1>
 <p style="font-size:14px;color:#64748b;margin:0 0 24px">Bonjour ${userName || ''}, voici votre code de vérification</p>
 </td></tr>

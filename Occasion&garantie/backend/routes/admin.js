@@ -350,7 +350,7 @@ router.post('/newsletter/send', authenticate, adminOnly, async (req, res) => {
         await mailSend({
           to: email,
           subject: title,
-          html: newsletterTpl({ title, content, unsubscribeLink: `https://occasionetgarantie.store/unsubscribe?email=${encodeURIComponent(email)}` }),
+          html: newsletterTpl({ title, content, unsubscribeLink: `https://www.occasionetgarantie.store/unsubscribe?email=${encodeURIComponent(email)}` }),
         });
         sent++;
       } catch (e) { console.log('Newsletter send failed for', email, e.message); }

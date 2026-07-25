@@ -19,7 +19,7 @@ function creditConfirmedTemplate({ userName, credits, amountDH, newBalance }) {
 <tr><td style="padding:8px 0;font-size:13px;color:#64748b">Montant</td><td align="right" style="font-size:15px;font-weight:600;color:#1a1a2e">${amountDH} DH</td></tr>
 <tr><td style="padding:8px 0;font-size:13px;color:#64748b;border-top:1px solid #e2e8f0">Nouveau solde</td><td align="right" style="padding:8px 0;font-size:16px;font-weight:700;color:#2563eb;border-top:1px solid #e2e8f0">${newBalance} crédits</td></tr>
 </table>
-<a href="https://occasionetgarantie.store/seller" style="display:inline-block;padding:12px 32px;background:#2563eb;color:#fff;text-decoration:none;border-radius:8px;font-size:14px;font-weight:600">Voir mon solde</a>
+<a href="https://www.occasionetgarantie.store/seller" style="display:inline-block;padding:12px 32px;background:#2563eb;color:#fff;text-decoration:none;border-radius:8px;font-size:14px;font-weight:600">Voir mon solde</a>
 </td></tr>
 <tr><td style="padding:32px" align="center">
 <p style="font-size:12px;color:#94a3b8;margin:0">Occasion & Garantie — Votre marché de confiance au Maroc</p>
