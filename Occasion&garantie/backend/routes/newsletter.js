@@ -1,7 +1,21 @@
 const express = require('express');
 const router = express.Router();
 const pool = require('../config/db');
-const { send } = require('../emails');
+const { Resend } = require('resend');
+
+const RESEND_API_KEY = process.env.RESEND_API_KEY;
+const AUDIENCE_ID = 'd755ae5f-37c7-460b-8fec-26487de88023';
+const FROM = 'Occasion & Garantie <contact@contact.occasionetgarantie.store>';
+
+async function addToResendAudience(email) {
+  if (!RESEND_API_KEY) return;
+  try {
+    const resend = new Resend(RESEND_API_KEY);
+    await resend.contacts.create({ email, audience_id: AUDIENCE_ID });
+  } catch (e) {
+    console.log('Resend audience add skipped:', e.message);
+  }
+}
 
 router.post('/subscribe', async (req, res) => {
   try {
@@ -26,6 +40,8 @@ router.post('/subscribe', async (req, res) => {
       }
     }
 
+    await addToResendAudience(email);
+
     const html = `<!DOCTYPE html>
 <html lang="fr">
 <head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"></head>
@@ -41,11 +57,11 @@ router.post('/subscribe', async (req, res) => {
 <p style="font-size:14px;color:#64748b;margin:0 0 24px">Bienvenue dans la newsletter Occasion & Garantie</p>
 </td></tr>
 <tr><td style="padding:0 32px 32px">
-<p style="font-size:14px;color:#1e293b;line-height:1.7;margin:0 0 16px">Vous recevrez désormais nos actualités, nouvelles annonces et offres exclusives directement dans votre boîte mail.</p>
-<p style="font-size:14px;color:#1e293b;line-height:1.7;margin:0">À très bientôt sur <a href="https://www.occasionetgarantie.store" style="color:#f59e0b;text-decoration:none;font-weight:600">www.occasionetgarantie.store</a> !</p>
+<p style="font-size:14px;color:#1e293b;line-height:1.7;margin:0 0 16px">Vous recevrez desormais nos actualites, nouvelles annonces et offres exclusives directement dans votre boite mail.</p>
+<p style="font-size:14px;color:#1e293b;line-height:1.7;margin:0">A tres bientot sur <a href="https://www.occasionetgarantie.store" style="color:#f59e0b;text-decoration:none;font-weight:600">www.occasionetgarantie.store</a> !</p>
 </td></tr>
 <tr><td style="padding:0 32px 32px" align="center">
-<p style="font-size:12px;color:#94a3b8;margin:0">Occasion & Garantie — Votre marché de confiance au Maroc</p>
+<p style="font-size:12px;color:#94a3b8;margin:0">Occasion & Garantie — Votre marche de confiance au Maroc</p>
 </td></tr>
 </table>
 </td></tr>
@@ -53,7 +69,8 @@ router.post('/subscribe', async (req, res) => {
 </body></html>`;
 
     try {
-      await send({ to: email, subject: 'Merci de votre inscription à la newsletter !', html });
+      const resend = new Resend(RESEND_API_KEY);
+      await resend.emails.send({ from: FROM, to: email, subject: 'Merci de votre inscription à la newsletter !', html });
     } catch (e) {
       console.log('Welcome email skipped:', e.message);
     }

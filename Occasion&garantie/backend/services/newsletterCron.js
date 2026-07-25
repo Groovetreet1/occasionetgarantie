@@ -1,10 +1,13 @@
 const cron = require('node-cron');
+const { Resend } = require('resend');
 const pool = require('../config/db');
-const { send, newsletter } = require('../emails');
+const { newsletter } = require('../emails');
 const API_BASE = process.env.CLIENT_URL || 'https://www.occasionetgarantie.store';
+const AUDIENCE_ID = 'd755ae5f-37c7-460b-8fec-26487de88023';
+const FROM = 'Occasion & Garantie <contact@contact.occasionetgarantie.store>';
 
 function buildProductCards(products) {
-  if (!products || products.length === 0) return '<p style="font-size:15px;color:#64748b;line-height:1.8">Découvrez les nouvelles annonces sur notre plateforme.</p>';
+  if (!products || products.length === 0) return '<p style="font-size:15px;color:#64748b;line-height:1.8">Decouvrez les nouvelles annonces sur notre plateforme.</p>';
   return products.map(p => `
     <table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="margin-bottom:16px;background:#f0f1f5;border-radius:10px;overflow:hidden">
       <tr>
@@ -20,13 +23,13 @@ function buildProductCards(products) {
   `).join('');
 }
 
-function buildContent(latestProducts) {
+function buildContent(products) {
   return `
     <p style="font-size:15px;color:#1e293b;line-height:1.8;margin:0 0 16px">Bonjour,</p>
-    <p style="font-size:15px;color:#1e293b;line-height:1.8;margin:0 0 20px">Voici les dernières annonces ajoutées sur Occasion & Garantie :</p>
-    ${buildProductCards(latestProducts)}
+    <p style="font-size:15px;color:#1e293b;line-height:1.8;margin:0 0 20px">Voici les dernieres annonces ajoutees sur Occasion & Garantie :</p>
+    ${buildProductCards(products)}
     <p style="font-size:15px;color:#1e293b;line-height:1.8;margin:20px 0 0">
-      <a href="${API_BASE}/products" style="color:#f59e0b;font-weight:600;text-decoration:none">Voir toutes les annonces →</a>
+      <a href="${API_BASE}/products" style="color:#f59e0b;font-weight:600;text-decoration:none">Voir toutes les annonces \u2192</a>
     </p>
   `;
 }
@@ -40,27 +43,25 @@ async function sendNewsletterToAll() {
 
     const content = buildContent(products);
     const today = new Date().toLocaleDateString('fr-FR', { day: 'numeric', month: 'long', year: 'numeric' });
-    const title = `Nouveautés du ${today}`;
+    const title = `Nouveautes du ${today}`;
+    const unsubscribeBlock = `<p style="font-size:12px;margin:8px 0 0"><a href="{{{unsubscribeUrl}}}" style="color:#f59e0b">Se desinscrire</a></p>`;
+    const html = newsletter({ title: `${title}`, content, unsubscribeLink: unsubscribeBlock });
 
-    const [subscribers] = await pool.query('SELECT email FROM newsletter_subscribers WHERE is_active = TRUE');
-    if (subscribers.length === 0) {
-      console.log(`[NewsletterCron] No active subscribers.`);
-      return;
-    }
+    if (!process.env.RESEND_API_KEY) return;
+    const resend = new Resend(process.env.RESEND_API_KEY);
 
-    let sent = 0;
-    for (const sub of subscribers) {
-      const unsubscribeLink = `${API_BASE}/unsubscribe?email=${encodeURIComponent(sub.email)}`;
-      const html = newsletter({ title, content, unsubscribeLink });
-      try {
-        await send({ to: sub.email, subject: title, html });
-        sent++;
-      } catch (e) {
-        console.log(`[NewsletterCron] Failed for ${sub.email}:`, e.message);
-      }
-      await new Promise(r => setTimeout(r, 200));
+    const broadcast = await resend.broadcasts.create({
+      name: title,
+      audience_id: AUDIENCE_ID,
+      from: FROM,
+      subject: title,
+      html,
+    });
+
+    if (broadcast?.id) {
+      await resend.broadcasts.send(broadcast.id);
+      console.log(`[NewsletterCron] Broadcast "${title}" sent to audience.`);
     }
-    console.log(`[NewsletterCron] Sent to ${sent}/${subscribers.length} subscribers.`);
   } catch (err) {
     console.error('[NewsletterCron] Error:', err.message);
   }
@@ -71,7 +72,7 @@ function startNewsletterCron() {
     console.log('[NewsletterCron] Running automated newsletter...');
     sendNewsletterToAll();
   });
-  console.log('[NewsletterCron] Scheduled: every 3 days at 09:00');
+  console.log('[NewsletterCron] Scheduled: every 3 days at 09:00 via Resend Broadcast');
 }
 
 module.exports = { startNewsletterCron, sendNewsletterToAll };
