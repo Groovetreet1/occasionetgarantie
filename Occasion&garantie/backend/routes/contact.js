@@ -3,26 +3,24 @@ const router = express.Router();
 const pool = require('../config/db');
 const { authenticate } = require('../middleware/auth');
 
-(async () => {
-  try {
-    await pool.query(`CREATE TABLE IF NOT EXISTS contact_messages (
-      id INT AUTO_INCREMENT PRIMARY KEY,
-      user_id INT NOT NULL,
-      name VARCHAR(100) NOT NULL,
-      email VARCHAR(200) NOT NULL,
-      message TEXT NOT NULL,
-      created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
-    )`);
-    console.log('contact_messages table ready');
-  } catch (e) {
-    console.log('contact_messages table check skipped:', e.message);
-  }
-})();
-
 router.post('/', authenticate, async (req, res) => {
   try {
     const { message } = req.body;
     if (!message || !message.trim()) return res.status(400).json({ message: 'Message requis.' });
+
+    // Ensure table exists (handles first-time use on fresh DB)
+    try {
+      await pool.query(`CREATE TABLE IF NOT EXISTS contact_messages (
+        id INT AUTO_INCREMENT PRIMARY KEY,
+        user_id INT NOT NULL,
+        name VARCHAR(100) NOT NULL,
+        email VARCHAR(200) NOT NULL,
+        message TEXT NOT NULL,
+        created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+      )`);
+    } catch (tableErr) {
+      console.log('contact_messages table check:', tableErr.message);
+    }
 
     const [users] = await pool.query('SELECT full_name, email FROM users WHERE id = ?', [req.user.id]);
     if (users.length === 0) return res.status(400).json({ message: 'Utilisateur introuvable.' });

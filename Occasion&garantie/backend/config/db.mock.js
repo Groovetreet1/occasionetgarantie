@@ -626,6 +626,11 @@ const mockPool = {
       return [[]];
     }
 
+    // INSERT INTO contact_messages
+    if (upper.startsWith('INSERT INTO CONTACT_MESSAGES')) {
+      return [{ insertId: 1 }];
+    }
+
     console.log('Unhandled SQL:', sql, JSON.stringify(params));
     return [[]];
   }
