@@ -78,7 +78,7 @@ router.post('/premium-payments/:id/confirm', authenticate, adminOnly, async (req
         await send({
           to: userRow[0].email,
           subject: 'Premium active - Occasion & Garantie',
-          html: `<div style="font-family:Arial;padding:20px"><h2 style="color:#2563eb">Premium activee</h2><p>Bonjour ${userRow[0].full_name}, votre compte Premium est actif pour 1 an. Les publicites sont desactivees.</p></div>`,
+          html: `<div style="font-family:Arial;padding:20px;background:#f8f9fc;border-radius:8px;max-width:480px;margin:0 auto"><div style="background:#fff;border-radius:12px;padding:24px"><h2 style="color:#10b981;margin:0 0 12px;font-size:18px">Premium activée</h2><p style="color:#1e293b;font-size:14px;line-height:1.6;margin:0">Bonjour ${userRow[0].full_name}, votre compte Premium est actif pour 1 an. Les publicités sont désactivées.</p></div></div>`,
         });
       }
     } catch (notifErr) { console.error('Email failed:', notifErr.message); }
@@ -107,7 +107,7 @@ router.post('/premium-payments/:id/reject', authenticate, adminOnly, async (req,
         await send({
           to: userRow[0].email,
           subject: 'Demande Premium refusee - Occasion & Garantie',
-          html: `<div style="font-family:Arial;padding:20px"><h2 style="color:#dc2626">Demande refusee</h2><p>Bonjour ${userRow[0].full_name}, votre demande Premium a ete refusee.</p><p style="color:#64748b">Raison: ${rejectionReason}</p></div>`,
+          html: `<div style="font-family:Arial;padding:20px;background:#f8f9fc;border-radius:8px;max-width:480px;margin:0 auto"><div style="background:#fff;border-radius:12px;padding:24px"><h2 style="color:#ef4444;margin:0 0 12px;font-size:18px">Demande refusée</h2><p style="color:#1e293b;font-size:14px;line-height:1.6;margin:0">Bonjour ${userRow[0].full_name}, votre demande Premium a été refusée.</p><p style="color:#64748b;font-size:13px;margin:8px 0 0">Raison : ${rejectionReason}</p></div></div>`,
         });
       }
     } catch (notifErr) { console.error('Email failed:', notifErr.message); }
@@ -210,7 +210,7 @@ router.post('/credit-purchases/:id/reject', authenticate, adminOnly, async (req,
         await send({
           to: userRow[0].email,
           subject: 'Achat de credits refuse - Occasion & Garantie',
-          html: `<div style="font-family:Arial;padding:20px"><h2 style="color:#dc2626">Achat refuse</h2><p>Bonjour ${userRow[0].full_name}, votre achat de credits a ete refuse.</p><p style="color:#64748b">Raison: ${rejectionReason}</p></div>`,
+          html: `<div style="font-family:Arial;padding:20px;background:#f8f9fc;border-radius:8px;max-width:480px;margin:0 auto"><div style="background:#fff;border-radius:12px;padding:24px"><h2 style="color:#ef4444;margin:0 0 12px;font-size:18px">Achat refusé</h2><p style="color:#1e293b;font-size:14px;line-height:1.6;margin:0">Bonjour ${userRow[0].full_name}, votre achat de crédits a été refusé.</p><p style="color:#64748b;font-size:13px;margin:8px 0 0">Raison : ${rejectionReason}</p></div></div>`,
         });
       }
     } catch (notifErr) { console.error('Email failed:', notifErr.message); }
