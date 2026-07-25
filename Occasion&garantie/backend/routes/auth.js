@@ -9,6 +9,7 @@ const { body, validationResult } = require('express-validator');
 const pool = require('../config/db');
 const { authenticate } = require('../middleware/auth');
 const gomobile = require('../services/gomobile');
+const { send, verification } = require('../emails');
 
 const router = express.Router();
 
@@ -117,7 +118,7 @@ router.post('/resend-code', [
 ], validate, async (req, res) => {
   try {
     const { email } = req.body;
-    const [users] = await pool.query('SELECT id, phone, phone_verified FROM users WHERE email = ?', [email]);
+    const [users] = await pool.query('SELECT id, phone, phone_verified, full_name FROM users WHERE email = ?', [email]);
     if (users.length === 0) return res.status(400).json({ message: 'Utilisateur introuvable.' });
 
     const user = users[0];
@@ -133,7 +134,17 @@ router.post('/resend-code', [
       console.error('SMS send failed:', smsErr.message);
     }
 
-    res.json({ message: 'Un nouveau code a ete envoye par SMS.' });
+    try {
+      await send({
+        to: email,
+        subject: 'Votre code de verification - Occasion & Garantie',
+        html: verification({ code, userName: user.full_name }),
+      });
+    } catch (mailErr) {
+      console.error('Email verification send failed:', mailErr.message);
+    }
+
+    res.json({ message: 'Un nouveau code a ete envoye par SMS et email.' });
   } catch (err) {
     res.status(500).json({ message: 'Erreur serveur.' });
   }

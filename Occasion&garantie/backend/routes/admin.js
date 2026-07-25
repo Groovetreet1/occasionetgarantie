@@ -3,6 +3,7 @@ const router = express.Router();
 const pool = require('../config/db');
 const { authenticate, adminOnly } = require('../middleware/auth');
 const gomobile = require('../services/gomobile');
+const { send, creditConfirmed } = require('../emails');
 
 router.post('/clean-db', authenticate, adminOnly, async (req, res) => {
   try {
@@ -168,12 +169,19 @@ router.post('/credit-purchases/:id/confirm', authenticate, adminOnly, async (req
     }
 
     try {
-      const [userRow] = await pool.query('SELECT phone, full_name FROM users WHERE id = ?', [userId]);
+      const [userRow] = await pool.query('SELECT phone, full_name, email FROM users WHERE id = ?', [userId]);
       if (userRow.length > 0 && userRow[0].phone) {
         const msg = `Bonjour ${userRow[0].full_name}, votre achat de ${creditsToAdd} credits est confirme ! Solde: ${newBalance} credits.`;
         await gomobile.sendSms(userRow[0].phone, msg);
       }
-    } catch (smsErr) { console.error('SMS failed:', smsErr.message); }
+      if (userRow.length > 0 && userRow[0].email) {
+        await send({
+          to: userRow[0].email,
+          subject: 'Achat de credits confirme - Occasion & Garantie',
+          html: creditConfirmed({ userName: userRow[0].full_name, credits: creditsToAdd, amountDH: purchases[0].amount_dh, newBalance }),
+        });
+      }
+    } catch (smsErr) { console.error('SMS/email failed:', smsErr.message); }
 
     res.json({ message: 'Achat confirme, credits ajoutes.', credit_balance: newBalance });
   } catch (err) {
@@ -322,6 +330,32 @@ router.post('/installments/:id/reject', authenticate, adminOnly, async (req, res
     await pool.query('UPDATE installments SET status = ?, rejection_reason = ? WHERE id = ?', ['rejete', reason || 'Demande refuse.', instId]);
     res.json({ message: 'Demande de paiement echelonne refuse.' });
   } catch (err) {
+    res.status(500).json({ message: 'Erreur serveur.' });
+  }
+});
+
+// ---- Newsletter ----
+router.post('/newsletter/send', authenticate, adminOnly, async (req, res) => {
+  try {
+    const { title, content, emails } = req.body;
+    if (!title || !content || !emails || !Array.isArray(emails) || emails.length === 0) {
+      return res.status(400).json({ message: 'Titre, contenu et liste d\'emails requis.' });
+    }
+    const { send: mailSend, newsletter: newsletterTpl } = require('../emails');
+    let sent = 0;
+    for (const email of emails) {
+      try {
+        await mailSend({
+          to: email,
+          subject: title,
+          html: newsletterTpl({ title, content, unsubscribeLink: `https://occasionetgarantie.store/unsubscribe?email=${encodeURIComponent(email)}` }),
+        });
+        sent++;
+      } catch (e) { console.log('Newsletter send failed for', email, e.message); }
+    }
+    res.json({ message: `Newsletter envoyee a ${sent}/${emails.length} destinataires.` });
+  } catch (err) {
+    console.error('Newsletter error:', err.message);
     res.status(500).json({ message: 'Erreur serveur.' });
   }
 });
