@@ -1,6 +1,9 @@
 const express = require('express');
 const pool = require('../config/db');
 const { authenticate } = require('../middleware/auth');
+const fs = require('fs');
+const path = require('path');
+const { destroy: cloudDestroy, USE_CLOUDINARY } = require('../services/uploader');
 
 const router = express.Router();
 
@@ -231,10 +234,19 @@ router.patch('/:id/status', authenticate, async (req, res) => {
 // Authenticated: delete product (admin or owner seller)
 router.delete('/:id', authenticate, async (req, res) => {
   try {
-    const [rows] = await pool.query('SELECT seller_id FROM products WHERE id = ?', [req.params.id]);
+    const [rows] = await pool.query('SELECT seller_id, image FROM products WHERE id = ?', [req.params.id]);
     if (rows.length === 0) return res.status(404).json({ message: 'Produit introuvable.' });
     if (req.user.role !== 'admin' && rows[0].seller_id !== req.user.id) {
       return res.status(403).json({ message: 'Vous ne pouvez supprimer que vos propres produits.' });
+    }
+    const img = rows[0].image;
+    if (img) {
+      try { fs.unlinkSync(path.join(__dirname, '..', 'uploads', img)); } catch {}
+      if (USE_CLOUDINARY && img.startsWith('http') && img.includes('/upload/')) {
+        const parts = img.split('/upload/')[1].split('?')[0].split('/');
+        const publicId = parts.slice(1).join('/').replace(/\.[^.]+$/, '');
+        if (publicId) cloudDestroy(publicId);
+      }
     }
     await pool.query('DELETE FROM products WHERE id = ?', [req.params.id]);
     res.json({ message: 'Produit supprimé.' });

@@ -162,7 +162,7 @@ export default function SellerProductForm() {
                 <div className="upload-preview-grid">
                   {existingImages.map((img, i) => (
                     <div key={`e-${i}`} className="upload-preview-item">
-                      <img src={`${API_BASE}/uploads/${img}`} alt="" />
+                      <img src={img.startsWith('http') ? img : `${API_BASE}/uploads/${img}`} alt="" />
                       <button type="button" className="upload-remove" onClick={() => removeExistingImage(img)}><FiX /></button>
                     </div>
                   ))}

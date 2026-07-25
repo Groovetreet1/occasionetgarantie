@@ -13,7 +13,7 @@ export default function ProductCard({ product, index = 0 }) {
   const formatPrice = (p) =>
     new Intl.NumberFormat('fr-FR', { style: 'currency', currency: 'MAD' })
       .format(p).replace('MAD', '').trim() + ' DH';
-  const imgUrl = product.image ? `${API_BASE}/uploads/${product.image}` : null;
+  const imgUrl = product.image ? (product.image.startsWith('http') ? product.image : `${API_BASE}/uploads/${product.image}`) : null;
   const discount = product.old_price && product.old_price > product.price
     ? Math.round((1 - product.price / product.old_price) * 100) : 0;
   const isSold = product.status === 'vendu';
@@ -47,7 +47,7 @@ export default function ProductCard({ product, index = 0 }) {
           {product.seller_name && (
             <span className="product-card-seller">
               {product.seller_avatar ? (
-                <img src={`${API_BASE}/uploads/avatars/${product.seller_avatar}`} alt="" className="product-card-seller-avatar" />
+                <img src={product.seller_avatar.startsWith('http') ? product.seller_avatar : `${API_BASE}/uploads/avatars/${product.seller_avatar}`} alt="" className="product-card-seller-avatar" />
               ) : <FiUser size={11} />}
               {product.seller_name} {product.seller_premium ? <FiStar size={14} style={{ color: '#FFD700', marginLeft: 3, verticalAlign: 'middle' }} /> : null}
             </span>

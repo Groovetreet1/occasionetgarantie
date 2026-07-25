@@ -34,7 +34,7 @@ export default function SellerProfile() {
 
         <div className="seller-profile-card">
           <div className="seller-avatar">
-            {seller.avatar ? <img src={`${API_BASE}/uploads/avatars/${seller.avatar}`} alt="" /> : seller.store_logo ? <img src={`${API_BASE}/uploads/avatars/${seller.store_logo}`} alt="" /> : <FiUser size={40} />}
+            {seller.avatar ? <img src={seller.avatar.startsWith('http') ? seller.avatar : `${API_BASE}/uploads/avatars/${seller.avatar}`} alt="" /> : seller.store_logo ? <img src={seller.store_logo.startsWith('http') ? seller.store_logo : `${API_BASE}/uploads/avatars/${seller.store_logo}`} alt="" /> : <FiUser size={40} />}
           </div>
           <div className="seller-info">
             <h1>{seller.store_name || seller.full_name}</h1>

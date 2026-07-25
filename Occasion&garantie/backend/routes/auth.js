@@ -10,6 +10,7 @@ const pool = require('../config/db');
 const { authenticate } = require('../middleware/auth');
 const gomobile = require('../services/gomobile');
 const { send, verification } = require('../emails');
+const { upload: cloudUpload } = require('../services/uploader');
 
 const router = express.Router();
 
@@ -265,8 +266,9 @@ router.post('/upload-avatar', authenticate, (req, res) => {
     if (err) return res.status(400).json({ message: err.message });
     if (!req.file) return res.status(400).json({ message: 'Aucun fichier envoye.' });
     try {
-      await pool.query('UPDATE users SET avatar = ? WHERE id = ?', [req.file.filename, req.user.id]);
-      res.json({ avatar: req.file.filename });
+      const result = await cloudUpload(req.file.path, 'avatars');
+      await pool.query('UPDATE users SET avatar = ? WHERE id = ?', [result.url, req.user.id]);
+      res.json({ avatar: result.url });
     } catch (dbErr) {
       res.status(500).json({ message: 'Erreur serveur.' });
     }
@@ -508,8 +510,8 @@ router.post('/upload-credit-screenshot', authenticate, creditUpload.single('scre
     if (purchases.length === 0) return res.status(404).json({ message: 'Demande introuvable.' });
     if (purchases[0].status !== 'en_attente') return res.status(400).json({ message: 'Deja traitee.' });
 
-    const filename = req.file.filename;
-    await pool.query('UPDATE credit_purchases SET screenshot = ? WHERE id = ?', [filename, purchaseId]);
+    const result = await cloudUpload(req.file.path, 'credits');
+    await pool.query('UPDATE credit_purchases SET screenshot = ? WHERE id = ?', [result.url, purchaseId]);
 
     try {
       const [adminRow] = await pool.query('SELECT email FROM users WHERE role = ?', ['admin']);

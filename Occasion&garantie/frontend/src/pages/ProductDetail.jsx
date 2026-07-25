@@ -98,7 +98,7 @@ export default function ProductDetail() {
             <div>
               <div className="product-detail-image" style={{ cursor: allImages.length > 0 ? 'pointer' : 'default' }} onClick={() => allImages.length > 0 && openLightbox(0)}>
                 {product.image ? (
-                  <img src={`${API_BASE}/uploads/${product.image}`} alt={product.name} style={{ width: '100%', height: '100%', objectFit: 'contain' }} />
+                  <img src={product.image.startsWith('http') ? product.image : `${API_BASE}/uploads/${product.image}`} alt={product.name} style={{ width: '100%', height: '100%', objectFit: 'contain' }} />
                 ) : (
                   <FiShoppingBag size={80} style={{ opacity: 0.15 }} />
                 )}
@@ -110,7 +110,7 @@ export default function ProductDetail() {
                 <div className="product-detail-thumbs">
                   {allImages.map((img, i) => (
                     <div key={i} onClick={() => openLightbox(i)} className={`product-detail-thumb${i === 0 ? ' active' : ''}`}>
-                      <img src={`${API_BASE}/uploads/${img}`} alt="" style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
+                      <img src={img.startsWith('http') ? img : `${API_BASE}/uploads/${img}`} alt="" style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
                     </div>
                   ))}
                 </div>
@@ -163,7 +163,7 @@ export default function ProductDetail() {
                   <h4>Vendu par</h4>
                   <Link to={`/seller/${product.seller_id}`} className="seller-badge">
                     <div className="seller-avatar-mini">
-                      {product.seller_avatar ? <img src={`${API_BASE}/uploads/avatars/${product.seller_avatar}`} alt="" /> : product.seller_logo ? <img src={`${API_BASE}/uploads/avatars/${product.seller_logo}`} alt="" /> : <FiUser size={18} />}
+                      {product.seller_avatar ? <img src={product.seller_avatar.startsWith('http') ? product.seller_avatar : `${API_BASE}/uploads/avatars/${product.seller_avatar}`} alt="" /> : product.seller_logo ? <img src={product.seller_logo.startsWith('http') ? product.seller_logo : `${API_BASE}/uploads/avatars/${product.seller_logo}`} alt="" /> : <FiUser size={18} />}
                     </div>
                     <div>
                       <strong>{product.seller_name}</strong>
@@ -223,7 +223,7 @@ export default function ProductDetail() {
           <button className="lightbox-close" onClick={closeLightbox}><FiX size={24} /></button>
           <button className="lightbox-nav lightbox-prev" onClick={(e) => { e.stopPropagation(); prevImage(); }}><FiChevronLeft size={28} /></button>
           <div className="lightbox-content" onClick={(e) => e.stopPropagation()}>
-            <img src={`${API_BASE}/uploads/${allImages[lightboxIndex]}`} alt="" style={{ maxWidth: '90vw', maxHeight: '85vh', borderRadius: '12px', objectFit: 'contain' }} />
+            <img src={allImages[lightboxIndex].startsWith('http') ? allImages[lightboxIndex] : `${API_BASE}/uploads/${allImages[lightboxIndex]}`} alt="" style={{ maxWidth: '90vw', maxHeight: '85vh', borderRadius: '12px', objectFit: 'contain' }} />
           </div>
           <button className="lightbox-nav lightbox-next" onClick={(e) => { e.stopPropagation(); nextImage(); }}><FiChevronRight size={28} /></button>
           <div className="lightbox-counter">{lightboxIndex + 1} / {allImages.length}</div>

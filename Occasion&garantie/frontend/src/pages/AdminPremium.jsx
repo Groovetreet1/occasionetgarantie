@@ -113,7 +113,7 @@ export default function AdminPremium() {
                     </td>
                     <td style={{ padding: '12px 8px' }}>
                       {p.screenshot ? (
-                        <a href={`${API_BASE}/uploads/premium/${p.screenshot}`} target="_blank" rel="noopener noreferrer" className="btn btn-secondary" style={{ padding: '4px 10px', fontSize: '12px' }}>
+                        <a href={p.screenshot.startsWith('http') ? p.screenshot : `${API_BASE}/uploads/premium/${p.screenshot}`} target="_blank" rel="noopener noreferrer" className="btn btn-secondary" style={{ padding: '4px 10px', fontSize: '12px' }}>
                           <FiEye size={14} /> Voir
                         </a>
                       ) : (

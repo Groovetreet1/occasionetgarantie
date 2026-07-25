@@ -185,7 +185,7 @@ export default function Profile() {
                 }}
               >
                 {avatar ? (
-                  <img src={`${API_BASE}/uploads/avatars/${avatar}`} alt="" style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
+                  <img src={avatar.startsWith('http') ? avatar : `${API_BASE}/uploads/avatars/${avatar}`} alt="" style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
                 ) : (
                   <div style={{ width: '100%', height: '100%', display: 'flex', alignItems: 'center', justifyContent: 'center', color: 'var(--text-muted)' }}>
                     <FiUser size={40} />

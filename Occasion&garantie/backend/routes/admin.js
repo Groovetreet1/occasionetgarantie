@@ -4,6 +4,7 @@ const pool = require('../config/db');
 const { authenticate, adminOnly } = require('../middleware/auth');
 const gomobile = require('../services/gomobile');
 const { send, creditConfirmed } = require('../emails');
+const { destroy: cloudDestroy, USE_CLOUDINARY } = require('../services/uploader');
 
 router.post('/clean-db', authenticate, adminOnly, async (req, res) => {
   try {
@@ -268,6 +269,11 @@ router.delete('/users/:id', authenticate, adminOnly, async (req, res) => {
     for (const p of products) {
       if (p.image) {
         try { fs.unlinkSync(path.join(__dirname, '..', 'uploads', p.image)); } catch {}
+        if (USE_CLOUDINARY && p.image.startsWith('http') && p.image.includes('/upload/')) {
+          const parts = p.image.split('/upload/')[1].split('?')[0].split('/');
+          const publicId = parts.slice(1).join('/').replace(/\.[^.]+$/, '');
+          if (publicId) cloudDestroy(publicId);
+        }
       }
     }
     await pool.query('DELETE FROM products WHERE user_id = ?', [userId]);

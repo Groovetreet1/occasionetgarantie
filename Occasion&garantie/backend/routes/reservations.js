@@ -7,6 +7,7 @@ const fs = require('fs');
 const pool = require('../config/db');
 const { authenticate } = require('../middleware/auth');
 const gomobile = require('../services/gomobile');
+const { upload: cloudUpload } = require('../services/uploader');
 
 const RESERVATION_AMOUNT = 200;
 const ADMIN_PHONE = process.env.ADMIN_PHONE;
@@ -72,9 +73,9 @@ router.post('/:id/screenshot', authenticate, screenshotUpload.single('screenshot
     if (rows.length === 0) return res.status(404).json({ message: 'Reservation introuvable.' });
     if (!req.file) return res.status(400).json({ message: 'Fichier requis.' });
 
-    const filename = req.file.filename;
+    const result = await cloudUpload(req.file.path, 'reservations');
     const screenshotToken = crypto.randomBytes(8).toString('hex');
-    await pool.query('UPDATE reservations SET screenshot = ?, status = ?, screenshot_token = ?, screenshot_views = 0 WHERE id = ?', [filename, 'confirmee', screenshotToken, reservationId]);
+    await pool.query('UPDATE reservations SET screenshot = ?, status = ?, screenshot_token = ?, screenshot_views = 0 WHERE id = ?', [result.url, 'confirmee', screenshotToken, reservationId]);
 
     const screenshotUrl = `${req.protocol}://${req.get('host')}/api/reservations/s/${screenshotToken}`;
     const clientName = rows[0].full_name;
@@ -109,13 +110,16 @@ router.get('/s/:token', async (req, res) => {
     await pool.query('UPDATE reservations SET screenshot_views = ? WHERE id = ?', [views, rows[0].id]);
 
     if (views >= 5) {
-      const filePath = path.join(SCREENSHOT_DIR, rows[0].screenshot);
-      if (fs.existsSync(filePath)) fs.unlinkSync(filePath);
       await pool.query('UPDATE reservations SET screenshot = NULL, screenshot_token = NULL WHERE id = ?', [rows[0].id]);
       return res.status(404).json({ message: 'Lien expire apres 5 consultations.' });
     }
 
-    const filePath = path.join(SCREENSHOT_DIR, rows[0].screenshot);
+    const screenshotVal = rows[0].screenshot;
+    if (screenshotVal.startsWith('http://') || screenshotVal.startsWith('https://')) {
+      return res.redirect(screenshotVal);
+    }
+
+    const filePath = path.join(SCREENSHOT_DIR, screenshotVal);
     if (!fs.existsSync(filePath)) return res.status(404).json({ message: 'Fichier introuvable.' });
 
     res.sendFile(filePath);

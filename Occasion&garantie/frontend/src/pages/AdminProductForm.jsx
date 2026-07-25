@@ -205,7 +205,7 @@ export default function AdminProductForm() {
               <label>Image principale</label>
               {form.image && (
                 <div style={{ marginBottom: '8px' }}>
-                  <img src={`/uploads/${form.image}`} alt="Preview" style={{ width: '120px', height: '120px', objectFit: 'cover', borderRadius: 'var(--radius)', border: '1px solid var(--border)' }} />
+                  <img src={form.image.startsWith('http') ? form.image : `/uploads/${form.image}`} alt="Preview" style={{ width: '120px', height: '120px', objectFit: 'cover', borderRadius: 'var(--radius)', border: '1px solid var(--border)' }} />
                 </div>
               )}
               <div style={{ display: 'flex', gap: '8px' }}>
@@ -221,7 +221,7 @@ export default function AdminProductForm() {
               <div style={{ display: 'flex', gap: '6px', flexWrap: 'wrap', marginBottom: '8px' }}>
                 {form.gallery.map((img, i) => (
                   <div key={i} style={{ position: 'relative', width: '80px', height: '80px' }}>
-                    <img src={`/uploads/${img}`} alt="" style={{ width: '100%', height: '100%', objectFit: 'cover', borderRadius: '8px', border: '1px solid var(--border)' }} />
+                    <img src={img.startsWith('http') ? img : `/uploads/${img}`} alt="" style={{ width: '100%', height: '100%', objectFit: 'cover', borderRadius: '8px', border: '1px solid var(--border)' }} />
                     <button type="button" onClick={() => removeGalleryImage(i)} style={{ position: 'absolute', top: '-6px', right: '-6px', width: '22px', height: '22px', borderRadius: '50%', border: 'none', background: 'var(--error)', color: 'white', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '14px' }}><FiX size={12} /></button>
                   </div>
                 ))}

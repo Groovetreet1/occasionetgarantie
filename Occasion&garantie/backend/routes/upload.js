@@ -3,6 +3,7 @@ const multer = require('multer');
 const path = require('path');
 const fs = require('fs');
 const { authenticate, sellerOrAdmin } = require('../middleware/auth');
+const { upload: cloudUpload } = require('../services/uploader');
 
 const router = express.Router();
 
@@ -24,22 +25,27 @@ const upload = multer({
     const allowed = ['.jpg', '.jpeg', '.png', '.webp', '.avif'];
     const ext = path.extname(file.originalname).toLowerCase();
     if (allowed.includes(ext)) cb(null, true);
-    else cb(new Error('Format non supporté. Utilisez JPG, PNG, WebP ou AVIF.'));
+    else cb(new Error('Format non supporte. Utilisez JPG, PNG, WebP ou AVIF.'));
   },
 });
 
-router.post('/', authenticate, sellerOrAdmin, (req, res) => {
+router.post('/', authenticate, sellerOrAdmin, async (req, res) => {
   const single = req.query.single === 'true';
   const uploader = single ? upload.single('image') : upload.array('images', 10);
-  uploader(req, res, (err) => {
+  uploader(req, res, async (err) => {
     if (err) return res.status(400).json({ message: err.message });
-    if (single) {
-      if (!req.file) return res.status(400).json({ message: 'Aucun fichier envoyé.' });
-      return res.json({ url: req.file.filename });
+    try {
+      if (single) {
+        if (!req.file) return res.status(400).json({ message: 'Aucun fichier envoye.' });
+        const result = await cloudUpload(req.file.path, 'products');
+        return res.json({ url: result.url });
+      }
+      if (!req.files || req.files.length === 0) return res.status(400).json({ message: 'Aucun fichier envoye.' });
+      const urls = await Promise.all(req.files.map((f) => cloudUpload(f.path, 'products').then((r) => r.url)));
+      res.json({ urls });
+    } catch (e) {
+      res.status(500).json({ message: 'Erreur upload.', error: e.message });
     }
-    if (!req.files || req.files.length === 0) return res.status(400).json({ message: 'Aucun fichier envoyé.' });
-    const urls = req.files.map((f) => f.filename);
-    res.json({ urls });
   });
 });
 

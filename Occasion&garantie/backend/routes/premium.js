@@ -6,6 +6,7 @@ const fs = require('fs');
 const pool = require('../config/db');
 const { authenticate } = require('../middleware/auth');
 const gomobile = require('../services/gomobile');
+const { upload: cloudUpload } = require('../services/uploader');
 
 // Auto-create premium_payments table if missing
 (async () => {
@@ -145,8 +146,8 @@ router.post('/activate', authenticate, screenshotUpload.single('screenshot'), as
 
     if (!req.file) return res.status(400).json({ message: 'Fichier requis.' });
 
-    const filename = req.file.filename;
-    await pool.query('UPDATE premium_payments SET screenshot = ? WHERE id = ?', [filename, paymentRow.id]);
+    const result = await cloudUpload(req.file.path, 'premium');
+    await pool.query('UPDATE premium_payments SET screenshot = ? WHERE id = ?', [result.url, paymentRow.id]);
 
     try {
       let adminPhone = ADMIN_PHONE;

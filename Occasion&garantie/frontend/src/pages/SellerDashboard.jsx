@@ -293,7 +293,7 @@ export default function SellerDashboard() {
                     <tr key={p.id}>
                       <td>
                         <div className="product-cell">
-                          {p.image && <img src={`/uploads/${p.image}`} alt="" className="product-thumb" />}
+                          {p.image && <img src={p.image.startsWith('http') ? p.image : `/uploads/${p.image}`} alt="" className="product-thumb" />}
                           <div>
                             <strong>{p.name}</strong>
                             <small className="text-secondary">{p.category_name}</small>
