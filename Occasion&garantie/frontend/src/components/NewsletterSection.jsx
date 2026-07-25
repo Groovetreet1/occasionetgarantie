@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import { motion } from 'framer-motion';
 import { FiSend, FiMail } from 'react-icons/fi';
-import api from '../api';
+import api from '../api/axios';
 
 export default function NewsletterSection() {
   const [email, setEmail] = useState('');
