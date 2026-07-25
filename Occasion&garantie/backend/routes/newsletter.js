@@ -7,15 +7,35 @@ const RESEND_API_KEY = process.env.RESEND_API_KEY;
 const AUDIENCE_ID = 'd755ae5f-37c7-460b-8fec-26487de88023';
 const FROM = 'Occasion & Garantie <contact@contact.occasionetgarantie.store>';
 
+if (!RESEND_API_KEY) console.log('[Newsletter] RESEND_API_KEY not set — audience sync disabled');
+
+function getResend() {
+  return RESEND_API_KEY ? new Resend(RESEND_API_KEY) : null;
+}
+
 async function addToResendAudience(email) {
-  if (!RESEND_API_KEY) return;
+  const r = getResend();
+  if (!r) return;
   try {
-    const resend = new Resend(RESEND_API_KEY);
-    await resend.contacts.create({ email, audience_id: AUDIENCE_ID });
+    await r.contacts.create({ email, audience_id: AUDIENCE_ID });
   } catch (e) {
     console.log('Resend audience add skipped:', e.message);
   }
 }
+
+router.get('/status', async (req, res) => {
+  try {
+    const [subscribers] = await pool.query('SELECT COUNT(*) as cnt FROM newsletter_subscribers WHERE is_active = TRUE');
+    res.json({
+      resend_key_set: !!RESEND_API_KEY,
+      resend_api_key_prefix: RESEND_API_KEY ? RESEND_API_KEY.substring(0, 6) + '...' : null,
+      audience_id: AUDIENCE_ID,
+      subscribers_db: subscribers[0].cnt,
+    });
+  } catch (err) {
+    res.json({ resend_key_set: !!RESEND_API_KEY, subscribers_db: 0, error: err.message });
+  }
+});
 
 router.post('/subscribe', async (req, res) => {
   try {
@@ -42,7 +62,9 @@ router.post('/subscribe', async (req, res) => {
 
     await addToResendAudience(email);
 
-    const html = `<!DOCTYPE html>
+    const r = getResend();
+    if (r) {
+      const html = `<!DOCTYPE html>
 <html lang="fr">
 <head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"></head>
 <body style="margin:0;padding:0;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;background:#f8f9fc">
@@ -67,12 +89,11 @@ router.post('/subscribe', async (req, res) => {
 </td></tr>
 </table>
 </body></html>`;
-
-    try {
-      const resend = new Resend(RESEND_API_KEY);
-      await resend.emails.send({ from: FROM, to: email, subject: 'Merci de votre inscription à la newsletter !', html });
-    } catch (e) {
-      console.log('Welcome email skipped:', e.message);
+      try {
+        await r.emails.send({ from: FROM, to: email, subject: 'Merci de votre inscription a la newsletter !', html });
+      } catch (e) {
+        console.log('Welcome email skipped:', e.message);
+      }
     }
 
     res.json({ message: 'Inscription reussie.' });
@@ -83,6 +104,8 @@ router.post('/subscribe', async (req, res) => {
 });
 
 router.post('/sync-audience', async (req, res) => {
+  const r = getResend();
+  if (!r) return res.status(500).json({ message: 'RESEND_API_KEY non configure.' });
   try {
     const [subscribers] = await pool.query('SELECT email FROM newsletter_subscribers WHERE is_active = TRUE');
     if (subscribers.length === 0) return res.json({ message: 'Aucun abonne a synchroniser.' });
@@ -90,11 +113,10 @@ router.post('/sync-audience', async (req, res) => {
     let added = 0;
     for (const sub of subscribers) {
       try {
-        const resend = new Resend(RESEND_API_KEY);
-        await resend.contacts.create({ email: sub.email, audience_id: AUDIENCE_ID });
+        await r.contacts.create({ email: sub.email, audience_id: AUDIENCE_ID });
         added++;
       } catch (e) {
-        if (e?.response?.status !== 409) console.log(`Sync skip ${sub.email}:`, e.message);
+        console.log(`Sync skip ${sub.email}:`, e.message);
       }
     }
     res.json({ message: `${added}/${subscribers.length} abonnes synchronises vers l audience Resend.` });
