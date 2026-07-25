@@ -98,7 +98,7 @@ export default function Navbar() {
               </AnimatePresence>
             </div>
             <NavLink to="/about">À propos</NavLink>
-            <NavLink to="/vendre" className="navbar-sell-link"><FiTrendingUp size={14} /> Vendre</NavLink>
+            {user?.role !== 'admin' && <NavLink to="/vendre" className="navbar-sell-link"><FiTrendingUp size={14} /> Vendre</NavLink>}
           </div>
 
           <div className="navbar-actions">
@@ -123,14 +123,16 @@ export default function Navbar() {
                       <NavLink to="/messenger" onClick={() => setDropdownOpen(false)}>
                         <FiMessageCircle size={14} /> Messages
                       </NavLink>
-                      {user.premium ? (
-                        <span className="navbar-premium-badge" onClick={() => setDropdownOpen(false)}>
-                          <FiStar size={14} /> Premium
-                        </span>
-                      ) : (
-                        <button onClick={() => { setDropdownOpen(false); setShowPremium(true); }} className="navbar-premium-btn">
-                          <FiStar size={14} /> Passer Premium
-                        </button>
+                      {user.role !== 'admin' && (
+                        user.premium ? (
+                          <span className="navbar-premium-badge" onClick={() => setDropdownOpen(false)}>
+                            <FiStar size={14} /> Premium
+                          </span>
+                        ) : (
+                          <button onClick={() => { setDropdownOpen(false); setShowPremium(true); }} className="navbar-premium-btn">
+                            <FiStar size={14} /> Passer Premium
+                          </button>
+                        )
                       )}
                       {(user.role === 'seller') && (
                         <NavLink to="/seller" onClick={() => setDropdownOpen(false)}>
@@ -139,7 +141,7 @@ export default function Navbar() {
                       )}
                       {user.role === 'admin' && (
                         <NavLink to="/admin" onClick={() => setDropdownOpen(false)}>
-                          <FiStar size={14} /> Premium
+                          <FiStar size={14} /> Dashboard
                         </NavLink>
                       )}
                       <button onClick={() => { logout(); navigate('/'); setDropdownOpen(false); }}>
@@ -176,26 +178,28 @@ export default function Navbar() {
           );
         })}
         <NavLink to="/about" onClick={closeMenu}>À propos</NavLink>
-        <NavLink to="/vendre" onClick={closeMenu} className="navbar-mobile-sell"><FiTrendingUp size={14} /> Vendre</NavLink>
+        {user?.role !== 'admin' && <NavLink to="/vendre" onClick={closeMenu} className="navbar-mobile-sell"><FiTrendingUp size={14} /> Vendre</NavLink>}
         <div className="navbar-mobile-divider" />
         {user ? (
           <>
             <NavLink to="/profile" onClick={closeMenu}><FiUser size={14} /> Mon Profil</NavLink>
             <NavLink to="/messenger" onClick={closeMenu}><FiMessageCircle size={14} /> Messages</NavLink>
-            {user.premium ? (
-              <span className="navbar-premium-badge" style={{ padding: '16px', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 8, fontSize: 14 }}>
-                <FiStar size={14} /> Premium
-              </span>
-            ) : (
-              <button onClick={() => { closeMenu(); setShowPremium(true); }} style={{ padding: '16px', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 8, fontSize: 14, background: 'none', border: 'none', color: 'inherit', cursor: 'pointer', width: '100%' }}>
-                <FiStar size={14} /> Passer Premium
-              </button>
+            {user.role !== 'admin' && (
+              user.premium ? (
+                <span className="navbar-premium-badge" style={{ padding: '16px', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 8, fontSize: 14 }}>
+                  <FiStar size={14} /> Premium
+                </span>
+              ) : (
+                <button onClick={() => { closeMenu(); setShowPremium(true); }} style={{ padding: '16px', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 8, fontSize: 14, background: 'none', border: 'none', color: 'inherit', cursor: 'pointer', width: '100%' }}>
+                  <FiStar size={14} /> Passer Premium
+                </button>
+              )
             )}
             {(user.role === 'seller') && (
               <NavLink to="/seller" onClick={closeMenu}><FiShoppingBag size={14} /> Tableau de Bord</NavLink>
             )}
             {user.role === 'admin' && (
-              <NavLink to="/admin" onClick={closeMenu}><FiStar size={14} /> Premium</NavLink>
+              <NavLink to="/admin" onClick={closeMenu}><FiStar size={14} /> Dashboard</NavLink>
             )}
             <button onClick={() => { logout(); navigate('/'); closeMenu(); }} className="navbar-mobile-logout">
               <FiLogOut size={14} /> Déconnexion

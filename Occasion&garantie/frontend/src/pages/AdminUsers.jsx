@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
-import { FiTrash2, FiArrowLeft, FiUsers as FiUsersIcon, FiShield, FiStar } from 'react-icons/fi';
+import { FiTrash2, FiArrowLeft, FiUsers as FiUsersIcon, FiShield } from 'react-icons/fi';
 import api from '../api/axios';
 
 export default function AdminUsers() {
@@ -55,7 +55,6 @@ export default function AdminUsers() {
                   <th style={{ padding: '10px 6px', textAlign: 'left' }}>Email</th>
                   <th style={{ padding: '10px 6px', textAlign: 'left' }}>Telephone</th>
                   <th style={{ padding: '10px 6px', textAlign: 'left' }}>Role</th>
-                  <th style={{ padding: '10px 6px', textAlign: 'left' }}>Premium</th>
                   <th style={{ padding: '10px 6px', textAlign: 'left' }}>Credits</th>
                   <th style={{ padding: '10px 6px', textAlign: 'left' }}>Inscrit le</th>
                   <th style={{ padding: '10px 6px', textAlign: 'left' }}>Actions</th>
@@ -79,9 +78,6 @@ export default function AdminUsers() {
                       ) : (
                         <span style={{ color: 'var(--text-muted)' }}>Client</span>
                       )}
-                    </td>
-                    <td style={{ padding: '10px 6px' }}>
-                      {u.premium ? <span style={{ color: '#f59e0b', display: 'flex', alignItems: 'center', gap: 4 }}><FiStar size={13} /> Premium</span> : '-'}
                     </td>
                     <td style={{ padding: '10px 6px', fontWeight: 700 }}>{Number(u.credit_balance || 0).toLocaleString()}</td>
                     <td style={{ padding: '10px 6px', fontSize: '11px', color: 'var(--text-secondary)' }}>{formatDate(u.created_at)}</td>

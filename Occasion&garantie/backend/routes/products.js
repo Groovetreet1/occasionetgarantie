@@ -17,8 +17,7 @@ router.get('/', async (req, res) => {
     const { category, search, min, max, state, sort, seller } = req.query;
     let sql = `
       SELECT p.*, c.name as category_name,
-             u.store_name as seller_name, u.store_logo as seller_logo, u.avatar as seller_avatar,
-             (u.premium = 1 AND (u.premium_expires_at IS NULL OR u.premium_expires_at > NOW())) as seller_premium
+             u.store_name as seller_name, u.store_logo as seller_logo, u.avatar as seller_avatar
       FROM products p
       LEFT JOIN categories c ON p.category_id = c.id
       LEFT JOIN users u ON p.seller_id = u.id
@@ -36,18 +35,12 @@ router.get('/', async (req, res) => {
     if (sort === 'price_asc') sql += ' ORDER BY p.price ASC';
     else if (sort === 'price_desc') sql += ' ORDER BY p.price DESC';
     else if (sort === 'newest') sql += ' ORDER BY p.created_at DESC';
-    else sql += ' ORDER BY seller_premium DESC, p.featured DESC, p.created_at DESC';
+    else sql += ' ORDER BY p.featured DESC, p.created_at DESC';
 
     try {
       const [rows] = await pool.query(sql, params);
       return res.json(rows);
     } catch (e) {
-      if (e.errno === 1054 || e.code === 'ER_BAD_FIELD_ERROR') {
-        sql = sql.replace(/,\s*\(u\.premium.*?as seller_premium/i, '');
-        sql = sql.replace(/ORDER BY seller_premium DESC,\s*/i, 'ORDER BY ');
-        const [rows] = await pool.query(sql, params);
-        return res.json(rows);
-      }
       throw e;
     }
   } catch (err) {
@@ -55,29 +48,19 @@ router.get('/', async (req, res) => {
   }
 });
 
-function fallbackSql(sql) {
-  return sql.replace(/,\s*\(u\.premium.*?as seller_premium/i, '').replace(/ORDER BY seller_premium DESC,\s*/i, 'ORDER BY ');
-}
-
 // Public: featured products (only disponible)
 router.get('/featured', async (req, res) => {
   try {
-    let sql = `SELECT p.*, c.name as category_name, u.store_name as seller_name, u.store_logo as seller_logo, u.avatar as seller_avatar,
-              (u.premium = 1 AND (u.premium_expires_at IS NULL OR u.premium_expires_at > NOW())) as seller_premium
+    let sql = `SELECT p.*, c.name as category_name, u.store_name as seller_name, u.store_logo as seller_logo, u.avatar as seller_avatar
        FROM products p
        LEFT JOIN categories c ON p.category_id = c.id
        LEFT JOIN users u ON p.seller_id = u.id
        WHERE p.featured = TRUE AND p.active = TRUE AND p.status = 'disponible' AND u.id IS NOT NULL
-       ORDER BY seller_premium DESC, p.created_at DESC LIMIT 8`;
+       ORDER BY p.created_at DESC LIMIT 8`;
     try {
       const [rows] = await pool.query(sql);
       return res.json(rows);
     } catch (e) {
-      if (e.errno === 1054 || e.code === 'ER_BAD_FIELD_ERROR') {
-        sql = fallbackSql(sql);
-        const [rows] = await pool.query(sql);
-        return res.json(rows);
-      }
       throw e;
     }
   } catch (err) {
@@ -105,8 +88,7 @@ router.get('/:slug', async (req, res) => {
   try {
     let sql = `SELECT p.*, c.name as category_name,
               u.id as seller_id, u.full_name as seller_full_name, u.store_name as seller_name, u.store_logo as seller_logo, u.avatar as seller_avatar,
-              u.phone as seller_phone,
-              (u.premium = 1 AND (u.premium_expires_at IS NULL OR u.premium_expires_at > NOW())) as seller_premium
+              u.phone as seller_phone
        FROM products p
        LEFT JOIN categories c ON p.category_id = c.id
        LEFT JOIN users u ON p.seller_id = u.id
@@ -118,14 +100,6 @@ router.get('/:slug', async (req, res) => {
       if (!product.seller_phone) product.seller_phone = '212669017295';
       return res.json(product);
     } catch (e) {
-      if (e.errno === 1054 || e.code === 'ER_BAD_FIELD_ERROR') {
-        sql = sql.replace(/,\s*\(u\.premium.*?as seller_premium/i, '');
-        const [rows] = await pool.query(sql, [req.params.slug]);
-        if (rows.length === 0) return res.status(404).json({ message: 'Produit introuvable.' });
-        const product = rows[0];
-        if (!product.seller_phone) product.seller_phone = '212669017295';
-        return res.json(product);
-      }
       throw e;
     }
   } catch (err) {

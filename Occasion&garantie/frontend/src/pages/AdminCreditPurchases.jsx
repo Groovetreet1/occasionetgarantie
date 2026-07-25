@@ -69,7 +69,6 @@ export default function AdminCreditPurchases() {
             <p style={{ color: 'var(--text-secondary)' }}>{purchases.length} demande{purchases.length > 1 ? 's' : ''}</p>
           </div>
           <div style={{ display: 'flex', gap: 8 }}>
-            <Link to="/admin/premium" className="btn btn-outline" style={{ fontSize: 13 }}>Premium</Link>
             <Link to="/admin/credits" className="btn btn-primary" style={{ fontSize: 13 }}>Credits</Link>
             <Link to="/admin/installments" className="btn btn-outline" style={{ fontSize: 13 }}>Echelonnement</Link>
           </div>

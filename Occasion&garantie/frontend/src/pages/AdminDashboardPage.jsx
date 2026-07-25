@@ -1,39 +1,31 @@
 import { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
-import { FiStar, FiCreditCard, FiClock, FiPackage, FiUsers, FiArrowLeft, FiTrendingUp, FiPlus } from 'react-icons/fi';
+import { FiCreditCard, FiClock, FiPackage, FiUsers, FiArrowLeft, FiTrendingUp, FiPlus } from 'react-icons/fi';
 import api from '../api/axios';
 
 export default function AdminDashboardPage() {
-  const [stats, setStats] = useState({ premium: 0, pendingPremium: 0, credits: 0, pendingCredits: 0, installments: 0, pendingInstallments: 0, products: 0, users: 0, sellers: 0 });
+  const [stats, setStats] = useState({ credits: 0, pendingCredits: 0, installments: 0, pendingInstallments: 0, products: 0, users: 0 });
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
     Promise.all([
-      api.get('/admin/premium-payments').catch(() => ({ data: [] })),
       api.get('/admin/credit-purchases').catch(() => ({ data: [] })),
       api.get('/admin/installments').catch(() => ({ data: [] })),
       api.get('/admin/products').catch(() => ({ data: [] })),
       api.get('/admin/users').catch(() => ({ data: [] })),
-    ]).then(([premium, credits, installments, products, users]) => {
+    ]).then(([credits, installments, products, users]) => {
       setStats({
-        premium: premium.data.length,
-        pendingPremium: premium.data.filter(p => p.status === 'en_attente').length,
         credits: credits.data.length,
         pendingCredits: credits.data.filter(c => c.status === 'en_attente').length,
         installments: installments.data.length,
         pendingInstallments: installments.data.filter(i => i.status === 'en_attente').length,
         products: products.data.length,
         users: users.data.length,
-        sellers: users.data.filter(u => u.role === 'seller').length,
       });
     }).catch(() => {}).finally(() => setLoading(false));
   }, []);
 
   const sections = [
-    { title: 'Premium', icon: FiStar, color: '#f59e0b', bg: 'rgba(245,158,11,0.1)', items: [
-      { label: 'Total demandes', value: stats.premium },
-      { label: 'En attente', value: stats.pendingPremium, highlight: true },
-    ], link: '/admin/premium' },
     { title: 'Credits', icon: FiCreditCard, color: '#3b82f6', bg: 'rgba(59,130,246,0.1)', items: [
       { label: 'Total demandes', value: stats.credits },
       { label: 'En attente', value: stats.pendingCredits, highlight: true },
@@ -47,7 +39,6 @@ export default function AdminDashboardPage() {
     ], link: '/admin/products' },
     { title: 'Utilisateurs', icon: FiUsers, color: '#dc2626', bg: 'rgba(220,38,38,0.1)', items: [
       { label: 'Total utilisateurs', value: stats.users },
-      { label: 'Vendeurs', value: stats.sellers },
     ], link: '/admin/users' },
   ];
 
@@ -59,7 +50,7 @@ export default function AdminDashboardPage() {
         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '32px', flexWrap: 'wrap', gap: '12px' }}>
           <div>
             <Link to="/" className="btn btn-ghost" style={{ marginBottom: '8px' }}><FiArrowLeft /> Retour au site</Link>
-            <h1 style={{ fontSize: '28px', fontWeight: 800 }}>Super Admin</h1>
+            <h1 style={{ fontSize: '28px', fontWeight: 800 }}>Dashboard</h1>
             <p style={{ color: 'var(--text-secondary)' }}>Gerez toutes les operations en un coup d'oeil</p>
           </div>
         </div>
@@ -105,7 +96,6 @@ export default function AdminDashboardPage() {
           <h2 style={{ fontSize: '18px', fontWeight: 700, marginBottom: '16px' }}>Actions rapides</h2>
           <div style={{ display: 'flex', gap: '12px', flexWrap: 'wrap' }}>
             <Link to="/admin/products/new" className="btn btn-primary"><FiPlus size={16} /> Nouveau produit</Link>
-            <Link to="/admin/premium" className="btn btn-outline"><FiStar size={16} /> Gerer les Premium</Link>
             <Link to="/admin/credits" className="btn btn-outline"><FiCreditCard size={16} /> Achats de credits</Link>
             <Link to="/admin/installments" className="btn btn-outline"><FiClock size={16} /> Paiements echelonnes</Link>
             <Link to="/admin/products" className="btn btn-outline"><FiPackage size={16} /> Tous les produits</Link>
