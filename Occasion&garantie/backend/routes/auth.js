@@ -87,14 +87,31 @@ router.post('/signup', [
           html: verification({ code, userName: fullName }),
         });
       } catch (mailErr) {
-        console.error('Email verification send failed:', mailErr.message);
-        try { await gomobile.sendSms(phone, `Votre code de verification Occasion & Garantie : ${code}`); } catch {}
+        console.error('Email failed, trying SMS:', mailErr.message);
+        try {
+          await gomobile.sendSms(phone, `Votre code de verification Occasion & Garantie : ${code}`);
+        } catch (smsErr2) {
+          console.error('SMS also failed:', smsErr2.message);
+          await pool.query('DELETE FROM users WHERE id = ?', [result.insertId]);
+          return res.status(500).json({ message: 'Impossible d\'envoyer le code de verification. Reessayez plus tard.' });
+        }
       }
     } else {
       try {
         await gomobile.sendSms(phone, `Votre code de verification Occasion & Garantie : ${code}`);
       } catch (smsErr) {
-        console.error('SMS send failed:', smsErr.message);
+        console.error('SMS failed, trying email:', smsErr.message);
+        try {
+          await send({
+            to: email,
+            subject: 'Votre code de verification - Occasion & Garantie',
+            html: verification({ code, userName: fullName }),
+          });
+        } catch (mailErr2) {
+          console.error('Email also failed:', mailErr2.message);
+          await pool.query('DELETE FROM users WHERE id = ?', [result.insertId]);
+          return res.status(500).json({ message: 'Impossible d\'envoyer le code de verification. Reessayez plus tard.' });
+        }
       }
     }
 
@@ -154,14 +171,29 @@ router.post('/resend-code', [
           html: verification({ code, userName: user.full_name }),
         });
       } catch (mailErr) {
-        console.error('Email verification send failed:', mailErr.message);
-        try { await gomobile.sendSms(user.phone, `Votre code de verification Occasion & Garantie : ${code}`); } catch {}
+        console.error('Email failed, trying SMS:', mailErr.message);
+        try {
+          await gomobile.sendSms(user.phone, `Votre code de verification Occasion & Garantie : ${code}`);
+        } catch (smsErr2) {
+          console.error('SMS also failed:', smsErr2.message);
+          return res.status(500).json({ message: 'Impossible d\'envoyer le code. Reessayez plus tard.' });
+        }
       }
     } else {
       try {
         await gomobile.sendSms(user.phone, `Votre code de verification Occasion & Garantie : ${code}`);
       } catch (smsErr) {
-        console.error('SMS send failed:', smsErr.message);
+        console.error('SMS failed, trying email:', smsErr.message);
+        try {
+          await send({
+            to: email,
+            subject: 'Votre code de verification - Occasion & Garantie',
+            html: verification({ code, userName: user.full_name }),
+          });
+        } catch (mailErr2) {
+          console.error('Email also failed:', mailErr2.message);
+          return res.status(500).json({ message: 'Impossible d\'envoyer le code. Reessayez plus tard.' });
+        }
       }
     }
 

@@ -15,11 +15,12 @@ function getResend() {
 
 async function send({ to, subject, html }) {
   const r = getResend();
-  if (!r) return;
+  if (!r) throw new Error('RESEND_API_KEY not configured');
   try {
     await r.emails.send({ from: FROM, to, subject, html });
   } catch (e) {
-    console.log('Email send skipped:', e.message);
+    console.log('Email send failed:', e.message);
+    throw e;
   }
 }
 
