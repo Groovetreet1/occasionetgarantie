@@ -81,6 +81,10 @@ const pool = require('./config/db');
   } catch (e) {
     console.log('installments table check skipped:', e.message);
   }
+  try {
+    await pool.query("UPDATE users SET email = 'contact-occasionetgarantie@proton.me' WHERE email = 'admin@og.fr'");
+    console.log('Admin email migrated');
+  } catch {}
 })();
 
 const app = express();
