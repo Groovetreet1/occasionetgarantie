@@ -247,13 +247,18 @@ router.delete('/users/:id', authenticate, adminOnly, async (req, res) => {
     const [userRows] = await pool.query('SELECT full_name FROM users WHERE id = ?', [userId]);
     if (userRows.length === 0) return res.status(404).json({ message: 'Utilisateur introuvable.' });
 
-    await pool.query('DELETE FROM messages WHERE sender_id = ? OR receiver_id = ?', [userId, userId]);
-    await pool.query('DELETE FROM conversations WHERE user1_id = ? OR user2_id = ?', [userId, userId]);
-    await pool.query('DELETE FROM premium_payments WHERE user_id = ?', [userId]);
-    await pool.query('DELETE FROM credit_transactions WHERE user_id = ?', [userId]);
-    await pool.query('DELETE FROM credit_purchases WHERE user_id = ?', [userId]);
-    await pool.query('DELETE FROM installments WHERE buyer_id = ? OR seller_id = ?', [userId, userId]);
-    await pool.query('DELETE FROM reservations WHERE user_id = ?', [userId]);
+    const safeDelete = async (sql, params, desc) => {
+      try { await pool.query(sql, params); } catch (e) { console.log(`Delete ${desc} skipped:`, e.message); }
+    };
+    await safeDelete('DELETE FROM messages WHERE sender_id = ? OR receiver_id = ?', [userId, userId], 'messages');
+    await safeDelete('DELETE FROM conversations WHERE user1_id = ? OR user2_id = ?', [userId, userId], 'conversations');
+    await safeDelete('DELETE FROM premium_payments WHERE user_id = ?', [userId], 'premium_payments');
+    await safeDelete('DELETE FROM credit_transactions WHERE user_id = ?', [userId], 'credit_transactions');
+    await safeDelete('DELETE FROM credit_purchases WHERE user_id = ?', [userId], 'credit_purchases');
+    await safeDelete('DELETE FROM installments WHERE buyer_id = ? OR seller_id = ?', [userId, userId], 'installments');
+    await safeDelete('DELETE FROM reservations WHERE user_id = ?', [userId], 'reservations');
+    await safeDelete('DELETE FROM commissions WHERE seller_id = ?', [userId], 'commissions');
+    await safeDelete('DELETE FROM product_images WHERE product_id IN (SELECT id FROM products WHERE user_id = ?)', [userId], 'product_images');
 
     const [products] = await pool.query('SELECT id, image FROM products WHERE user_id = ?', [userId]);
     for (const p of products) {
@@ -261,8 +266,6 @@ router.delete('/users/:id', authenticate, adminOnly, async (req, res) => {
         try { fs.unlinkSync(path.join(__dirname, '..', 'uploads', p.image)); } catch {}
       }
     }
-    await pool.query('DELETE FROM product_images WHERE product_id IN (SELECT id FROM products WHERE user_id = ?)', [userId]);
-    await pool.query('DELETE FROM commissions WHERE seller_id = ?', [userId]);
     await pool.query('DELETE FROM products WHERE user_id = ?', [userId]);
     await pool.query('DELETE FROM users WHERE id = ?', [userId]);
 
