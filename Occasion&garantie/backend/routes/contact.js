@@ -9,7 +9,7 @@ router.post('/', authenticate, async (req, res) => {
     const { message } = req.body;
     if (!message || !message.trim()) return res.status(400).json({ message: 'Message requis.' });
 
-    // Ensure table exists (handles first-time use on fresh DB)
+    // Ensure table + columns exist
     try {
       await pool.query(`CREATE TABLE IF NOT EXISTS contact_messages (
         id INT AUTO_INCREMENT PRIMARY KEY,
@@ -21,6 +21,11 @@ router.post('/', authenticate, async (req, res) => {
       )`);
     } catch (tableErr) {
       console.log('contact_messages table check:', tableErr.message);
+    }
+    try {
+      await pool.query('ALTER TABLE contact_messages ADD COLUMN user_id INT NOT NULL');
+    } catch (e) {
+      if (e.errno !== 1060 && e.code !== 'ER_DUP_FIELDNAME') console.log('user_id col check:', e.message);
     }
 
     const [users] = await pool.query('SELECT full_name, email FROM users WHERE id = ?', [req.user.id]);
