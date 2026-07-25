@@ -19,8 +19,9 @@ export default function About() {
       await api.post('/contact', { message: cfMsg });
       setCfDone(true);
       setCfMsg('');
-    } catch {
-      alert('Erreur lors de l\'envoi. Reessayez.');
+    } catch (err) {
+      const data = err.response?.data || {};
+      alert((data.message || 'Erreur lors de l\'envoi.') + (data.detail ? ` (${data.detail})` : ''));
     } finally { setCfLoading(false); }
   };
 

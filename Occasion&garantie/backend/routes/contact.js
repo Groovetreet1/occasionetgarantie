@@ -45,8 +45,9 @@ router.post('/', authenticate, async (req, res) => {
 
     res.json({ message: 'Message envoye avec succes.' });
   } catch (err) {
-    console.error('POST /contact:', err.message);
-    res.status(500).json({ message: 'Erreur serveur.' });
+    const detail = err.sqlMessage || err.message || 'Erreur inconnue';
+    console.error('POST /contact error:', detail);
+    res.status(500).json({ message: 'Erreur serveur.', detail });
   }
 });
 
