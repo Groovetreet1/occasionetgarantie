@@ -157,6 +157,14 @@ app.get('/api/health', (req, res) => {
   res.json({ status: 'ok', message: 'Occasion&Garantie API running' });
 });
 
+app.post('/api/test-ai', async (req, res) => {
+  const { image } = req.body;
+  if (!image) return res.status(400).json({ message: 'Image URL requise.' });
+  const { classifyImage } = require('./services/ai-validator');
+  const result = await classifyImage(image);
+  res.json(result);
+});
+
 app.use('/api/*', (req, res) => {
   res.status(404).json({ message: 'Endpoint API introuvable.' });
 });
@@ -172,5 +180,6 @@ app.use((err, req, res, next) => {
 
 app.listen(PORT, () => {
   console.log(`Server running on http://localhost:${PORT}`);
+  console.log('AI image validator: HUGGINGFACE_API_KEY=' + (process.env.HUGGINGFACE_API_KEY ? 'SET (' + process.env.HUGGINGFACE_API_KEY.substring(0, 8) + '...)' : 'NOT SET'));
   try { startNewsletterCron(); } catch (e) { console.log('Newsletter cron init:', e.message); }
 });
