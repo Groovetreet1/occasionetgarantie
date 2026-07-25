@@ -5,6 +5,8 @@ import { FiUser, FiPackage, FiCalendar, FiArrowLeft } from 'react-icons/fi';
 import api from '../api/axios';
 import ProductCard from '../components/ProductCard';
 
+const API_BASE = import.meta.env.VITE_API_URL || '';
+
 export default function SellerProfile() {
   const { id } = useParams();
   const [seller, setSeller] = useState(null);
@@ -32,7 +34,7 @@ export default function SellerProfile() {
 
         <div className="seller-profile-card">
           <div className="seller-avatar">
-            {seller.store_logo ? <img src={`/uploads/avatars/${seller.store_logo}`} alt="" /> : <FiUser size={40} />}
+            {seller.avatar ? <img src={`${API_BASE}/uploads/avatars/${seller.avatar}`} alt="" /> : seller.store_logo ? <img src={`${API_BASE}/uploads/avatars/${seller.store_logo}`} alt="" /> : <FiUser size={40} />}
           </div>
           <div className="seller-info">
             <h1>{seller.store_name || seller.full_name}</h1>

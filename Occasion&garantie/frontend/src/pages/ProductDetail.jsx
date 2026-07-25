@@ -163,7 +163,7 @@ export default function ProductDetail() {
                   <h4>Vendu par</h4>
                   <Link to={`/seller/${product.seller_id}`} className="seller-badge">
                     <div className="seller-avatar-mini">
-                      {product.seller_logo ? <img src={`/uploads/avatars/${product.seller_logo}`} alt="" /> : <FiUser size={18} />}
+                      {product.seller_avatar ? <img src={`${API_BASE}/uploads/avatars/${product.seller_avatar}`} alt="" /> : product.seller_logo ? <img src={`${API_BASE}/uploads/avatars/${product.seller_logo}`} alt="" /> : <FiUser size={18} />}
                     </div>
                     <div>
                       <strong>{product.seller_name}</strong>

@@ -3,12 +3,15 @@ import { FiUser, FiMail, FiPhone, FiLock, FiSave, FiArrowLeft, FiCamera, FiX, Fi
 import { motion } from 'framer-motion';
 import { Link, useNavigate } from 'react-router-dom';
 import api from '../api/axios';
+import { useAuth } from '../context/AuthContext';
 
+const API_BASE = import.meta.env.VITE_API_URL || '';
 const container = { hidden: {}, show: { transition: { staggerChildren: 0.06 } } };
 const item = { hidden: { opacity: 0, y: 20 }, show: { opacity: 1, y: 0, transition: { duration: 0.4 } } };
 
 export default function Profile() {
   const navigate = useNavigate();
+  const { refreshUser } = useAuth();
   const fileRef = useRef();
   const [name, setName] = useState('');
   const [email, setEmail] = useState('');
@@ -59,6 +62,7 @@ export default function Profile() {
         headers: { 'Content-Type': 'multipart/form-data' },
       });
       setAvatar(data.avatar);
+      refreshUser();
       setMsg({ type: 'success', text: 'Photo de profil mise a jour.' });
     } catch (err) {
       setMsg({ type: 'error', text: err.response?.data?.message || 'Erreur.' });
@@ -181,7 +185,7 @@ export default function Profile() {
                 }}
               >
                 {avatar ? (
-                  <img src={`/uploads/avatars/${avatar}`} alt="" style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
+                  <img src={`${API_BASE}/uploads/avatars/${avatar}`} alt="" style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
                 ) : (
                   <div style={{ width: '100%', height: '100%', display: 'flex', alignItems: 'center', justifyContent: 'center', color: 'var(--text-muted)' }}>
                     <FiUser size={40} />

@@ -14,7 +14,7 @@ router.get('/', async (req, res) => {
     const { category, search, min, max, state, sort, seller } = req.query;
     let sql = `
       SELECT p.*, c.name as category_name,
-             u.store_name as seller_name, u.store_logo as seller_logo,
+             u.store_name as seller_name, u.store_logo as seller_logo, u.avatar as seller_avatar,
              (u.premium = 1 AND (u.premium_expires_at IS NULL OR u.premium_expires_at > NOW())) as seller_premium
       FROM products p
       LEFT JOIN categories c ON p.category_id = c.id
@@ -59,7 +59,7 @@ function fallbackSql(sql) {
 // Public: featured products (only disponible)
 router.get('/featured', async (req, res) => {
   try {
-    let sql = `SELECT p.*, c.name as category_name, u.store_name as seller_name, u.store_logo as seller_logo,
+    let sql = `SELECT p.*, c.name as category_name, u.store_name as seller_name, u.store_logo as seller_logo, u.avatar as seller_avatar,
               (u.premium = 1 AND (u.premium_expires_at IS NULL OR u.premium_expires_at > NOW())) as seller_premium
        FROM products p
        LEFT JOIN categories c ON p.category_id = c.id
@@ -101,7 +101,7 @@ router.get('/id/:id', authenticate, async (req, res) => {
 router.get('/:slug', async (req, res) => {
   try {
     let sql = `SELECT p.*, c.name as category_name,
-              u.id as seller_id, u.full_name as seller_full_name, u.store_name as seller_name, u.store_logo as seller_logo,
+              u.id as seller_id, u.full_name as seller_full_name, u.store_name as seller_name, u.store_logo as seller_logo, u.avatar as seller_avatar,
               u.phone as seller_phone,
               (u.premium = 1 AND (u.premium_expires_at IS NULL OR u.premium_expires_at > NOW())) as seller_premium
        FROM products p

@@ -45,7 +45,12 @@ export default function ProductCard({ product, index = 0 }) {
           <h3 className="product-card-title">{product.name}</h3>
 
           {product.seller_name && (
-            <span className="product-card-seller"><FiUser size={11} /> {product.seller_name} {product.seller_premium ? <FiStar size={14} style={{ color: '#FFD700', marginLeft: 3, verticalAlign: 'middle' }} /> : null}</span>
+            <span className="product-card-seller">
+              {product.seller_avatar ? (
+                <img src={`${API_BASE}/uploads/avatars/${product.seller_avatar}`} alt="" className="product-card-seller-avatar" />
+              ) : <FiUser size={11} />}
+              {product.seller_name} {product.seller_premium ? <FiStar size={14} style={{ color: '#FFD700', marginLeft: 3, verticalAlign: 'middle' }} /> : null}
+            </span>
           )}
 
           <div className="product-card-price-row">

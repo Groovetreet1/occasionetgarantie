@@ -6,6 +6,8 @@ import { useAuth } from '../context/AuthContext';
 import ThemeToggle from './ThemeToggle';
 import PremiumPopup from './PremiumPopup';
 
+const API_BASE = import.meta.env.VITE_API_URL || '';
+
 const categories = [
   { name: 'Smartphones', icon: FiSmartphone, slug: 'Smartphones' },
   { name: 'Tablettes', icon: FiTablet, slug: 'Tablettes' },
@@ -104,7 +106,7 @@ export default function Navbar() {
             {user ? (
               <div className="navbar-dropdown" ref={dropdownRef}>
                 <button className="navbar-user" onClick={() => setDropdownOpen((o) => !o)}>
-                  <FiUser size={16} /> <span>{user.fullName || user.full_name}</span> <FiChevronDown size={14} />
+                  {user.avatar ? <img src={`${API_BASE}/uploads/avatars/${user.avatar}`} alt="" className="navbar-user-avatar" /> : <FiUser size={16} />} <span>{user.fullName || user.full_name}</span> <FiChevronDown size={14} />
                 </button>
                 <AnimatePresence>
                   {dropdownOpen && (
