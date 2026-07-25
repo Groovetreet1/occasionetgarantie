@@ -44,6 +44,7 @@ router.post('/', authenticate, sellerOrAdmin, async (req, res) => {
       const urls = await Promise.all(req.files.map((f) => cloudUpload(f.path, 'products').then((r) => r.url)));
       res.json({ urls });
     } catch (e) {
+      console.error('Product upload error:', e.message);
       res.status(500).json({ message: 'Erreur upload.', error: e.message });
     }
   });

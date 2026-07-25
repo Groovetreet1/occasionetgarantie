@@ -15,29 +15,39 @@ else console.log('[Uploader] Cloudinary not configured, using local disk');
 
 async function upload(filePath, folder = '') {
   if (USE_CLOUDINARY) {
-    const result = await cloudinary.uploader.upload(filePath, {
-      folder: `occasionetgarantie/${folder}`,
-      resource_type: 'image',
-    });
-    try { fs.unlinkSync(filePath); } catch {}
-    return { url: result.secure_url, public_id: result.public_id };
+    try {
+      const result = await cloudinary.uploader.upload(filePath, {
+        folder: `occasionetgarantie/${folder}`,
+        resource_type: 'image',
+      });
+      try { fs.unlinkSync(filePath); } catch {}
+      console.log(`[Uploader] Cloudinary success: ${result.secure_url}`);
+      return { url: result.secure_url, public_id: result.public_id };
+    } catch (cloudErr) {
+      console.error(`[Uploader] Cloudinary failed, falling back to local: ${cloudErr.message}`);
+    }
   }
   const filename = path.basename(filePath);
+  console.log(`[Uploader] Local save: ${filename}`);
   return { url: filename, public_id: null };
 }
 
 async function uploadBuffer(buffer, filename, folder = '') {
   if (USE_CLOUDINARY) {
-    return new Promise((resolve, reject) => {
-      const stream = cloudinary.uploader.upload_stream(
-        { folder: `occasionetgarantie/${folder}`, resource_type: 'image' },
-        (err, result) => {
-          if (err) return reject(err);
-          resolve({ url: result.secure_url, public_id: result.public_id });
-        }
-      );
-      stream.end(buffer);
-    });
+    try {
+      return await new Promise((resolve, reject) => {
+        const stream = cloudinary.uploader.upload_stream(
+          { folder: `occasionetgarantie/${folder}`, resource_type: 'image' },
+          (err, result) => {
+            if (err) return reject(err);
+            resolve({ url: result.secure_url, public_id: result.public_id });
+          }
+        );
+        stream.end(buffer);
+      });
+    } catch (cloudErr) {
+      console.error(`[Uploader] Cloudinary stream failed, falling back to local: ${cloudErr.message}`);
+    }
   }
   const filePath = path.join(__dirname, '..', 'uploads', folder, filename);
   const dir = path.dirname(filePath);
