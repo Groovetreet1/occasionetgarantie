@@ -2,7 +2,7 @@ const express = require('express');
 const router = express.Router();
 const pool = require('../config/db');
 const { authenticate } = require('../middleware/auth');
-const { send, newsletter } = require('../emails');
+const { send } = require('../emails');
 
 router.post('/', authenticate, async (req, res) => {
   try {

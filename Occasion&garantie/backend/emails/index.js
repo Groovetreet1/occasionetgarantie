@@ -3,7 +3,7 @@ const verification = require('./verification');
 const creditConfirmed = require('./credit-confirmed');
 const newsletter = require('./newsletter');
 
-const FROM = 'Occasion & Garantie <contact@occasionetgarantie.store>';
+const FROM = 'Occasion & Garantie <contact@contact.occasionetgarantie.store>';
 
 let _resend = null;
 function getResend() {
