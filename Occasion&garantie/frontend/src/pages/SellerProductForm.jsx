@@ -222,7 +222,8 @@ export default function SellerProductForm() {
                     <option value="3">Ordinateurs</option>
                     <option value="4">Accessoires</option>
                     <option value="5">Gaming</option>
-                  </select>
+                    </select>
+                    <small style={{ display: 'block', color: 'var(--text-secondary)', marginTop: 6, fontSize: 12 }}>Uniquement les produits electronique et tech sont autorises.</small>
                 </div>
               </div>
             </div>

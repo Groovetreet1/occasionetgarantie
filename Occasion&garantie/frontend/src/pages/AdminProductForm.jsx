@@ -185,7 +185,8 @@ export default function AdminProductForm() {
                 <option value={3}>Ordinateurs</option>
                 <option value={4}>Accessoires</option>
                 <option value={5}>Gaming</option>
-              </select>
+                </select>
+                <small style={{ display: 'block', color: 'var(--text-secondary)', marginTop: 6, fontSize: 12 }}>Uniquement les produits electronique et tech sont autorises.</small>
             </div>
             <div className="form-group">
               <label>État</label>
