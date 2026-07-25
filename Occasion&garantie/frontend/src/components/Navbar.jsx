@@ -140,7 +140,7 @@ export default function Navbar() {
                           <FiStar size={14} /> Premium
                         </NavLink>
                       )}
-                      <button onClick={() => { logout(); setDropdownOpen(false); }}>
+                      <button onClick={() => { logout(); navigate('/'); setDropdownOpen(false); }}>
                         <FiLogOut size={14} /> Déconnexion
                       </button>
                     </motion.div>
@@ -195,7 +195,7 @@ export default function Navbar() {
             {user.role === 'admin' && (
               <NavLink to="/admin" onClick={closeMenu}><FiStar size={14} /> Premium</NavLink>
             )}
-            <button onClick={() => { logout(); closeMenu(); }} className="navbar-mobile-logout">
+            <button onClick={() => { logout(); navigate('/'); closeMenu(); }} className="navbar-mobile-logout">
               <FiLogOut size={14} /> Déconnexion
             </button>
           </>
