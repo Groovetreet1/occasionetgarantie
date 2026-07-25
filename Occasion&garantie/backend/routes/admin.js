@@ -7,12 +7,16 @@ const { send, creditConfirmed } = require('../emails');
 
 router.post('/clean-db', authenticate, adminOnly, async (req, res) => {
   try {
-    const tables = ['messages', 'conversations', 'product_images', 'order_items', 'orders', 'premium_payments', 'products', 'reservations'];
+    const tables = [
+      'messages', 'conversations', 'product_images', 'order_items', 'orders',
+      'premium_payments', 'commissions', 'credit_transactions', 'credit_purchases',
+      'installments', 'contact_messages', 'reservations', 'products'
+    ];
     for (const t of tables) {
       try { await pool.query(`DELETE FROM \`${t}\``); } catch {}
     }
     await pool.query('DELETE FROM users WHERE id != 1');
-    res.json({ message: 'DB cleaned. Admin only.' });
+    res.json({ message: 'DB nettoyee. Admin uniquement.' });
   } catch (err) {
     res.status(500).json({ message: 'Erreur serveur.' });
   }
