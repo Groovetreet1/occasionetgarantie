@@ -39,7 +39,7 @@ router.post('/', authenticate, async (req, res) => {
         const { Resend } = require('resend');
         const resend = new Resend(process.env.RESEND_API_KEY);
         await resend.emails.send({
-          from: 'Occasion & Garantie <onboarding@resend.dev>',
+          from: 'Occasion & Garantie <contact@occasionetgarantie.store>',
           to: process.env.CONTACT_EMAIL || 'contact-occasionetgarantie@proton.me',
           subject: `[Occasion & Garantie] Message de ${full_name}`,
           text: `Nom: ${full_name}\nEmail: ${email}\n\nMessage:\n${message}`,
