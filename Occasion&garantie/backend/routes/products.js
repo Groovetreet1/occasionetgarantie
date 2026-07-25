@@ -22,7 +22,7 @@ router.get('/', async (req, res) => {
       FROM products p
       LEFT JOIN categories c ON p.category_id = c.id
       LEFT JOIN users u ON p.seller_id = u.id
-      WHERE p.active = TRUE AND p.status = 'disponible'
+      WHERE p.active = TRUE AND p.status = 'disponible' AND u.id IS NOT NULL
     `;
     const params = [];
 
@@ -67,7 +67,7 @@ router.get('/featured', async (req, res) => {
        FROM products p
        LEFT JOIN categories c ON p.category_id = c.id
        LEFT JOIN users u ON p.seller_id = u.id
-       WHERE p.featured = TRUE AND p.active = TRUE AND p.status = 'disponible'
+       WHERE p.featured = TRUE AND p.active = TRUE AND p.status = 'disponible' AND u.id IS NOT NULL
        ORDER BY seller_premium DESC, p.created_at DESC LIMIT 8`;
     try {
       const [rows] = await pool.query(sql);
