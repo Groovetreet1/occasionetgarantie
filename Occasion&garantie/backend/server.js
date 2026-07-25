@@ -101,6 +101,15 @@ const pool = require('./config/db');
 
 const app = express();
 app.set('trust proxy', 1);
+
+app.use((req, res, next) => {
+  const host = req.headers.host;
+  if (host && (host === 'occasionetgarantie.store' || host.startsWith('occasionetgarantie.store:'))) {
+    const wwwHost = host.replace('occasionetgarantie.store', 'www.occasionetgarantie.store');
+    return res.redirect(301, `${req.protocol}://${wwwHost}${req.url}`);
+  }
+  next();
+});
 const PORT = process.env.PORT || 5000;
 
 const limiter = rateLimit({
