@@ -887,11 +887,25 @@ select.form-control, .form-group select { cursor: pointer; appearance: auto; }
   white-space: nowrap; padding: 0 12px;
 }
 
-.whatsapp-float { position: fixed; bottom: 24px; right: 24px; display: flex; flex-direction: column; gap: 12px; z-index: 9998; }
+.support-float { position: fixed; bottom: 24px; right: 24px; display: flex; flex-direction: column; align-items: flex-end; gap: 12px; z-index: 9998; }
 .scroll-top-btn { width: 48px; height: 48px; border-radius: 50%; border: none; cursor: pointer; display: flex; align-items: center; justify-content: center; background: var(--bg-card); color: var(--text-primary); border: 1px solid var(--border-light); box-shadow: var(--shadow); font-size: 20px; transition: var(--transition); }
 .scroll-top-btn:hover { border-color: var(--primary); color: var(--primary); transform: translateY(-2px); }
-.whatsapp-btn { width: 52px; height: 52px; border-radius: 50%; border: none; display: flex; align-items: center; justify-content: center; background: #25D366; color: white; box-shadow: 0 4px 15px rgba(37, 211, 102, 0.3); font-size: 24px; transition: var(--transition); }
-.whatsapp-btn:hover { transform: scale(1.1); }
+.support-btn { width: 52px; height: 52px; border-radius: 50%; border: none; display: flex; align-items: center; justify-content: center; background: var(--gradient); color: white; box-shadow: var(--shadow-glow); font-size: 24px; transition: var(--transition); cursor: pointer; }
+.support-btn:hover { transform: scale(1.1); }
+
+.support-popup { position: absolute; bottom: 68px; right: 0; width: 340px; max-width: calc(100vw - 48px); background: var(--bg-card); border-radius: 16px; box-shadow: 0 8px 32px rgba(0,0,0,0.15); overflow: hidden; border: 1px solid var(--border); }
+.support-popup-header { display: flex; align-items: center; gap: 8px; padding: 14px 16px; background: var(--gradient); color: white; font-weight: 600; font-size: 14px; }
+.support-popup-close { margin-left: auto; background: none; border: none; color: white; cursor: pointer; padding: 4px; border-radius: 4px; display: flex; }
+.support-popup-close:hover { background: rgba(255,255,255,0.15); }
+.support-popup-body { padding: 16px; }
+.support-popup-body .form-group { margin-bottom: 10px; }
+.support-popup-body input, .support-popup-body textarea { width: 100%; padding: 10px 12px; border: 1px solid var(--border); border-radius: 8px; background: var(--bg-secondary); color: var(--text); font-family: var(--font); font-size: 13px; box-sizing: border-box; }
+.support-popup-body input:focus, .support-popup-body textarea:focus { outline: none; border-color: var(--primary); }
+.support-popup-body textarea { resize: vertical; min-height: 80px; }
+.support-popup-success { text-align: center; padding: 24px 16px; }
+.support-popup-success svg { color: var(--success); margin-bottom: 12px; }
+.support-popup-success p { font-weight: 600; margin-bottom: 4px; font-size: 14px; }
+.support-popup-success small { color: var(--text-muted); font-size: 12px; }
 
 .theme-toggle { background: none; border: none; color: var(--text-secondary); cursor: pointer; padding: 8px; border-radius: 8px; font-size: 16px; display: flex; align-items: center; justify-content: center; transition: var(--transition); }
 .theme-toggle:hover { background: var(--bg-hover); color: var(--primary); }

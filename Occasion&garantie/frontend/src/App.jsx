@@ -3,7 +3,7 @@ import { Routes, Route, Navigate, useLocation } from 'react-router-dom';
 import { AnimatePresence, motion } from 'framer-motion';
 import Navbar from './components/Navbar';
 import Footer from './components/Footer';
-import WhatsAppFloat from './components/WhatsAppFloat';
+import SupportFloat from './components/SupportFloat';
 import AdminRoute from './components/AdminRoute';
 import SellerRoute from './components/SellerRoute';
 import Home from './pages/Home';
@@ -88,7 +88,7 @@ export default function App() {
           <Route path="*" element={<AnimatedPage><NotFound /></AnimatedPage>} />
         </Routes>
       </AnimatePresence>
-      <WhatsAppFloat />
+      <SupportFloat />
       <Footer />
     </>
   );
