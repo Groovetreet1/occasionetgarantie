@@ -5,6 +5,7 @@ import { BsWhatsapp } from 'react-icons/bs';
 import api from '../api/axios';
 import { useAuth } from '../context/AuthContext';
 import SellerRating from '../components/SellerRating';
+import { trackViewItem } from '../utils/gtag';
 
 const stateLabels = {
   neuf: 'Neuf',
@@ -33,7 +34,16 @@ export default function ProductDetail() {
     window.scrollTo(0, 0);
     setLoading(true);
     api.get(`/products/${slug}`)
-      .then((res) => setProduct(res.data))
+      .then((res) => {
+        setProduct(res.data);
+        trackViewItem({
+          id: res.data.id,
+          name: res.data.name,
+          category: res.data.category_name,
+          price: Number(res.data.price),
+          brand: res.data.brand,
+        });
+      })
       .catch(() => {})
       .finally(() => setLoading(false));
   }, [slug]);

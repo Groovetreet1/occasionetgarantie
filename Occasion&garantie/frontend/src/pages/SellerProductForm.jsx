@@ -4,6 +4,7 @@ import { motion } from 'framer-motion';
 import { FiUpload, FiX } from 'react-icons/fi';
 import api from '../api/axios';
 import SellerNav from '../components/SellerNav';
+import { trackSubmitProduct } from '../utils/gtag';
 
 const API_BASE = import.meta.env.VITE_API_URL || '';
 
@@ -129,6 +130,7 @@ export default function SellerProductForm() {
         await api.put(`/products/${id}`, payload);
       } else {
         await api.post('/products', payload);
+        trackSubmitProduct({ value: Number(form.price) });
       }
       navigate('/seller');
     } catch (err) {

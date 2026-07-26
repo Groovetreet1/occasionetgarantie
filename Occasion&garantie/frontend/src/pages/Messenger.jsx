@@ -4,6 +4,7 @@ import { FiMessageCircle, FiSend, FiArrowLeft, FiUser, FiStar, FiTrash2, FiShopp
 import { BsWhatsapp } from 'react-icons/bs';
 import api from '../api/axios';
 import { useAuth } from '../context/AuthContext';
+import { trackContact } from '../utils/gtag';
 
 export default function Messenger() {
   const { id } = useParams();
@@ -121,6 +122,7 @@ export default function Messenger() {
     try {
       const { data } = await api.post(`/chat/conversations/${activeConv}/messages`, { text: msgText });
       prevMsgCountRef.current++;
+      if (messages.length === 0) trackContact();
       setMessages((prev) => [...prev, data]);
       setTimeout(scrollToBottom, 100);
       loadConversations();

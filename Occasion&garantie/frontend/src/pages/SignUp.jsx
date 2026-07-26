@@ -4,6 +4,7 @@ import { FiUserPlus, FiMail, FiLock, FiPhone, FiTrendingUp, FiShoppingBag, FiFil
 import { useAuth } from '../context/AuthContext';
 import api from '../api/axios';
 import TermsPopup from '../components/TermsPopup';
+import { trackSignup } from '../utils/gtag';
 
 export default function SignUp() {
   const { user } = useAuth();
@@ -33,6 +34,7 @@ export default function SignUp() {
     setLoading(true);
     try {
       await api.post('/auth/signup', { fullName, email, password, phone, role: isSeller ? 'seller' : undefined, storeName: isSeller ? storeName : undefined, termsAccepted: true, verificationMethod: verifMethod });
+      trackSignup();
       navigate(`/verify-code?email=${encodeURIComponent(email)}${isSeller ? '&role=seller' : ''}${verifMethod === 'email' ? '&method=email' : ''}`);
     } catch (err) {
       setError(err.response?.data?.message || 'Erreur lors de l\'inscription.');

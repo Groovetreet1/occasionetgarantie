@@ -4,7 +4,10 @@ import { BrowserRouter } from 'react-router-dom';
 import App from './App';
 import { AuthProvider } from './context/AuthContext';
 import { ThemeProvider } from './context/ThemeContext';
+import { initGtag } from './utils/gtag';
 import './index.css';
+
+initGtag();
 
 ReactDOM.createRoot(document.getElementById('root')).render(
   <React.StrictMode>
