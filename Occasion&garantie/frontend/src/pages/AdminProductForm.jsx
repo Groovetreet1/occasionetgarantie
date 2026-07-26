@@ -195,10 +195,6 @@ export default function AdminProductForm() {
               </select>
             </div>
             <div className="form-group">
-              <label>Garantie</label>
-              <input name="warranty" value={form.warranty} onChange={handleChange} />
-            </div>
-            <div className="form-group">
               <label>Stock</label>
               <input name="stock" type="number" value={form.stock} onChange={handleChange} />
             </div>

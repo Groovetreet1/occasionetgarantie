@@ -229,7 +229,7 @@ export default function SellerProductForm() {
             </div>
 
             <div className="seller-form-card">
-              <h3>État & Garantie</h3>
+              <h3>État</h3>
               <div className="state-grid">
                 {states.map(s => (
                   <label key={s.value} className={`state-option ${form.state === s.value ? 'active' : ''}`}>
@@ -238,19 +238,6 @@ export default function SellerProductForm() {
                     <span>{s.desc}</span>
                   </label>
                 ))}
-              </div>
-              <div className="form-row" style={{ marginTop: 16 }}>
-                <div className="form-group">
-                  <label>Garantie</label>
-                  <select name="warranty" value={form.warranty} onChange={handleChange} className="form-control">
-                    <option value="1 mois">1 mois</option>
-                    <option value="3 mois">3 mois</option>
-                    <option value="6 mois">6 mois</option>
-                    <option value="12 mois">12 mois</option>
-                    <option value="24 mois">24 mois</option>
-                    <option value="Sans garantie">Sans garantie</option>
-                  </select>
-                </div>
               </div>
             </div>
 
