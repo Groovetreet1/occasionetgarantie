@@ -20,6 +20,7 @@ export default function Footer() {
             <h4>Navigation</h4>
             <Link to="/">Accueil</Link>
             <Link to="/products">Produits</Link>
+            <Link to="/about">À propos</Link>
           </div>
           <div className="footer-col">
             <h4>Compte</h4>
@@ -39,7 +40,12 @@ export default function Footer() {
           </div>
         </div>
         <div className="footer-bottom">
-          &copy; {new Date().getFullYear()} Occasion & Garantie. Tous droits réservés.
+          <div className="footer-bottom-links">
+            <Link to="/privacy">Politique de confidentialité</Link>
+            <Link to="/legal">Mentions légales</Link>
+            <Link to="/about">À propos</Link>
+          </div>
+          <p>&copy; {new Date().getFullYear()} Occasion & Garantie. Tous droits réservés.</p>
         </div>
       </div>
     </footer>

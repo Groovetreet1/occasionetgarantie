@@ -31,6 +31,8 @@ export default function Home() {
   const [searchTerm, setSearchTerm] = useState('');
   const [loading, setLoading] = useState(true);
 
+  useEffect(() => { document.title = 'Occasion & Garantie - Achetez et vendez des produits électroniques d\'occasion au Maroc'; }, []);
+
   useEffect(() => {
     api.get('/products?sort=newest').then(res => {
       setProducts(res.data.slice(0, 20));

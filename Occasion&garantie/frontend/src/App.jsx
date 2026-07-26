@@ -28,6 +28,8 @@ import SellerProductForm from './pages/SellerProductForm';
 import SellerProfile from './pages/SellerProfile';
 import SellerStats from './pages/SellerStats';
 import Messenger from './pages/Messenger';
+import Privacy from './pages/Privacy';
+import Legal from './pages/Legal';
 
 const pageVariants = {
   initial: { opacity: 0, y: 12 },
@@ -81,6 +83,8 @@ export default function App() {
           <Route path="/seller/:id" element={<AnimatedPage><SellerProfile /></AnimatedPage>} />
           <Route path="/messenger" element={<AnimatedPage><Messenger /></AnimatedPage>} />
           <Route path="/messenger/:id" element={<AnimatedPage><Messenger /></AnimatedPage>} />
+          <Route path="/privacy" element={<AnimatedPage><Privacy /></AnimatedPage>} />
+          <Route path="/legal" element={<AnimatedPage><Legal /></AnimatedPage>} />
           <Route path="*" element={<AnimatedPage><NotFound /></AnimatedPage>} />
         </Routes>
       </AnimatePresence>

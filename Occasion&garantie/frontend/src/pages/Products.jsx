@@ -27,6 +27,8 @@ export default function Products() {
   const [priceMax, setPriceMax] = useState('');
   const [visibleCount, setVisibleCount] = useState(12);
 
+  useEffect(() => { document.title = 'Tous les produits - Occasion & Garantie'; }, []);
+
   useEffect(() => {
     const catParam = searchParams.get('category');
     if (catParam) setCategory(catParam);
