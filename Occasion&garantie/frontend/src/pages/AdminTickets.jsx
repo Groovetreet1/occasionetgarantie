@@ -1,7 +1,9 @@
 import { useEffect, useState, useCallback } from 'react';
 import { Link } from 'react-router-dom';
-import { FiArrowLeft, FiHeadphones, FiSearch, FiClock, FiRefreshCw, FiSend, FiCheckCircle, FiMail, FiChevronDown, FiChevronUp } from 'react-icons/fi';
+import { FiArrowLeft, FiHeadphones, FiSearch, FiClock, FiRefreshCw, FiSend, FiCheckCircle, FiMail, FiChevronDown, FiChevronUp, FiChevronLeft, FiChevronRight } from 'react-icons/fi';
 import api from '../api/axios';
+
+const PER_PAGE = 10;
 
 export default function AdminTickets() {
   const [tickets, setTickets] = useState([]);
@@ -11,6 +13,8 @@ export default function AdminTickets() {
   const [replies, setReplies] = useState({});
   const [sending, setSending] = useState({});
   const [sent, setSent] = useState({});
+  const [pageNr, setPageNr] = useState(1);
+  const [pageR, setPageR] = useState(1);
 
   const load = useCallback(() => {
     setLoading(true);
@@ -31,12 +35,20 @@ export default function AdminTickets() {
       )
     : tickets;
 
+  const notRepliedAll = filtered.filter(t => !t.replied_at);
+  const repliedAll = filtered.filter(t => t.replied_at);
+
+  const notReplied = notRepliedAll.slice(0, PER_PAGE * pageNr);
+  const replied = repliedAll.slice(0, PER_PAGE * pageR);
+
+  const totalNr = notRepliedAll.length;
+  const totalR = repliedAll.length;
+  const hasMoreNr = totalNr > PER_PAGE * pageNr;
+  const hasMoreR = totalR > PER_PAGE * pageR;
+
   const formatDate = (d) => new Date(d).toLocaleString('fr-FR', {
     day: 'numeric', month: 'short', year: 'numeric', hour: '2-digit', minute: '2-digit'
   });
-
-  const notReplied = filtered.filter(t => !t.replied_at);
-  const replied = filtered.filter(t => t.replied_at);
 
   const handleReply = async (ticketNumber) => {
     const reply = replies[ticketNumber];
@@ -53,6 +65,28 @@ export default function AdminTickets() {
       setSending(prev => ({ ...prev, [ticketNumber]: false }));
     }
   };
+
+  const Pagination = ({ page, setPage, hasMore, total }) => (
+    total > PER_PAGE ? (
+      <div style={{ display: 'flex', alignItems: 'center', gap: '4px', marginTop: '8px', justifyContent: 'center' }}>
+        <button
+          onClick={() => setPage(p => Math.max(1, p - 1))}
+          disabled={page <= 1}
+          style={{ padding: '6px 10px', border: '1px solid var(--border)', borderRadius: '6px', background: 'var(--bg-card)', color: 'var(--text)', cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '4px', fontSize: '12px', opacity: page <= 1 ? 0.4 : 1 }}
+        >
+          <FiChevronLeft size={14} /> Precedent
+        </button>
+        <span style={{ fontSize: '12px', color: 'var(--text-muted)', padding: '0 8px' }}>Page {page} / {Math.ceil(total / PER_PAGE)}</span>
+        <button
+          onClick={() => setPage(p => p + 1)}
+          disabled={!hasMore}
+          style={{ padding: '6px 10px', border: '1px solid var(--border)', borderRadius: '6px', background: 'var(--bg-card)', color: 'var(--text)', cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '4px', fontSize: '12px', opacity: !hasMore ? 0.4 : 1 }}
+        >
+          Suivant <FiChevronRight size={14} />
+        </button>
+      </div>
+    ) : null
+  );
 
   return (
     <section className="admin-dashboard">
@@ -75,7 +109,7 @@ export default function AdminTickets() {
             type="text"
             placeholder="Rechercher par numero ticket, nom, email ou message..."
             value={search}
-            onChange={(e) => setSearch(e.target.value)}
+            onChange={(e) => { setSearch(e.target.value); setPageNr(1); setPageR(1); }}
             style={{ width: '100%', padding: '12px 14px 12px 42px', border: '1px solid var(--border)', borderRadius: '10px', background: 'var(--bg-card)', color: 'var(--text)', fontFamily: 'var(--font)', fontSize: '14px', boxSizing: 'border-box' }}
           />
         </div>
@@ -89,10 +123,10 @@ export default function AdminTickets() {
           </div>
         ) : (
           <div style={{ display: 'flex', flexDirection: 'row', gap: '16px', alignItems: 'flex-start', flexWrap: 'wrap' }}>
-            {notReplied.length > 0 && (
+            {notRepliedAll.length > 0 && (
               <div style={{ flex: '1 1 300px', minWidth: 0 }}>
                 <h3 style={{ fontSize: '16px', fontWeight: 700, color: 'var(--text)', margin: '0 0 8px', display: 'flex', alignItems: 'center', gap: '8px' }}>
-                  <span style={{ width: '8px', height: '8px', borderRadius: '50%', background: 'var(--primary)' }} /> En attente de reponse ({notReplied.length})
+                  <span style={{ width: '8px', height: '8px', borderRadius: '50%', background: 'var(--primary)' }} /> En attente de reponse ({totalNr})
                 </h3>
                 {notReplied.map(ticket => {
               const isOpen = expanded === ticket.id;
@@ -164,12 +198,13 @@ export default function AdminTickets() {
                 </div>
               );
             })}
+                <Pagination page={pageNr} setPage={setPageNr} hasMore={hasMoreNr} total={totalNr} />
               </div>
             )}
-            {replied.length > 0 && (
+            {repliedAll.length > 0 && (
               <div style={{ flex: '1 1 300px', minWidth: 0 }}>
                 <h3 style={{ fontSize: '16px', fontWeight: 700, color: 'var(--text)', margin: '0 0 8px', display: 'flex', alignItems: 'center', gap: '8px' }}>
-                  <span style={{ width: '8px', height: '8px', borderRadius: '50%', background: 'var(--success)' }} /> Repondu ({replied.length})
+                  <span style={{ width: '8px', height: '8px', borderRadius: '50%', background: 'var(--success)' }} /> Repondu ({totalR})
                 </h3>
                 {replied.map(ticket => {
               const isOpen = expanded === ticket.id;
@@ -217,6 +252,7 @@ export default function AdminTickets() {
                 </div>
               );
             })}
+                <Pagination page={pageR} setPage={setPageR} hasMore={hasMoreR} total={totalR} />
               </div>
             )}
           </div>
