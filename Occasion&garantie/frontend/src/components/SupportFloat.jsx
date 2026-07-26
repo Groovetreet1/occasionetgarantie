@@ -1,11 +1,13 @@
 import { useEffect, useState } from 'react';
 import { FiArrowUp, FiHeadphones, FiX, FiSend, FiCheckCircle } from 'react-icons/fi';
 import api from '../api/axios';
+import { useAuth } from '../context/AuthContext';
 
 export default function SupportFloat() {
+  const { user } = useAuth();
   const [showScroll, setShowScroll] = useState(false);
   const [open, setOpen] = useState(false);
-  const [name, setName] = useState('');
+  const [name, setName] = useState(user?.fullName || user?.full_name || '');
   const [message, setMessage] = useState('');
   const [loading, setLoading] = useState(false);
   const [done, setDone] = useState(false);
@@ -17,6 +19,10 @@ export default function SupportFloat() {
     window.addEventListener('scroll', handle);
     return () => window.removeEventListener('scroll', handle);
   }, []);
+
+  useEffect(() => {
+    if (user?.fullName || user?.full_name) setName(user.fullName || user.full_name);
+  }, [user]);
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -77,6 +83,8 @@ export default function SupportFloat() {
                     value={name}
                     onChange={(e) => setName(e.target.value)}
                     required
+                    readOnly={!!user}
+                    style={user ? { opacity: 0.7, cursor: 'not-allowed' } : {}}
                   />
                 </div>
                 <div className="form-group">

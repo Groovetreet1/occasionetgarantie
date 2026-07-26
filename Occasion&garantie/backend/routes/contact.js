@@ -28,6 +28,7 @@ router.post('/', async (req, res) => {
         message TEXT NOT NULL,
         created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
       )`);
+      try { await pool.query('ALTER TABLE support_tickets ADD COLUMN ticket_number VARCHAR(10) NOT NULL UNIQUE'); } catch (e) { if (e.errno !== 1060 && e.code !== 'ER_DUP_FIELDNAME') console.log('ticket_number col:', e.message); }
     } catch (tableErr) {
       console.log('support_tickets table check:', tableErr.message);
     }
