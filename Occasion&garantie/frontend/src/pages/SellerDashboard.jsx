@@ -52,7 +52,7 @@ export default function SellerDashboard() {
       if (cr.status === 'fulfilled') setCreditBalance(cr.value.data.credit_balance);
       if (r.status === 'fulfilled' && r.value?.data) setSellerRatings(r.value.data);
     }).finally(() => setLoading(false));
-  }, [user]);
+  }, []);
 
   const handleBuyCredits = async () => {
     setBuyLoading(true);

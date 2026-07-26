@@ -1,7 +1,6 @@
 import { useEffect, useState } from 'react';
 import { motion } from 'framer-motion';
 import { FiHeadphones, FiStar, FiUsers, FiMessageCircle } from 'react-icons/fi';
-import api from '../api/axios';
 
 const items = [
   { icon: FiMessageCircle, label: 'Avis clients', sub: 'Notez les vendeurs' },
@@ -9,14 +8,21 @@ const items = [
   { icon: FiStar, label: 'Satisfaction', sub: 'Clients notent les produits' },
 ];
 
-export default function TrustBar() {
-  const [stats, setStats] = useState({ products: 0, clients: 0, satisfaction: 98 });
+function loadStats(setStats) {
+  fetch('/api/stats')
+    .then(r => r.ok ? r.json() : null)
+    .then(d => d && setStats(d))
+    .catch(() => {});
+}
 
-  useEffect(() => {
-    api.get('/stats')
-      .then(res => setStats(res.data))
-      .catch(() => {});
-  }, []);
+export default function TrustBar() {
+  const [stats, setStats] = useState(null);
+
+  useEffect(() => { loadStats(setStats); }, []);
+
+  const products = stats?.products || 0;
+  const clients = stats?.clients || 0;
+  const satisfaction = stats?.satisfaction || 98;
 
   return (
     <section className="trust-bar">
@@ -46,21 +52,21 @@ export default function TrustBar() {
             variants={{ hidden: { opacity: 0, scale: 0.8 }, show: { opacity: 1, scale: 1 } }}
           >
             <FiStar size={28} />
-            <span className="trust-stat-value">{stats.products > 0 ? stats.products.toLocaleString() + '+' : '—'}</span>
+            <span className="trust-stat-value">{products > 0 ? products.toLocaleString() + '+' : '—'}</span>
             <span className="trust-stat-label">Produits vendus</span>
           </motion.div>
           <motion.div className="trust-stat"
             variants={{ hidden: { opacity: 0, scale: 0.8 }, show: { opacity: 1, scale: 1 } }}
           >
             <FiUsers size={28} />
-            <span className="trust-stat-value">{stats.clients > 0 ? stats.clients.toLocaleString() + '+' : '—'}</span>
+            <span className="trust-stat-value">{clients > 0 ? clients.toLocaleString() + '+' : '—'}</span>
             <span className="trust-stat-label">Clients satisfaits</span>
           </motion.div>
           <motion.div className="trust-stat"
             variants={{ hidden: { opacity: 0, scale: 0.8 }, show: { opacity: 1, scale: 1 } }}
           >
             <FiStar size={28} />
-            <span className="trust-stat-value">{stats.satisfaction}%</span>
+            <span className="trust-stat-value">{satisfaction}%</span>
             <span className="trust-stat-label">Avis positifs</span>
           </motion.div>
         </motion.div>
