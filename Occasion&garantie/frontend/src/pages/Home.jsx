@@ -6,7 +6,6 @@ import { BsPhone, BsLaptop, BsHeadphones } from 'react-icons/bs';
 import api from '../api/axios';
 import ProductCard from '../components/ProductCard';
 import TrustBar from '../components/TrustBar';
-import TestimonialsSection from '../components/TestimonialsSection';
 import NewsletterSection from '../components/NewsletterSection';
 import PromoPopup from '../components/PromoPopup';
 import AdBanner from '../components/AdBanner';
@@ -134,7 +133,6 @@ export default function Home() {
         </div>
       </motion.section>
 
-      <TestimonialsSection />
       <NewsletterSection />
     </motion.div>
   );
