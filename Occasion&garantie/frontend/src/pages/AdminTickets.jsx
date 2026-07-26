@@ -18,6 +18,11 @@ export default function AdminTickets() {
 
   useEffect(() => { load(); }, [load]);
 
+  useEffect(() => {
+    const interval = setInterval(load, 10000);
+    return () => clearInterval(interval);
+  }, [load]);
+
   const filtered = search
     ? tickets.filter(t =>
         t.ticket_number.includes(search) ||
