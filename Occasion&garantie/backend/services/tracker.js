@@ -52,14 +52,14 @@ async function resolveIp(ip) {
   if (!ip || ip === 'unknown' || ip === '127.0.0.1' || ip === '::1' || ip === '::ffff:127.0.0.1') return { ...def, isp: 'Local' };
 
   const json = await fetchJson(`https://api.ipapi.is/?q=${ip}`);
-  if (json && (json.isp || json.org)) {
+  if (json && json.ip) {
     const result = {
-      isp: json.isp || json.org || 'Inconnu',
-      city: json.city || null,
-      region: json.regionName || null,
-      country: json.country || null,
+      isp: json.company?.name || json.isp || json.org || json.asn?.descr || 'Inconnu',
+      city: json.city || json.location?.city || null,
+      region: json.regionName || json.location?.state || null,
+      country: json.country || json.location?.country || null,
       isVpn: !!(json.is_vpn || json.is_proxy || json.is_tor),
-      isDatacenter: !!(json.is_datacenter),
+      isDatacenter: !!(json.is_datacenter || json.company?.type === 'hosting'),
     };
     CACHE[ip] = result;
     return result;
