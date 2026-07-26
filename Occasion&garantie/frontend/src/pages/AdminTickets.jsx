@@ -247,6 +247,31 @@ export default function AdminTickets() {
                       <div style={{ padding: '12px', background: 'var(--bg-secondary)', borderRadius: '8px', fontSize: '14px', color: 'var(--text-secondary)', lineHeight: '1.6', whiteSpace: 'pre-wrap', marginBottom: '16px' }}>
                         {ticket.message}
                       </div>
+                      {sent[ticket.ticket_number] ? (
+                        <div style={{ display: 'flex', alignItems: 'center', gap: '8px', padding: '12px', background: 'rgba(16,185,129,0.1)', borderRadius: '8px', color: 'var(--success)', fontSize: '14px' }}>
+                          <FiCheckCircle size={18} /> Reponse envoyee avec succes !
+                        </div>
+                      ) : (
+                        <div>
+                          <textarea
+                            rows={3}
+                            placeholder="Ecrire une nouvelle reponse..."
+                            value={replies[ticket.ticket_number] || ''}
+                            onChange={(e) => setReplies(prev => ({ ...prev, [ticket.ticket_number]: e.target.value }))}
+                            style={{ width: '100%', padding: '10px 12px', border: '1px solid var(--border)', borderRadius: '8px', background: 'var(--bg-secondary)', color: 'var(--text)', fontFamily: 'var(--font)', fontSize: '13px', boxSizing: 'border-box', resize: 'vertical', minHeight: '60px' }}
+                          />
+                          <button
+                            onClick={() => handleReply(ticket.ticket_number)}
+                            disabled={sending[ticket.ticket_number] || !(replies[ticket.ticket_number] || '').trim()}
+                            style={{ marginTop: '8px', padding: '10px 20px', border: 'none', borderRadius: '8px', background: 'var(--gradient)', color: 'white', cursor: 'pointer', fontFamily: 'var(--font)', fontSize: '13px', fontWeight: 600, display: 'inline-flex', alignItems: 'center', gap: '6px' }}
+                          >
+                            {sending[ticket.ticket_number] ? 'Envoi...' : <><FiSend size={14} /> Envoyer une reponse</>}
+                          </button>
+                          <span style={{ marginLeft: '12px', fontSize: '12px', color: 'var(--text-muted)' }}>
+                            La reponse sera envoyee a {ticket.email}
+                          </span>
+                        </div>
+                      )}
                     </div>
                   )}
                 </div>
