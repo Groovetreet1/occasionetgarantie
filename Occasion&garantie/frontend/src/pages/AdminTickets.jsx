@@ -88,10 +88,10 @@ export default function AdminTickets() {
             <p>Aucun ticket pour le moment.</p>
           </div>
         ) : (
-          <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
+          <div style={{ display: 'flex', flexDirection: 'row', gap: '16px', alignItems: 'flex-start', flexWrap: 'wrap' }}>
             {notReplied.length > 0 && (
-              <>
-                <h3 style={{ fontSize: '16px', fontWeight: 700, color: 'var(--text)', margin: '0 0 4px', display: 'flex', alignItems: 'center', gap: '8px' }}>
+              <div style={{ flex: '1 1 300px', minWidth: 0 }}>
+                <h3 style={{ fontSize: '16px', fontWeight: 700, color: 'var(--text)', margin: '0 0 8px', display: 'flex', alignItems: 'center', gap: '8px' }}>
                   <span style={{ width: '8px', height: '8px', borderRadius: '50%', background: 'var(--primary)' }} /> En attente de reponse ({notReplied.length})
                 </h3>
                 {notReplied.map(ticket => {
@@ -164,11 +164,11 @@ export default function AdminTickets() {
                 </div>
               );
             })}
-              </>
+              </div>
             )}
             {replied.length > 0 && (
-              <>
-                <h3 style={{ fontSize: '16px', fontWeight: 700, color: 'var(--text)', margin: '24px 0 4px', display: 'flex', alignItems: 'center', gap: '8px' }}>
+              <div style={{ flex: '1 1 300px', minWidth: 0 }}>
+                <h3 style={{ fontSize: '16px', fontWeight: 700, color: 'var(--text)', margin: '0 0 8px', display: 'flex', alignItems: 'center', gap: '8px' }}>
                   <span style={{ width: '8px', height: '8px', borderRadius: '50%', background: 'var(--success)' }} /> Repondu ({replied.length})
                 </h3>
                 {replied.map(ticket => {
@@ -217,7 +217,7 @@ export default function AdminTickets() {
                 </div>
               );
             })}
-              </>
+              </div>
             )}
           </div>
         )}
