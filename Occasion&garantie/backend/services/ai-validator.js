@@ -101,7 +101,7 @@ function checkLabels(predictions) {
   const topScore = scores[0]?.score || 0;
 
   const forbiddenMatch = scores.find(s =>
-    s.score > 0.08 &&
+    s.score > 0.20 &&
     FORBIDDEN_LABELS.some(f => s.label === f || s.label.startsWith(f + ',') || s.label.startsWith(f + ' ') || s.label.includes(', ' + f))
   );
   if (forbiddenMatch) {
@@ -109,7 +109,7 @@ function checkLabels(predictions) {
   }
 
   const electronicsMatch = scores.some(s =>
-    s.score > 0.04 &&
+    s.score > 0.02 &&
     ELECTRONICS_LABELS.some(e => s.label === e || s.label.startsWith(e + ',') || s.label.startsWith(e + ' ') || s.label.includes(', ' + e))
   );
   if (!electronicsMatch) {
@@ -261,8 +261,8 @@ async function classifyLocalWithBuffer(buffer) {
       return { valid: false, reason: 'Image trop petite pour un produit.' };
     }
     const { skinRatio, brightRatio, grayRatio } = await detectSkinAndBg(buffer);
-    if (skinRatio > 0.25) return { valid: false, reason: 'Image non valide: visage detecte (' + (skinRatio * 100).toFixed(0) + '%). Veuillez uploader une photo de produit electronique.' };
-    if (brightRatio > 0.85 && grayRatio > 0.70) return { valid: false, reason: 'Image non valide: fond blanc vide. Veuillez uploader une photo reelle de votre produit.' };
+    if (skinRatio > 0.40) return { valid: false, reason: 'Image non valide: visage detecte (' + (skinRatio * 100).toFixed(0) + '%). Veuillez uploader une photo de produit electronique.' };
+    if (brightRatio > 0.90 && grayRatio > 0.80) return { valid: false, reason: 'Image non valide: fond blanc vide. Veuillez uploader une photo reelle de votre produit.' };
     console.log('AI validator: sharp ACCEPTED (skin=' + (skinRatio * 100).toFixed(1) + '%)');
     return { valid: true };
   } catch {
