@@ -38,8 +38,8 @@ export default function AdminTickets() {
   const notRepliedAll = filtered.filter(t => !t.replied_at);
   const repliedAll = filtered.filter(t => t.replied_at);
 
-  const notReplied = notRepliedAll.slice(0, PER_PAGE * pageNr);
-  const replied = repliedAll.slice(0, PER_PAGE * pageR);
+  const notReplied = notRepliedAll.slice((pageNr - 1) * PER_PAGE, PER_PAGE * pageNr);
+  const replied = repliedAll.slice((pageR - 1) * PER_PAGE, PER_PAGE * pageR);
 
   const totalNr = notRepliedAll.length;
   const totalR = repliedAll.length;
