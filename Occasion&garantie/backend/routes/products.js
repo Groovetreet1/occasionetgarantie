@@ -14,42 +14,6 @@ function isAdminOrSeller(req) {
 
 const ALLOWED_CATEGORY_IDS = [1, 2, 3, 4, 5];
 
-const CATEGORY_KEYWORDS = {
-  1: ['smartphone','iphone','samsung','xiaomi','huawei','oppo','oneplus','pixel','telephone','téléphone','mobile','galaxy','redmi','realme','nokia','sony','lg','honor','nothing phone','poco','motorola','fold','flip'],
-  2: ['tablette','tablet','ipad','samsung tab','huawei matepad','lenovo tab','amazon fire','surface','galaxy tab','xiaomi pad','ipad air','ipad pro'],
-  3: ['ordinateur','pc portable','pc','laptop','macbook','mac book','portable','gamer','dell','hp','lenovo','asus','acer','msi','thinkpad','imac','mac pro','mac mini','surface pro','chromebook','ecran','moniteur','clavier','souris','sourie'],
-  4: ['accessoire','chargeur','coque','ecouteur','écouteur','casque','cable','câble','adaptateur','batterie','powerbank','support','etui','étui','film','protection','housse','sacoche','stand','dock','hub','usb','hdmi','enceinte','haut-parleur'],
-  5: ['gaming','playstation','ps4','ps5','xbox','nintendo','switch','manette','jeu video','console','casque gaming','clavier gaming','souris gaming','gamer','siege','siège','volant','simulateur'],
-};
-
-const FORBIDDEN_KEYWORDS = [
-  'vetement','vêtement','chaussure','sac à main','bijou','montre','parfum',
-  'nourriture','aliment','boisson','meuble','table','chaise','canapé','lit','armoire',
-  'voiture','moto','velo','vélo','maison','appartement','terrain','location',
-  'jouet','livre','cd','dvd','disque','instrument','musique',
-  'animal','chien','chat','plante','decoration','décoration',
-  'cosmetique','cosmétique','maquillage','crème','shampoing',
-  'service','cours','formation','billet','ticket','abonnement',
-];
-
-async function validateProductContent(name, description, categoryId) {
-  const text = `${name} ${description || ''}`.toLowerCase();
-
-  for (const word of FORBIDDEN_KEYWORDS) {
-    if (text.includes(word)) {
-      return `Ce produit ne correspond pas aux categories autorisees (electronique uniquement). Mot non autorise detecte: "${word}".`;
-    }
-  }
-
-  const keywords = CATEGORY_KEYWORDS[Number(categoryId)] || [];
-  const found = keywords.filter(k => text.includes(k.toLowerCase()));
-  if (found.length === 0) {
-    const catNames = { 1: 'Smartphones', 2: 'Tablettes', 3: 'Ordinateurs', 4: 'Accessoires', 5: 'Gaming' };
-    return `Le titre ou la description ne correspond pas a la categorie "${catNames[categoryId] || ''}". Veuillez decrire un produit electronique valide.`;
-  }
-  return null;
-}
-
 async function validateCategory(categoryId) {
   if (!categoryId) return 'Categorie requise. Seuls les produits electronique (Smartphones, Tablettes, Ordinateurs, Accessoires, Gaming) sont autorises.';
   if (!ALLOWED_CATEGORY_IDS.includes(Number(categoryId))) return 'Categorie invalide. Seuls les produits electronique sont autorises.';
@@ -171,9 +135,6 @@ router.post('/', authenticate, async (req, res) => {
     const catError = await validateCategory(category_id);
     if (catError) return res.status(400).json({ message: catError });
 
-    const contentError = await validateProductContent(name, description, category_id);
-    if (contentError) return res.status(400).json({ message: contentError });
-
     if (image) {
       const imgResult = await classifyImage(image);
       if (!imgResult.valid) return res.status(400).json({ message: imgResult.reason });
@@ -230,10 +191,6 @@ router.put('/:id', authenticate, async (req, res) => {
     if (category_id) {
       const catError = await validateCategory(category_id);
       if (catError) return res.status(400).json({ message: catError });
-    }
-    if (name) {
-      const contentError = await validateProductContent(name, description || '', category_id || rows[0].category_id);
-      if (contentError) return res.status(400).json({ message: contentError });
     }
     if (image) {
       const imgResult = await classifyImage(image);
