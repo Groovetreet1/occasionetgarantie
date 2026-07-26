@@ -73,7 +73,11 @@ router.get('/:id', async (req, res) => {
       'SELECT COUNT(*) as total FROM products WHERE seller_id = ? AND active = TRUE',
       [req.params.id]
     );
-    res.json({ ...users[0], productCount: count[0].total });
+    const [rating] = await pool.query(
+      'SELECT COUNT(*) as rating_count, ROUND(AVG(rating), 1) as rating_avg FROM seller_ratings WHERE seller_id = ?',
+      [req.params.id]
+    );
+    res.json({ ...users[0], productCount: count[0].total, ...rating[0] });
   } catch (err) {
     res.status(500).json({ message: 'Erreur serveur.', error: err.message });
   }

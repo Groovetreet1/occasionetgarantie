@@ -1,7 +1,7 @@
 import { useEffect, useState } from 'react';
 import { useParams, Link } from 'react-router-dom';
 import { motion } from 'framer-motion';
-import { FiUser, FiPackage, FiCalendar, FiArrowLeft } from 'react-icons/fi';
+import { FiUser, FiPackage, FiCalendar, FiArrowLeft, FiStar } from 'react-icons/fi';
 import api from '../api/axios';
 import ProductCard from '../components/ProductCard';
 
@@ -33,8 +33,11 @@ export default function SellerProfile() {
         <Link to="/products" className="back-link"><FiArrowLeft size={14} /> Retour aux produits</Link>
 
         <div className="seller-profile-card">
-          <div className="seller-avatar">
-            {seller.avatar ? <img src={seller.avatar.startsWith('http') ? seller.avatar : `${API_BASE}/uploads/avatars/${seller.avatar}`} alt="" /> : seller.store_logo ? <img src={seller.store_logo.startsWith('http') ? seller.store_logo : `${API_BASE}/uploads/avatars/${seller.store_logo}`} alt="" /> : <FiUser size={40} />}
+          <div className="avatar-rating">
+            <div className="seller-avatar">
+              {seller.avatar ? <img src={seller.avatar.startsWith('http') ? seller.avatar : `${API_BASE}/uploads/avatars/${seller.avatar}`} alt="" /> : seller.store_logo ? <img src={seller.store_logo.startsWith('http') ? seller.store_logo : `${API_BASE}/uploads/avatars/${seller.store_logo}`} alt="" /> : <FiUser size={40} />}
+            </div>
+            {seller.rating_count > 0 && seller.rating_avg && <span className="avatar-rating-badge"><FiStar size={10} fill="#fff" /> {parseFloat(seller.rating_avg).toFixed(1)}</span>}
           </div>
           <div className="seller-info">
             <h1>{seller.store_name || seller.full_name}</h1>
