@@ -1,24 +1,27 @@
 import { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
-import { FiCreditCard, FiClock, FiPackage, FiUsers, FiArrowLeft, FiTrendingUp, FiPlus, FiHeadphones } from 'react-icons/fi';
+import { FiCreditCard, FiClock, FiPackage, FiUsers, FiArrowLeft, FiTrendingUp, FiPlus, FiHeadphones, FiShield } from 'react-icons/fi';
 import api from '../api/axios';
 
 export default function AdminDashboardPage() {
-  const [stats, setStats] = useState({ credits: 0, pendingCredits: 0, installments: 0, pendingInstallments: 0, products: 0, users: 0 });
+  const [stats, setStats] = useState({ credits: 0, pendingCredits: 0, installments: 0, pendingInstallments: 0, premium: 0, pendingPremium: 0, products: 0, users: 0 });
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
     Promise.all([
       api.get('/admin/credit-purchases').catch(() => ({ data: [] })),
       api.get('/admin/installments').catch(() => ({ data: [] })),
+      api.get('/admin/premium-payments').catch(() => ({ data: [] })),
       api.get('/admin/products').catch(() => ({ data: [] })),
       api.get('/admin/users').catch(() => ({ data: [] })),
-    ]).then(([credits, installments, products, users]) => {
+    ]).then(([credits, installments, premium, products, users]) => {
       setStats({
         credits: credits.data.length,
         pendingCredits: credits.data.filter(c => c.status === 'en_attente').length,
         installments: installments.data.length,
         pendingInstallments: installments.data.filter(i => i.status === 'en_attente').length,
+        premium: premium.data.length,
+        pendingPremium: premium.data.filter(p => p.status === 'en_attente').length,
         products: products.data.length,
         users: users.data.length,
       });
@@ -34,6 +37,10 @@ export default function AdminDashboardPage() {
       { label: 'Total demandes', value: stats.installments },
       { label: 'En attente', value: stats.pendingInstallments, highlight: true },
     ], link: '/admin/installments' },
+    { title: 'Prime', icon: FiShield, color: '#ec4899', bg: 'rgba(236,72,153,0.1)', items: [
+      { label: 'Total demandes', value: stats.premium },
+      { label: 'En attente', value: stats.pendingPremium, highlight: true },
+    ], link: '/admin/premium' },
     { title: 'Produits', icon: FiPackage, color: '#059669', bg: 'rgba(5,150,105,0.1)', items: [
       { label: 'Total produits', value: stats.products },
     ], link: '/admin/products' },
@@ -101,6 +108,7 @@ export default function AdminDashboardPage() {
             <Link to="/admin/products/new" className="btn btn-primary"><FiPlus size={16} /> Nouveau produit</Link>
             <Link to="/admin/credits" className="btn btn-outline"><FiCreditCard size={16} /> Achats de credits</Link>
             <Link to="/admin/installments" className="btn btn-outline"><FiClock size={16} /> Paiements echelonnes</Link>
+            <Link to="/admin/premium" className="btn btn-outline"><FiShield size={16} /> Demandes Prime</Link>
             <Link to="/admin/products" className="btn btn-outline"><FiPackage size={16} /> Tous les produits</Link>
             <Link to="/admin/users" className="btn btn-outline"><FiUsers size={16} /> Utilisateurs</Link>
           </div>
