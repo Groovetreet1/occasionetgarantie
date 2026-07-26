@@ -385,18 +385,28 @@ router.post('/newsletter/send', authenticate, adminOnly, async (req, res) => {
 
 router.get('/vendor-logs', authenticate, adminOnly, async (req, res) => {
   try {
-    try { await pool.query(`CREATE TABLE IF NOT EXISTS vendor_activity_log (
+      try { await pool.query(`CREATE TABLE IF NOT EXISTS vendor_activity_log (
       id INT AUTO_INCREMENT PRIMARY KEY,
       user_id INT NOT NULL,
       action VARCHAR(50) NOT NULL,
       ip_address VARCHAR(45) DEFAULT NULL,
       isp VARCHAR(200) DEFAULT NULL,
+      city VARCHAR(100) DEFAULT NULL,
+      region VARCHAR(100) DEFAULT NULL,
+      country VARCHAR(100) DEFAULT NULL,
+      is_vpn TINYINT(1) DEFAULT 0,
+      vpn_warned_at DATETIME DEFAULT NULL,
       user_agent TEXT DEFAULT NULL,
       product_id INT DEFAULT NULL,
       details TEXT DEFAULT NULL,
       created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
     )`); } catch (e) { console.log('vendor_activity_log table:', e.message); }
     try { await pool.query('ALTER TABLE vendor_activity_log ADD COLUMN isp VARCHAR(200) DEFAULT NULL'); } catch (e) { if (e.errno !== 1060 && e.code !== 'ER_DUP_FIELDNAME') console.log('isp col:', e.message); }
+    try { await pool.query('ALTER TABLE vendor_activity_log ADD COLUMN city VARCHAR(100) DEFAULT NULL'); } catch (e) { if (e.errno !== 1060 && e.code !== 'ER_DUP_FIELDNAME') console.log('city col:', e.message); }
+    try { await pool.query('ALTER TABLE vendor_activity_log ADD COLUMN region VARCHAR(100) DEFAULT NULL'); } catch (e) { if (e.errno !== 1060 && e.code !== 'ER_DUP_FIELDNAME') console.log('region col:', e.message); }
+    try { await pool.query('ALTER TABLE vendor_activity_log ADD COLUMN country VARCHAR(100) DEFAULT NULL'); } catch (e) { if (e.errno !== 1060 && e.code !== 'ER_DUP_FIELDNAME') console.log('country col:', e.message); }
+    try { await pool.query('ALTER TABLE vendor_activity_log ADD COLUMN is_vpn TINYINT(1) DEFAULT 0'); } catch (e) { if (e.errno !== 1060 && e.code !== 'ER_DUP_FIELDNAME') console.log('is_vpn col:', e.message); }
+    try { await pool.query('ALTER TABLE vendor_activity_log ADD COLUMN vpn_warned_at DATETIME DEFAULT NULL'); } catch (e) { if (e.errno !== 1060 && e.code !== 'ER_DUP_FIELDNAME') console.log('vpn_warned_at col:', e.message); }
 
     const [rows] = await pool.query(
       `SELECT l.*, u.full_name, u.store_name, u.email, u.phone

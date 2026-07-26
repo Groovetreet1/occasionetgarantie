@@ -98,14 +98,29 @@ export default function AdminVendorLogs() {
                     }}>
                       {actionLabels[log.action] || log.action}
                     </span>
-                    <span style={{ fontSize: '11px', color: 'var(--text-muted)', whiteSpace: 'nowrap' }}>
+                      {log.is_vpn == 1 && (
+                        <span style={{
+                          padding: '3px 8px', borderRadius: '12px', fontSize: '10px', fontWeight: 700, textTransform: 'uppercase',
+                          background: log.vpn_warned_at && (Date.now() - new Date(log.vpn_warned_at).getTime() > 60*60*1000) ? 'rgba(220,38,38,0.15)' : 'rgba(239,68,68,0.12)',
+                          color: log.vpn_warned_at && (Date.now() - new Date(log.vpn_warned_at).getTime() > 60*60*1000) ? '#dc2626' : '#ef4444',
+                        }}>
+                          VPN {log.vpn_warned_at ? '⚠' : ''}
+                        </span>
+                      )}
+                      <span style={{ fontSize: '11px', color: 'var(--text-muted)', whiteSpace: 'nowrap' }}>
                       <FiClock size={11} /> {formatDate(log.created_at)}
                     </span>
                   </div>
                 </div>
                 {expanded === log.id && (
                   <div style={{ marginTop: '12px', padding: '12px', background: 'var(--bg-secondary)', borderRadius: '8px', fontSize: '13px', color: 'var(--text-secondary)', lineHeight: '1.8' }}>
-                    <div><FiGlobe size={13} /> IP : <strong>{log.ip_address}</strong></div>
+                    <div><FiGlobe size={13} /> IP : <strong>{log.ip_address}</strong>
+                      {log.is_vpn == 1 && (
+                        <span style={{ marginLeft: '8px', fontSize: '11px', fontWeight: 600, color: '#ef4444' }}>
+                          ⚠ VPN
+                        </span>
+                      )}
+                    </div>
                     <div><FiMonitor size={13} /> Operateur : <strong>{log.isp || 'Inconnu'}</strong></div>
                     {(log.city || log.region || log.country) && (
                       <div style={{ marginTop: '4px' }}>

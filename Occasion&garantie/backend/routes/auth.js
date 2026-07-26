@@ -209,6 +209,10 @@ router.post('/login', [
   body('password').notEmpty().withMessage('Mot de passe requis.'),
 ], validate, async (req, res) => {
   try {
+    try { await pool.query("ALTER TABLE users ADD COLUMN suspended TINYINT(1) DEFAULT 0"); } catch (e) { if (e.errno !== 1060 && e.code !== 'ER_DUP_FIELDNAME') console.log('suspended col:', e.message); }
+    try { await pool.query("ALTER TABLE users ADD COLUMN suspension_reason VARCHAR(255) DEFAULT NULL"); } catch (e) { if (e.errno !== 1060 && e.code !== 'ER_DUP_FIELDNAME') console.log('suspension_reason col:', e.message); }
+    try { await pool.query("ALTER TABLE users ADD COLUMN vpn_warned_at DATETIME DEFAULT NULL"); } catch (e) { if (e.errno !== 1060 && e.code !== 'ER_DUP_FIELDNAME') console.log('vpn_warned_at col:', e.message); }
+
     const { email, password } = req.body;
     const [users] = await pool.query('SELECT * FROM users WHERE email = ?', [email]);
     if (users.length === 0) {
@@ -218,6 +222,9 @@ router.post('/login', [
     const valid = await bcrypt.compare(password, user.password);
     if (!valid) {
       return res.status(400).json({ message: 'Email ou mot de passe incorrect.' });
+    }
+    if (user.suspended) {
+      return res.status(403).json({ message: 'Votre compte a ete suspendu. Raison : ' + (user.suspension_reason || 'Non specifiee') + '. Contactez l\'administration (contact-occasionetgarantie@proton.me).' });
     }
     if (!user.phone_verified && user.role !== 'admin') {
       return res.status(403).json({
