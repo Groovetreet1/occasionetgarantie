@@ -3,7 +3,6 @@ import { Routes, Route, Navigate, useLocation } from 'react-router-dom';
 import { AnimatePresence, motion } from 'framer-motion';
 import Navbar from './components/Navbar';
 import Footer from './components/Footer';
-import { trackPageView } from './utils/gtag';
 import WhatsAppFloat from './components/WhatsAppFloat';
 import AdminRoute from './components/AdminRoute';
 import SellerRoute from './components/SellerRoute';
@@ -54,10 +53,7 @@ function AnimatedPage({ children }) {
 export default function App() {
   const location = useLocation();
 
-  useEffect(() => {
-    window.scrollTo(0, 0);
-    trackPageView(location.pathname);
-  }, [location.pathname]);
+  useEffect(() => { window.scrollTo(0, 0); }, [location.pathname]);
 
   return (
     <>

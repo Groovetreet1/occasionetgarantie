@@ -1,7 +1,7 @@
 import { useEffect, useState } from 'react';
 import { useSearchParams } from 'react-router-dom';
 import { FiSearch, FiSliders, FiPackage, FiX, FiGrid, FiList } from 'react-icons/fi';
-import AdBanner from '../components/AdBanner';
+
 import { motion } from 'framer-motion';
 import api from '../api/axios';
 import ProductCard from '../components/ProductCard';
@@ -139,9 +139,6 @@ export default function Products() {
             </div>
           </motion.div>
         )}
-
-        {/* Ad banner */}
-        <AdBanner slot="4761614885" className="ad-banner-products" />
 
         {/* Products grid */}
         {loading ? (

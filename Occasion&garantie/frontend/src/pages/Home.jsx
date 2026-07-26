@@ -8,7 +8,6 @@ import ProductCard from '../components/ProductCard';
 import TrustBar from '../components/TrustBar';
 import NewsletterSection from '../components/NewsletterSection';
 import PromoPopup from '../components/PromoPopup';
-import AdBanner from '../components/AdBanner';
 
 const fadeUp = { hidden: { opacity: 0, y: 40 }, show: { opacity: 1, y: 0, transition: { duration: 0.5 } } };
 const stagger = { hidden: {}, show: { transition: { staggerChildren: 0.1 } } };
@@ -113,9 +112,6 @@ export default function Home() {
       </motion.section>
 
       <TrustBar />
-
-      {/* Ad banner */}
-      <AdBanner slot="4761614885" format="autorelaxed" className="ad-banner-home" />
 
       {/* Sell CTA */}
       <motion.section className="section sell-promo" variants={fadeUp} initial="hidden" whileInView="show" viewport={{ once: true }}>

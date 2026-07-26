@@ -1465,14 +1465,6 @@ select.form-control, .form-group select { cursor: pointer; appearance: auto; }
   .revenue-amount { font-size: 22px; }
 }
 
-/* ============ Premium / AdSense ============ */
-.ad-banner {
-  width: 100%; min-height: 90px; display: flex; align-items: center; justify-content: center;
-  margin: 24px auto; overflow: hidden; border-radius: var(--radius);
-  background: var(--bg-secondary);
-}
-.ad-banner ins { width: 100%; }
-
 /* Premium modal */
 .premium-overlay {
   position: fixed; inset: 0; background: rgba(0,0,0,0.6); z-index: 99999;
