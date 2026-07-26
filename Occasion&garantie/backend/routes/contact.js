@@ -96,10 +96,21 @@ router.post('/reply/:ticketNumber', authenticate, adminOnly, async (req, res) =>
     const { reply } = req.body;
     if (!reply || !reply.trim()) return res.status(400).json({ message: 'Reponse requise.' });
 
+    try { await pool.query('ALTER TABLE support_tickets ADD COLUMN email VARCHAR(200) DEFAULT NULL'); } catch (e) { if (e.errno !== 1060 && e.code !== 'ER_DUP_FIELDNAME') console.log('email col:', e.message); }
+
     const [tickets] = await pool.query('SELECT * FROM support_tickets WHERE ticket_number = ?', [req.params.ticketNumber]);
     if (tickets.length === 0) return res.status(404).json({ message: 'Ticket introuvable.' });
 
-    const ticket = tickets[0];
+    let ticket = tickets[0];
+
+    if (!ticket.email && ticket.user_id) {
+      const [users] = await pool.query('SELECT email FROM users WHERE id = ?', [ticket.user_id]);
+      if (users.length > 0 && users[0].email) {
+        ticket.email = users[0].email;
+        await pool.query('UPDATE support_tickets SET email = ? WHERE id = ?', [ticket.email, ticket.id]);
+      }
+    }
+
     if (!ticket.email) return res.status(400).json({ message: 'Aucun email associe a ce ticket.' });
 
     const SUPPORT_EMAIL = 'contact@contact.occasionetgarantie.store';
