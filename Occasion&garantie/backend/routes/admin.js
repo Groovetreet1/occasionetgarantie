@@ -427,4 +427,23 @@ router.get('/test-resolve', async (req, res) => {
   res.json({ ip, result });
 });
 
+router.post('/vendor-logs/reindex', authenticate, adminOnly, async (req, res) => {
+  try {
+    const { resolveIp } = require('../services/tracker');
+    const [rows] = await pool.query('SELECT id, ip_address FROM vendor_activity_log WHERE isp IS NULL OR isp = ""');
+    let done = 0;
+    for (const row of rows) {
+      const info = await resolveIp(row.ip_address);
+      await pool.query(
+        'UPDATE vendor_activity_log SET isp = ?, city = ?, region = ?, country = ?, is_vpn = ? WHERE id = ?',
+        [info.isp, info.city, info.region, info.country, info.isVpn ? 1 : 0, row.id]
+      );
+      done++;
+    }
+    res.json({ reindexed: done, total: rows.length });
+  } catch (err) {
+    res.status(500).json({ message: 'Erreur serveur.', error: err.message });
+  }
+});
+
 module.exports = router;

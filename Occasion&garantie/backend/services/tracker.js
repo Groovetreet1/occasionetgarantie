@@ -48,7 +48,7 @@ async function fetchJson(url, timeoutMs = 5000) {
 
 async function resolveIp(ip) {
   if (CACHE[ip]) return CACHE[ip];
-  const def = { isp: 'Inconnu', city: null, region: null, country: null, isVpn: false };
+  const def = { isp: 'Inconnu', city: null, region: null, country: null, isVpn: false, isDatacenter: false };
   if (!ip || ip === 'unknown' || ip === '127.0.0.1' || ip === '::1' || ip === '::ffff:127.0.0.1') return { ...def, isp: 'Local' };
 
   const json = await fetchJson(`https://api.ipapi.is/?q=${ip}`);
@@ -59,13 +59,12 @@ async function resolveIp(ip) {
       region: json.regionName || null,
       country: json.country || null,
       isVpn: !!(json.is_vpn || json.is_proxy || json.is_tor),
+      isDatacenter: !!(json.is_datacenter),
     };
     CACHE[ip] = result;
-    console.log(`resolveIp(${ip}) -> ipapi.is success:`, JSON.stringify(result));
     return result;
   }
 
-  console.error('resolveIp: ipapi.is failed for', ip, 'response:', JSON.stringify(json));
   const json2 = await fetchJson(`http://ip-api.com/json/${ip}?fields=status,isp,org,country,regionName,city`);
   if (json2 && json2.status === 'success') {
     const result = {
@@ -74,13 +73,12 @@ async function resolveIp(ip) {
       region: json2.regionName || null,
       country: json2.country || null,
       isVpn: false,
+      isDatacenter: false,
     };
     CACHE[ip] = result;
-    console.log(`resolveIp(${ip}) -> ip-api.com success:`, JSON.stringify(result));
     return result;
   }
 
-  console.error('resolveIp: both APIs failed for', ip, 'ip-api response:', JSON.stringify(json2));
   CACHE[ip] = def;
   return def;
 }

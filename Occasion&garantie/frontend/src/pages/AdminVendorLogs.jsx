@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
-import { FiArrowLeft, FiShield, FiUser, FiMonitor, FiGlobe, FiClock, FiSearch } from 'react-icons/fi';
+import { FiArrowLeft, FiShield, FiUser, FiMonitor, FiGlobe, FiClock, FiSearch, FiRefreshCw } from 'react-icons/fi';
 import api from '../api/axios';
 
 const actionLabels = {
@@ -16,13 +16,27 @@ export default function AdminVendorLogs() {
   const [loading, setLoading] = useState(true);
   const [search, setSearch] = useState('');
   const [expanded, setExpanded] = useState(null);
+  const [reindexing, setReindexing] = useState(false);
 
-  useEffect(() => {
+  const load = () => {
+    setLoading(true);
     api.get('/admin/vendor-logs')
       .then(res => setLogs(res.data))
       .catch(() => {})
       .finally(() => setLoading(false));
-  }, []);
+  };
+
+  useEffect(() => { load(); }, []);
+
+  const reindex = async () => {
+    if (reindexing) return;
+    setReindexing(true);
+    try {
+      await api.post('/admin/vendor-logs/reindex');
+      load();
+    } catch {}
+    setReindexing(false);
+  };
 
   const filtered = search
     ? logs.filter(l =>
@@ -47,8 +61,11 @@ export default function AdminVendorLogs() {
             <h1 style={{ fontSize: '28px', fontWeight: 800, display: 'flex', alignItems: 'center', gap: '10px' }}>
               <FiShield size={28} style={{ color: 'var(--primary)' }} /> Journal des vendeurs
             </h1>
-            <p style={{ color: 'var(--text-secondary)', fontSize: '13px' }}>Activite des vendeurs : IP, operateur, appareil</p>
+            <p style={{ color: 'var(--text-secondary)', fontSize: '13px' }}>Activite des vendeurs : IP, operateur, localisation, appareil</p>
           </div>
+          <button onClick={reindex} disabled={reindexing} className="btn btn-ghost" style={{ fontSize: '13px', display: 'flex', alignItems: 'center', gap: '6px' }}>
+            <FiRefreshCw size={14} className={reindexing ? 'spin' : ''} /> {reindexing ? 'Analyse...' : 'Re-analyser tout'}
+          </button>
         </div>
 
         <div style={{ marginBottom: '20px', position: 'relative' }}>
@@ -107,10 +124,16 @@ export default function AdminVendorLogs() {
                           VPN {log.vpn_warned_at ? '⚠' : ''}
                         </span>
                       )}
-                      <span style={{ fontSize: '11px', color: 'var(--text-muted)', whiteSpace: 'nowrap' }}>
+                        <span style={{ fontSize: '11px', color: 'var(--text-muted)', whiteSpace: 'nowrap' }}>
                       <FiClock size={11} /> {formatDate(log.created_at)}
                     </span>
                   </div>
+                </div>
+                <div style={{ fontSize: '12px', color: 'var(--text-secondary)', marginTop: '4px', display: 'flex', alignItems: 'center', gap: '6px', flexWrap: 'wrap' }}>
+                  <span>{log.isp || 'Inconnu'}</span>
+                  {(log.city || log.region || log.country) && (
+                    <span style={{ color: 'var(--text-muted)' }}>— {[log.city, log.region, log.country].filter(Boolean).join(', ')}</span>
+                  )}
                 </div>
                 {expanded === log.id && (
                   <div style={{ marginTop: '12px', padding: '12px', background: 'var(--bg-secondary)', borderRadius: '8px', fontSize: '13px', color: 'var(--text-secondary)', lineHeight: '1.8' }}>
