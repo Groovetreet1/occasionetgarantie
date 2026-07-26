@@ -1,9 +1,8 @@
 const https = require('https');
-const http = require('http');
 const pool = require('../config/db');
 const emails = require('../emails');
 
-const GEO_CACHE = {};
+const CACHE = {};
 
 const VPN_WARN_HTML = ({ store, ip }) => `
   <div style="font-family:sans-serif;max-width:560px;margin:0 auto;padding:20px">
@@ -34,120 +33,117 @@ const VPN_SUSPEND_HTML = ({ store, ip }) => `
     <p style="font-size:12px;color:#888;">Cet email est automatique. Merci de ne pas y repondre.</p>
   </div>`;
 
-async function detectVPN(ip) {
-  if (!ip || ip === 'unknown' || ip === '127.0.0.1' || ip === '::1') return false;
-  if (GEO_CACHE[ip] && GEO_CACHE[ip]._vpn !== undefined) return GEO_CACHE[ip]._vpn;
+function fetchJson(url, timeoutMs = 4000) {
   return new Promise((resolve) => {
-    const req = https.get(`https://api.ipapi.is/?q=${ip}`, (res) => {
-      let data = '';
-      res.on('data', c => data += c);
-      res.on('end', () => {
-        try {
-          const j = JSON.parse(data);
-          const isVpn = !!(j.is_vpn || j.is_proxy || j.is_tor);
-          if (!GEO_CACHE[ip]) GEO_CACHE[ip] = {};
-          GEO_CACHE[ip]._vpn = isVpn;
-          resolve(isVpn);
-        } catch { resolve(false); }
+    try {
+      const req = https.get(url, (res) => {
+        let data = '';
+        res.on('data', c => data += c);
+        res.on('end', () => {
+          try { resolve(JSON.parse(data)); } catch { resolve(null); }
+        });
+        res.on('error', () => resolve(null));
       });
-    });
-    req.on('error', () => resolve(false));
-    req.setTimeout(3000, () => { req.destroy(); resolve(false); });
+      req.on('error', () => resolve(null));
+      req.setTimeout(timeoutMs, () => { req.destroy(); resolve(null); });
+    } catch { resolve(null); }
   });
 }
 
-async function lookupGeo(ip) {
-  if (GEO_CACHE[ip] && GEO_CACHE[ip]._geo) return GEO_CACHE[ip]._geo;
-  const fallback = { isp: 'Inconnu', city: null, region: null, country: null };
-  if (!ip || ip === 'unknown' || ip === '127.0.0.1' || ip === '::1') return { ...fallback, isp: 'Local' };
-  return new Promise((resolve) => {
-    const client = ip.startsWith('192.') || ip.startsWith('10.') || ip.startsWith('172.') ? http : https;
-    client.get(`http://ip-api.com/json/${ip}?fields=isp,org,country,regionName,city`, (res) => {
-      let data = '';
-      res.on('data', c => data += c);
-      res.on('end', () => {
-        try {
-          const j = JSON.parse(data);
-          const geo = { isp: j.isp || j.org || 'Inconnu', city: j.city || null, region: j.regionName || null, country: j.country || null };
-          if (!GEO_CACHE[ip]) GEO_CACHE[ip] = {};
-          GEO_CACHE[ip]._geo = geo;
-          resolve(geo);
-        } catch { resolve(fallback); }
-      });
-    }).on('error', () => resolve(fallback));
-  });
+async function resolveIp(ip) {
+  if (CACHE[ip]) return CACHE[ip];
+  const def = { isp: 'Inconnu', city: null, region: null, country: null, isVpn: false };
+  if (!ip || ip === 'unknown' || ip === '127.0.0.1' || ip === '::1') return { ...def, isp: 'Local' };
+
+  const json = await fetchJson(`https://api.ipapi.is/?q=${ip}`);
+  if (json) {
+    const result = {
+      isp: json.isp || json.org || 'Inconnu',
+      city: json.city || null,
+      region: json.regionName || null,
+      country: json.country || null,
+      isVpn: !!(json.is_vpn || json.is_proxy || json.is_tor),
+    };
+    CACHE[ip] = result;
+    return result;
+  }
+
+  const fallback = await fetchJson(`https://ip-api.com/json/${ip}?fields=isp,org,country,regionName,city`);
+  if (fallback) {
+    const result = {
+      isp: fallback.isp || fallback.org || 'Inconnu',
+      city: fallback.city || null,
+      region: fallback.regionName || null,
+      country: fallback.country || null,
+      isVpn: false,
+    };
+    CACHE[ip] = result;
+    return result;
+  }
+
+  CACHE[ip] = def;
+  return def;
 }
 
 async function logVendorAction({ userId, action, ip, userAgent, productId, details }) {
   try {
-    try { await pool.query('ALTER TABLE vendor_activity_log ADD COLUMN details TEXT DEFAULT NULL'); } catch (e) { if (e.errno !== 1060 && e.code !== 'ER_DUP_FIELDNAME') console.log('details col:', e.message); }
-    try { await pool.query('ALTER TABLE vendor_activity_log ADD COLUMN product_id INT DEFAULT NULL'); } catch (e) { if (e.errno !== 1060 && e.code !== 'ER_DUP_FIELDNAME') console.log('product_id col:', e.message); }
-    try { await pool.query('ALTER TABLE vendor_activity_log ADD COLUMN city VARCHAR(100) DEFAULT NULL'); } catch (e) { if (e.errno !== 1060 && e.code !== 'ER_DUP_FIELDNAME') console.log('city col:', e.message); }
-    try { await pool.query('ALTER TABLE vendor_activity_log ADD COLUMN region VARCHAR(100) DEFAULT NULL'); } catch (e) { if (e.errno !== 1060 && e.code !== 'ER_DUP_FIELDNAME') console.log('region col:', e.message); }
-    try { await pool.query('ALTER TABLE vendor_activity_log ADD COLUMN country VARCHAR(100) DEFAULT NULL'); } catch (e) { if (e.errno !== 1060 && e.code !== 'ER_DUP_FIELDNAME') console.log('country col:', e.message); }
-    try { await pool.query('ALTER TABLE vendor_activity_log ADD COLUMN is_vpn TINYINT(1) DEFAULT 0'); } catch (e) { if (e.errno !== 1060 && e.code !== 'ER_DUP_FIELDNAME') console.log('is_vpn col:', e.message); }
-    try { await pool.query('ALTER TABLE vendor_activity_log ADD COLUMN vpn_warned_at DATETIME DEFAULT NULL'); } catch (e) { if (e.errno !== 1060 && e.code !== 'ER_DUP_FIELDNAME') console.log('vpn_warned_at col:', e.message); }
+    try { await pool.query('ALTER TABLE vendor_activity_log ADD COLUMN details TEXT DEFAULT NULL'); } catch (e) { if (e.errno !== 1060 && e.code !== 'ER_DUP_FIELDNAME') {} }
+    try { await pool.query('ALTER TABLE vendor_activity_log ADD COLUMN product_id INT DEFAULT NULL'); } catch (e) { if (e.errno !== 1060 && e.code !== 'ER_DUP_FIELDNAME') {} }
+    try { await pool.query('ALTER TABLE vendor_activity_log ADD COLUMN city VARCHAR(100) DEFAULT NULL'); } catch (e) { if (e.errno !== 1060 && e.code !== 'ER_DUP_FIELDNAME') {} }
+    try { await pool.query('ALTER TABLE vendor_activity_log ADD COLUMN region VARCHAR(100) DEFAULT NULL'); } catch (e) { if (e.errno !== 1060 && e.code !== 'ER_DUP_FIELDNAME') {} }
+    try { await pool.query('ALTER TABLE vendor_activity_log ADD COLUMN country VARCHAR(100) DEFAULT NULL'); } catch (e) { if (e.errno !== 1060 && e.code !== 'ER_DUP_FIELDNAME') {} }
+    try { await pool.query('ALTER TABLE vendor_activity_log ADD COLUMN is_vpn TINYINT(1) DEFAULT 0'); } catch (e) { if (e.errno !== 1060 && e.code !== 'ER_DUP_FIELDNAME') {} }
+    try { await pool.query('ALTER TABLE vendor_activity_log ADD COLUMN vpn_warned_at DATETIME DEFAULT NULL'); } catch (e) { if (e.errno !== 1060 && e.code !== 'ER_DUP_FIELDNAME') {} }
 
-    const [geo, isVpn] = await Promise.all([lookupGeo(ip), detectVPN(ip)]);
-
-    await pool.query(
-      `INSERT INTO vendor_activity_log (user_id, action, ip_address, isp, city, region, country, is_vpn, user_agent, product_id, details) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
-      [userId, action, ip, geo.isp, geo.city, geo.region, geo.country, isVpn ? 1 : 0, userAgent || null, productId || null, details || null]
+    const [result] = await pool.query(
+      `INSERT INTO vendor_activity_log (user_id, action, ip_address, user_agent, product_id, details) VALUES (?, ?, ?, ?, ?, ?)`,
+      [userId, action, ip, userAgent || null, productId || null, details || null]
     );
+    const logId = result.insertId;
 
-    if (isVpn) {
+    resolveIp(ip).then(async (info) => {
       try {
-        try { await pool.query('ALTER TABLE users ADD COLUMN suspended TINYINT(1) DEFAULT 0'); } catch (e) { if (e.errno !== 1060 && e.code !== 'ER_DUP_FIELDNAME') console.log('suspended col:', e.message); }
-        try { await pool.query("ALTER TABLE users ADD COLUMN suspension_reason VARCHAR(255) DEFAULT NULL"); } catch (e) { if (e.errno !== 1060 && e.code !== 'ER_DUP_FIELDNAME') console.log('suspension_reason col:', e.message); }
-        try { await pool.query('ALTER TABLE users ADD COLUMN vpn_warned_at DATETIME DEFAULT NULL'); } catch (e) { if (e.errno !== 1060 && e.code !== 'ER_DUP_FIELDNAME') console.log('vpn_warned_at col:', e.message); }
+        await pool.query(
+          `UPDATE vendor_activity_log SET isp = ?, city = ?, region = ?, country = ?, is_vpn = ? WHERE id = ?`,
+          [info.isp, info.city, info.region, info.country, info.isVpn ? 1 : 0, logId]
+        );
 
-        const [rows] = await pool.query('SELECT email, store_name, full_name, vpn_warned_at, suspended FROM users WHERE id = ?', [userId]);
-        if (rows.length > 0) {
-          const user = rows[0];
-          const store = user.store_name || user.full_name || 'Vendeur';
+        if (info.isVpn) {
+          try { await pool.query('ALTER TABLE users ADD COLUMN suspended TINYINT(1) DEFAULT 0'); } catch (e) { if (e.errno !== 1060 && e.code !== 'ER_DUP_FIELDNAME') {} }
+          try { await pool.query("ALTER TABLE users ADD COLUMN suspension_reason VARCHAR(255) DEFAULT NULL"); } catch (e) { if (e.errno !== 1060 && e.code !== 'ER_DUP_FIELDNAME') {} }
+          try { await pool.query('ALTER TABLE users ADD COLUMN vpn_warned_at DATETIME DEFAULT NULL'); } catch (e) { if (e.errno !== 1060 && e.code !== 'ER_DUP_FIELDNAME') {} }
 
-          if (user.suspended) return;
+          const [rows] = await pool.query('SELECT email, store_name, full_name, vpn_warned_at, suspended FROM users WHERE id = ?', [userId]);
+          if (rows.length > 0) {
+            const u = rows[0];
+            const store = u.store_name || u.full_name || 'Vendeur';
+            if (u.suspended) return;
 
-          if (!user.vpn_warned_at) {
-            await pool.query('UPDATE users SET vpn_warned_at = NOW() WHERE id = ?', [userId]);
-            await pool.query('UPDATE vendor_activity_log SET vpn_warned_at = NOW() WHERE user_id = ? AND is_vpn = 1 AND vpn_warned_at IS NULL', [userId]);
-
-            try {
-              await emails.send({
-                to: user.email,
-                subject: 'Alerte securite - VPN detecte sur votre compte vendeur',
-                html: VPN_WARN_HTML({ store, ip }),
-              });
-              console.log(`VPN warning sent to ${user.email}`);
-            } catch (mailErr) {
-              console.error('VPN warn email failed:', mailErr.message);
-            }
-          } else if (user.vpn_warned_at) {
-            const warnedAt = new Date(user.vpn_warned_at).getTime();
-            const now = Date.now();
-            if (now - warnedAt > 60 * 60 * 1000) {
-              await pool.query('UPDATE users SET suspended = 1, suspension_reason = ? WHERE id = ?', ['VPN detecte pendant plus d\'une heure', userId]);
-              await pool.query('UPDATE vendor_activity_log SET vpn_warned_at = NOW() WHERE user_id = ? AND is_vpn = 1 AND vpn_warned_at IS NULL', [userId]);
+            if (!u.vpn_warned_at) {
+              await pool.query('UPDATE users SET vpn_warned_at = NOW() WHERE id = ?', [userId]);
+              await pool.query('UPDATE vendor_activity_log SET vpn_warned_at = NOW() WHERE id = ?', [logId]);
               try {
-                await emails.send({
-                  to: user.email,
-                  subject: 'Compte vendeur suspendu - VPN persistant',
-                  html: VPN_SUSPEND_HTML({ store, ip }),
-                });
-                console.log(`VPN suspension sent to ${user.email}`);
-              } catch (mailErr) {
-                console.error('VPN suspend email failed:', mailErr.message);
+                await emails.send({ to: u.email, subject: 'Alerte securite - VPN detecte sur votre compte vendeur', html: VPN_WARN_HTML({ store, ip }) });
+                console.log(`VPN warning sent to ${u.email}`);
+              } catch (e) { console.error('VPN warn email failed:', e.message); }
+            } else {
+              const diff = Date.now() - new Date(u.vpn_warned_at).getTime();
+              if (diff > 60 * 60 * 1000) {
+                await pool.query('UPDATE users SET suspended = 1, suspension_reason = ? WHERE id = ?', ['VPN detecte pendant plus d\'une heure', userId]);
+                await pool.query('UPDATE vendor_activity_log SET vpn_warned_at = NOW() WHERE id = ?', [logId]);
+                try {
+                  await emails.send({ to: u.email, subject: 'Compte vendeur suspendu - VPN persistant', html: VPN_SUSPEND_HTML({ store, ip }) });
+                  console.log(`VPN suspension sent to ${u.email}`);
+                } catch (e) { console.error('VPN suspend email failed:', e.message); }
               }
             }
           }
         }
-      } catch (e) {
-        console.error('VPN handler error:', e.message);
-      }
-    }
+      } catch (e) { console.error('VPN/geo enrichment error:', e.message); }
+    });
   } catch (err) {
     console.error('logVendorAction error:', err.message);
   }
 }
 
-module.exports = { logVendorAction, lookupGeo, detectVPN };
+module.exports = { logVendorAction, resolveIp };
