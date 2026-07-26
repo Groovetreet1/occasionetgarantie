@@ -1,3 +1,4 @@
+import { useEffect } from 'react';
 import { Routes, Route, Navigate, useLocation } from 'react-router-dom';
 import { AnimatePresence, motion } from 'framer-motion';
 import Navbar from './components/Navbar';
@@ -49,6 +50,8 @@ function AnimatedPage({ children }) {
 
 export default function App() {
   const location = useLocation();
+
+  useEffect(() => { window.scrollTo(0, 0); }, [location.pathname]);
 
   return (
     <>
