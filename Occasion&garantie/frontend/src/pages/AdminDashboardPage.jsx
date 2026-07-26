@@ -3,6 +3,10 @@ import { Link } from 'react-router-dom';
 import { FiCreditCard, FiClock, FiPackage, FiUsers, FiArrowLeft, FiTrendingUp, FiPlus, FiHeadphones, FiShield } from 'react-icons/fi';
 import api from '../api/axios';
 
+function CardWrapper({ link, children, ...rest }) {
+  return link ? <Link to={link} {...rest}>{children}</Link> : <div {...rest}>{children}</div>;
+}
+
 export default function AdminDashboardPage() {
   const [stats, setStats] = useState({ credits: 0, pendingCredits: 0, installments: 0, pendingInstallments: 0, premium: 0, pendingPremium: 0, products: 0, vendorProducts: 0, tickets: 0, pendingTickets: 0, repliedTickets: 0, users: 0 });
   const [loading, setLoading] = useState(true);
@@ -50,7 +54,7 @@ export default function AdminDashboardPage() {
     { title: 'Produits', icon: FiPackage, color: '#059669', bg: 'rgba(5,150,105,0.1)', items: [
       { label: 'Total produits', value: stats.products },
       { label: 'Par vendeurs', value: stats.vendorProducts, highlight: true },
-    ], link: '/admin/products' },
+    ], link: null },
     { title: 'Tickets Support', icon: FiHeadphones, color: '#f59e0b', bg: 'rgba(245,158,11,0.1)', items: [
       { label: 'Total', value: stats.tickets },
       { label: 'En attente', value: stats.pendingTickets, highlight: true },
@@ -78,17 +82,17 @@ export default function AdminDashboardPage() {
           {sections.map(section => {
             const Icon = section.icon;
             return (
-              <Link key={section.title} to={section.link} style={{ textDecoration: 'none', color: 'inherit' }}>
+              <CardWrapper key={section.title} link={section.link} style={{ textDecoration: 'none', color: 'inherit' }}>
                 <div style={{
                   background: 'var(--bg-card)',
                   border: '1px solid var(--border)',
                   borderRadius: 'var(--radius-lg)',
                   padding: '24px',
                   transition: 'transform 0.2s, box-shadow 0.2s',
-                  cursor: 'pointer',
+                  cursor: section.link ? 'pointer' : 'default',
                 }}
-                  onMouseEnter={e => { e.currentTarget.style.transform = 'translateY(-2px)'; e.currentTarget.style.boxShadow = '0 8px 24px rgba(0,0,0,0.12)'; }}
-                  onMouseLeave={e => { e.currentTarget.style.transform = ''; e.currentTarget.style.boxShadow = ''; }}>
+                  onMouseEnter={e => { if (section.link) { e.currentTarget.style.transform = 'translateY(-2px)'; e.currentTarget.style.boxShadow = '0 8px 24px rgba(0,0,0,0.12)'; } }}
+                  onMouseLeave={e => { if (section.link) { e.currentTarget.style.transform = ''; e.currentTarget.style.boxShadow = ''; } }}>
                   <div style={{ display: 'flex', alignItems: 'center', gap: '12px', marginBottom: '16px' }}>
                     <div style={{ width: 44, height: 44, borderRadius: '12px', background: section.bg, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
                       <Icon size={22} color={section.color} />
@@ -106,7 +110,7 @@ export default function AdminDashboardPage() {
                     ))}
                   </div>
                 </div>
-              </Link>
+              </CardWrapper>
             );
           })}
         </div>
