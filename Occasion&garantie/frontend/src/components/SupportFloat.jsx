@@ -13,6 +13,8 @@ export default function SupportFloat() {
   const [done, setDone] = useState(false);
   const [error, setError] = useState('');
   const [ticketNumber, setTicketNumber] = useState('');
+  const [sentName, setSentName] = useState('');
+  const [sentMessage, setSentMessage] = useState('');
 
   useEffect(() => {
     const handle = () => setShowScroll(window.scrollY > 400);
@@ -32,8 +34,9 @@ export default function SupportFloat() {
     try {
       const res = await api.post('/contact', { name: name.trim(), message: message.trim() });
       setTicketNumber(res.data.ticketNumber || '');
+      setSentName(name.trim());
+      setSentMessage(message.trim());
       setDone(true);
-      setTimeout(() => { setOpen(false); setDone(false); setName(''); setMessage(''); setTicketNumber(''); }, 4000);
     } catch (err) {
       setError(err.response?.data?.message || 'Erreur lors de l\'envoi.');
     } finally {
@@ -43,7 +46,15 @@ export default function SupportFloat() {
 
   const handleClose = () => {
     setOpen(false);
-    setTimeout(() => { setDone(false); setError(''); }, 300);
+    setTimeout(() => { setDone(false); setError(''); setName(user?.fullName || user?.full_name || ''); setMessage(''); setTicketNumber(''); setSentName(''); setSentMessage(''); }, 300);
+  };
+
+  const handleNewTicket = () => {
+    setDone(false);
+    setMessage('');
+    setTicketNumber('');
+    setSentName('');
+    setSentMessage('');
   };
 
   return (
@@ -71,7 +82,15 @@ export default function SupportFloat() {
                 <FiCheckCircle size={36} />
                 <p>Message envoye avec succes !</p>
                 {ticketNumber && <div className="ticket-number">Ticket #<strong>{ticketNumber}</strong></div>}
-                <small>Nous vous repondrons par email.</small>
+                <div style={{ marginTop: '12px', padding: '12px', background: 'var(--bg-secondary)', borderRadius: '8px', fontSize: '13px', color: 'var(--text-secondary)', lineHeight: '1.5', textAlign: 'left', whiteSpace: 'pre-wrap' }}>
+                  <div style={{ fontWeight: 600, marginBottom: '4px', fontSize: '12px', color: 'var(--text-muted)' }}>{sentName}</div>
+                  {sentMessage}
+                </div>
+                <small style={{ display: 'block', marginTop: '12px' }}>Nous vous repondrons par email.</small>
+                <div style={{ display: 'flex', gap: '8px', marginTop: '14px' }}>
+                  <button onClick={handleNewTicket} style={{ flex: 1, padding: '8px', border: '1px solid var(--border)', borderRadius: '8px', background: 'transparent', color: 'var(--text)', cursor: 'pointer', fontFamily: 'var(--font)', fontSize: '12px' }}>Nouveau ticket</button>
+                  <button onClick={handleClose} style={{ flex: 1, padding: '8px', border: 'none', borderRadius: '8px', background: 'var(--gradient)', color: 'white', cursor: 'pointer', fontFamily: 'var(--font)', fontSize: '12px', fontWeight: 600 }}>Fermer</button>
+                </div>
               </div>
             ) : (
               <form onSubmit={handleSubmit}>
