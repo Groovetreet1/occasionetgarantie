@@ -158,6 +158,18 @@ app.get('/api/health', (req, res) => {
   res.json({ status: 'ok', message: 'Occasion&Garantie API running' });
 });
 
+app.get('/api/stats', async (req, res) => {
+  try {
+    const [prod] = await pool.query('SELECT COUNT(*) as cnt FROM products WHERE active = TRUE AND status = \'disponible\'');
+    const [clients] = await pool.query('SELECT COUNT(*) as cnt FROM users WHERE role = \'client\'');
+    const [ratings] = await pool.query('SELECT ROUND(AVG(rating), 1) as avg FROM seller_ratings');
+    const satisfaction = ratings[0]?.avg ? Math.round((ratings[0].avg / 5) * 100) : 98;
+    res.json({ products: prod[0].cnt, clients: clients[0].cnt, satisfaction });
+  } catch (e) {
+    res.status(500).json({ message: 'Erreur serveur.' });
+  }
+});
+
 app.use('/api/*', (req, res) => {
   res.status(404).json({ message: 'Endpoint API introuvable.' });
 });

@@ -1,5 +1,7 @@
+import { useEffect, useState } from 'react';
 import { motion } from 'framer-motion';
 import { FiHeadphones, FiStar, FiUsers, FiMessageCircle } from 'react-icons/fi';
+import api from '../api/axios';
 
 const items = [
   { icon: FiMessageCircle, label: 'Avis clients', sub: 'Notez les vendeurs' },
@@ -7,13 +9,15 @@ const items = [
   { icon: FiStar, label: 'Satisfaction', sub: 'Clients notent les produits' },
 ];
 
-const stats = [
-  { icon: FiStar, value: '4500+', label: 'Produits vendus' },
-  { icon: FiUsers, value: '2000+', label: 'Clients satisfaits' },
-  { icon: FiStar, value: '5/5', label: 'Note moyenne' },
-];
-
 export default function TrustBar() {
+  const [stats, setStats] = useState({ products: 0, clients: 0, satisfaction: 98 });
+
+  useEffect(() => {
+    api.get('/stats')
+      .then(res => setStats(res.data))
+      .catch(() => {});
+  }, []);
+
   return (
     <section className="trust-bar">
       <div className="container">
@@ -38,15 +42,27 @@ export default function TrustBar() {
           initial="hidden" whileInView="show" viewport={{ once: true }}
           variants={{ hidden: {}, show: { transition: { staggerChildren: 0.1, delayChildren: 0.2 } } }}
         >
-          {stats.map((s) => (
-            <motion.div key={s.label} className="trust-stat"
-              variants={{ hidden: { opacity: 0, scale: 0.8 }, show: { opacity: 1, scale: 1 } }}
-            >
-              <s.icon size={28} />
-              <span className="trust-stat-value">{s.value}</span>
-              <span className="trust-stat-label">{s.label}</span>
-            </motion.div>
-          ))}
+          <motion.div className="trust-stat"
+            variants={{ hidden: { opacity: 0, scale: 0.8 }, show: { opacity: 1, scale: 1 } }}
+          >
+            <FiStar size={28} />
+            <span className="trust-stat-value">{stats.products > 0 ? stats.products.toLocaleString() + '+' : '—'}</span>
+            <span className="trust-stat-label">Produits vendus</span>
+          </motion.div>
+          <motion.div className="trust-stat"
+            variants={{ hidden: { opacity: 0, scale: 0.8 }, show: { opacity: 1, scale: 1 } }}
+          >
+            <FiUsers size={28} />
+            <span className="trust-stat-value">{stats.clients > 0 ? stats.clients.toLocaleString() + '+' : '—'}</span>
+            <span className="trust-stat-label">Clients satisfaits</span>
+          </motion.div>
+          <motion.div className="trust-stat"
+            variants={{ hidden: { opacity: 0, scale: 0.8 }, show: { opacity: 1, scale: 1 } }}
+          >
+            <FiStar size={28} />
+            <span className="trust-stat-value">{stats.satisfaction}%</span>
+            <span className="trust-stat-label">Avis positifs</span>
+          </motion.div>
         </motion.div>
       </div>
     </section>
