@@ -1,6 +1,6 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useState, useCallback } from 'react';
 import { Link } from 'react-router-dom';
-import { FiArrowLeft, FiHeadphones, FiSearch, FiCheck, FiClock } from 'react-icons/fi';
+import { FiArrowLeft, FiHeadphones, FiSearch, FiCheck, FiClock, FiRefreshCw } from 'react-icons/fi';
 import api from '../api/axios';
 
 export default function AdminTickets() {
@@ -8,12 +8,15 @@ export default function AdminTickets() {
   const [loading, setLoading] = useState(true);
   const [search, setSearch] = useState('');
 
-  useEffect(() => {
+  const load = useCallback(() => {
+    setLoading(true);
     api.get('/contact/tickets')
       .then(res => setTickets(res.data))
       .catch(() => {})
       .finally(() => setLoading(false));
   }, []);
+
+  useEffect(() => { load(); }, [load]);
 
   const filtered = search
     ? tickets.filter(t =>
@@ -37,6 +40,9 @@ export default function AdminTickets() {
               <FiHeadphones size={28} style={{ color: 'var(--primary)' }} /> Tickets Support
             </h1>
           </div>
+          <button onClick={load} className="btn btn-outline" style={{ display: 'flex', alignItems: 'center', gap: '6px' }} disabled={loading}>
+            <FiRefreshCw size={16} className={loading ? 'spin' : ''} /> {loading ? 'Chargement...' : 'Actualiser'}
+          </button>
         </div>
 
         <div style={{ marginBottom: '20px', position: 'relative' }}>
@@ -75,6 +81,8 @@ export default function AdminTickets() {
                       #{ticket.ticket_number}
                     </span>
                     <div style={{ fontWeight: 600, marginBottom: '4px', fontSize: '15px' }}>{ticket.name}</div>
+                    {ticket.user_id && <div style={{ fontSize: '11px', color: 'var(--text-muted)' }}>User ID: {ticket.user_id}</div>}
+                    {ticket.ip_address && !ticket.user_id && <div style={{ fontSize: '11px', color: 'var(--text-muted)' }}>IP: {ticket.ip_address}</div>}
                   </div>
                   <div style={{ fontSize: '12px', color: 'var(--text-muted)', display: 'flex', alignItems: 'center', gap: '4px', whiteSpace: 'nowrap' }}>
                     <FiClock size={12} /> {formatDate(ticket.created_at)}

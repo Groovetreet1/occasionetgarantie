@@ -1,9 +1,11 @@
 const express = require('express');
 const crypto = require('crypto');
+const jwt = require('jsonwebtoken');
 const router = express.Router();
 const pool = require('../config/db');
 const { send } = require('../emails');
 const { authenticate, adminOnly } = require('../middleware/auth');
+const DAILY_LIMIT = 5;
 
 async function generateTicketNumber() {
   for (let i = 0; i < 50; i++) {
@@ -12,6 +14,20 @@ async function generateTicketNumber() {
     if (rows.length === 0) return num;
   }
   return Date.now().toString().slice(-10);
+}
+
+function getUserIdFromReq(req) {
+  try {
+    const header = req.headers.authorization;
+    if (!header || !header.startsWith('Bearer ')) return null;
+    const token = header.split(' ')[1];
+    const decoded = jwt.verify(token, process.env.JWT_SECRET);
+    return decoded.id;
+  } catch { return null; }
+}
+
+function getClientIp(req) {
+  return req.headers['x-forwarded-for']?.split(',')[0]?.trim() || req.socket.remoteAddress || 'unknown';
 }
 
 router.post('/', async (req, res) => {
@@ -24,20 +40,38 @@ router.post('/', async (req, res) => {
       await pool.query(`CREATE TABLE IF NOT EXISTS support_tickets (
         id INT AUTO_INCREMENT PRIMARY KEY,
         ticket_number VARCHAR(10) NOT NULL UNIQUE,
+        user_id INT DEFAULT NULL,
+        ip_address VARCHAR(45) DEFAULT NULL,
         name VARCHAR(100) NOT NULL,
         message TEXT NOT NULL,
         created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
       )`);
       try { await pool.query('ALTER TABLE support_tickets ADD COLUMN ticket_number VARCHAR(10) NOT NULL UNIQUE'); } catch (e) { if (e.errno !== 1060 && e.code !== 'ER_DUP_FIELDNAME') console.log('ticket_number col:', e.message); }
+      try { await pool.query('ALTER TABLE support_tickets ADD COLUMN user_id INT DEFAULT NULL'); } catch (e) { if (e.errno !== 1060 && e.code !== 'ER_DUP_FIELDNAME') console.log('user_id col:', e.message); }
+      try { await pool.query('ALTER TABLE support_tickets ADD COLUMN ip_address VARCHAR(45) DEFAULT NULL'); } catch (e) { if (e.errno !== 1060 && e.code !== 'ER_DUP_FIELDNAME') console.log('ip_address col:', e.message); }
     } catch (tableErr) {
       console.log('support_tickets table check:', tableErr.message);
+    }
+
+    const userId = getUserIdFromReq(req);
+    const ip = getClientIp(req);
+    const today = new Date().toISOString().slice(0, 10);
+
+    let count;
+    if (userId) {
+      [count] = await pool.query('SELECT COUNT(*) as cnt FROM support_tickets WHERE user_id = ? AND DATE(created_at) = ?', [userId, today]);
+    } else {
+      [count] = await pool.query('SELECT COUNT(*) as cnt FROM support_tickets WHERE ip_address = ? AND DATE(created_at) = ?', [ip, today]);
+    }
+    if (count[0].cnt >= DAILY_LIMIT) {
+      return res.status(429).json({ message: `Limite de ${DAILY_LIMIT} tickets par jour atteinte. Reessayez demain.` });
     }
 
     const ticketNumber = await generateTicketNumber();
 
     await pool.query(
-      'INSERT INTO support_tickets (ticket_number, name, message) VALUES (?, ?, ?)',
-      [ticketNumber, name.trim(), message.trim()]
+      'INSERT INTO support_tickets (ticket_number, user_id, ip_address, name, message) VALUES (?, ?, ?, ?, ?)',
+      [ticketNumber, userId, userId ? null : ip, name.trim(), message.trim()]
     );
 
     try {
