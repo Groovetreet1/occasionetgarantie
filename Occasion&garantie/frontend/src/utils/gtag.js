@@ -2,17 +2,17 @@
 // Remplace GOOGLE_ADS_ID par ton ID de conversion Google Ads (ex: AW-123456789)
 // Remplace GA4_ID par ton ID de mesure Google Analytics 4 (ex: G-XXXXXXXXXX)
 
-const GOOGLE_ADS_ID = import.meta.env.VITE_GOOGLE_ADS_ID || '';
+const GOOGLE_ADS_ID = import.meta.env.VITE_GOOGLE_ADS_ID || 'AW-879979551';
 const GA4_ID = import.meta.env.VITE_GA4_ID || '';
 
 export function initGtag() {
-  if (!window.gtag && GOOGLE_ADS_ID) {
+  if (typeof window.gtag !== 'function') {
     window.dataLayer = window.dataLayer || [];
     function gtag(){window.dataLayer.push(arguments);}
     window.gtag = gtag;
     gtag('js', new Date());
-    if (GA4_ID) gtag('config', GA4_ID);
     if (GOOGLE_ADS_ID) gtag('config', GOOGLE_ADS_ID);
+    if (GA4_ID) gtag('config', GA4_ID);
   }
 }
 
