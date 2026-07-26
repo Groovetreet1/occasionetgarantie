@@ -1,4 +1,5 @@
 const https = require('https');
+const http = require('http');
 const pool = require('../config/db');
 const emails = require('../emails');
 
@@ -33,15 +34,14 @@ const VPN_SUSPEND_HTML = ({ store, ip }) => `
     <p style="font-size:12px;color:#888;">Cet email est automatique. Merci de ne pas y repondre.</p>
   </div>`;
 
-function fetchJson(url, timeoutMs = 4000) {
+function fetchUrl(url, useHttps = true, timeoutMs = 5000) {
   return new Promise((resolve) => {
     try {
-      const req = https.get(url, (res) => {
+      const mod = url.startsWith('https') ? https : http;
+      const req = mod.get(url, { rejectUnauthorized: false }, (res) => {
         let data = '';
         res.on('data', c => data += c);
-        res.on('end', () => {
-          try { resolve(JSON.parse(data)); } catch { resolve(null); }
-        });
+        res.on('end', () => resolve(data));
         res.on('error', () => resolve(null));
       });
       req.on('error', () => resolve(null));
@@ -55,30 +55,40 @@ async function resolveIp(ip) {
   const def = { isp: 'Inconnu', city: null, region: null, country: null, isVpn: false };
   if (!ip || ip === 'unknown' || ip === '127.0.0.1' || ip === '::1') return { ...def, isp: 'Local' };
 
-  const json = await fetchJson(`https://api.ipapi.is/?q=${ip}`);
-  if (json) {
-    const result = {
-      isp: json.isp || json.org || 'Inconnu',
-      city: json.city || null,
-      region: json.regionName || null,
-      country: json.country || null,
-      isVpn: !!(json.is_vpn || json.is_proxy || json.is_tor),
-    };
-    CACHE[ip] = result;
-    return result;
+  const raw = await fetchUrl(`https://api.ipapi.is/?q=${ip}`);
+  if (raw) {
+    try {
+      const j = JSON.parse(raw);
+      if (j && j.isp !== undefined) {
+        const result = {
+          isp: j.isp || j.org || 'Inconnu',
+          city: j.city || null,
+          region: j.regionName || null,
+          country: j.country || null,
+          isVpn: !!(j.is_vpn || j.is_proxy || j.is_tor),
+        };
+        CACHE[ip] = result;
+        return result;
+      }
+    } catch {}
   }
 
-  const fallback = await fetchJson(`https://ip-api.com/json/${ip}?fields=isp,org,country,regionName,city`);
-  if (fallback) {
-    const result = {
-      isp: fallback.isp || fallback.org || 'Inconnu',
-      city: fallback.city || null,
-      region: fallback.regionName || null,
-      country: fallback.country || null,
-      isVpn: false,
-    };
-    CACHE[ip] = result;
-    return result;
+  const raw2 = await fetchUrl(`http://ip-api.com/json/${ip}?fields=isp,org,country,regionName,city`, false);
+  if (raw2) {
+    try {
+      const j = JSON.parse(raw2);
+      if (j && j.status === 'success') {
+        const result = {
+          isp: j.isp || j.org || 'Inconnu',
+          city: j.city || null,
+          region: j.regionName || null,
+          country: j.country || null,
+          isVpn: false,
+        };
+        CACHE[ip] = result;
+        return result;
+      }
+    } catch {}
   }
 
   CACHE[ip] = def;
