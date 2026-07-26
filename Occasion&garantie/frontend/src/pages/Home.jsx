@@ -115,7 +115,7 @@ export default function Home() {
       <TrustBar />
 
       {/* Ad banner */}
-      <AdBanner slot="xxxxxxxxxx" className="ad-banner-home" />
+      <AdBanner slot="4761614885" format="autorelaxed" className="ad-banner-home" />
 
       {/* Sell CTA */}
       <motion.section className="section sell-promo" variants={fadeUp} initial="hidden" whileInView="show" viewport={{ once: true }}>

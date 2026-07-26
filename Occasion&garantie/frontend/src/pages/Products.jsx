@@ -141,7 +141,7 @@ export default function Products() {
         )}
 
         {/* Ad banner */}
-        <AdBanner slot="xxxxxxxxxx" className="ad-banner-products" />
+        <AdBanner slot="4761614885" className="ad-banner-products" />
 
         {/* Products grid */}
         {loading ? (

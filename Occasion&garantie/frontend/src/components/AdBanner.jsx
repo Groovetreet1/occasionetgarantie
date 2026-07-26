@@ -3,7 +3,7 @@ import { useAuth } from '../context/AuthContext';
 
 const AD_CLIENT = 'ca-pub-3266333749754332';
 
-export default function AdBanner({ slot, format = 'auto', className = '' }) {
+export default function AdBanner({ slot, format = 'auto', className = '', style = {} }) {
   const { user } = useAuth();
   const adRef = useRef(null);
   const loaded = useRef(false);
@@ -20,8 +20,10 @@ export default function AdBanner({ slot, format = 'auto', className = '' }) {
 
   if (isPremium) return null;
 
+  const isAutoRelaxed = format === 'autorelaxed';
+
   return (
-    <div className={`ad-banner ${className}`}>
+    <div className={`ad-banner ${className}`} style={style}>
       <ins
         ref={adRef}
         className="adsbygoogle"
@@ -29,7 +31,7 @@ export default function AdBanner({ slot, format = 'auto', className = '' }) {
         data-ad-client={AD_CLIENT}
         data-ad-slot={slot}
         data-ad-format={format}
-        data-full-width-responsive="true"
+        {...(isAutoRelaxed ? {} : { 'data-full-width-responsive': 'true' })}
       />
     </div>
   );
