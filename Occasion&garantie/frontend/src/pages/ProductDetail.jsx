@@ -182,7 +182,7 @@ export default function ProductDetail() {
                   rel="noopener noreferrer"
                   className="btn"
                   style={{
-                    width: '100%', background: '#25D366', color: 'white',
+                    width: '100%', marginTop: '24px', background: '#25D366', color: 'white',
                     fontSize: '18px', padding: '16px 36px', justifyContent: 'center',
                     boxShadow: '0 4px 16px rgba(37,211,102,0.35)',
                   }}
@@ -198,7 +198,7 @@ export default function ProductDetail() {
                   onClick={handleStartChat}
                   className="btn"
                   style={{
-                    width: '100%', marginTop: '10px',
+                    width: '100%', marginTop: '12px',
                     background: 'var(--gradient)', color: 'white',
                     fontSize: '16px', padding: '14px 36px', justifyContent: 'center',
                     border: 'none', cursor: 'pointer', fontFamily: 'var(--font)',
