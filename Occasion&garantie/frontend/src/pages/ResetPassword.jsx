@@ -6,6 +6,7 @@ import api from '../api/axios';
 export default function ResetPassword() {
   const [searchParams] = useSearchParams();
   const identifierParam = searchParams.get('identifier') || '';
+  const userIdParam = searchParams.get('userId') || '';
   const navigate = useNavigate();
   const [code, setCode] = useState('');
   const [newPassword, setNewPassword] = useState('');
@@ -18,7 +19,9 @@ export default function ResetPassword() {
     setError('');
     setLoading(true);
     try {
-      await api.post('/auth/reset-password', { identifier: identifierParam, code, newPassword });
+      const body = { identifier: identifierParam, code, newPassword };
+      if (userIdParam) body.userId = Number(userIdParam);
+      await api.post('/auth/reset-password', body);
       setSuccess(true);
     } catch (err) {
       setError(err.response?.data?.message || 'Erreur.');
