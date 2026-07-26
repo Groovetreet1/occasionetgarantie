@@ -1,15 +1,26 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import { FiMapPin, FiPhone, FiMail, FiClock, FiCheckCircle, FiUsers, FiAward, FiSend, FiStar } from 'react-icons/fi';
 import { BsWhatsapp } from 'react-icons/bs';
 import api from '../api/axios';
 import { useAuth } from '../context/AuthContext';
 
+function yearsSince(dateStr) {
+  const years = (new Date() - new Date(dateStr)) / (365.25 * 86400000);
+  if (years < 1) return 'moins d\'un an';
+  return `+${Math.floor(years)} ans`;
+}
+
 export default function About() {
   const { user } = useAuth();
+  const [siteStats, setSiteStats] = useState(null);
   const [cfMsg, setCfMsg] = useState('');
   const [cfLoading, setCfLoading] = useState(false);
   const [cfDone, setCfDone] = useState(false);
+
+  useEffect(() => {
+    api.get('/public/stats').then(r => setSiteStats(r.data)).catch(() => {});
+  }, []);
 
   const handleContactSubmit = async (e) => {
     e.preventDefault();
@@ -53,24 +64,24 @@ export default function About() {
             </div>
             <div className="about-stats-box">
               <div style={{ textAlign: 'center', padding: '20px', background: 'var(--bg-secondary)', borderRadius: 'var(--radius)' }}>
-                <FiStar size={28} style={{ color: 'var(--primary)', marginBottom: '8px' }} />
-                <div style={{ fontSize: '22px', fontWeight: 700, color: 'var(--primary)' }}>+500</div>
-                <div style={{ fontSize: '12px', color: 'var(--text-muted)' }}>Clients satisfaits</div>
+                <FiUsers size={28} style={{ color: 'var(--primary)', marginBottom: '8px' }} />
+                <div style={{ fontSize: '22px', fontWeight: 700, color: 'var(--primary)' }}>{siteStats ? `+${siteStats.totalUsers}` : '...'}</div>
+                <div style={{ fontSize: '12px', color: 'var(--text-muted)' }}>Inscrits</div>
               </div>
               <div style={{ textAlign: 'center', padding: '20px', background: 'var(--bg-secondary)', borderRadius: 'var(--radius)' }}>
                 <FiAward size={28} style={{ color: 'var(--primary)', marginBottom: '8px' }} />
-                <div style={{ fontSize: '22px', fontWeight: 700, color: 'var(--primary)' }}>+3 ans</div>
+                <div style={{ fontSize: '22px', fontWeight: 700, color: 'var(--primary)' }}>{yearsSince('2023-01-01')}</div>
                 <div style={{ fontSize: '12px', color: 'var(--text-muted)' }}>D'expérience</div>
               </div>
               <div style={{ textAlign: 'center', padding: '20px', background: 'var(--bg-secondary)', borderRadius: 'var(--radius)' }}>
                 <FiCheckCircle size={28} style={{ color: 'var(--primary)', marginBottom: '8px' }} />
-                <div style={{ fontSize: '22px', fontWeight: 700, color: 'var(--primary)' }}>100%</div>
-                <div style={{ fontSize: '12px', color: 'var(--text-muted)' }}>Produits vérifiés</div>
+                <div style={{ fontSize: '22px', fontWeight: 700, color: 'var(--primary)' }}>{siteStats ? `+${siteStats.totalProducts}` : '...'}</div>
+                <div style={{ fontSize: '12px', color: 'var(--text-muted)' }}>Annonces</div>
               </div>
               <div style={{ textAlign: 'center', padding: '20px', background: 'var(--bg-secondary)', borderRadius: 'var(--radius)' }}>
                 <FiStar size={28} style={{ color: 'var(--primary)', marginBottom: '8px' }} />
-                <div style={{ fontSize: '22px', fontWeight: 700, color: 'var(--primary)' }}>5/5</div>
-                <div style={{ fontSize: '12px', color: 'var(--text-muted)' }}>Note moyenne</div>
+                <div style={{ fontSize: '22px', fontWeight: 700, color: 'var(--primary)' }}>{siteStats ? `${siteStats.avgRating}/5` : '...'}</div>
+                <div style={{ fontSize: '12px', color: 'var(--text-muted)' }}>Note vendeurs</div>
               </div>
             </div>
           </div>
