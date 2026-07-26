@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react';
-import { FiArrowUp, FiHeadphones, FiX, FiSend, FiCheckCircle } from 'react-icons/fi';
+import { FiArrowUp, FiHeadphones, FiX, FiSend, FiCheckCircle, FiMail } from 'react-icons/fi';
 import api from '../api/axios';
 import { useAuth } from '../context/AuthContext';
 
@@ -8,6 +8,7 @@ export default function SupportFloat() {
   const [showScroll, setShowScroll] = useState(false);
   const [open, setOpen] = useState(false);
   const [name, setName] = useState(user?.fullName || user?.full_name || '');
+  const [email, setEmail] = useState(user?.email || '');
   const [message, setMessage] = useState('');
   const [loading, setLoading] = useState(false);
   const [done, setDone] = useState(false);
@@ -24,6 +25,7 @@ export default function SupportFloat() {
 
   useEffect(() => {
     if (user?.fullName || user?.full_name) setName(user.fullName || user.full_name);
+    if (user?.email) setEmail(user.email);
   }, [user]);
 
   const handleSubmit = async (e) => {
@@ -32,7 +34,7 @@ export default function SupportFloat() {
     setError('');
     setLoading(true);
     try {
-      const res = await api.post('/contact', { name: name.trim(), message: message.trim() });
+      const res = await api.post('/contact', { name: name.trim(), message: message.trim(), email: email.trim() || undefined });
       setTicketNumber(res.data.ticketNumber || '');
       setSentName(name.trim());
       setSentMessage(message.trim());
@@ -46,7 +48,7 @@ export default function SupportFloat() {
 
   const handleClose = () => {
     setOpen(false);
-    setTimeout(() => { setDone(false); setError(''); setName(user?.fullName || user?.full_name || ''); setMessage(''); setTicketNumber(''); setSentName(''); setSentMessage(''); }, 300);
+    setTimeout(() => { setDone(false); setError(''); setName(user?.fullName || user?.full_name || ''); setEmail(user?.email || ''); setMessage(''); setTicketNumber(''); setSentName(''); setSentMessage(''); }, 300);
   };
 
   const handleNewTicket = () => {
@@ -83,7 +85,8 @@ export default function SupportFloat() {
                 <p>Message envoye avec succes !</p>
                 {ticketNumber && <div className="ticket-number">Ticket #<strong>{ticketNumber}</strong></div>}
                 <div style={{ marginTop: '12px', padding: '12px', background: 'var(--bg-secondary)', borderRadius: '8px', fontSize: '13px', color: 'var(--text-secondary)', lineHeight: '1.5', textAlign: 'left', whiteSpace: 'pre-wrap' }}>
-                  <div style={{ fontWeight: 600, marginBottom: '4px', fontSize: '12px', color: 'var(--text-muted)' }}>{sentName}</div>
+                  <div style={{ fontWeight: 600, marginBottom: '2px', fontSize: '12px', color: 'var(--text-muted)' }}>{sentName}</div>
+                  <div style={{ fontSize: '11px', color: 'var(--text-muted)', marginBottom: '6px' }}>{email}</div>
                   {sentMessage}
                 </div>
                 <small style={{ display: 'block', marginTop: '12px' }}>Nous vous repondrons par email.</small>
@@ -105,6 +108,20 @@ export default function SupportFloat() {
                     readOnly={!!user}
                     style={user ? { opacity: 0.7, cursor: 'not-allowed' } : {}}
                   />
+                </div>
+                <div className="form-group">
+                  <div style={{ position: 'relative' }}>
+                    <FiMail size={16} style={{ position: 'absolute', left: '10px', top: '11px', color: 'var(--text-muted)' }} />
+                    <input
+                      type="email"
+                      placeholder="Votre email"
+                      value={email}
+                      onChange={(e) => setEmail(e.target.value)}
+                      required
+                      readOnly={!!user}
+                      style={{ paddingLeft: '32px', ...(user ? { opacity: 0.7, cursor: 'not-allowed' } : {}) }}
+                    />
+                  </div>
                 </div>
                 <div className="form-group">
                   <textarea
