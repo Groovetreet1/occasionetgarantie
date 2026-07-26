@@ -65,7 +65,7 @@ router.get('/me/products', authenticate, async (req, res) => {
 router.get('/:id', async (req, res) => {
   try {
     const [users] = await pool.query(
-      'SELECT id, full_name, store_name, store_logo, avatar, created_at FROM users WHERE id = ? AND role = ?',
+      'SELECT id, full_name, store_name, store_logo, avatar, created_at, premium FROM users WHERE id = ? AND role = ?',
       [req.params.id, 'seller']
     );
     if (users.length === 0) return res.status(404).json({ message: 'Vendeur introuvable.' });
@@ -87,9 +87,10 @@ router.get('/:id', async (req, res) => {
 router.get('/:id/products', async (req, res) => {
   try {
     const [rows] = await pool.query(
-      `SELECT p.*, c.name as category_name FROM products p
+      `SELECT p.*, c.name as category_name, u.premium as seller_premium FROM products p
        LEFT JOIN categories c ON p.category_id = c.id
-       WHERE p.seller_id = ? AND p.active = TRUE ORDER BY p.created_at DESC`,
+       JOIN users u ON u.id = p.seller_id
+       WHERE p.seller_id = ? AND p.active = TRUE ORDER BY RAND()`,
       [req.params.id]
     );
     res.json(rows);

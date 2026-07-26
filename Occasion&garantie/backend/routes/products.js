@@ -28,7 +28,7 @@ router.get('/', async (req, res) => {
     const { category, search, min, max, state, sort, seller } = req.query;
     let sql = `
       SELECT p.*, c.name as category_name,
-             u.store_name as seller_name, u.store_logo as seller_logo, u.avatar as seller_avatar,
+             u.store_name as seller_name, u.store_logo as seller_logo, u.avatar as seller_avatar, u.premium as seller_premium,
              (SELECT ROUND(AVG(rating), 1) FROM seller_ratings WHERE seller_id = u.id) as seller_rating_avg,
              (SELECT COUNT(*) FROM seller_ratings WHERE seller_id = u.id) as seller_rating_count
       FROM products p
@@ -49,7 +49,7 @@ router.get('/', async (req, res) => {
     if (sort === 'price_asc') sql += ', p.price ASC';
     else if (sort === 'price_desc') sql += ', p.price DESC';
     else if (sort === 'newest') sql += ', p.created_at DESC';
-    else sql += ', p.featured DESC, p.created_at DESC';
+    else sql += ', RAND()';
 
     try {
       const [rows] = await pool.query(sql, params);
@@ -65,12 +65,12 @@ router.get('/', async (req, res) => {
 // Public: featured products (only disponible)
 router.get('/featured', async (req, res) => {
   try {
-    let sql = `SELECT p.*, c.name as category_name, u.store_name as seller_name, u.store_logo as seller_logo, u.avatar as seller_avatar
+    let sql = `SELECT p.*, c.name as category_name, u.store_name as seller_name, u.store_logo as seller_logo, u.avatar as seller_avatar, u.premium as seller_premium
        FROM products p
        LEFT JOIN categories c ON p.category_id = c.id
        LEFT JOIN users u ON p.seller_id = u.id
        WHERE p.featured = TRUE AND p.active = TRUE AND p.status = 'disponible' AND u.id IS NOT NULL
-       ORDER BY (u.premium = TRUE AND (u.premium_expires_at IS NULL OR u.premium_expires_at > NOW())) DESC, p.created_at DESC LIMIT 8`;
+       ORDER BY (u.premium = TRUE AND (u.premium_expires_at IS NULL OR u.premium_expires_at > NOW())) DESC, RAND() LIMIT 8`;
     try {
       const [rows] = await pool.query(sql);
       return res.json(rows);
@@ -101,7 +101,7 @@ router.get('/id/:id', authenticate, async (req, res) => {
 router.get('/:slug', async (req, res) => {
   try {
     let sql = `SELECT p.*, c.name as category_name,
-              u.id as seller_id, u.full_name as seller_full_name, u.store_name as seller_name, u.store_logo as seller_logo, u.avatar as seller_avatar,
+              u.id as seller_id, u.full_name as seller_full_name, u.store_name as seller_name, u.store_logo as seller_logo, u.avatar as seller_avatar, u.premium as seller_premium,
               u.phone as seller_phone,
               (SELECT ROUND(AVG(rating), 1) FROM seller_ratings WHERE seller_id = u.id) as seller_rating_avg,
               (SELECT COUNT(*) FROM seller_ratings WHERE seller_id = u.id) as seller_rating_count

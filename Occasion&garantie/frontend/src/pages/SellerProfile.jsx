@@ -40,7 +40,7 @@ export default function SellerProfile() {
             {seller.rating_count > 0 && seller.rating_avg && <span className="avatar-rating-badge"><FiStar size={10} fill="#fff" /> {parseFloat(seller.rating_avg).toFixed(1)}</span>}
           </div>
           <div className="seller-info">
-            <h1>{seller.store_name || seller.full_name}</h1>
+            <h1>{seller.store_name || seller.full_name} {seller.premium ? <FiStar size={20} style={{ color: '#FFD700', verticalAlign: 'middle', marginLeft: 4 }} /> : null}</h1>
             <p className="seller-meta">
               <FiCalendar size={14} /> Membre depuis {new Date(seller.created_at).toLocaleDateString('fr-FR', { month: 'long', year: 'numeric' })}
             </p>

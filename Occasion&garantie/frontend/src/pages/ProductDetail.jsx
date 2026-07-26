@@ -164,7 +164,7 @@ export default function ProductDetail() {
                         {product.seller_avatar ? <img src={product.seller_avatar.startsWith('http') ? product.seller_avatar : `${API_BASE}/uploads/avatars/${product.seller_avatar}`} alt="" /> : product.seller_logo ? <img src={product.seller_logo.startsWith('http') ? product.seller_logo : `${API_BASE}/uploads/avatars/${product.seller_logo}`} alt="" /> : <FiUser size={18} />}
                       </div>
                     <div>
-                      <strong>{product.seller_name}</strong>
+                      <strong>{product.seller_name} {product.seller_premium ? <FiStar size={14} style={{ color: '#FFD700', verticalAlign: 'middle', marginLeft: 2 }} /> : null}</strong>
                       {product.seller_rating_count > 0 && (
                         <small style={{ display: 'flex', alignItems: 'center', gap: 4, color: 'var(--text-muted)' }}>
                           <FiStar size={12} fill="var(--primary)" color="var(--primary)" /> {product.seller_rating_avg}/5 ({product.seller_rating_count} avis)
