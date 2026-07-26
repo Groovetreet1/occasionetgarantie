@@ -893,7 +893,7 @@ select.form-control, .form-group select { cursor: pointer; appearance: auto; }
 .support-btn { width: 52px; height: 52px; border-radius: 50%; border: none; display: flex; align-items: center; justify-content: center; background: var(--gradient); color: white; box-shadow: var(--shadow-glow); font-size: 24px; transition: var(--transition); cursor: pointer; }
 .support-btn:hover { transform: scale(1.1); }
 
-.support-popup { position: absolute; bottom: 68px; right: 0; width: 340px; max-width: calc(100vw - 48px); background: var(--bg-card); border-radius: 16px; box-shadow: 0 8px 32px rgba(0,0,0,0.15); overflow: hidden; border: 1px solid var(--border); }
+.support-popup { position: absolute; bottom: 68px; right: 0; width: 340px; max-width: calc(100vw - 48px); background: var(--bg-card); border-radius: 16px; box-shadow: 0 8px 32px rgba(0,0,0,0.15); overflow: hidden; border: 1px solid var(--border); z-index: 9999; }
 .support-popup-header { display: flex; align-items: center; gap: 8px; padding: 14px 16px; background: var(--gradient); color: white; font-weight: 600; font-size: 14px; }
 .support-popup-close { margin-left: auto; background: none; border: none; color: white; cursor: pointer; padding: 4px; border-radius: 4px; display: flex; }
 .support-popup-close:hover { background: rgba(255,255,255,0.15); }
@@ -1581,7 +1581,7 @@ select.form-control, .form-group select { cursor: pointer; appearance: auto; }
 
 /* Print styles */
 @media print {
-  .navbar, .footer, .whatsapp-float, .navbar-mobile-panel, .navbar-hamburger, .navbar-auth,
+  .navbar, .footer, .support-float, .navbar-mobile-panel, .navbar-hamburger, .navbar-auth,
   .btn, .seller-nav-bar, .seller-sidebar, .seller-nav, .sidebar-toggle-btn, .seller-topbar, .dashboard-header .btn, .seller-form-actions, .upload-zone { display: none !important; }
   .container { max-width: 100% !important; padding: 0 !important; }
   .stats-report { gap: 16px; }
