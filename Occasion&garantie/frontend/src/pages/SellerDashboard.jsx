@@ -1,7 +1,7 @@
 import { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
-import { FiPlus, FiEdit2, FiTrash2, FiPackage, FiCheckCircle, FiPercent, FiCreditCard, FiDollarSign, FiX, FiCopy, FiCheck, FiUpload, FiLock } from 'react-icons/fi';
+import { FiPlus, FiEdit2, FiTrash2, FiPackage, FiCheckCircle, FiPercent, FiCreditCard, FiDollarSign, FiX, FiCopy, FiCheck, FiUpload, FiLock, FiStar } from 'react-icons/fi';
 import api from '../api/axios';
 import { useAuth } from '../context/AuthContext';
 import SellerNav from '../components/SellerNav';
@@ -36,20 +36,23 @@ export default function SellerDashboard() {
   const [uploadingScreenshot, setUploadingScreenshot] = useState(false);
   const [uploadMsg, setUploadMsg] = useState(null);
   const [copiedField, setCopiedField] = useState(null);
+  const [sellerRatings, setSellerRatings] = useState(null);
   useEffect(() => {
     Promise.allSettled([
       api.get('/seller/me'),
       api.get('/seller/me/products'),
       api.get('/seller/me/commissions'),
       api.get('/auth/my-credits'),
+      user?.id ? api.get('/ratings/my') : Promise.resolve(),
     ]).then((results) => {
-      const [p, pr, c, cr] = results;
+      const [p, pr, c, cr, r] = results;
       if (p.status === 'fulfilled') { setProfile(p.value.data); setStoreName(p.value.data.store_name || ''); }
       if (pr.status === 'fulfilled') setProducts(pr.value.data);
       if (c.status === 'fulfilled') setCommissions(c.value.data);
       if (cr.status === 'fulfilled') setCreditBalance(cr.value.data.credit_balance);
+      if (r.status === 'fulfilled' && r.value?.data) setSellerRatings(r.value.data);
     }).finally(() => setLoading(false));
-  }, []);
+  }, [user]);
 
   const handleBuyCredits = async () => {
     setBuyLoading(true);
@@ -141,6 +144,13 @@ export default function SellerDashboard() {
               <span className="stat-value">{commissions.summary.total_commission} DH</span>
               <span className="stat-label">Commission ({commissions.summary.count} ventes)</span>
             </div>
+            {sellerRatings && (
+              <div className="stat-card">
+                <FiStar size={20} style={{ color: '#FFD700' }} />
+                <span className="stat-value">{sellerRatings.stats?.avg || '—'}/5</span>
+                <span className="stat-label">{sellerRatings.stats?.total || 0} avis clients</span>
+              </div>
+            )}
           </div>
           )}
           {profile?.created_at && new Date(profile.created_at).getTime() + 3 * 30 * 24 * 60 * 60 * 1000 > Date.now() && (
