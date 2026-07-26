@@ -28,7 +28,7 @@ export default function SellerProductForm() {
   const [form, setForm] = useState({
     name: '', slug: '', description: '', price: '', old_price: '',
     category_id: '1', brand: '', state: 'tres_bon', warranty: '6 mois',
-    specs: { ...defaultSpecs },
+    specs: { ...defaultSpecs }, ville: '',
   });
   const [gallery, setGallery] = useState([]);
   const [existingImages, setExistingImages] = useState([]);
@@ -45,7 +45,7 @@ export default function SellerProductForm() {
           price: p.price || '', old_price: p.old_price || '',
           category_id: String(p.category_id || '1'), brand: p.brand || '',
           state: p.state || 'tres_bon', warranty: p.warranty || '6 mois',
-          specs: p.specs || { ...defaultSpecs },
+          specs: p.specs || { ...defaultSpecs }, ville: p.ville || '',
         });
         if (p.image) setExistingImages([p.image]);
         if (p.gallery && Array.isArray(p.gallery)) {
@@ -190,6 +190,19 @@ export default function SellerProductForm() {
                     <option value="Apple" /><option value="Samsung" /><option value="Xiaomi" />
                     <option value="Huawei" /><option value="OnePlus" /><option value="Oppo" />
                     <option value="Google" /><option value="Sony" /><option value="Nokia" />
+                  </datalist>
+                </div>
+                <div className="form-group">
+                  <label>Ville</label>
+                  <input name="ville" value={form.ville} onChange={handleChange} className="form-control" placeholder="Votre ville" list="villes" />
+                  <datalist id="villes">
+                    <option value="Casablanca" /><option value="Rabat" /><option value="Marrakech" />
+                    <option value="Fès" /><option value="Tanger" /><option value="Agadir" />
+                    <option value="Meknès" /><option value="Oujda" /><option value="El Jadida" />
+                    <option value="Tétouan" /><option value="Safi" /><option value="Mohammedia" />
+                    <option value="Kénitra" /><option value="Laâyoune" /><option value="Salé" />
+                    <option value="Nador" /><option value="Taza" /><option value="Béni Mellal" />
+                    <option value="Khouribga" /><option value="Settat" />
                   </datalist>
                 </div>
               </div>

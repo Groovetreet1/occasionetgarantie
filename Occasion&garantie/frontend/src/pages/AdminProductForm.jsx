@@ -24,7 +24,7 @@ export default function AdminProductForm() {
   const [form, setForm] = useState({
     name: '', slug: '', description: '', price: '', old_price: '', category_id: 1,
     brand: '', state: 'tres_bon', warranty: '12 mois', stock: 1, featured: false,
-    image: '', gallery: [], specs: { ...defaultSpecs },
+    image: '', gallery: [], specs: { ...defaultSpecs }, ville: '',
   });
 
   useEffect(() => {
@@ -38,7 +38,7 @@ export default function AdminProductForm() {
           name: p.name || '', slug: p.slug || '', description: p.description || '',
           price: p.price || '', old_price: p.old_price || '', category_id: p.category_id || 1,
           brand: p.brand || '', state: p.state || 'tres_bon', warranty: p.warranty || '12 mois',
-          stock: p.stock || 1, featured: p.featured || false, image: p.image || '', gallery, specs,
+          stock: p.stock || 1, featured: p.featured || false, image: p.image || '', gallery, specs, ville: p.ville || '',
         });
       }).catch(() => navigate('/admin'));
     }
@@ -197,6 +197,19 @@ export default function AdminProductForm() {
             <div className="form-group">
               <label>Stock</label>
               <input name="stock" type="number" value={form.stock} onChange={handleChange} />
+            </div>
+            <div className="form-group">
+              <label>Ville</label>
+              <input name="ville" value={form.ville} onChange={handleChange} placeholder="Casablanca, Rabat..." list="villes" />
+              <datalist id="villes">
+                <option value="Casablanca" /><option value="Rabat" /><option value="Marrakech" />
+                <option value="Fès" /><option value="Tanger" /><option value="Agadir" />
+                <option value="Meknès" /><option value="Oujda" /><option value="El Jadida" />
+                <option value="Tétouan" /><option value="Safi" /><option value="Mohammedia" />
+                <option value="Kénitra" /><option value="Laâyoune" /><option value="Salé" />
+                <option value="Nador" /><option value="Taza" /><option value="Béni Mellal" />
+                <option value="Khouribga" /><option value="Settat" />
+              </datalist>
             </div>
             <div className="form-group" style={{ gridColumn: 'span 2' }}>
               <label>Image principale</label>
