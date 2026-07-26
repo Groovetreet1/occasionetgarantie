@@ -64,7 +64,9 @@ router.get('/', async (req, res) => {
     const { category, search, min, max, state, sort, seller } = req.query;
     let sql = `
       SELECT p.*, c.name as category_name,
-             u.store_name as seller_name, u.store_logo as seller_logo, u.avatar as seller_avatar
+             u.store_name as seller_name, u.store_logo as seller_logo, u.avatar as seller_avatar,
+             (SELECT ROUND(AVG(rating), 1) FROM seller_ratings WHERE seller_id = u.id) as seller_rating_avg,
+             (SELECT COUNT(*) FROM seller_ratings WHERE seller_id = u.id) as seller_rating_count
       FROM products p
       LEFT JOIN categories c ON p.category_id = c.id
       LEFT JOIN users u ON p.seller_id = u.id
@@ -135,7 +137,9 @@ router.get('/:slug', async (req, res) => {
   try {
     let sql = `SELECT p.*, c.name as category_name,
               u.id as seller_id, u.full_name as seller_full_name, u.store_name as seller_name, u.store_logo as seller_logo, u.avatar as seller_avatar,
-              u.phone as seller_phone
+              u.phone as seller_phone,
+              (SELECT ROUND(AVG(rating), 1) FROM seller_ratings WHERE seller_id = u.id) as seller_rating_avg,
+              (SELECT COUNT(*) FROM seller_ratings WHERE seller_id = u.id) as seller_rating_count
        FROM products p
        LEFT JOIN categories c ON p.category_id = c.id
        LEFT JOIN users u ON p.seller_id = u.id

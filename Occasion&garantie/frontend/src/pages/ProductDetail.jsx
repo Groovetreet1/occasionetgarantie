@@ -168,8 +168,11 @@ export default function ProductDetail() {
                     </div>
                     <div>
                       <strong>{product.seller_name}</strong>
-                      {product.seller_premium ? <FiStar size={18} style={{ color: '#FFD700', marginLeft: 4, verticalAlign: 'middle' }} /> : null}
-                      <small>Voir profil du vendeur</small>
+                      {product.seller_rating_count > 0 && (
+                        <small style={{ display: 'flex', alignItems: 'center', gap: 4, color: 'var(--text-muted)' }}>
+                          <FiStar size={12} fill="var(--primary)" color="var(--primary)" /> {product.seller_rating_avg}/5 ({product.seller_rating_count} avis)
+                        </small>
+                      )}
                     </div>
                   </Link>
                 </div>
