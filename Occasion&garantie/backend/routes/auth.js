@@ -380,12 +380,14 @@ router.post('/forgot-password', [
       return res.json({ message: 'Code de verification envoye par SMS.', identifier });
     }
 
-    const normalized = normalizePhone(identifier);
+    const inputDigits = identifier.replace(/\D/g, '');
     const [matched] = await pool.query(
-      'SELECT id, full_name, email, phone FROM users WHERE REPLACE(phone, "+", "") = ? OR REPLACE(phone, " ", "") = ? OR phone = ? OR phone = ?',
-      [identifier.replace(/\D/g, ''), normalized.replace(/\D/g, ''), identifier, normalized]
+      'SELECT id, full_name, email, phone FROM users'
     );
-    const unique = matched.filter((u, i, a) => a.findIndex(x => x.id === u.id) === i);
+    const unique = matched.filter(u => {
+      const pd = (u.phone || '').replace(/\D/g, '');
+      return pd === inputDigits || pd.endsWith(inputDigits.slice(-9)) || inputDigits.endsWith(pd.slice(-9));
+    });
     if (unique.length === 0) return res.status(404).json({ message: 'Aucun compte trouve avec ce telephone.' });
 
     if (unique.length > 1 && !userId) {
@@ -403,7 +405,7 @@ router.post('/forgot-password', [
     if (!target.phone) return res.status(400).json({ message: 'Aucun telephone enregistre sur ce compte.' });
 
     const code = crypto.randomInt(100000, 999999).toString();
-    const key = normalized + '-' + targetId;
+    const key = inputDigits + '-' + targetId;
     resetCodes.set(key, { code, userId: targetId, expiresAt: Date.now() + CODE_EXPIRY });
 
     try {
@@ -414,6 +416,7 @@ router.post('/forgot-password', [
 
     res.json({ message: 'Code de verification envoye par SMS.', identifier, userId: targetId });
   } catch (err) {
+    console.error('forgot-password error:', err.message, err.stack?.split('\n').slice(0, 3).join('\n'));
     res.status(500).json({ message: 'Erreur serveur.' });
   }
 });
