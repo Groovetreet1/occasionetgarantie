@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
-import { FiCreditCard, FiClock, FiPackage, FiUsers, FiArrowLeft, FiTrendingUp, FiPlus, FiHeadphones, FiShield } from 'react-icons/fi';
+import { FiCreditCard, FiClock, FiPackage, FiUsers, FiArrowLeft, FiTrendingUp, FiPlus, FiHeadphones, FiShield, FiMonitor } from 'react-icons/fi';
 import api from '../api/axios';
 
 function CardWrapper({ link, children, ...rest }) {
@@ -60,6 +60,9 @@ export default function AdminDashboardPage() {
       { label: 'En attente', value: stats.pendingTickets, highlight: true },
       { label: 'Repondu', value: stats.repliedTickets },
     ], link: '/admin/tickets' },
+    { title: 'Journal Vendeurs', icon: FiMonitor, color: '#6366f1', bg: 'rgba(99,102,241,0.1)', items: [
+      { label: 'Activite', value: 'IP, ISP, UA' },
+    ], link: '/admin/vendor-logs' },
     { title: 'Utilisateurs', icon: FiUsers, color: '#dc2626', bg: 'rgba(220,38,38,0.1)', items: [
       { label: 'Total utilisateurs', value: stats.users },
     ], link: '/admin/users' },

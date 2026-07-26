@@ -1,0 +1,122 @@
+import { useEffect, useState } from 'react';
+import { Link } from 'react-router-dom';
+import { FiArrowLeft, FiShield, FiUser, FiMonitor, FiGlobe, FiClock, FiSearch } from 'react-icons/fi';
+import api from '../api/axios';
+
+const actionLabels = {
+  connexion: 'Connexion',
+  produit_ajoute: 'Produit ajouté',
+  statut_disponible: 'Marqué disponible',
+  statut_en_attente: 'Marqué en attente',
+  statut_vendu: 'Vendu',
+};
+
+export default function AdminVendorLogs() {
+  const [logs, setLogs] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [search, setSearch] = useState('');
+  const [expanded, setExpanded] = useState(null);
+
+  useEffect(() => {
+    api.get('/admin/vendor-logs')
+      .then(res => setLogs(res.data))
+      .catch(() => {})
+      .finally(() => setLoading(false));
+  }, []);
+
+  const filtered = search
+    ? logs.filter(l =>
+        (l.full_name || '').toLowerCase().includes(search.toLowerCase()) ||
+        (l.store_name || '').toLowerCase().includes(search.toLowerCase()) ||
+        (l.email || '').toLowerCase().includes(search.toLowerCase()) ||
+        (l.ip_address || '').includes(search) ||
+        (l.action || '').includes(search.toLowerCase())
+      )
+    : logs;
+
+  const formatDate = (d) => new Date(d).toLocaleString('fr-FR', {
+    day: 'numeric', month: 'short', year: 'numeric', hour: '2-digit', minute: '2-digit'
+  });
+
+  return (
+    <section className="admin-dashboard">
+      <div className="container" style={{ position: 'relative', zIndex: 1 }}>
+        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '24px', flexWrap: 'wrap', gap: '12px' }}>
+          <div>
+            <Link to="/admin" className="btn btn-ghost" style={{ marginBottom: '8px' }}><FiArrowLeft /> Dashboard</Link>
+            <h1 style={{ fontSize: '28px', fontWeight: 800, display: 'flex', alignItems: 'center', gap: '10px' }}>
+              <FiShield size={28} style={{ color: 'var(--primary)' }} /> Journal des vendeurs
+            </h1>
+            <p style={{ color: 'var(--text-secondary)', fontSize: '13px' }}>Activite des vendeurs : IP, operateur, appareil</p>
+          </div>
+        </div>
+
+        <div style={{ marginBottom: '20px', position: 'relative' }}>
+          <FiSearch size={18} style={{ position: 'absolute', left: '14px', top: '14px', color: 'var(--text-muted)' }} />
+          <input
+            type="text"
+            placeholder="Rechercher par nom, email, IP..."
+            value={search}
+            onChange={(e) => setSearch(e.target.value)}
+            style={{ width: '100%', padding: '12px 14px 12px 42px', border: '1px solid var(--border)', borderRadius: '10px', background: 'var(--bg-card)', color: 'var(--text)', fontFamily: 'var(--font)', fontSize: '14px', boxSizing: 'border-box' }}
+          />
+        </div>
+
+        {loading ? (
+          <div style={{ textAlign: 'center', padding: '60px 0' }}><div className="spinner" /></div>
+        ) : filtered.length === 0 ? (
+          <div style={{ textAlign: 'center', padding: '60px 0', color: 'var(--text-muted)' }}>
+            <FiShield size={48} style={{ opacity: 0.3, marginBottom: '12px' }} />
+            <p>Aucune activite enregistree.</p>
+          </div>
+        ) : (
+          <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
+            {filtered.map(log => (
+              <div key={log.id} style={{
+                background: 'var(--bg-card)', border: '1px solid var(--border)',
+                borderRadius: 'var(--radius)', padding: '16px', cursor: 'pointer',
+              }}
+                onClick={() => setExpanded(expanded === log.id ? null : log.id)}
+              >
+                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', gap: '12px', flexWrap: 'wrap' }}>
+                  <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
+                    <FiUser size={18} style={{ color: 'var(--primary)', flexShrink: 0 }} />
+                    <div>
+                      <div style={{ fontWeight: 600, fontSize: '14px' }}>{log.store_name || log.full_name}</div>
+                      <div style={{ fontSize: '12px', color: 'var(--text-muted)' }}>{log.email} | {log.phone || 'Tel inconnu'}</div>
+                    </div>
+                  </div>
+                  <div style={{ display: 'flex', alignItems: 'center', gap: '8px', flexShrink: 0 }}>
+                    <span style={{
+                      padding: '3px 10px', borderRadius: '12px', fontSize: '11px', fontWeight: 600,
+                      background: log.action === 'connexion' ? 'rgba(59,130,246,0.1)' :
+                                   log.action === 'produit_ajoute' ? 'rgba(16,185,129,0.1)' :
+                                   log.action === 'statut_vendu' ? 'rgba(239,68,68,0.1)' : 'rgba(245,158,11,0.1)',
+                      color: log.action === 'connexion' ? '#3b82f6' :
+                             log.action === 'produit_ajoute' ? '#10b981' :
+                             log.action === 'statut_vendu' ? '#ef4444' : '#f59e0b',
+                    }}>
+                      {actionLabels[log.action] || log.action}
+                    </span>
+                    <span style={{ fontSize: '11px', color: 'var(--text-muted)', whiteSpace: 'nowrap' }}>
+                      <FiClock size={11} /> {formatDate(log.created_at)}
+                    </span>
+                  </div>
+                </div>
+                {expanded === log.id && (
+                  <div style={{ marginTop: '12px', padding: '12px', background: 'var(--bg-secondary)', borderRadius: '8px', fontSize: '13px', color: 'var(--text-secondary)', lineHeight: '1.8' }}>
+                    <div><FiGlobe size={13} /> IP : <strong>{log.ip_address}</strong></div>
+                    <div><FiMonitor size={13} /> Operateur : <strong>{log.isp || 'Inconnu'}</strong></div>
+                    <div style={{ fontSize: '12px', wordBreak: 'break-word' }}>Appareil : {log.user_agent || 'Inconnu'}</div>
+                    {log.product_id && <div>Produit #{log.product_id}</div>}
+                    {log.details && <div style={{ marginTop: '4px', fontStyle: 'italic' }}>"{log.details}"</div>}
+                  </div>
+                )}
+              </div>
+            ))}
+          </div>
+        )}
+      </div>
+    </section>
+  );
+}

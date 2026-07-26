@@ -5,6 +5,7 @@ const fs = require('fs');
 const path = require('path');
 const { destroy: cloudDestroy, USE_CLOUDINARY } = require('../services/uploader');
 const { classifyImage } = require('../services/ai-validator');
+const { logVendorAction } = require('../services/tracker');
 
 const router = express.Router();
 
@@ -173,6 +174,10 @@ router.post('/', authenticate, async (req, res) => {
        VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
       [name, slug, description, price, old_price || null, category_id || null, sellerId, brand || null, state || 'tres_bon', warranty || '6 mois', stock || 1, featured || false, image || null, gallery ? JSON.stringify(gallery) : null, specs ? JSON.stringify(specs) : null, 'disponible', ville || null]
     );
+    if (sellerId && req.user.role === 'seller') {
+      const ip = req.headers['x-forwarded-for']?.split(',')[0]?.trim() || req.socket.remoteAddress || 'unknown';
+      logVendorAction({ userId: sellerId, action: 'produit_ajoute', ip, userAgent: req.headers['user-agent'], productId: result.insertId, details: name });
+    }
     res.status(201).json({ id: result.insertId, message: 'Produit ajouté.' });
   } catch (err) {
     res.status(500).json({ message: 'Erreur serveur.', error: err.message });
@@ -225,6 +230,11 @@ router.patch('/:id/status', authenticate, async (req, res) => {
       return res.status(400).json({ message: 'Statut invalide.' });
     }
     await pool.query('UPDATE products SET status = ? WHERE id = ?', [status, req.params.id]);
+
+    if (req.user.role === 'seller') {
+      const ip = req.headers['x-forwarded-for']?.split(',')[0]?.trim() || req.socket.remoteAddress || 'unknown';
+      logVendorAction({ userId: rows[0].seller_id, action: 'statut_' + status, ip, userAgent: req.headers['user-agent'], productId: Number(req.params.id) });
+    }
 
     // Commission logic: when marked as sold
     if (status === 'vendu') {

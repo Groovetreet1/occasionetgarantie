@@ -23,6 +23,7 @@ import AdminInstallments from './pages/AdminInstallments';
 import AdminDashboardPage from './pages/AdminDashboardPage';
 import AdminUsers from './pages/AdminUsers';
 import AdminTickets from './pages/AdminTickets';
+import AdminVendorLogs from './pages/AdminVendorLogs';
 import SellPage from './pages/SellPage';
 import SellerDashboard from './pages/SellerDashboard';
 import SellerProductForm from './pages/SellerProductForm';
@@ -77,6 +78,7 @@ export default function App() {
           <Route path="/admin/installments" element={<AnimatedPage><AdminRoute><AdminInstallments /></AdminRoute></AnimatedPage>} />
           <Route path="/admin/users" element={<AnimatedPage><AdminRoute><AdminUsers /></AdminRoute></AnimatedPage>} />
           <Route path="/admin/tickets" element={<AnimatedPage><AdminRoute><AdminTickets /></AdminRoute></AnimatedPage>} />
+          <Route path="/admin/vendor-logs" element={<AnimatedPage><AdminRoute><AdminVendorLogs /></AdminRoute></AnimatedPage>} />
           <Route path="/vendre" element={<AnimatedPage><SellPage /></AnimatedPage>} />
           <Route path="/seller" element={<AnimatedPage><SellerRoute><SellerDashboard /></SellerRoute></AnimatedPage>} />
           <Route path="/seller/stats" element={<AnimatedPage><SellerRoute><SellerStats /></SellerRoute></AnimatedPage>} />

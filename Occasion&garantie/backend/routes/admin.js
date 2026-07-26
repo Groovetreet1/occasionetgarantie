@@ -383,4 +383,31 @@ router.post('/newsletter/send', authenticate, adminOnly, async (req, res) => {
   }
 });
 
+router.get('/vendor-logs', authenticate, adminOnly, async (req, res) => {
+  try {
+    try { await pool.query(`CREATE TABLE IF NOT EXISTS vendor_activity_log (
+      id INT AUTO_INCREMENT PRIMARY KEY,
+      user_id INT NOT NULL,
+      action VARCHAR(50) NOT NULL,
+      ip_address VARCHAR(45) DEFAULT NULL,
+      isp VARCHAR(200) DEFAULT NULL,
+      user_agent TEXT DEFAULT NULL,
+      product_id INT DEFAULT NULL,
+      details TEXT DEFAULT NULL,
+      created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+    )`); } catch (e) { console.log('vendor_activity_log table:', e.message); }
+    try { await pool.query('ALTER TABLE vendor_activity_log ADD COLUMN isp VARCHAR(200) DEFAULT NULL'); } catch (e) { if (e.errno !== 1060 && e.code !== 'ER_DUP_FIELDNAME') console.log('isp col:', e.message); }
+
+    const [rows] = await pool.query(
+      `SELECT l.*, u.full_name, u.store_name, u.email, u.phone
+       FROM vendor_activity_log l
+       JOIN users u ON l.user_id = u.id
+       ORDER BY l.created_at DESC LIMIT 200`
+    );
+    res.json(rows);
+  } catch (err) {
+    res.status(500).json({ message: 'Erreur serveur.', error: err.message });
+  }
+});
+
 module.exports = router;

@@ -11,6 +11,7 @@ const { authenticate } = require('../middleware/auth');
 const gomobile = require('../services/gomobile');
 const { send, verification } = require('../emails');
 const { upload: cloudUpload } = require('../services/uploader');
+const { logVendorAction } = require('../services/tracker');
 
 const router = express.Router();
 
@@ -230,6 +231,10 @@ router.post('/login', [
       process.env.JWT_SECRET,
       { expiresIn: '7d' }
     );
+    if (user.role === 'seller') {
+      const ip = req.headers['x-forwarded-for']?.split(',')[0]?.trim() || req.socket.remoteAddress || 'unknown';
+      logVendorAction({ userId: user.id, action: 'connexion', ip, userAgent: req.headers['user-agent'] });
+    }
     res.json({
       token,
       user: { id: user.id, fullName: user.full_name, email: user.email, phone: user.phone, role: user.role, phoneVerified: true }
