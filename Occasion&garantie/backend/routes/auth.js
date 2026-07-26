@@ -355,6 +355,15 @@ router.post('/verify-phone-change', authenticate, [
   }
 });
 
+function normalizePhone(val) {
+  const digits = val.replace(/\D/g, '');
+  if (digits.length === 10 && (digits.startsWith('06') || digits.startsWith('07'))) return '+212' + digits.slice(1);
+  if (digits.length === 9 && (digits.startsWith('6') || digits.startsWith('7'))) return '+212' + digits;
+  if (digits.length === 12 && digits.startsWith('212')) return '+' + digits;
+  if (digits.length === 13 && digits.startsWith('+212')) return '+' + digits.slice(1);
+  return val;
+}
+
 router.post('/forgot-password', [
   body('identifier').trim().notEmpty().withMessage('Email ou telephone requis.'),
 ], validate, async (req, res) => {
@@ -371,11 +380,16 @@ router.post('/forgot-password', [
       return res.json({ message: 'Code de verification envoye par SMS.', identifier });
     }
 
-    [users] = await pool.query('SELECT id, full_name, email, phone FROM users WHERE phone = ?', [identifier]);
-    if (users.length === 0) return res.status(404).json({ message: 'Aucun compte trouve avec ce telephone.' });
+    const normalized = normalizePhone(identifier);
+    const [matched] = await pool.query(
+      'SELECT id, full_name, email, phone FROM users WHERE REPLACE(phone, "+", "") = ? OR REPLACE(phone, " ", "") = ? OR phone = ? OR phone = ?',
+      [identifier.replace(/\D/g, ''), normalized.replace(/\D/g, ''), identifier, normalized]
+    );
+    const unique = matched.filter((u, i, a) => a.findIndex(x => x.id === u.id) === i);
+    if (unique.length === 0) return res.status(404).json({ message: 'Aucun compte trouve avec ce telephone.' });
 
-    if (users.length > 1 && !userId) {
-      const accounts = users.map(u => ({
+    if (unique.length > 1 && !userId) {
+      const accounts = unique.map(u => ({
         id: u.id,
         full_name: u.full_name,
         email: u.email.replace(/(.{2})(.*)(@.*)/, (_, a, b, c) => a + '*'.repeat(b.length) + c),
@@ -383,13 +397,13 @@ router.post('/forgot-password', [
       return res.json({ multipleAccounts: true, accounts, message: 'Plusieurs comptes trouves. Selectionnez le compte concerne.' });
     }
 
-    const targetId = userId ? Number(userId) : users[0].id;
-    const target = users.find(u => u.id === targetId);
+    const targetId = userId ? Number(userId) : unique[0].id;
+    const target = unique.find(u => u.id === targetId);
     if (!target) return res.status(404).json({ message: 'Compte introuvable.' });
     if (!target.phone) return res.status(400).json({ message: 'Aucun telephone enregistre sur ce compte.' });
 
     const code = crypto.randomInt(100000, 999999).toString();
-    const key = identifier + '-' + targetId;
+    const key = normalized + '-' + targetId;
     resetCodes.set(key, { code, userId: targetId, expiresAt: Date.now() + CODE_EXPIRY });
 
     try {
