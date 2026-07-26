@@ -118,7 +118,6 @@ export default function AdminDashboardPage() {
         <div style={{ marginTop: '32px', background: 'var(--bg-card)', border: '1px solid var(--border)', borderRadius: 'var(--radius-lg)', padding: '24px' }}>
           <h2 style={{ fontSize: '18px', fontWeight: 700, marginBottom: '16px' }}>Actions rapides</h2>
           <div style={{ display: 'flex', gap: '12px', flexWrap: 'wrap' }}>
-            <Link to="/admin/products/new" className="btn btn-primary"><FiPlus size={16} /> Nouveau produit</Link>
             <Link to="/admin/credits" className="btn btn-outline"><FiCreditCard size={16} /> Achats de credits</Link>
             <Link to="/admin/installments" className="btn btn-outline"><FiClock size={16} /> Paiements echelonnes</Link>
             <Link to="/admin/premium" className="btn btn-outline"><FiShield size={16} /> Demandes Prime</Link>
