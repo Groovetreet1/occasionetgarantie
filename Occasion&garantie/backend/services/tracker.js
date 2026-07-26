@@ -92,6 +92,7 @@ async function logVendorAction({ userId, action, ip, userAgent, productId, detai
     try { await pool.query('ALTER TABLE vendor_activity_log ADD COLUMN country VARCHAR(100) DEFAULT NULL'); } catch (e) { if (e.errno !== 1060 && e.code !== 'ER_DUP_FIELDNAME') {} }
     try { await pool.query('ALTER TABLE vendor_activity_log ADD COLUMN is_vpn TINYINT(1) DEFAULT 0'); } catch (e) { if (e.errno !== 1060 && e.code !== 'ER_DUP_FIELDNAME') {} }
     try { await pool.query('ALTER TABLE vendor_activity_log ADD COLUMN vpn_warned_at DATETIME DEFAULT NULL'); } catch (e) { if (e.errno !== 1060 && e.code !== 'ER_DUP_FIELDNAME') {} }
+    try { await pool.query("ALTER TABLE vendor_activity_log ADD COLUMN is_datacenter TINYINT(1) DEFAULT 0"); } catch (e) { if (e.errno !== 1060 && e.code !== 'ER_DUP_FIELDNAME') {} }
 
     const [result] = await pool.query(
       `INSERT INTO vendor_activity_log (user_id, action, ip_address, user_agent, product_id, details) VALUES (?, ?, ?, ?, ?, ?)`,
@@ -102,11 +103,13 @@ async function logVendorAction({ userId, action, ip, userAgent, productId, detai
     resolveIp(ip).then(async (info) => {
       try {
         await pool.query(
-          `UPDATE vendor_activity_log SET isp = ?, city = ?, region = ?, country = ?, is_vpn = ? WHERE id = ?`,
-          [info.isp, info.city, info.region, info.country, info.isVpn ? 1 : 0, logId]
+          `UPDATE vendor_activity_log SET isp = ?, city = ?, region = ?, country = ?, is_vpn = ?, is_datacenter = ? WHERE id = ?`,
+          [info.isp, info.city, info.region, info.country, info.isVpn ? 1 : 0, info.isDatacenter ? 1 : 0, logId]
         );
 
-        if (info.isVpn) {
+        const isSuspicious = info.isVpn || info.isDatacenter;
+
+        if (isSuspicious) {
           try { await pool.query('ALTER TABLE users ADD COLUMN suspended TINYINT(1) DEFAULT 0'); } catch (e) { if (e.errno !== 1060 && e.code !== 'ER_DUP_FIELDNAME') {} }
           try { await pool.query("ALTER TABLE users ADD COLUMN suspension_reason VARCHAR(255) DEFAULT NULL"); } catch (e) { if (e.errno !== 1060 && e.code !== 'ER_DUP_FIELDNAME') {} }
           try { await pool.query('ALTER TABLE users ADD COLUMN vpn_warned_at DATETIME DEFAULT NULL'); } catch (e) { if (e.errno !== 1060 && e.code !== 'ER_DUP_FIELDNAME') {} }
@@ -144,4 +147,4 @@ async function logVendorAction({ userId, action, ip, userAgent, productId, detai
   }
 }
 
-module.exports = { logVendorAction, resolveIp };
+module.exports = { logVendorAction, resolveIp, fetchJson };

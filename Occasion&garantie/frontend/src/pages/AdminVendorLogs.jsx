@@ -124,6 +124,14 @@ export default function AdminVendorLogs() {
                           VPN {log.vpn_warned_at ? '⚠' : ''}
                         </span>
                       )}
+                      {log.is_vpn != 1 && log.is_datacenter == 1 && (
+                        <span style={{
+                          padding: '3px 8px', borderRadius: '12px', fontSize: '10px', fontWeight: 700, textTransform: 'uppercase',
+                          background: 'rgba(245,158,11,0.12)', color: '#f59e0b',
+                        }}>
+                          Hebergement
+                        </span>
+                      )}
                         <span style={{ fontSize: '11px', color: 'var(--text-muted)', whiteSpace: 'nowrap' }}>
                       <FiClock size={11} /> {formatDate(log.created_at)}
                     </span>
@@ -139,9 +147,10 @@ export default function AdminVendorLogs() {
                   <div style={{ marginTop: '12px', padding: '12px', background: 'var(--bg-secondary)', borderRadius: '8px', fontSize: '13px', color: 'var(--text-secondary)', lineHeight: '1.8' }}>
                     <div><FiGlobe size={13} /> IP : <strong>{log.ip_address}</strong>
                       {log.is_vpn == 1 && (
-                        <span style={{ marginLeft: '8px', fontSize: '11px', fontWeight: 600, color: '#ef4444' }}>
-                          ⚠ VPN
-                        </span>
+                        <span style={{ marginLeft: '8px', fontSize: '11px', fontWeight: 600, color: '#ef4444' }}>⚠ VPN</span>
+                      )}
+                      {log.is_vpn != 1 && log.is_datacenter == 1 && (
+                        <span style={{ marginLeft: '8px', fontSize: '11px', fontWeight: 600, color: '#f59e0b' }}>Hebergement</span>
                       )}
                     </div>
                     <div><FiMonitor size={13} /> Operateur : <strong>{log.isp || 'Inconnu'}</strong></div>

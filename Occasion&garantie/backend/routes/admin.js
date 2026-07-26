@@ -395,6 +395,7 @@ router.get('/vendor-logs', authenticate, adminOnly, async (req, res) => {
       region VARCHAR(100) DEFAULT NULL,
       country VARCHAR(100) DEFAULT NULL,
       is_vpn TINYINT(1) DEFAULT 0,
+      is_datacenter TINYINT(1) DEFAULT 0,
       vpn_warned_at DATETIME DEFAULT NULL,
       user_agent TEXT DEFAULT NULL,
       product_id INT DEFAULT NULL,
@@ -422,9 +423,16 @@ router.get('/vendor-logs', authenticate, adminOnly, async (req, res) => {
 
 router.get('/test-resolve', async (req, res) => {
   const ip = req.query.ip || req.ip;
-  const { resolveIp } = require('../services/tracker');
+  const { resolveIp, fetchJson } = require('../services/tracker');
+
+  const raw = await fetchJson(`https://api.ipapi.is/?q=${ip}`);
   const result = await resolveIp(ip);
-  res.json({ ip, result });
+
+  res.json({
+    ip,
+    result,
+    raw: raw || null,
+  });
 });
 
 router.post('/vendor-logs/reindex', authenticate, adminOnly, async (req, res) => {
@@ -435,8 +443,8 @@ router.post('/vendor-logs/reindex', authenticate, adminOnly, async (req, res) =>
     for (const row of rows) {
       const info = await resolveIp(row.ip_address);
       await pool.query(
-        'UPDATE vendor_activity_log SET isp = ?, city = ?, region = ?, country = ?, is_vpn = ? WHERE id = ?',
-        [info.isp, info.city, info.region, info.country, info.isVpn ? 1 : 0, row.id]
+        'UPDATE vendor_activity_log SET isp = ?, city = ?, region = ?, country = ?, is_vpn = ?, is_datacenter = ? WHERE id = ?',
+        [info.isp, info.city, info.region, info.country, info.isVpn ? 1 : 0, info.isDatacenter ? 1 : 0, row.id]
       );
       done++;
     }
