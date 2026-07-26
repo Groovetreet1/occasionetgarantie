@@ -139,7 +139,9 @@ export default function SellerRating({ sellerId, currentUserId }) {
             <div key={r.id} style={{ padding: '12px 0', borderBottom: '1px solid var(--border)' }}>
               <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '4px' }}>
                 <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-                  <div style={{ width: '28px', height: '28px', borderRadius: '50%', background: 'var(--gradient)', color: 'white', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '12px', fontWeight: 700 }}>{r.full_name?.[0] || '?'}</div>
+                  <div style={{ width: '28px', height: '28px', borderRadius: '50%', overflow: 'hidden', background: 'var(--gradient)', color: 'white', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '12px', fontWeight: 700, flexShrink: 0 }}>
+                    {r.avatar ? <img src={r.avatar.startsWith('http') ? r.avatar : '/uploads/avatars/' + r.avatar} alt="" style={{ width: '100%', height: '100%', objectFit: 'cover' }} /> : r.full_name?.[0] || '?'}
+                  </div>
                   <strong style={{ fontSize: '13px' }}>{r.full_name}</strong>
                 </div>
                 <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
