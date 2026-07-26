@@ -1,6 +1,11 @@
 import { useState, useEffect } from 'react';
-import { FiStar } from 'react-icons/fi';
+import { FiStar, FiEdit2, FiTrash2 } from 'react-icons/fi';
 import api from '../api/axios';
+
+const starStyle = (fill) => ({
+  background: 'none', border: 'none', cursor: 'pointer', padding: '2px',
+  color: fill ? 'var(--primary)' : 'var(--text-muted)',
+});
 
 export default function SellerRating({ sellerId, currentUserId }) {
   const [ratings, setRatings] = useState([]);
@@ -9,10 +14,10 @@ export default function SellerRating({ sellerId, currentUserId }) {
   const [myRating, setMyRating] = useState(0);
   const [myComment, setMyComment] = useState('');
   const [submitting, setSubmitting] = useState(false);
-  const [submitted, setSubmitted] = useState(false);
   const [showForm, setShowForm] = useState(false);
+  const [editId, setEditId] = useState(null);
 
-  useEffect(() => {
+  const load = () => {
     api.get('/ratings/seller/' + sellerId)
       .then(res => {
         setRatings(res.data.ratings);
@@ -20,25 +25,57 @@ export default function SellerRating({ sellerId, currentUserId }) {
       })
       .catch(() => {})
       .finally(() => setLoading(false));
-  }, [sellerId]);
+  };
 
-  const canRate = currentUserId && currentUserId !== sellerId && !ratings.some(r => r.user_id === currentUserId);
+  useEffect(() => { load(); }, [sellerId]);
+
+  const myExisting = ratings.find(r => r.user_id === currentUserId);
+  const canRate = currentUserId && currentUserId !== sellerId && !myExisting;
 
   const handleSubmit = async (e) => {
     e.preventDefault();
     if (myRating === 0) return;
     setSubmitting(true);
     try {
-      await api.post('/ratings', { seller_id: sellerId, rating: myRating, comment: myComment });
-      setSubmitted(true);
-      const res = await api.get('/ratings/seller/' + sellerId);
-      setRatings(res.data.ratings);
-      setStats(res.data.stats);
+      if (editId) {
+        await api.put('/ratings/' + editId, { rating: myRating, comment: myComment });
+      } else {
+        await api.post('/ratings', { seller_id: sellerId, rating: myRating, comment: myComment });
+      }
+      setShowForm(false);
+      setEditId(null);
+      setMyRating(0);
+      setMyComment('');
+      load();
     } catch (err) {
       alert(err.response?.data?.message || 'Erreur');
     } finally {
       setSubmitting(false);
     }
+  };
+
+  const handleDelete = async (id) => {
+    if (!window.confirm('Supprimer votre avis ?')) return;
+    try {
+      await api.delete('/ratings/' + id);
+      load();
+    } catch (err) {
+      alert(err.response?.data?.message || 'Erreur');
+    }
+  };
+
+  const startEdit = (r) => {
+    setEditId(r.id);
+    setMyRating(r.rating);
+    setMyComment(r.comment || '');
+    setShowForm(true);
+  };
+
+  const cancelForm = () => {
+    setShowForm(false);
+    setEditId(null);
+    setMyRating(0);
+    setMyComment('');
   };
 
   if (loading) return null;
@@ -60,34 +97,38 @@ export default function SellerRating({ sellerId, currentUserId }) {
         )}
       </div>
 
-      {canRate && !submitted && (
+      {currentUserId && currentUserId !== sellerId && (
         <div style={{ marginBottom: '20px' }}>
-          {showForm ? (
-            <form onSubmit={handleSubmit} style={{ background: 'var(--bg-secondary)', padding: '16px', borderRadius: 'var(--radius)', border: '1px solid var(--border)' }}>
-              <label style={{ display: 'block', fontSize: '14px', fontWeight: 600, marginBottom: '8px' }}>Votre note</label>
-              <div style={{ display: 'flex', gap: '4px', marginBottom: '12px' }}>
-                {[1,2,3,4,5].map(s => (
-                  <button key={s} type="button" onClick={() => setMyRating(s)} style={{ background: 'none', border: 'none', cursor: 'pointer', padding: '2px' }}>
-                    <FiStar size={28} fill={s <= myRating ? 'var(--primary)' : 'none'} color={s <= myRating ? 'var(--primary)' : 'var(--text-muted)'} style={{ transition: 'fill 0.15s' }} />
+          {!myExisting || editId ? (
+            showForm ? (
+              <form onSubmit={handleSubmit} style={{ background: 'var(--bg-secondary)', padding: '16px', borderRadius: 'var(--radius)', border: '1px solid var(--border)' }}>
+                <label style={{ display: 'block', fontSize: '14px', fontWeight: 600, marginBottom: '8px' }}>Votre note</label>
+                <div style={{ display: 'flex', gap: '4px', marginBottom: '12px' }}>
+                  {[1,2,3,4,5].map(s => (
+                    <button key={s} type="button" onClick={() => setMyRating(s)} style={{ background: 'none', border: 'none', cursor: 'pointer', padding: '2px' }}>
+                      <FiStar size={28} fill={s <= myRating ? 'var(--primary)' : 'none'} color={s <= myRating ? 'var(--primary)' : 'var(--text-muted)'} style={{ transition: 'fill 0.15s' }} />
+                    </button>
+                  ))}
+                </div>
+                <textarea value={myComment} onChange={e => setMyComment(e.target.value)} placeholder="Votre commentaire (optionnel)" rows={2} style={{ width: '100%', padding: '10px', borderRadius: '8px', border: '1px solid var(--border)', background: 'var(--bg-card)', color: 'var(--text-primary)', fontFamily: 'inherit', fontSize: '13px', resize: 'vertical', marginBottom: '10px', boxSizing: 'border-box' }} />
+                <div style={{ display: 'flex', gap: '8px' }}>
+                  <button type="submit" className="btn btn-primary" style={{ padding: '8px 20px', fontSize: '13px' }} disabled={submitting || myRating === 0}>
+                    {submitting ? '...' : editId ? 'Modifier' : 'Publier'}
                   </button>
-                ))}
-              </div>
-              <textarea value={myComment} onChange={e => setMyComment(e.target.value)} placeholder="Votre commentaire (optionnel)" rows={2} style={{ width: '100%', padding: '10px', borderRadius: '8px', border: '1px solid var(--border)', background: 'var(--bg-card)', color: 'var(--text-primary)', fontFamily: 'inherit', fontSize: '13px', resize: 'vertical', marginBottom: '10px', boxSizing: 'border-box' }} />
-              <div style={{ display: 'flex', gap: '8px' }}>
-                <button type="submit" className="btn btn-primary" style={{ padding: '8px 20px', fontSize: '13px' }} disabled={submitting || myRating === 0}>
-                  {submitting ? '...' : 'Publier'}
-                </button>
-                <button type="button" onClick={() => setShowForm(false)} className="btn btn-ghost" style={{ padding: '8px 20px', fontSize: '13px' }}>Annuler</button>
-              </div>
-            </form>
+                  <button type="button" onClick={cancelForm} className="btn btn-ghost" style={{ padding: '8px 20px', fontSize: '13px' }}>Annuler</button>
+                </div>
+              </form>
+            ) : canRate ? (
+              <button onClick={() => setShowForm(true)} className="btn btn-outline" style={{ fontSize: '13px' }}><FiStar size={14} /> Noter ce vendeur</button>
+            ) : null
           ) : (
-            <button onClick={() => setShowForm(true)} className="btn btn-outline" style={{ fontSize: '13px' }}><FiStar size={14} /> Noter ce vendeur</button>
+            <p style={{ color: 'var(--success)', fontSize: '13px', marginBottom: '16px', display: 'flex', alignItems: 'center', gap: '8px' }}>
+              <span>Merci pour votre avis !</span>
+              <button onClick={() => startEdit(myExisting)} className="btn btn-ghost" style={{ padding: '4px 10px', fontSize: '12px' }}><FiEdit2 size={12} /> Modifier</button>
+              <button onClick={() => handleDelete(myExisting.id)} className="btn btn-ghost" style={{ padding: '4px 10px', fontSize: '12px', color: 'var(--error)' }}><FiTrash2 size={12} /> Supprimer</button>
+            </p>
           )}
         </div>
-      )}
-
-      {submitted && (
-        <p style={{ color: 'var(--success)', fontSize: '13px', marginBottom: '16px' }}>Merci pour votre avis !</p>
       )}
 
       {ratings.length === 0 ? (
@@ -101,10 +142,18 @@ export default function SellerRating({ sellerId, currentUserId }) {
                   <div style={{ width: '28px', height: '28px', borderRadius: '50%', background: 'var(--gradient)', color: 'white', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '12px', fontWeight: 700 }}>{r.full_name?.[0] || '?'}</div>
                   <strong style={{ fontSize: '13px' }}>{r.full_name}</strong>
                 </div>
-                <div style={{ display: 'flex', gap: '2px' }}>
-                  {[1,2,3,4,5].map(s => (
-                    <FiStar key={s} size={12} fill={s <= r.rating ? 'var(--primary)' : 'none'} color="var(--primary)" />
-                  ))}
+                <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                  <div style={{ display: 'flex', gap: '2px' }}>
+                    {[1,2,3,4,5].map(s => (
+                      <FiStar key={s} size={12} fill={s <= r.rating ? 'var(--primary)' : 'none'} color="var(--primary)" />
+                    ))}
+                  </div>
+                  {currentUserId && r.user_id === currentUserId && !editId && (
+                    <div style={{ display: 'flex', gap: '4px' }}>
+                      <button onClick={() => startEdit(r)} style={{ background: 'none', border: 'none', cursor: 'pointer', color: 'var(--text-muted)', padding: '2px' }} title="Modifier"><FiEdit2 size={12} /></button>
+                      <button onClick={() => handleDelete(r.id)} style={{ background: 'none', border: 'none', cursor: 'pointer', color: 'var(--error)', padding: '2px' }} title="Supprimer"><FiTrash2 size={12} /></button>
+                    </div>
+                  )}
                 </div>
               </div>
               {r.comment && <p style={{ fontSize: '13px', color: 'var(--text-secondary)', marginTop: '4px' }}>{r.comment}</p>}

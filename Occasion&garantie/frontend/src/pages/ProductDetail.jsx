@@ -216,7 +216,7 @@ export default function ProductDetail() {
             </div>
           </div>
         </div>
-        <div className="container" style={{ marginTop: '-40px', paddingBottom: '40px' }}>
+        <div className="container" style={{ paddingBottom: '40px' }}>
           {product.seller_id && <SellerRating sellerId={product.seller_id} currentUserId={user?.id} />}
         </div>
       </section>

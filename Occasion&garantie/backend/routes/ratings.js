@@ -60,6 +60,38 @@ router.get('/seller/:sellerId', async (req, res) => {
   }
 });
 
+router.put('/:id', authenticate, async (req, res) => {
+  try {
+    const { id } = req.params;
+    const { rating, comment } = req.body;
+    if (!rating) return res.status(400).json({ message: 'Rating requis.' });
+    if (rating < 1 || rating > 5) return res.status(400).json({ message: 'Rating must be 1-5.' });
+
+    const [rows] = await pool.query('SELECT * FROM seller_ratings WHERE id = ?', [id]);
+    if (rows.length === 0) return res.status(404).json({ message: 'Avis introuvable.' });
+    if (rows[0].user_id !== req.user.id) return res.status(403).json({ message: 'Vous ne pouvez modifier que votre propre avis.' });
+
+    await pool.query('UPDATE seller_ratings SET rating = ?, comment = ? WHERE id = ?', [rating, comment || null, id]);
+    res.json({ message: 'Avis modifie.' });
+  } catch (err) {
+    res.status(500).json({ message: 'Erreur serveur.' });
+  }
+});
+
+router.delete('/:id', authenticate, async (req, res) => {
+  try {
+    const { id } = req.params;
+    const [rows] = await pool.query('SELECT * FROM seller_ratings WHERE id = ?', [id]);
+    if (rows.length === 0) return res.status(404).json({ message: 'Avis introuvable.' });
+    if (rows[0].user_id !== req.user.id) return res.status(403).json({ message: 'Vous ne pouvez supprimer que votre propre avis.' });
+
+    await pool.query('DELETE FROM seller_ratings WHERE id = ?', [id]);
+    res.json({ message: 'Avis supprime.' });
+  } catch (err) {
+    res.status(500).json({ message: 'Erreur serveur.' });
+  }
+});
+
 router.get('/my', authenticate, async (req, res) => {
   try {
     const [rows] = await pool.query(
