@@ -103,9 +103,6 @@ export default function ProductDetail() {
                 ) : (
                   <FiShoppingBag size={80} style={{ opacity: 0.15 }} />
                 )}
-                <span className="product-badge badge-warranty" style={{ bottom: '12px', left: '12px', top: 'auto', right: 'auto', fontSize: '14px', padding: '8px 16px' }}>
-                  <FiShield size={14} /> Garantie {product.warranty}
-                </span>
               </div>
               {allImages.length > 1 && (
                 <div className="product-detail-thumbs">

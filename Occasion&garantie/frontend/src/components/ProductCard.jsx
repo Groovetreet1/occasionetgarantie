@@ -64,9 +64,7 @@ export default function ProductCard({ product, index = 0 }) {
             {product.state && (
               <span className="meta-chip">{stateLabels[product.state] || product.state}</span>
             )}
-            {product.warranty && product.warranty !== 'Sans garantie' && (
-              <span className="meta-chip meta-chip-warranty"><FiShield size={10} /> {product.warranty}</span>
-            )}
+
           </div>
         </div>
       </Link>
