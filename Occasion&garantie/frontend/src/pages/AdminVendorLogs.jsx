@@ -107,7 +107,12 @@ export default function AdminVendorLogs() {
                   <div style={{ marginTop: '12px', padding: '12px', background: 'var(--bg-secondary)', borderRadius: '8px', fontSize: '13px', color: 'var(--text-secondary)', lineHeight: '1.8' }}>
                     <div><FiGlobe size={13} /> IP : <strong>{log.ip_address}</strong></div>
                     <div><FiMonitor size={13} /> Operateur : <strong>{log.isp || 'Inconnu'}</strong></div>
-                    <div style={{ fontSize: '12px', wordBreak: 'break-word' }}>Appareil : {log.user_agent || 'Inconnu'}</div>
+                    {(log.city || log.region || log.country) && (
+                      <div style={{ marginTop: '4px' }}>
+                        <FiGlobe size={13} /> Localisation : <strong>{[log.city, log.region, log.country].filter(Boolean).join(', ')}</strong>
+                      </div>
+                    )}
+                    <div style={{ fontSize: '12px', wordBreak: 'break-word', marginTop: '4px' }}>Appareil : {log.user_agent || 'Inconnu'}</div>
                     {log.product_id && <div>Produit #{log.product_id}</div>}
                     {log.details && <div style={{ marginTop: '4px', fontStyle: 'italic' }}>"{log.details}"</div>}
                   </div>
