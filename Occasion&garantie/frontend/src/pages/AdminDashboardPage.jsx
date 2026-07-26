@@ -4,7 +4,7 @@ import { FiCreditCard, FiClock, FiPackage, FiUsers, FiArrowLeft, FiTrendingUp, F
 import api from '../api/axios';
 
 export default function AdminDashboardPage() {
-  const [stats, setStats] = useState({ credits: 0, pendingCredits: 0, installments: 0, pendingInstallments: 0, premium: 0, pendingPremium: 0, products: 0, users: 0 });
+  const [stats, setStats] = useState({ credits: 0, pendingCredits: 0, installments: 0, pendingInstallments: 0, premium: 0, pendingPremium: 0, products: 0, vendorProducts: 0, tickets: 0, pendingTickets: 0, repliedTickets: 0, users: 0 });
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
@@ -13,8 +13,10 @@ export default function AdminDashboardPage() {
       api.get('/admin/installments').catch(() => ({ data: [] })),
       api.get('/admin/premium-payments').catch(() => ({ data: [] })),
       api.get('/admin/products').catch(() => ({ data: [] })),
+      api.get('/contact/tickets').catch(() => ({ data: [] })),
       api.get('/admin/users').catch(() => ({ data: [] })),
-    ]).then(([credits, installments, premium, products, users]) => {
+    ]).then(([credits, installments, premium, products, tickets, users]) => {
+      const ticketData = tickets.data || [];
       setStats({
         credits: credits.data.length,
         pendingCredits: credits.data.filter(c => c.status === 'en_attente').length,
@@ -23,6 +25,10 @@ export default function AdminDashboardPage() {
         premium: premium.data.length,
         pendingPremium: premium.data.filter(p => p.status === 'en_attente').length,
         products: products.data.length,
+        vendorProducts: products.data.filter(p => p.seller_id || p.user_id).length,
+        tickets: ticketData.length,
+        pendingTickets: ticketData.filter(t => !t.replied_at).length,
+        repliedTickets: ticketData.filter(t => t.replied_at).length,
         users: users.data.length,
       });
     }).catch(() => {}).finally(() => setLoading(false));
@@ -43,9 +49,12 @@ export default function AdminDashboardPage() {
     ], link: '/admin/premium' },
     { title: 'Produits', icon: FiPackage, color: '#059669', bg: 'rgba(5,150,105,0.1)', items: [
       { label: 'Total produits', value: stats.products },
+      { label: 'Par vendeurs', value: stats.vendorProducts, highlight: true },
     ], link: '/admin/products' },
     { title: 'Tickets Support', icon: FiHeadphones, color: '#f59e0b', bg: 'rgba(245,158,11,0.1)', items: [
-      { label: 'Voir les tickets', value: '' },
+      { label: 'Total', value: stats.tickets },
+      { label: 'En attente', value: stats.pendingTickets, highlight: true },
+      { label: 'Repondu', value: stats.repliedTickets },
     ], link: '/admin/tickets' },
     { title: 'Utilisateurs', icon: FiUsers, color: '#dc2626', bg: 'rgba(220,38,38,0.1)', items: [
       { label: 'Total utilisateurs', value: stats.users },
