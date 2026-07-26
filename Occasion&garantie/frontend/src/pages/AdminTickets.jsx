@@ -35,6 +35,9 @@ export default function AdminTickets() {
     day: 'numeric', month: 'short', year: 'numeric', hour: '2-digit', minute: '2-digit'
   });
 
+  const notReplied = filtered.filter(t => !t.replied_at);
+  const replied = filtered.filter(t => t.replied_at);
+
   const handleReply = async (ticketNumber) => {
     const reply = replies[ticketNumber];
     if (!reply || !reply.trim()) return;
@@ -86,7 +89,12 @@ export default function AdminTickets() {
           </div>
         ) : (
           <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
-            {filtered.map(ticket => {
+            {notReplied.length > 0 && (
+              <>
+                <h3 style={{ fontSize: '16px', fontWeight: 700, color: 'var(--text)', margin: '0 0 4px', display: 'flex', alignItems: 'center', gap: '8px' }}>
+                  <span style={{ width: '8px', height: '8px', borderRadius: '50%', background: 'var(--primary)' }} /> En attente de reponse ({notReplied.length})
+                </h3>
+                {notReplied.map(ticket => {
               const isOpen = expanded === ticket.id;
               return (
                 <div key={ticket.id} style={{
@@ -106,11 +114,6 @@ export default function AdminTickets() {
                         }}>
                           #{ticket.ticket_number}
                         </span>
-                        {ticket.replied_at && (
-                          <span style={{ display: 'inline-flex', alignItems: 'center', gap: '4px', fontSize: '11px', color: 'var(--success)' }}>
-                            <FiCheckCircle size={12} /> Repondu
-                          </span>
-                        )}
                       </div>
                       <div style={{ fontWeight: 600, fontSize: '15px' }}>{ticket.name}</div>
                       <div style={{ fontSize: '12px', color: 'var(--text-muted)', marginTop: '2px', display: 'flex', alignItems: 'center', gap: '4px' }}>
@@ -161,6 +164,61 @@ export default function AdminTickets() {
                 </div>
               );
             })}
+              </>
+            )}
+            {replied.length > 0 && (
+              <>
+                <h3 style={{ fontSize: '16px', fontWeight: 700, color: 'var(--text)', margin: '24px 0 4px', display: 'flex', alignItems: 'center', gap: '8px' }}>
+                  <span style={{ width: '8px', height: '8px', borderRadius: '50%', background: 'var(--success)' }} /> Repondu ({replied.length})
+                </h3>
+                {replied.map(ticket => {
+              const isOpen = expanded === ticket.id;
+              return (
+                <div key={ticket.id} style={{
+                  background: 'var(--bg-card)', border: '1px solid var(--border)',
+                  borderRadius: 'var(--radius)', overflow: 'hidden', opacity: 0.7,
+                }}>
+                  <div
+                    onClick={() => setExpanded(isOpen ? null : ticket.id)}
+                    style={{ padding: '20px', cursor: 'pointer', display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', gap: '12px', flexWrap: 'wrap' }}
+                  >
+                    <div style={{ flex: 1 }}>
+                      <div style={{ display: 'flex', alignItems: 'center', gap: '8px', flexWrap: 'wrap', marginBottom: '6px' }}>
+                        <span style={{
+                          display: 'inline-flex', alignItems: 'center', gap: '6px',
+                          padding: '4px 12px', borderRadius: '20px', fontSize: '12px', fontWeight: 700,
+                          background: 'rgba(16,185,129,0.1)', color: 'var(--success)', letterSpacing: '1px',
+                        }}>
+                          #{ticket.ticket_number}
+                        </span>
+                        <span style={{ display: 'inline-flex', alignItems: 'center', gap: '4px', fontSize: '11px', color: 'var(--success)' }}>
+                          <FiCheckCircle size={12} /> Repondu {formatDate(ticket.replied_at)}
+                        </span>
+                      </div>
+                      <div style={{ fontWeight: 600, fontSize: '15px' }}>{ticket.name}</div>
+                      <div style={{ fontSize: '12px', color: 'var(--text-muted)', marginTop: '2px', display: 'flex', alignItems: 'center', gap: '4px' }}>
+                        <FiMail size={11} /> {ticket.email || 'Email inconnu'}
+                      </div>
+                    </div>
+                    <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                      <span style={{ fontSize: '12px', color: 'var(--text-muted)', whiteSpace: 'nowrap' }}>
+                        <FiClock size={12} /> {formatDate(ticket.created_at)}
+                      </span>
+                      {isOpen ? <FiChevronUp size={18} style={{ color: 'var(--text-muted)' }} /> : <FiChevronDown size={18} style={{ color: 'var(--text-muted)' }} />}
+                    </div>
+                  </div>
+                  {isOpen && (
+                    <div style={{ borderTop: '1px solid var(--border)', padding: '20px' }}>
+                      <div style={{ padding: '12px', background: 'var(--bg-secondary)', borderRadius: '8px', fontSize: '14px', color: 'var(--text-secondary)', lineHeight: '1.6', whiteSpace: 'pre-wrap', marginBottom: '16px' }}>
+                        {ticket.message}
+                      </div>
+                    </div>
+                  )}
+                </div>
+              );
+            })}
+              </>
+            )}
           </div>
         )}
       </div>
