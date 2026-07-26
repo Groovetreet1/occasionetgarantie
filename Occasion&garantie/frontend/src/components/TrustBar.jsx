@@ -1,17 +1,16 @@
 import { motion } from 'framer-motion';
-import { FiShield, FiTruck, FiRefreshCw, FiHeadphones, FiStar, FiUsers } from 'react-icons/fi';
+import { FiHeadphones, FiStar, FiUsers, FiMessageCircle } from 'react-icons/fi';
 
 const items = [
-  { icon: FiShield, label: 'Garantie 15 jours', sub: 'Produits vérifiés' },
-  { icon: FiTruck, label: 'Livraison gratuite', sub: 'Casablanca 24h' },
-  { icon: FiRefreshCw, label: 'Retour facile', sub: 'Satisfait ou remboursé' },
+  { icon: FiMessageCircle, label: 'Avis clients', sub: 'Notez les vendeurs' },
   { icon: FiHeadphones, label: 'Support WhatsApp', sub: 'Réponse sous 24h' },
+  { icon: FiStar, label: 'Satisfaction', sub: 'Clients notent les produits' },
 ];
 
 const stats = [
   { icon: FiStar, value: '4500+', label: 'Produits vendus' },
   { icon: FiUsers, value: '2000+', label: 'Clients satisfaits' },
-  { icon: FiShield, value: '98%', label: 'Avis positifs' },
+  { icon: FiStar, value: '5/5', label: 'Note moyenne' },
 ];
 
 export default function TrustBar() {

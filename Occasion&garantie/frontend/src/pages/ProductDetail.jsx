@@ -4,6 +4,7 @@ import { FiArrowLeft, FiShoppingBag, FiShield, FiCheck, FiMonitor, FiCpu, FiHard
 import { BsWhatsapp } from 'react-icons/bs';
 import api from '../api/axios';
 import { useAuth } from '../context/AuthContext';
+import SellerRating from '../components/SellerRating';
 
 const stateLabels = {
   neuf: 'Neuf',
@@ -209,12 +210,11 @@ export default function ProductDetail() {
                   <FiMessageCircle size={20} /> Envoyer un message
                 </button>
               )}
-
-              <p style={{ textAlign: 'center', color: 'var(--text-muted)', fontSize: '12px', marginTop: '10px' }}>
-                Réponse sous 24h | Paiement sécurisé
-              </p>
             </div>
           </div>
+        </div>
+        <div className="container" style={{ marginTop: '-40px', paddingBottom: '40px' }}>
+          {product.seller_id && <SellerRating sellerId={product.seller_id} currentUserId={user?.id} />}
         </div>
       </section>
 

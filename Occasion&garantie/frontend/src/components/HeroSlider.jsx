@@ -14,28 +14,19 @@ const slides = [
   },
   {
     id: 2,
-    title: 'Garantie incluse sur tous nos produits',
-    subtitle: '15 jours de garantie minimum sur chaque achat. Votre satisfaction est notre priorité.',
-    cta: 'Voir la garantie',
-    link: '/products',
-    orbColor: '#3B82F6',
-  },
-  {
-    id: 3,
-    title: 'Livraison rapide à Casablanca',
-    subtitle: 'Livraison gratuite sous 24h sur tout Casablanca. Suivi de commande en temps réel.',
-    cta: 'Nous contacter',
-    link: 'https://wa.me/212669017295',
-    external: true,
-    orbColor: '#10B981',
-  },
-  {
-    id: 4,
     title: 'Qualité testée et vérifiée',
     subtitle: 'Nos experts vérifient chaque article avant mise en vente. Qualité irréprochable.',
     cta: 'Créer un compte',
     link: '/signup',
     orbColor: '#F59E0B',
+  },
+  {
+    id: 3,
+    title: 'Avis clients vérifiés',
+    subtitle: 'Chaque vendeur est noté par ses clients. Achetez en toute confiance.',
+    cta: 'Voir les avis',
+    link: '/products',
+    orbColor: '#3B82F6',
   },
 ];
 
@@ -101,16 +92,9 @@ export default function HeroSlider() {
               >
                 <h2>{slides[current].title}</h2>
                 <p>{slides[current].subtitle}</p>
-                {slides[current].external ? (
-                  <a href={slides[current].link} target="_blank" rel="noopener noreferrer"
-                    className="btn btn-primary">
-                    {slides[current].cta} <FiArrowRight size={18} />
-                  </a>
-                ) : (
-                  <Link to={slides[current].link} className="btn btn-primary">
-                    {slides[current].cta} <FiArrowRight size={18} />
-                  </Link>
-                )}
+                <Link to={slides[current].link} className="btn btn-primary">
+                  {slides[current].cta} <FiArrowRight size={18} />
+                </Link>
               </motion.div>
             </div>
           </div>

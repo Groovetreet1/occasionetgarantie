@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { Link } from 'react-router-dom';
-import { FiShield, FiRefreshCw, FiTruck, FiMapPin, FiPhone, FiMail, FiClock, FiCheckCircle, FiUsers, FiAward, FiSend } from 'react-icons/fi';
+import { FiMapPin, FiPhone, FiMail, FiClock, FiCheckCircle, FiUsers, FiAward, FiSend, FiStar } from 'react-icons/fi';
 import { BsWhatsapp } from 'react-icons/bs';
 import api from '../api/axios';
 import { useAuth } from '../context/AuthContext';
@@ -53,7 +53,7 @@ export default function About() {
             </div>
             <div className="about-stats-box">
               <div style={{ textAlign: 'center', padding: '20px', background: 'var(--bg-secondary)', borderRadius: 'var(--radius)' }}>
-                <FiUsers size={28} style={{ color: 'var(--primary)', marginBottom: '8px' }} />
+                <FiStar size={28} style={{ color: 'var(--primary)', marginBottom: '8px' }} />
                 <div style={{ fontSize: '22px', fontWeight: 700, color: 'var(--primary)' }}>+500</div>
                 <div style={{ fontSize: '12px', color: 'var(--text-muted)' }}>Clients satisfaits</div>
               </div>
@@ -68,9 +68,9 @@ export default function About() {
                 <div style={{ fontSize: '12px', color: 'var(--text-muted)' }}>Produits vérifiés</div>
               </div>
               <div style={{ textAlign: 'center', padding: '20px', background: 'var(--bg-secondary)', borderRadius: 'var(--radius)' }}>
-                <FiTruck size={28} style={{ color: 'var(--primary)', marginBottom: '8px' }} />
-                <div style={{ fontSize: '22px', fontWeight: 700, color: 'var(--primary)' }}>24h</div>
-                <div style={{ fontSize: '12px', color: 'var(--text-muted)' }}>Livraison Casa</div>
+                <FiStar size={28} style={{ color: 'var(--primary)', marginBottom: '8px' }} />
+                <div style={{ fontSize: '22px', fontWeight: 700, color: 'var(--primary)' }}>5/5</div>
+                <div style={{ fontSize: '12px', color: 'var(--text-muted)' }}>Note moyenne</div>
               </div>
             </div>
           </div>
@@ -82,19 +82,19 @@ export default function About() {
           <h2 style={{ fontSize: '24px', fontWeight: 700, marginBottom: '40px' }}>Ce que nous offrons</h2>
           <div className="about-offer-grid">
             <div className="feature-card">
-              <div className="feature-icon"><FiShield size={24} /></div>
-              <h3>Garantie incluse</h3>
-              <p>Chaque produit est couvert par une garantie minimum de 15 jours pour votre tranquillité.</p>
+              <div className="feature-icon"><FiCheckCircle size={24} /></div>
+              <h3>Produits vérifiés</h3>
+              <p>Chaque article est minutieusement testé avant mise en vente. Qualité irréprochable.</p>
             </div>
             <div className="feature-card">
-              <div className="feature-icon"><FiRefreshCw size={24} /></div>
-              <h3>Testé et vérifié</h3>
-              <p>Nos experts vérifient chaque article avant mise en vente. Qualité irréprochable.</p>
+              <div className="feature-icon"><FiStar size={24} /></div>
+              <h3>Avis clients</h3>
+              <p>Notez les vendeurs après chaque achat. La satisfaction client est notre priorité.</p>
             </div>
             <div className="feature-card">
-              <div className="feature-icon"><FiTruck size={24} /></div>
-              <h3>Livraison rapide</h3>
-              <p>Expédition sur Casablanca gratuit sous 24h. Suivi de commande en temps réel.</p>
+              <div className="feature-icon"><FiUsers size={24} /></div>
+              <h3>Confiance</h3>
+              <p>Achetez et vendez en toute confiance entre particuliers sur notre plateforme.</p>
             </div>
           </div>
         </div>

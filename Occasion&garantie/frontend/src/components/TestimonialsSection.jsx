@@ -3,12 +3,12 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { FiChevronLeft, FiChevronRight, FiStar } from 'react-icons/fi';
 
 const testimonials = [
-  { name: 'Karim B.', role: 'Achat iPhone 13', text: "Très satisfait de mon achat. Le téléphone était en parfait état, comme neuf. Livraison rapide à Casablanca. Je recommande vivement !", rating: 5 },
+  { name: 'Karim B.', role: 'Achat iPhone 13', text: "Très satisfait de mon achat. Le téléphone était en parfait état, comme neuf. Je recommande vivement !", rating: 5 },
   { name: 'Sara M.', role: 'Achat MacBook Air', text: "Je cherchais un MacBook reconditionné de qualité. Produit conforme à la description, emballage soigné. Service client réactif sur WhatsApp.", rating: 5 },
   { name: 'Youssef H.', role: 'Achat Galaxy S24', text: "Première expérience avec ce site, et franchement satisfait. Le rapport qualité-prix est imbattable. Je reviendrai pour mes prochains achats.", rating: 5 },
-  { name: 'Fatima Z.', role: 'Achat iPad 9', text: "Commande reçue en 24h. Produit impeccable avec garantie. Je recommande à tous ceux qui cherchent des produits reconditionnés de qualité.", rating: 4 },
-  { name: 'Amine R.', role: 'Achat accessoires', text: "Coque et verre trempé de très bonne qualité. Prix raisonnables. Le site est bien fait et facile à naviguer. Merci à toute l'équipe.", rating: 5 },
-  { name: 'Nadia L.', role: 'Achat iPhone 14 Pro', text: "Produit reçu plus tôt que prévu. L'iPhone est comme neuf, batterie à 100%. Service après-vente au top. 5 étoiles sans hésitation.", rating: 5 },
+  { name: 'Fatima Z.', role: 'Achat iPad 9', text: "Produit impeccable, conforme à la description. Je recommande à tous ceux qui cherchent des produits reconditionnés de qualité.", rating: 4 },
+  { name: 'Amine R.', role: 'Achat accessoires', text: "Coque et verre trempé de très bonne qualité. Prix raisonnables. Le site est bien fait et facile à naviguer.", rating: 5 },
+  { name: 'Nadia L.', role: 'Achat iPhone 14 Pro', text: "L'iPhone est comme neuf, batterie à 100%. Service après-vente au top. 5 étoiles sans hésitation.", rating: 5 },
 ];
 
 export default function TestimonialsSection() {

@@ -138,6 +138,7 @@ app.use('/api/seller', sellerRoutes);
 app.use('/api/chat', chatRoutes);
 app.use('/api/contact', contactRoutes);
 app.use('/api/newsletter', require('./routes/newsletter'));
+app.use('/api/ratings', require('./routes/ratings'));
 
 const { startNewsletterCron, sendNewsletterToAll } = require('./services/newsletterCron');
 app.post('/api/newsletter/trigger', authenticate, adminOnly, async (req, res) => {

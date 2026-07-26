@@ -60,7 +60,7 @@ export default function Home() {
           <motion.div className="marketplace-hero-content" variants={fadeUp}>
             <span className="hero-badge">Marketplace Officiel</span>
             <h1>Achetez et vendez des <span className="gradient-text">téléphones d'occasion</span> en toute confiance</h1>
-            <p>Des milliers d'annonces vérifiées. Paiement sécurisé. Livraison rapide à Casablanca.</p>
+            <p>Des milliers d'annonces vérifiées. Achetez et vendez en toute confiance.</p>
             <form onSubmit={handleSearch} className="hero-search">
               <FiSearch size={18} />
               <input type="text" value={searchTerm} onChange={e => setSearchTerm(e.target.value)} placeholder="Rechercher un téléphone, une marque..." />

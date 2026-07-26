@@ -9,7 +9,7 @@ export default function Footer() {
         <div className="footer-grid">
           <div className="footer-brand">
             <h3>Occasion & Garantie</h3>
-            <p>Des produits d&rsquo;exception à prix réduits, avec une garantie qui vous protège. Achetez en toute confiance.</p>
+            <p>Des produits d&rsquo;exception à prix réduits. Achetez et vendez en toute confiance.</p>
             <div className="footer-social">
               <a href="https://instagram.com" target="_blank" rel="noopener noreferrer" title="Instagram"><BsInstagram /></a>
               <a href="https://tiktok.com" target="_blank" rel="noopener noreferrer" title="TikTok"><BsTiktok /></a>
