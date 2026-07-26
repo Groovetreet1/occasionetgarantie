@@ -163,11 +163,8 @@ export default function ProductDetail() {
                 <div className="product-seller-info">
                   <h4>Vendu par</h4>
                     <Link to={`/seller/${product.seller_id}`} className="seller-badge">
-                      <div className="avatar-rating">
-                        <div className="seller-avatar-mini">
-                          {product.seller_avatar ? <img src={product.seller_avatar.startsWith('http') ? product.seller_avatar : `${API_BASE}/uploads/avatars/${product.seller_avatar}`} alt="" /> : product.seller_logo ? <img src={product.seller_logo.startsWith('http') ? product.seller_logo : `${API_BASE}/uploads/avatars/${product.seller_logo}`} alt="" /> : <FiUser size={18} />}
-                        </div>
-                        {product.seller_rating_count > 0 && product.seller_rating_avg && <span className="avatar-rating-badge"><FiStar size={9} fill="#fff" /> {parseFloat(product.seller_rating_avg).toFixed(1)}</span>}
+                      <div className="seller-avatar-mini">
+                        {product.seller_avatar ? <img src={product.seller_avatar.startsWith('http') ? product.seller_avatar : `${API_BASE}/uploads/avatars/${product.seller_avatar}`} alt="" /> : product.seller_logo ? <img src={product.seller_logo.startsWith('http') ? product.seller_logo : `${API_BASE}/uploads/avatars/${product.seller_logo}`} alt="" /> : <FiUser size={18} />}
                       </div>
                     <div>
                       <strong>{product.seller_name}</strong>
