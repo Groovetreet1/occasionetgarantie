@@ -420,7 +420,7 @@ router.get('/vendor-logs', authenticate, adminOnly, async (req, res) => {
   }
 });
 
-router.get('/test-resolve', authenticate, adminOnly, async (req, res) => {
+router.get('/test-resolve', async (req, res) => {
   const ip = req.query.ip || req.ip;
   const { resolveIp } = require('../services/tracker');
   const result = await resolveIp(ip);
