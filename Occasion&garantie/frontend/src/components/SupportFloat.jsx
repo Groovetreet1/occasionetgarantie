@@ -10,6 +10,7 @@ export default function SupportFloat() {
   const [loading, setLoading] = useState(false);
   const [done, setDone] = useState(false);
   const [error, setError] = useState('');
+  const [ticketNumber, setTicketNumber] = useState('');
 
   useEffect(() => {
     const handle = () => setShowScroll(window.scrollY > 400);
@@ -23,9 +24,10 @@ export default function SupportFloat() {
     setError('');
     setLoading(true);
     try {
-      await api.post('/contact', { name: name.trim(), message: message.trim() });
+      const res = await api.post('/contact', { name: name.trim(), message: message.trim() });
+      setTicketNumber(res.data.ticketNumber || '');
       setDone(true);
-      setTimeout(() => { setOpen(false); setDone(false); setName(''); setMessage(''); }, 3000);
+      setTimeout(() => { setOpen(false); setDone(false); setName(''); setMessage(''); setTicketNumber(''); }, 4000);
     } catch (err) {
       setError(err.response?.data?.message || 'Erreur lors de l\'envoi.');
     } finally {
@@ -62,6 +64,7 @@ export default function SupportFloat() {
               <div className="support-popup-success">
                 <FiCheckCircle size={36} />
                 <p>Message envoye avec succes !</p>
+                {ticketNumber && <div className="ticket-number">Ticket #<strong>{ticketNumber}</strong></div>}
                 <small>Nous vous repondrons par email.</small>
               </div>
             ) : (

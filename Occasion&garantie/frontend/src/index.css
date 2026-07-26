@@ -906,6 +906,8 @@ select.form-control, .form-group select { cursor: pointer; appearance: auto; }
 .support-popup-success svg { color: var(--success); margin-bottom: 12px; }
 .support-popup-success p { font-weight: 600; margin-bottom: 4px; font-size: 14px; }
 .support-popup-success small { color: var(--text-muted); font-size: 12px; }
+.ticket-number { margin: 8px 0; font-size: 14px; color: var(--primary); }
+.ticket-number strong { font-size: 18px; letter-spacing: 2px; }
 
 .theme-toggle { background: none; border: none; color: var(--text-secondary); cursor: pointer; padding: 8px; border-radius: 8px; font-size: 16px; display: flex; align-items: center; justify-content: center; transition: var(--transition); }
 .theme-toggle:hover { background: var(--bg-hover); color: var(--primary); }

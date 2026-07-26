@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
-import { FiCreditCard, FiClock, FiPackage, FiUsers, FiArrowLeft, FiTrendingUp, FiPlus } from 'react-icons/fi';
+import { FiCreditCard, FiClock, FiPackage, FiUsers, FiArrowLeft, FiTrendingUp, FiPlus, FiHeadphones } from 'react-icons/fi';
 import api from '../api/axios';
 
 export default function AdminDashboardPage() {
@@ -37,6 +37,9 @@ export default function AdminDashboardPage() {
     { title: 'Produits', icon: FiPackage, color: '#059669', bg: 'rgba(5,150,105,0.1)', items: [
       { label: 'Total produits', value: stats.products },
     ], link: '/admin/products' },
+    { title: 'Tickets Support', icon: FiHeadphones, color: '#f59e0b', bg: 'rgba(245,158,11,0.1)', items: [
+      { label: 'Voir les tickets', value: '' },
+    ], link: '/admin/tickets' },
     { title: 'Utilisateurs', icon: FiUsers, color: '#dc2626', bg: 'rgba(220,38,38,0.1)', items: [
       { label: 'Total utilisateurs', value: stats.users },
     ], link: '/admin/users' },
