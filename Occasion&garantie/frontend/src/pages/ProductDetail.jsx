@@ -283,12 +283,12 @@ export default function ProductDetail() {
                 </div>
               )}
 
-              {user && user.role === 'seller' && user.id === product.seller_id && vendorReprises.length > 0 && (
+              {user && user.role === 'seller' && user.id === product.seller_id && (
                 <div style={{ marginTop: '20px', borderTop: '1px solid var(--border)', paddingTop: '16px' }}>
                   <div style={{ fontSize: 14, fontWeight: 700, display: 'flex', alignItems: 'center', gap: 6, marginBottom: 8 }}>
-                    <FiSmartphone size={16} /> Demandes de reprise ({vendorReprises.length})
+                    <FiSmartphone size={16} /> Reprise
                   </div>
-                  {vendorReprises.map(r => (
+                  {vendorReprises.length > 0 ? vendorReprises.map(r => (
                     <div key={r.id} style={{
                       padding: '10px 12px', background: 'var(--bg-secondary)', borderRadius: 10, marginBottom: 6,
                       display: 'flex', alignItems: 'center', gap: 10, fontSize: 13,
@@ -308,7 +308,18 @@ export default function ProductDetail() {
                         Traiter →
                       </Link>
                     </div>
-                  ))}
+                  )) : (
+                    <div style={{ fontSize: 13, color: 'var(--text-muted)', textAlign: 'center', padding: '12px 0' }}>
+                      Aucune demande de reprise pour cet article
+                    </div>
+                  )}
+                  <Link to="/reprise/list" style={{
+                    display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 6,
+                    marginTop: 8, padding: '10px', borderRadius: 10, fontSize: 13, fontWeight: 600,
+                    background: 'var(--btn-primary)', color: '#fff', textDecoration: 'none',
+                  }}>
+                    Gerer toutes les demandes →
+                  </Link>
                 </div>
               )}
 
