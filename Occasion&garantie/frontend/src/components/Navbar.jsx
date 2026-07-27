@@ -98,7 +98,11 @@ export default function Navbar() {
               </AnimatePresence>
             </div>
             <NavLink to="/about">À propos</NavLink>
-            {user?.role !== 'admin' && <NavLink to="/vendre" className="navbar-sell-link"><FiTrendingUp size={14} /> Vendre</NavLink>}
+            {user?.role == 'seller' ? (
+              <NavLink to="/seller" className="navbar-sell-link"><FiTrendingUp size={14} /> Vendre</NavLink>
+            ) : user?.role !== 'admin' && (
+              <NavLink to="/vendre" className="navbar-sell-link"><FiTrendingUp size={14} /> Vendre</NavLink>
+            )}
           </div>
 
           <div className="navbar-actions">
