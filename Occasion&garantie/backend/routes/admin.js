@@ -297,6 +297,7 @@ router.delete('/users/:id', authenticate, adminOnly, async (req, res) => {
 // ---- Product approval ----
 router.get('/products/pending', authenticate, adminOnly, async (req, res) => {
   try {
+    try { await pool.query('ALTER TABLE products ADD COLUMN approved TINYINT(1) DEFAULT 1'); } catch {}
     const [rows] = await pool.query(
       `SELECT p.*, u.full_name as seller_name, u.store_name FROM products p
        LEFT JOIN users u ON p.seller_id = u.id
@@ -310,6 +311,7 @@ router.get('/products/pending', authenticate, adminOnly, async (req, res) => {
 
 router.post('/products/approve-existing', authenticate, adminOnly, async (req, res) => {
   try {
+    try { await pool.query('ALTER TABLE products ADD COLUMN approved TINYINT(1) DEFAULT 1'); } catch {}
     const [result] = await pool.query('UPDATE products SET approved = 1 WHERE approved IS NULL OR approved = 0');
     res.json({ message: `${result.affectedRows} produits approuves.` });
   } catch (err) {
@@ -319,6 +321,7 @@ router.post('/products/approve-existing', authenticate, adminOnly, async (req, r
 
 router.put('/products/:id/approve', authenticate, adminOnly, async (req, res) => {
   try {
+    try { await pool.query('ALTER TABLE products ADD COLUMN approved TINYINT(1) DEFAULT 1'); } catch {}
     await pool.query('UPDATE products SET approved = TRUE WHERE id = ?', [req.params.id]);
     res.json({ message: 'Produit approuve.' });
   } catch (err) {
@@ -329,6 +332,7 @@ router.put('/products/:id/approve', authenticate, adminOnly, async (req, res) =>
 // ---- Admin stats ----
 router.get('/products', authenticate, adminOnly, async (req, res) => {
   try {
+    try { await pool.query('ALTER TABLE products ADD COLUMN approved TINYINT(1) DEFAULT 1'); } catch {}
     const [rows] = await pool.query('SELECT p.*, u.full_name as seller_name, u.store_name FROM products p LEFT JOIN users u ON p.seller_id = u.id ORDER BY p.id DESC');
     res.json(rows);
   } catch (err) {
