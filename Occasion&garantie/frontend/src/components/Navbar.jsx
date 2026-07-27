@@ -1,5 +1,5 @@
 import { Link, NavLink, useNavigate, useLocation } from 'react-router-dom';
-import { FiUser, FiLogOut, FiSettings, FiChevronDown, FiSmartphone, FiMonitor, FiHeadphones, FiTablet, FiShoppingBag, FiTrendingUp, FiStar, FiMessageCircle, FiPackage, FiRefreshCw } from 'react-icons/fi';
+import { FiUser, FiLogOut, FiSettings, FiChevronDown, FiSmartphone, FiMonitor, FiHeadphones, FiTablet, FiShoppingBag, FiTrendingUp, FiStar, FiMessageCircle, FiPackage } from 'react-icons/fi';
 import { useState, useRef, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useAuth } from '../context/AuthContext';
@@ -25,6 +25,7 @@ export default function Navbar() {
   const [prodsOpen, setProdsOpen] = useState(false);
   const [scrolled, setScrolled] = useState(false);
   const [showPremium, setShowPremium] = useState(false);
+  const [mobileProdsOpen, setMobileProdsOpen] = useState(false);
   const navRef = useRef(null);
   const panelRef = useRef(null);
   const dropdownRef = useRef(null);
@@ -46,7 +47,7 @@ export default function Navbar() {
     return () => document.removeEventListener('mousedown', handle);
   }, []);
 
-  const closeMenu = () => setMenuOpen(false);
+  const closeMenu = () => { setMenuOpen(false); setMobileProdsOpen(false); };
 
   return (
     <>
@@ -171,8 +172,15 @@ export default function Navbar() {
 
       <div className={`navbar-mobile-panel${menuOpen ? ' open' : ''}`} ref={panelRef}>
         <NavLink to="/" end onClick={closeMenu}>Accueil</NavLink>
-        <Link to="/products" onClick={closeMenu} className={location.pathname.startsWith('/products') ? 'active' : ''}>Produits</Link>
-        {categories.map((cat) => {
+        <button onClick={() => setMobileProdsOpen(o => !o)} style={{
+          background: 'none', border: 'none', color: 'inherit', cursor: 'pointer', width: '100%',
+          padding: '16px', display: 'flex', alignItems: 'center', justifyContent: 'space-between',
+          fontSize: 14, fontFamily: 'var(--font)',
+        }}>
+          <span className={location.pathname.startsWith('/products') ? 'active' : ''}>Produits</span>
+          <FiChevronDown size={14} style={{ transform: mobileProdsOpen ? 'rotate(180deg)' : 'none', transition: 'transform 0.2s' }} />
+        </button>
+        {mobileProdsOpen && categories.map((cat) => {
           const isActive = location.search === `?category=${cat.slug}`;
           return (
             <Link key={cat.slug} to={`/products?category=${cat.slug}`} onClick={closeMenu}
@@ -182,6 +190,7 @@ export default function Navbar() {
             </Link>
           );
         })}
+        <Link to="/products" onClick={closeMenu} style={{ paddingLeft: '32px', fontSize: '13px', opacity: 0.6, display: 'block' }}>Tous les produits →</Link>
         <NavLink to="/about" onClick={closeMenu}>À propos</NavLink>
         <NavLink to="/reprise" onClick={closeMenu}><FiSmartphone size={14} /> Reprise</NavLink>
         {user?.role == 'seller' ? (
