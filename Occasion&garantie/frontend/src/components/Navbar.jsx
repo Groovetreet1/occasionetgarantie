@@ -178,7 +178,7 @@ export default function Navbar() {
         <NavLink to="/" end onClick={closeMenu}>Accueil</NavLink>
         <button onClick={() => setMobileProdsOpen(o => !o)} style={{
           background: 'none', border: 'none', color: 'inherit', cursor: 'pointer', width: '100%',
-          padding: '16px', display: 'flex', alignItems: 'center', justifyContent: 'space-between',
+          padding: '16px', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 6,
           fontSize: 14, fontFamily: 'var(--font)',
         }}>
           <span className={location.pathname.startsWith('/products') ? 'active' : ''}>Produits</span>
@@ -188,13 +188,13 @@ export default function Navbar() {
           const isActive = location.search === `?category=${cat.slug}`;
           return (
             <Link key={cat.slug} to={`/products?category=${cat.slug}`} onClick={closeMenu}
-              style={{ paddingLeft: '32px', fontSize: '14px', opacity: 0.7 }}
+              style={{ textAlign: 'center', display: 'block', fontSize: '14px', opacity: 0.7, padding: '8px 16px' }}
               className={isActive ? 'active' : ''}>
               <cat.icon size={14} style={{ marginRight: 6 }} /> {cat.name}
             </Link>
           );
         })}
-        <Link to="/products" onClick={closeMenu} style={{ paddingLeft: '32px', fontSize: '13px', opacity: 0.6, display: 'block' }}>Tous les produits →</Link>
+        <Link to="/products" onClick={closeMenu} style={{ textAlign: 'center', display: 'block', fontSize: '13px', opacity: 0.6, padding: '8px 16px' }}>Tous les produits →</Link>
         <NavLink to="/about" onClick={closeMenu}>À propos</NavLink>
         {user?.role == 'seller' ? (
           <NavLink to="/reprise/list" onClick={closeMenu}><FiSmartphone size={14} /> Demandes reprise</NavLink>
