@@ -38,10 +38,8 @@ export default function RepriseList() {
 
   const productImgs = (r) => {
     if (!r.product_images) return [];
-    try {
-      const imgs = JSON.parse(r.product_images);
-      return Array.isArray(imgs) ? imgs.map(i => imgUrl(i)) : [];
-    } catch { return []; }
+    const imgs = typeof r.product_images === 'object' ? r.product_images : (() => { try { return JSON.parse(r.product_images); } catch { return []; } })();
+    return Array.isArray(imgs) ? imgs.map(i => imgUrl(i)) : [];
   };
 
   return (
@@ -70,7 +68,7 @@ export default function RepriseList() {
           <div style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
             {reprises.map(r => {
               const st = statusStyles[r.status] || statusStyles.en_attente;
-              const photos = (() => { try { return JSON.parse(r.photos || '{}'); } catch { return {}; } })();
+              const photos = (() => { if (r.photos && typeof r.photos === 'object') return r.photos; try { return JSON.parse(r.photos || '{}'); } catch { return {}; } })();
               const hasPhotos = Object.keys(photos).length > 0;
               const pImgs = productImgs(r);
 
