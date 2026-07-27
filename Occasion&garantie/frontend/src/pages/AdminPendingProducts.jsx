@@ -28,7 +28,9 @@ export default function AdminPendingProducts() {
       const res = await api.post('/admin/products/approve-existing');
       alert(res.data.message);
       load();
-    } catch {}
+    } catch (e) {
+      alert(e?.response?.data?.message || 'Erreur: ' + (e.message || 'inconnue'));
+    }
   };
 
   return (
