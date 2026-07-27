@@ -8,7 +8,7 @@ function CardWrapper({ link, children, ...rest }) {
 }
 
 export default function AdminDashboardPage() {
-  const [stats, setStats] = useState({ credits: 0, pendingCredits: 0, installments: 0, pendingInstallments: 0, premium: 0, pendingPremium: 0, products: 0, vendorProducts: 0, tickets: 0, pendingTickets: 0, repliedTickets: 0, users: 0, pendingReprises: 0 });
+  const [stats, setStats] = useState({ credits: 0, pendingCredits: 0, installments: 0, pendingInstallments: 0, premium: 0, pendingPremium: 0, products: 0, vendorProducts: 0, tickets: 0, pendingTickets: 0, repliedTickets: 0, users: 0, pendingReprises: 0, pendingProducts: 0 });
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
@@ -20,7 +20,8 @@ export default function AdminDashboardPage() {
       api.get('/contact/tickets').catch(() => ({ data: [] })),
       api.get('/admin/users').catch(() => ({ data: [] })),
       api.get('/reprises').catch(() => ({ data: [] })),
-    ]).then(([credits, installments, premium, products, tickets, users, reprises]) => {
+      api.get('/admin/products/pending').catch(() => ({ data: [] })),
+    ]).then(([credits, installments, premium, products, tickets, users, reprises, pendingProds]) => {
       const ticketData = tickets.data || [];
       const repriseData = reprises.data || [];
       setStats({
@@ -37,6 +38,7 @@ export default function AdminDashboardPage() {
         repliedTickets: ticketData.filter(t => t.replied_at).length,
         users: users.data.length,
         pendingReprises: repriseData.filter(r => r.status === 'en_attente').length,
+        pendingProducts: pendingProds.data.length,
       });
     }).catch(() => {}).finally(() => setLoading(false));
   }, []);
@@ -57,7 +59,11 @@ export default function AdminDashboardPage() {
     { title: 'Produits', icon: FiPackage, color: '#059669', bg: 'rgba(5,150,105,0.1)', items: [
       { label: 'Total produits', value: stats.products },
       { label: 'Par vendeurs', value: stats.vendorProducts, highlight: true },
-    ], link: null },
+      { label: 'En attente', value: stats.pendingProducts, highlight: stats.pendingProducts > 0 },
+    ], link: '/admin/products' },
+    { title: 'Approbation', icon: FiShield, color: '#f59e0b', bg: 'rgba(245,158,11,0.1)', items: [
+      { label: 'Produits en attente', value: stats.pendingProducts, highlight: stats.pendingProducts > 0 },
+    ], link: '/admin/products/pending' },
     { title: 'Tickets Support', icon: FiHeadphones, color: '#f59e0b', bg: 'rgba(245,158,11,0.1)', items: [
       { label: 'Total', value: stats.tickets },
       { label: 'En attente', value: stats.pendingTickets, highlight: true },

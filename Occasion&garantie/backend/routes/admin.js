@@ -294,6 +294,29 @@ router.delete('/users/:id', authenticate, adminOnly, async (req, res) => {
   }
 });
 
+// ---- Product approval ----
+router.get('/products/pending', authenticate, adminOnly, async (req, res) => {
+  try {
+    const [rows] = await pool.query(
+      `SELECT p.*, u.full_name as seller_name, u.store_name FROM products p
+       LEFT JOIN users u ON p.seller_id = u.id
+       WHERE p.approved = FALSE ORDER BY p.created_at DESC`
+    );
+    res.json(rows);
+  } catch (err) {
+    res.status(500).json({ message: 'Erreur serveur.' });
+  }
+});
+
+router.put('/products/:id/approve', authenticate, adminOnly, async (req, res) => {
+  try {
+    await pool.query('UPDATE products SET approved = TRUE WHERE id = ?', [req.params.id]);
+    res.json({ message: 'Produit approuve.' });
+  } catch (err) {
+    res.status(500).json({ message: 'Erreur serveur.' });
+  }
+});
+
 // ---- Admin stats ----
 router.get('/products', authenticate, adminOnly, async (req, res) => {
   try {

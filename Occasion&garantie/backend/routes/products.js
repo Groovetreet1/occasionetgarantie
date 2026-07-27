@@ -35,7 +35,7 @@ router.get('/', async (req, res) => {
       FROM products p
       LEFT JOIN categories c ON p.category_id = c.id
       LEFT JOIN users u ON p.seller_id = u.id
-      WHERE p.active = TRUE AND p.status = 'disponible' AND u.id IS NOT NULL
+      WHERE p.active = TRUE AND p.status = 'disponible' AND p.approved = TRUE AND u.id IS NOT NULL
     `;
     const params = [];
 
@@ -71,7 +71,7 @@ router.get('/featured', async (req, res) => {
        FROM products p
        LEFT JOIN categories c ON p.category_id = c.id
        LEFT JOIN users u ON p.seller_id = u.id
-       WHERE p.featured = TRUE AND p.active = TRUE AND p.status = 'disponible' AND u.id IS NOT NULL
+       WHERE p.featured = TRUE AND p.active = TRUE AND p.status = 'disponible' AND p.approved = TRUE AND u.id IS NOT NULL
        ORDER BY (u.premium = TRUE AND (u.premium_expires_at IS NULL OR u.premium_expires_at > NOW())) DESC, RAND() LIMIT 8`;
     try {
       const [rows] = await pool.query(sql);
@@ -169,11 +169,14 @@ router.post('/', authenticate, async (req, res) => {
     }
 
     try { await pool.query('ALTER TABLE products ADD COLUMN ville VARCHAR(100) DEFAULT NULL'); } catch (e) { if (e.errno !== 1060 && e.code !== 'ER_DUP_FIELDNAME') console.log('ville col:', e.message); }
+    try { await pool.query('ALTER TABLE products ADD COLUMN approved TINYINT(1) DEFAULT 1'); } catch {}
+
+    const approved = req.user.role === 'admin' ? 1 : 0;
 
     const [result] = await pool.query(
-      `INSERT INTO products (name, slug, description, price, old_price, category_id, seller_id, brand, state, warranty, stock, featured, image, gallery, specs, status, ville)
-       VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
-      [name, slug, description, price, old_price || null, category_id || null, sellerId, brand || null, state || 'tres_bon', warranty || '6 mois', stock || 1, featured || false, image || null, gallery ? JSON.stringify(gallery) : null, specs ? JSON.stringify(specs) : null, 'disponible', ville || null]
+      `INSERT INTO products (name, slug, description, price, old_price, category_id, seller_id, brand, state, warranty, stock, featured, image, gallery, specs, status, ville, approved)
+       VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
+      [name, slug, description, price, old_price || null, category_id || null, sellerId, brand || null, state || 'tres_bon', warranty || '6 mois', stock || 1, featured || false, image || null, gallery ? JSON.stringify(gallery) : null, specs ? JSON.stringify(specs) : null, 'disponible', ville || null, approved]
     );
     if (sellerId && req.user.role === 'seller') {
       const ip = req.headers['x-forwarded-for']?.split(',')[0]?.trim() || req.socket.remoteAddress || 'unknown';
