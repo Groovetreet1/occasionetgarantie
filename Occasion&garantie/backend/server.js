@@ -66,10 +66,12 @@ const pool = require('./config/db');
     await pool.query(`CREATE TABLE IF NOT EXISTS reprises (
       id INT AUTO_INCREMENT PRIMARY KEY,
       user_id INT NOT NULL,
+      product_id INT DEFAULT NULL,
       brand VARCHAR(100) NOT NULL,
       model VARCHAR(200) NOT NULL,
       imei VARCHAR(20) DEFAULT NULL,
       photos JSON DEFAULT NULL,
+      client_notes TEXT DEFAULT NULL,
       status ENUM('en_attente','estime','accepte','refuse','converti') DEFAULT 'en_attente',
       estimated_price DECIMAL(10,2) DEFAULT NULL,
       vendor_id INT DEFAULT NULL,

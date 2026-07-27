@@ -1,6 +1,6 @@
 import { useParams, Link, useNavigate } from 'react-router-dom';
-import { useEffect, useState } from 'react';
-import { FiArrowLeft, FiShoppingBag, FiShield, FiCheck, FiMonitor, FiCpu, FiHardDrive, FiBattery, FiCamera, FiDroplet, FiX, FiChevronLeft, FiChevronRight, FiUser, FiMessageCircle, FiStar } from 'react-icons/fi';
+import { useEffect, useState, useRef } from 'react';
+import { FiArrowLeft, FiShoppingBag, FiShield, FiCheck, FiMonitor, FiCpu, FiHardDrive, FiBattery, FiCamera, FiDroplet, FiX, FiChevronLeft, FiChevronRight, FiUser, FiMessageCircle, FiStar, FiSmartphone, FiMapPin } from 'react-icons/fi';
 import { BsWhatsapp } from 'react-icons/bs';
 import api from '../api/axios';
 import { useAuth } from '../context/AuthContext';
@@ -28,6 +28,16 @@ export default function ProductDetail() {
   const [loading, setLoading] = useState(true);
   const [selectedImage, setSelectedImage] = useState(null);
   const [lightboxIndex, setLightboxIndex] = useState(0);
+  const [showReprise, setShowReprise] = useState(false);
+  const [repBrand, setRepBrand] = useState('');
+  const [repModel, setRepModel] = useState('');
+  const [repImei, setRepImei] = useState('');
+  const [repNotes, setRepNotes] = useState('');
+  const [repPhotos, setRepPhotos] = useState({});
+  const [repStep, setRepStep] = useState(0);
+  const [submittingRep, setSubmittingRep] = useState(false);
+  const [repDone, setRepDone] = useState(false);
+  const repFileRef = useRef(null);
 
   useEffect(() => {
     window.scrollTo(0, 0);
@@ -66,6 +76,37 @@ export default function ProductDetail() {
       </div>
     </div>
   );
+
+  const repSteps = [
+    { key: 'front', label: 'Face avant', hint: "Photo de l'ecran" },
+    { key: 'back', label: 'Face arriere', hint: 'Photo du dos' },
+    { key: 'side', label: 'Cote', hint: 'Photo du cote' },
+    { key: 'screen', label: 'Ecran allume', hint: "Allumez l'ecran et prenez la photo" },
+  ];
+  const repAllDone = Object.keys(repPhotos).length === repSteps.length;
+
+  const handleRepPhoto = (e) => {
+    const file = e.target.files[0];
+    if (!file) return;
+    const key = repSteps[repStep].key;
+    setRepPhotos(p => ({ ...p, [key]: file }));
+    if (repStep < repSteps.length - 1) setRepStep(s => s + 1);
+  };
+  const submitReprise = async () => {
+    if (!repBrand || !repModel) return;
+    setSubmittingRep(true);
+    try {
+      const fd = new FormData();
+      fd.append('brand', repBrand); fd.append('model', repModel);
+      fd.append('product_id', product.id);
+      if (repImei) fd.append('imei', repImei);
+      if (repNotes) fd.append('client_notes', repNotes);
+      for (const [k, f] of Object.entries(repPhotos)) fd.append(k, f);
+      await api.post('/reprises', fd, { headers: { 'Content-Type': 'multipart/form-data' } });
+      setRepDone(true);
+    } catch { alert("Erreur lors de l'envoi"); }
+    setSubmittingRep(false);
+  };
 
   const formatPrice = (p) => new Intl.NumberFormat('fr-FR', { style: 'currency', currency: 'MAD' }).format(p).replace('MAD', '').trim() + ' DH';
   const API_BASE = import.meta.env.VITE_API_URL || '';
@@ -172,6 +213,64 @@ export default function ProductDetail() {
                       )}
                     </div>
                   </Link>
+                </div>
+              )}
+
+              {user && user.role !== 'seller' && user.id !== product.seller_id && (
+                <div style={{ marginTop: '20px', borderTop: '1px solid var(--border)', paddingTop: '16px' }}>
+                  {repDone ? (
+                    <div style={{ textAlign: 'center', padding: '12px', background: 'rgba(16,185,129,0.1)', borderRadius: 10, fontSize: 14, color: '#10b981', fontWeight: 600 }}>
+                      Reprise soumise ! Le vendeur va vous contacter.
+                    </div>
+                  ) : !showReprise ? (
+                    <button onClick={() => setShowReprise(true)} className="btn" style={{
+                      width: '100%', background: 'transparent', border: '2px dashed var(--primary)', color: 'var(--primary)',
+                      fontSize: '14px', padding: '12px', justifyContent: 'center', borderRadius: 10, cursor: 'pointer', fontFamily: 'var(--font)',
+                    }}>
+                      <FiSmartphone size={18} /> Proposer une reprise pour mon telephone
+                    </button>
+                  ) : (
+                    <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
+                      <div style={{ fontSize: 14, fontWeight: 700, display: 'flex', alignItems: 'center', gap: 6 }}>
+                        <FiSmartphone size={16} /> Reprise de votre telephone
+                      </div>
+                      <input type="text" placeholder="Marque (ex: Samsung)" value={repBrand} onChange={e => setRepBrand(e.target.value)}
+                        style={{ padding: '10px 14px', borderRadius: 8, border: '1px solid var(--border)', background: 'var(--bg-card)', color: 'var(--text)', fontSize: 13, fontFamily: 'var(--font)' }} />
+                      <input type="text" placeholder="Modele (ex: Galaxy S23)" value={repModel} onChange={e => setRepModel(e.target.value)}
+                        style={{ padding: '10px 14px', borderRadius: 8, border: '1px solid var(--border)', background: 'var(--bg-card)', color: 'var(--text)', fontSize: 13, fontFamily: 'var(--font)' }} />
+                      <input type="text" placeholder="IMEI (optionnel)" value={repImei} onChange={e => setRepImei(e.target.value.replace(/\D/g, '').slice(0, 15))}
+                        style={{ padding: '10px 14px', borderRadius: 8, border: '1px solid var(--border)', background: 'var(--bg-card)', color: 'var(--text)', fontSize: 13, fontFamily: 'var(--font)' }} />
+                      <textarea placeholder="Description / etat du telephone (optionnel)" value={repNotes} onChange={e => setRepNotes(e.target.value)} rows={2}
+                        style={{ padding: '10px 14px', borderRadius: 8, border: '1px solid var(--border)', background: 'var(--bg-card)', color: 'var(--text)', fontSize: 13, fontFamily: 'var(--font)', resize: 'vertical' }} />
+
+                      <div style={{ marginTop: 4 }}>
+                        <div style={{ fontSize: 12, fontWeight: 600, marginBottom: 6 }}>Photos guidees</div>
+                        <div style={{ display: 'flex', gap: 4, marginBottom: 8 }}>
+                          {repSteps.map((s, i) => (
+                            <div key={s.key} style={{ flex: 1, height: 3, borderRadius: 2, background: repPhotos[s.key] ? 'var(--primary)' : i === repStep ? 'var(--primary)' : 'var(--border)', opacity: i === repStep ? 0.7 : 1 }} />
+                          ))}
+                        </div>
+                        <div onClick={() => repFileRef.current?.click()} style={{
+                          border: '2px dashed var(--border)', borderRadius: 10, padding: '16px', textAlign: 'center',
+                          background: 'var(--bg-secondary)', cursor: 'pointer', fontSize: 13, color: 'var(--text-muted)',
+                        }}>
+                          <FiCamera size={24} style={{ display: 'block', margin: '0 auto 4px' }} />
+                          {repSteps[repStep]?.label} — {repSteps[repStep]?.hint}
+                          {repPhotos[repSteps[repStep]?.key] && <span style={{ color: '#10b981', display: 'block', marginTop: 4 }}>Photo prise</span>}
+                        </div>
+                        <input ref={repFileRef} type="file" accept="image/*" capture="environment" onChange={handleRepPhoto} style={{ display: 'none' }} />
+                      </div>
+
+                      <div style={{ display: 'flex', gap: 6, marginTop: 4 }}>
+                        <button onClick={submitReprise} disabled={!repBrand || !repModel || !repAllDone || submittingRep}
+                          className="btn btn-primary" style={{ fontSize: 13, padding: '10px 20px' }}>
+                          {submittingRep ? 'Envoi...' : 'Envoyer la reprise'}
+                        </button>
+                        <button onClick={() => { setShowReprise(false); setRepBrand(''); setRepModel(''); setRepImei(''); setRepNotes(''); setRepPhotos({}); setRepStep(0); }}
+                          className="btn btn-ghost" style={{ fontSize: 13, padding: '10px 20px' }}>Annuler</button>
+                      </div>
+                    </div>
+                  )}
                 </div>
               )}
 

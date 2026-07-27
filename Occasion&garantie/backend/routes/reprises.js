@@ -37,10 +37,12 @@ function ensureTable() {
   return pool.query(`CREATE TABLE IF NOT EXISTS reprises (
     id INT AUTO_INCREMENT PRIMARY KEY,
     user_id INT NOT NULL,
+    product_id INT DEFAULT NULL,
     brand VARCHAR(100) NOT NULL,
     model VARCHAR(200) NOT NULL,
     imei VARCHAR(20) DEFAULT NULL,
     photos JSON DEFAULT NULL,
+    client_notes TEXT DEFAULT NULL,
     status ENUM('en_attente','estime','accepte','refuse','converti') DEFAULT 'en_attente',
     estimated_price DECIMAL(10,2) DEFAULT NULL,
     vendor_id INT DEFAULT NULL,
@@ -56,7 +58,7 @@ router.post('/', authenticate, async (req, res) => {
     uploadFields(req, res, async (err) => {
       if (err) return res.status(400).json({ message: err.message });
 
-      const { brand, model, imei } = req.body;
+      const { brand, model, imei, product_id, client_notes } = req.body;
       if (!brand || !model) return res.status(400).json({ message: 'Marque et modele requis.' });
 
       const photos = {};
@@ -65,8 +67,8 @@ router.post('/', authenticate, async (req, res) => {
       }
 
       const [result] = await pool.query(
-        'INSERT INTO reprises (user_id, brand, model, imei, photos) VALUES (?, ?, ?, ?, ?)',
-        [req.user.id, brand, model, imei || null, Object.keys(photos).length ? JSON.stringify(photos) : null]
+        'INSERT INTO reprises (user_id, product_id, brand, model, imei, photos, client_notes) VALUES (?, ?, ?, ?, ?, ?, ?)',
+        [req.user.id, product_id || null, brand, model, imei || null, Object.keys(photos).length ? JSON.stringify(photos) : null, client_notes || null]
       );
 
       res.status(201).json({ id: result.insertId, message: 'Reprise soumise avec succes.' });

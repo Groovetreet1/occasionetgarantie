@@ -1,7 +1,7 @@
 import { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
-import { FiPlus, FiEdit2, FiTrash2, FiPackage, FiCheckCircle, FiPercent, FiCreditCard, FiDollarSign, FiX, FiCopy, FiCheck, FiUpload, FiLock, FiStar } from 'react-icons/fi';
+import { FiPlus, FiEdit2, FiTrash2, FiPackage, FiCheckCircle, FiPercent, FiCreditCard, FiDollarSign, FiX, FiCopy, FiCheck, FiUpload, FiLock, FiStar, FiSmartphone, FiArrowRight } from 'react-icons/fi';
 import api from '../api/axios';
 import { useAuth } from '../context/AuthContext';
 import SellerNav from '../components/SellerNav';
@@ -37,6 +37,7 @@ export default function SellerDashboard() {
   const [uploadMsg, setUploadMsg] = useState(null);
   const [copiedField, setCopiedField] = useState(null);
   const [sellerRatings, setSellerRatings] = useState(null);
+  const [pendingReprises, setPendingReprises] = useState([]);
   useEffect(() => {
     Promise.allSettled([
       api.get('/seller/me'),
@@ -44,9 +45,11 @@ export default function SellerDashboard() {
       api.get('/seller/me/commissions'),
       api.get('/auth/my-credits'),
       user?.id ? api.get('/ratings/my') : Promise.resolve(),
+      api.get('/reprises'),
     ]).then((results) => {
-      const [p, pr, c, cr, r] = results;
+      const [p, pr, c, cr, r, reps] = results;
       if (p.status === 'fulfilled') { setProfile(p.value.data); setStoreName(p.value.data.store_name || ''); }
+      if (reps.status === 'fulfilled') setPendingReprises(reps.value.data.filter(x => x.status === 'en_attente' || x.status === 'estime'));
       if (pr.status === 'fulfilled') setProducts(pr.value.data);
       if (c.status === 'fulfilled') setCommissions(c.value.data);
       if (cr.status === 'fulfilled') setCreditBalance(cr.value.data.credit_balance);
@@ -277,7 +280,44 @@ export default function SellerDashboard() {
             </div>
           )}
 
-        <div className="dashboard-products">
+          {pendingReprises.length > 0 && (
+            <div style={{ background: 'var(--bg-card)', border: '1px solid var(--border)', borderRadius: 'var(--radius-lg)', padding: 16, marginTop: 16 }}>
+              <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 12 }}>
+                <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+                  <FiSmartphone size={18} style={{ color: '#f59e0b' }} />
+                  <span style={{ fontWeight: 700, fontSize: 15 }}>Demandes de reprise ({pendingReprises.length})</span>
+                </div>
+                <Link to="/reprise/list" className="btn btn-primary" style={{ fontSize: 12, padding: '6px 14px', textDecoration: 'none' }}>
+                  Voir tout <FiArrowRight size={13} />
+                </Link>
+              </div>
+              <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
+                {pendingReprises.slice(0, 5).map(r => (
+                  <div key={r.id} style={{
+                    display: 'flex', alignItems: 'center', gap: 10, padding: '10px 12px',
+                    background: 'var(--bg-secondary)', borderRadius: 10, fontSize: 13,
+                  }}>
+                    <div style={{ flex: 1 }}>
+                      <div style={{ fontWeight: 600 }}>{r.brand} {r.model}</div>
+                      <div style={{ fontSize: 11, color: 'var(--text-muted)' }}>{r.full_name} — {r.imei ? `IMEI: ${r.imei}` : ''}</div>
+                    </div>
+                    <span style={{
+                      padding: '2px 8px', borderRadius: 10, fontSize: 10, fontWeight: 600,
+                      background: r.status === 'en_attente' ? 'rgba(245,158,11,0.1)' : 'rgba(59,130,246,0.1)',
+                      color: r.status === 'en_attente' ? '#f59e0b' : '#3b82f6',
+                    }}>
+                      {r.status === 'en_attente' ? 'Nouveau' : 'Estime'}
+                    </span>
+                    <Link to="/reprise/list" style={{ color: 'var(--primary)', fontWeight: 600, fontSize: 12, textDecoration: 'none' }}>
+                      Traiter →
+                    </Link>
+                  </div>
+                ))}
+              </div>
+            </div>
+          )}
+
+          <div className="dashboard-products">
           <h3>Mes annonces ({products.length})</h3>
           {products.length === 0 ? (
             <div className="empty-state">

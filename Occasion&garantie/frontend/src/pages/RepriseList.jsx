@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
-import { FiArrowLeft, FiSmartphone, FiDollarSign, FiCheck, FiX, FiClock, FiRefreshCw } from 'react-icons/fi';
+import { FiArrowLeft, FiSmartphone, FiDollarSign, FiCheck, FiX, FiClock, FiRefreshCw, FiPhone, FiMessageCircle } from 'react-icons/fi';
 import api from '../api/axios';
 
 const API_BASE = import.meta.env.VITE_API_URL || '';
@@ -137,8 +137,21 @@ export default function RepriseList() {
                     </button>
                   </div>
                 ) : r.status === 'accepte' ? (
-                  <div style={{ marginTop: 8, display: 'flex', gap: 8 }}>
-                    <button onClick={() => convert(r.id)} className="btn btn-primary" style={{ fontSize: 12, padding: '6px 14px' }}>
+                  <div style={{ marginTop: 8, display: 'flex', flexDirection: 'column', gap: 8 }}>
+                    {r.phone && (
+                      <div style={{ display: 'flex', alignItems: 'center', gap: 8, padding: '10px 14px', background: 'rgba(16,185,129,0.08)', borderRadius: 10, fontSize: 14, fontWeight: 600 }}>
+                        <FiPhone size={16} style={{ color: '#10b981' }} />
+                        <span>{r.phone}</span>
+                        <a href={`tel:${r.phone}`} className="btn btn-primary" style={{ fontSize: 12, padding: '6px 14px', marginLeft: 'auto', textDecoration: 'none' }}>
+                          <FiPhone size={13} /> Appeler
+                        </a>
+                        <a href={`https://wa.me/${r.phone.replace(/^0+/, '')}`} target="_blank" rel="noopener noreferrer"
+                          className="btn btn-primary" style={{ fontSize: 12, padding: '6px 14px', background: '#25D366', textDecoration: 'none' }}>
+                          <FiMessageCircle size={13} /> WhatsApp
+                        </a>
+                      </div>
+                    )}
+                    <button onClick={() => convert(r.id)} className="btn btn-primary" style={{ fontSize: 12, padding: '6px 14px', alignSelf: 'flex-start' }}>
                       <FiSmartphone size={13} /> Convertir en produit
                     </button>
                   </div>
@@ -153,6 +166,11 @@ export default function RepriseList() {
                   )
                 ) : null}
 
+                {r.client_notes && (
+                  <div style={{ marginTop: 8, fontSize: 12, color: 'var(--text-secondary)', padding: '8px 12px', background: 'var(--bg-secondary)', borderRadius: 8 }}>
+                    <strong>Client :</strong> {r.client_notes}
+                  </div>
+                )}
                 {r.vendor_notes && (
                   <div style={{ marginTop: 8, fontSize: 12, color: 'var(--text-secondary)', fontStyle: 'italic' }}>
                     Note: {r.vendor_notes}
