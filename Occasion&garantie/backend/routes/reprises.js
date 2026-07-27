@@ -52,30 +52,33 @@ function ensureTable() {
   )`);
 }
 
-router.post('/', authenticate, async (req, res) => {
-  try {
-    await ensureTable();
-    uploadFields(req, res, async (err) => {
-      if (err) return res.status(400).json({ message: err.message });
+router.post('/', authenticate, (req, res) => {
+  uploadFields(req, res, (err) => {
+    if (err) return res.status(400).json({ message: err.message });
 
-      const { brand, model, imei, product_id, client_notes } = req.body;
-      if (!brand || !model) return res.status(400).json({ message: 'Marque et modele requis.' });
+    (async () => {
+      try {
+        await ensureTable();
+        const { brand, model, imei, product_id, client_notes } = req.body;
+        if (!brand || !model) return res.status(400).json({ message: 'Marque et modele requis.' });
 
-      const photos = {};
-      for (const key of ['front', 'back', 'side', 'screen']) {
-        if (req.files?.[key]) photos[key] = `/uploads/reprises/${req.files[key][0].filename}`;
+        const photos = {};
+        for (const key of ['front', 'back', 'side', 'screen']) {
+          if (req.files?.[key]) photos[key] = `/uploads/reprises/${req.files[key][0].filename}`;
+        }
+
+        const [result] = await pool.query(
+          'INSERT INTO reprises (user_id, product_id, brand, model, imei, photos, client_notes) VALUES (?, ?, ?, ?, ?, ?, ?)',
+          [req.user.id, product_id || null, brand, model, imei || null, Object.keys(photos).length ? JSON.stringify(photos) : null, client_notes || null]
+        );
+
+        res.status(201).json({ id: result.insertId, message: 'Reprise soumise avec succes.' });
+      } catch (dbErr) {
+        console.error('Reprise insert error:', dbErr.message);
+        if (!res.headersSent) res.status(500).json({ message: 'Erreur lors de l\'envoi. Veuillez reessayer.', error: dbErr.message });
       }
-
-      const [result] = await pool.query(
-        'INSERT INTO reprises (user_id, product_id, brand, model, imei, photos, client_notes) VALUES (?, ?, ?, ?, ?, ?, ?)',
-        [req.user.id, product_id || null, brand, model, imei || null, Object.keys(photos).length ? JSON.stringify(photos) : null, client_notes || null]
-      );
-
-      res.status(201).json({ id: result.insertId, message: 'Reprise soumise avec succes.' });
-    });
-  } catch (err) {
-    res.status(500).json({ message: 'Erreur serveur.', error: err.message });
-  }
+    })();
+  });
 });
 
 router.get('/', authenticate, async (req, res) => {

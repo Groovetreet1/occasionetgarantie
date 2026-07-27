@@ -113,7 +113,7 @@ export default function ProductDetail() {
       for (const [k, f] of Object.entries(repPhotos)) fd.append(k, f);
       await api.post('/reprises', fd, { headers: { 'Content-Type': 'multipart/form-data' } });
       setRepDone(true);
-    } catch { alert("Erreur lors de l'envoi"); }
+    } catch (e) { alert(e?.response?.data?.message || "Erreur lors de l'envoi"); }
     setSubmittingRep(false);
   };
 
