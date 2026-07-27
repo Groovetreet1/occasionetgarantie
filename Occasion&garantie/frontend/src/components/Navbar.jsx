@@ -1,10 +1,11 @@
 import { Link, NavLink, useNavigate, useLocation } from 'react-router-dom';
-import { FiUser, FiLogOut, FiSettings, FiChevronDown, FiSmartphone, FiMonitor, FiHeadphones, FiTablet, FiShoppingBag, FiTrendingUp, FiStar, FiMessageCircle, FiPackage } from 'react-icons/fi';
+import { FiUser, FiLogOut, FiSettings, FiChevronDown, FiSmartphone, FiMonitor, FiHeadphones, FiTablet, FiShoppingBag, FiTrendingUp, FiStar, FiMessageCircle, FiPackage, FiBell } from 'react-icons/fi';
 import { useState, useRef, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useAuth } from '../context/AuthContext';
 import ThemeToggle from './ThemeToggle';
 import PremiumPopup from './PremiumPopup';
+import api from '../api/axios';
 
 const API_BASE = import.meta.env.VITE_API_URL || '';
 
@@ -46,6 +47,49 @@ export default function Navbar() {
     document.addEventListener('mousedown', handle);
     return () => document.removeEventListener('mousedown', handle);
   }, []);
+
+  const [notifOpen, setNotifOpen] = useState(false);
+  const [notifications, setNotifications] = useState([]);
+  const [unreadCount, setUnreadCount] = useState(0);
+  const notifRef = useRef(null);
+
+  useEffect(() => {
+    if (!user) return;
+    const fetchNotifs = () => {
+      api.get('/notifications/unread-count').then(r => setUnreadCount(r.data.count)).catch(() => {});
+    };
+    fetchNotifs();
+    const interval = setInterval(fetchNotifs, 15000);
+    return () => clearInterval(interval);
+  }, [user]);
+
+  useEffect(() => {
+    const handle = (e) => {
+      if (notifRef.current && !notifRef.current.contains(e.target)) setNotifOpen(false);
+    };
+    document.addEventListener('mousedown', handle);
+    return () => document.removeEventListener('mousedown', handle);
+  }, []);
+
+  const openNotifs = async () => {
+    setNotifOpen(true);
+    setDropdownOpen(false);
+    try {
+      const res = await api.get('/notifications');
+      setNotifications(res.data);
+      setUnreadCount(0);
+    } catch {}
+  };
+
+  const markRead = async (n) => {
+    try { await api.put(`/notifications/${n.id}/read`); } catch {}
+    if (n.link) navigate(n.link);
+    setNotifOpen(false);
+  };
+
+  const markAllRead = async () => {
+    try { await api.put('/notifications/read-all'); setNotifications(n => n.map(n => ({ ...n, read_at: 'now' }))); setUnreadCount(0); } catch {}
+  };
 
   const closeMenu = () => { setMenuOpen(false); setMobileProdsOpen(false); };
 
@@ -113,6 +157,52 @@ export default function Navbar() {
 
           <div className="navbar-actions">
             <ThemeToggle />
+            {user && (
+              <div className="navbar-notif" ref={notifRef}>
+                <button className="navbar-notif-btn" onClick={openNotifs} aria-label="Notifications">
+                  <FiBell size={18} />
+                  {unreadCount > 0 && <span className="navbar-notif-badge">{unreadCount > 9 ? '9+' : unreadCount}</span>}
+                </button>
+                <AnimatePresence>
+                  {notifOpen && (
+                    <motion.div className="navbar-notif-dropdown"
+                      initial={{ opacity: 0, y: -8 }}
+                      animate={{ opacity: 1, y: 0 }}
+                      exit={{ opacity: 0, y: -8 }}
+                      transition={{ duration: 0.15 }}
+                    >
+                      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '10px 14px', borderBottom: '1px solid var(--border)' }}>
+                        <strong style={{ fontSize: 14 }}>Notifications</strong>
+                        {notifications.some(n => !n.read_at) && (
+                          <button onClick={markAllRead} style={{ fontSize: 11, background: 'none', border: 'none', color: 'var(--primary)', cursor: 'pointer', fontFamily: 'var(--font)' }}>
+                            Tout marquer lu
+                          </button>
+                        )}
+                      </div>
+                      <div style={{ maxHeight: 320, overflowY: 'auto' }}>
+                        {notifications.length === 0 ? (
+                          <div style={{ padding: '24px 16px', textAlign: 'center', fontSize: 13, color: 'var(--text-muted)' }}>
+                            Aucune notification
+                          </div>
+                        ) : notifications.slice(0, 20).map(n => (
+                          <button key={n.id} onClick={() => markRead(n)} style={{
+                            display: 'block', width: '100%', textAlign: 'left', padding: '10px 14px',
+                            border: 'none', borderBottom: '1px solid var(--border)', background: n.read_at ? 'transparent' : 'rgba(99,102,241,0.04)',
+                            cursor: 'pointer', color: 'inherit', fontFamily: 'var(--font)',
+                          }}>
+                            <div style={{ fontSize: 13, fontWeight: n.read_at ? 400 : 600 }}>{n.title}</div>
+                            <div style={{ fontSize: 11, color: 'var(--text-muted)', marginTop: 2, lineHeight: 1.4 }}>{n.message}</div>
+                            <div style={{ fontSize: 10, color: 'var(--text-muted)', marginTop: 4 }}>
+                              {new Date(n.created_at).toLocaleDateString('fr-FR')} {new Date(n.created_at).toLocaleTimeString('fr-FR', { hour: '2-digit', minute: '2-digit' })}
+                            </div>
+                          </button>
+                        ))}
+                      </div>
+                    </motion.div>
+                  )}
+                </AnimatePresence>
+              </div>
+            )}
             {user ? (
               <div className="navbar-dropdown" ref={dropdownRef}>
                 <button className="navbar-user" onClick={() => setDropdownOpen((o) => !o)}>
@@ -210,6 +300,7 @@ export default function Navbar() {
         {user ? (
           <>
             <NavLink to="/profile" onClick={closeMenu}><FiUser size={14} /> Mon Profil</NavLink>
+            <NavLink to="/notifications" onClick={closeMenu}><FiBell size={14} /> Notifications{unreadCount > 0 && <span style={{ marginLeft: 6, background: 'var(--primary)', color: '#fff', borderRadius: 10, padding: '1px 7px', fontSize: 11 }}>{unreadCount}</span>}</NavLink>
             <NavLink to="/messenger" onClick={closeMenu}><FiMessageCircle size={14} /> Messages</NavLink>
             {user.role !== 'admin' && (
               user.premium ? (

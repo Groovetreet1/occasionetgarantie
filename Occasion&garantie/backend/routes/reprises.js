@@ -68,6 +68,25 @@ router.post('/', authenticate, (req, res) => {
         );
 
         res.status(201).json({ id: result.insertId, message: 'Reprise soumise avec succes.' });
+
+        // Notify product owner if reprise is linked to a product
+        if (product_id) {
+          try {
+            const [prodRow] = await pool.query('SELECT seller_id, name FROM products WHERE id = ?', [product_id]);
+            if (prodRow.length > 0) {
+              const [clientRow] = await pool.query('SELECT full_name FROM users WHERE id = ?', [req.user.id]);
+              const cName = clientRow[0]?.full_name || 'Un client';
+              await pool.query(
+                'INSERT INTO notifications (user_id, type, title, message, link) VALUES (?, ?, ?, ?, ?)',
+                [prodRow[0].seller_id, 'reprise_new', 'Nouvelle demande de reprise',
+                 `${cName} a soumis une reprise pour ${prodRow[0].name} (${brand} ${model}).`,
+                 '/reprise/list']
+              );
+            }
+          } catch (nErr) {
+            console.error('Notification creation failed:', nErr.message);
+          }
+        }
       } catch (dbErr) {
         console.error('Reprise insert error:', dbErr.message);
         if (!res.headersSent) res.status(500).json({ message: 'Erreur lors de l\'envoi. Veuillez reessayer.', error: dbErr.message });
@@ -198,6 +217,53 @@ router.put('/:id', authenticate, async (req, res) => {
         }
       } catch (mailErr) {
         console.error('Reprise rejection email failed:', mailErr.message);
+      }
+    }
+
+    // Send email to client if accepted
+    if (status === 'accepte' && rows[0].status !== 'accepte') {
+      try {
+        const [userRow] = await pool.query('SELECT full_name, email FROM users WHERE id = ?', [rows[0].user_id]);
+        if (userRow.length > 0 && userRow[0].email) {
+          const u = userRow[0];
+          await emails.send({
+            to: u.email,
+            subject: 'Reprise acceptee - Occasion & Garantie',
+            html: `<div style="font-family:Arial;max-width:480px;margin:0 auto;padding:24px">
+              <h2 style="font-size:20px;margin-bottom:12px">Bonjour ${u.full_name},</h2>
+              <p style="font-size:14px;color:#444;line-height:1.6">
+                Votre demande de reprise pour <strong>${rows[0].brand} ${rows[0].model}</strong>
+                a ete acceptee par le vendeur.
+              </p>
+              <p style="font-size:14px;color:#444;line-height:1.6">
+                Le vendeur va vous contacter dans les plus brefs delais pour finaliser les demarches.
+              </p>
+              <p style="font-size:12px;color:#888;">Cordialement,<br>L'equipe Occasion & Garantie</p>
+            </div>`,
+          });
+        }
+      } catch (mailErr) {
+        console.error('Reprise acceptance email failed:', mailErr.message);
+      }
+    }
+
+    // Create notification for client
+    if (status && rows[0].status !== status) {
+      try {
+        const [vendorRow] = await pool.query('SELECT store_name FROM users WHERE id = ?', [req.user.id]);
+        const vName = vendorRow[0]?.store_name || 'Le vendeur';
+        const notifTitle = status === 'accepte' ? 'Reprise acceptee' : status === 'refuse' ? 'Reprise refuse' : 'Reprise mise a jour';
+        const notifMsg = status === 'accepte'
+          ? `${vName} a accepte votre demande de reprise pour ${rows[0].brand} ${rows[0].model}. Il vous contactera bientot.`
+          : status === 'refuse'
+            ? `${vName} a refuse votre demande de reprise pour ${rows[0].brand} ${rows[0].model}.${rows[0].vendor_notes ? ' Raison: ' + rows[0].vendor_notes : ''}`
+            : `Votre reprise ${rows[0].brand} ${rows[0].model} a ete mise a jour.`;
+        await pool.query(
+          'INSERT INTO notifications (user_id, type, title, message, link) VALUES (?, ?, ?, ?, ?)',
+          [rows[0].user_id, `reprise_${status}`, notifTitle, notifMsg, '/reprise/list']
+        );
+      } catch (notifErr) {
+        console.error('Notification creation failed:', notifErr.message);
       }
     }
 

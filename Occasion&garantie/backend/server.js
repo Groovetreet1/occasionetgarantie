@@ -165,6 +165,7 @@ app.use('/api/newsletter', require('./routes/newsletter'));
 app.use('/api/ratings', require('./routes/ratings'));
 app.use('/api/public', require('./routes/public'));
 app.use('/api/reprises', require('./routes/reprises'));
+app.use('/api/notifications', require('./routes/notifications'));
 
 const { startNewsletterCron, sendNewsletterToAll } = require('./services/newsletterCron');
 app.post('/api/newsletter/trigger', authenticate, adminOnly, async (req, res) => {
