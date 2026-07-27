@@ -37,6 +37,7 @@ export default function ProductDetail() {
   const [repStep, setRepStep] = useState(0);
   const [submittingRep, setSubmittingRep] = useState(false);
   const [repDone, setRepDone] = useState(false);
+  const [vendorReprises, setVendorReprises] = useState([]);
   const repFileRef = useRef(null);
 
   useEffect(() => {
@@ -47,6 +48,14 @@ export default function ProductDetail() {
       .catch(() => {})
       .finally(() => setLoading(false));
   }, [slug]);
+
+  useEffect(() => {
+    if (product && user && user.role === 'seller' && user.id === product.seller_id) {
+      api.get(`/reprises?product_id=${product.id}`).then(res => {
+        setVendorReprises(Array.isArray(res.data) ? res.data.filter(r => r.product_id == product.id) : []);
+      }).catch(() => {});
+    }
+  }, [product, user]);
 
   const handleStartChat = async () => {
     if (!user) return navigate('/login');
@@ -271,6 +280,35 @@ export default function ProductDetail() {
                       </div>
                     </div>
                   )}
+                </div>
+              )}
+
+              {user && user.role === 'seller' && user.id === product.seller_id && vendorReprises.length > 0 && (
+                <div style={{ marginTop: '20px', borderTop: '1px solid var(--border)', paddingTop: '16px' }}>
+                  <div style={{ fontSize: 14, fontWeight: 700, display: 'flex', alignItems: 'center', gap: 6, marginBottom: 8 }}>
+                    <FiSmartphone size={16} /> Demandes de reprise ({vendorReprises.length})
+                  </div>
+                  {vendorReprises.map(r => (
+                    <div key={r.id} style={{
+                      padding: '10px 12px', background: 'var(--bg-secondary)', borderRadius: 10, marginBottom: 6,
+                      display: 'flex', alignItems: 'center', gap: 10, fontSize: 13,
+                    }}>
+                      <div style={{ flex: 1 }}>
+                        <div style={{ fontWeight: 600 }}>{r.brand} {r.model}</div>
+                        <div style={{ fontSize: 11, color: 'var(--text-muted)' }}>{r.full_name} — {r.imei || 'IMEI: N/A'}</div>
+                      </div>
+                      <span style={{
+                        padding: '2px 8px', borderRadius: 10, fontSize: 10, fontWeight: 600, whiteSpace: 'nowrap',
+                        background: r.status === 'en_attente' ? 'rgba(245,158,11,0.1)' : r.status === 'estime' ? 'rgba(59,130,246,0.1)' : 'rgba(16,185,129,0.1)',
+                        color: r.status === 'en_attente' ? '#f59e0b' : r.status === 'estime' ? '#3b82f6' : '#10b981',
+                      }}>
+                        {r.status === 'en_attente' ? 'Nouveau' : r.status === 'estime' ? 'Estime' : 'Accepte'}
+                      </span>
+                      <Link to="/reprise/list" style={{ color: 'var(--primary)', fontWeight: 600, fontSize: 12, textDecoration: 'none', whiteSpace: 'nowrap' }}>
+                        Traiter →
+                      </Link>
+                    </div>
+                  ))}
                 </div>
               )}
 

@@ -90,14 +90,22 @@ router.get('/', authenticate, async (req, res) => {
     } else if (req.user.role === 'seller') {
       query = `SELECT r.*, u.full_name, u.email, u.phone, u.store_name
                FROM reprises r JOIN users u ON r.user_id = u.id
-               WHERE r.vendor_id = ? OR r.vendor_id IS NULL ORDER BY r.created_at DESC`;
+               WHERE (r.vendor_id = ? OR r.vendor_id IS NULL) ORDER BY r.created_at DESC`;
       params = [req.user.id];
     } else {
       query = `SELECT r.* FROM reprises r WHERE r.user_id = ? ORDER BY r.created_at DESC`;
       params = [req.user.id];
     }
 
-    const [rows] = await pool.query(query, params);
+    let rows;
+    try {
+      [rows] = await pool.query(query, params);
+    } catch { [rows] = []; }
+
+    if (req.query.product_id) {
+      rows = rows.filter(r => r.product_id == req.query.product_id);
+    }
+
     res.json(rows);
   } catch (err) {
     res.status(500).json({ message: 'Erreur serveur.', error: err.message });
