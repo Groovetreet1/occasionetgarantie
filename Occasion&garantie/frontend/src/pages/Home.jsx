@@ -1,8 +1,7 @@
 import { Link, useNavigate } from 'react-router-dom';
 import { useEffect, useState } from 'react';
 import { motion } from 'framer-motion';
-import { FiSmartphone, FiHeadphones, FiTablet, FiShield, FiTruck, FiArrowRight, FiTrendingUp, FiShoppingBag, FiStar, FiSearch, FiMonitor, FiMapPin } from 'react-icons/fi';
-import { BsPhone, BsLaptop, BsHeadphones } from 'react-icons/bs';
+import { FiSmartphone, FiShield, FiArrowRight, FiTrendingUp, FiShoppingBag, FiStar, FiSearch, FiMapPin } from 'react-icons/fi';
 import api from '../api/axios';
 import ProductCard from '../components/ProductCard';
 import TrustBar from '../components/TrustBar';
@@ -60,13 +59,6 @@ export default function Home() {
     navigate(url);
   };
 
-  const categories = [
-    { to: '/products?category=Smartphones', icon: BsPhone, title: 'Smartphones', desc: 'iPhone, Samsung, Xiaomi' },
-    { to: '/products?category=Tablettes', icon: FiTablet, title: 'Tablettes', desc: 'iPad, Samsung Tab' },
-    { to: '/products?category=Ordinateurs', icon: BsLaptop, title: 'Ordinateurs', desc: 'MacBook, PC Portable' },
-    { to: '/products?category=Accessoires', icon: BsHeadphones, title: 'Accessoires', desc: 'Chargeurs, coques' },
-  ];
-
   return (
     <motion.div initial="hidden" animate="show">
       <PromoPopup />
@@ -99,19 +91,6 @@ export default function Home() {
               </div>
               <button type="submit" className="avito-search-btn">Rechercher</button>
             </form>
-          </div>
-        </div>
-      </section>
-
-      <section className="section" style={{ paddingTop: 0 }}>
-        <div className="container">
-          <div className="avito-categories">
-            {categories.map((cat) => (
-              <Link key={cat.title} to={cat.to} className="avito-cat-card">
-                <div className="avito-cat-icon"><cat.icon size={28} /></div>
-                <span>{cat.title}</span>
-              </Link>
-            ))}
           </div>
         </div>
       </section>
