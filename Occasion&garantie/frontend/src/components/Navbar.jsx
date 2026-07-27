@@ -99,7 +99,11 @@ export default function Navbar() {
               </AnimatePresence>
             </div>
             <NavLink to="/about">À propos</NavLink>
-            <NavLink to="/reprise" className="navbar-sell-link"><FiSmartphone size={14} /> Reprise</NavLink>
+            {user?.role == 'seller' ? (
+              <NavLink to="/reprise/list" className="navbar-sell-link"><FiSmartphone size={14} /> Demandes reprise</NavLink>
+            ) : user?.role == 'admin' ? null : (
+              <NavLink to="/reprise" className="navbar-sell-link"><FiSmartphone size={14} /> Reprise</NavLink>
+            )}
             {user?.role == 'seller' ? (
               <NavLink to="/seller" className="navbar-sell-link"><FiTrendingUp size={14} /> Vendre</NavLink>
             ) : user?.role !== 'admin' && (
@@ -192,7 +196,11 @@ export default function Navbar() {
         })}
         <Link to="/products" onClick={closeMenu} style={{ paddingLeft: '32px', fontSize: '13px', opacity: 0.6, display: 'block' }}>Tous les produits →</Link>
         <NavLink to="/about" onClick={closeMenu}>À propos</NavLink>
-        <NavLink to="/reprise" onClick={closeMenu}><FiSmartphone size={14} /> Reprise</NavLink>
+        {user?.role == 'seller' ? (
+          <NavLink to="/reprise/list" onClick={closeMenu}><FiSmartphone size={14} /> Demandes reprise</NavLink>
+        ) : user?.role == 'admin' ? null : (
+          <NavLink to="/reprise" onClick={closeMenu}><FiSmartphone size={14} /> Reprise</NavLink>
+        )}
         {user?.role == 'seller' ? (
           <NavLink to="/seller" onClick={closeMenu} className="navbar-mobile-sell"><FiTrendingUp size={14} /> Vendre</NavLink>
         ) : user?.role !== 'admin' && (
