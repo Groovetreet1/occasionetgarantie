@@ -63,6 +63,28 @@ const pool = require('./config/db');
     console.log('credit_purchases table check skipped:', e.message);
   }
   try {
+    await pool.query(`CREATE TABLE IF NOT EXISTS reprises (
+      id INT AUTO_INCREMENT PRIMARY KEY,
+      user_id INT NOT NULL,
+      brand VARCHAR(100) NOT NULL,
+      model VARCHAR(200) NOT NULL,
+      imei VARCHAR(20) DEFAULT NULL,
+      photos JSON DEFAULT NULL,
+      status ENUM('en_attente','estime','accepte','refuse','converti') DEFAULT 'en_attente',
+      estimated_price DECIMAL(10,2) DEFAULT NULL,
+      vendor_id INT DEFAULT NULL,
+      vendor_notes TEXT DEFAULT NULL,
+      created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+      updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
+    )`);
+    console.log('reprises table ready');
+  } catch (e) {
+    console.log('reprises table check skipped:', e.message);
+  }
+  try { await pool.query("ALTER TABLE products ADD COLUMN type ENUM('vente','reprise') DEFAULT 'vente'"); } catch (e) { if (e.errno !== 1060) console.log('type col:', e.message); }
+  try { await pool.query("ALTER TABLE products ADD COLUMN imei VARCHAR(20) DEFAULT NULL"); } catch (e) { if (e.errno !== 1060) console.log('imei col:', e.message); }
+  try { await pool.query("ALTER TABLE products ADD COLUMN reprise_id INT DEFAULT NULL"); } catch (e) { if (e.errno !== 1060) console.log('reprise_id col:', e.message); }
+  try {
     await pool.query(`CREATE TABLE IF NOT EXISTS installments (
       id INT AUTO_INCREMENT PRIMARY KEY,
       product_id INT NOT NULL,
@@ -140,6 +162,7 @@ app.use('/api/contact', contactRoutes);
 app.use('/api/newsletter', require('./routes/newsletter'));
 app.use('/api/ratings', require('./routes/ratings'));
 app.use('/api/public', require('./routes/public'));
+app.use('/api/reprises', require('./routes/reprises'));
 
 const { startNewsletterCron, sendNewsletterToAll } = require('./services/newsletterCron');
 app.post('/api/newsletter/trigger', authenticate, adminOnly, async (req, res) => {

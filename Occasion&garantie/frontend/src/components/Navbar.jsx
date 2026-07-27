@@ -1,5 +1,5 @@
 import { Link, NavLink, useNavigate, useLocation } from 'react-router-dom';
-import { FiUser, FiLogOut, FiSettings, FiChevronDown, FiSmartphone, FiMonitor, FiHeadphones, FiTablet, FiShoppingBag, FiTrendingUp, FiStar, FiMessageCircle, FiPackage } from 'react-icons/fi';
+import { FiUser, FiLogOut, FiSettings, FiChevronDown, FiSmartphone, FiMonitor, FiHeadphones, FiTablet, FiShoppingBag, FiTrendingUp, FiStar, FiMessageCircle, FiPackage, FiRefreshCw } from 'react-icons/fi';
 import { useState, useRef, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useAuth } from '../context/AuthContext';
@@ -98,6 +98,7 @@ export default function Navbar() {
               </AnimatePresence>
             </div>
             <NavLink to="/about">À propos</NavLink>
+            <NavLink to="/reprise" className="navbar-sell-link"><FiSmartphone size={14} /> Reprise</NavLink>
             {user?.role == 'seller' ? (
               <NavLink to="/seller" className="navbar-sell-link"><FiTrendingUp size={14} /> Vendre</NavLink>
             ) : user?.role !== 'admin' && (
@@ -182,7 +183,12 @@ export default function Navbar() {
           );
         })}
         <NavLink to="/about" onClick={closeMenu}>À propos</NavLink>
-        {user?.role !== 'admin' && <NavLink to="/vendre" onClick={closeMenu} className="navbar-mobile-sell"><FiTrendingUp size={14} /> Vendre</NavLink>}
+        <NavLink to="/reprise" onClick={closeMenu}><FiSmartphone size={14} /> Reprise</NavLink>
+        {user?.role == 'seller' ? (
+          <NavLink to="/seller" onClick={closeMenu} className="navbar-mobile-sell"><FiTrendingUp size={14} /> Vendre</NavLink>
+        ) : user?.role !== 'admin' && (
+          <NavLink to="/vendre" onClick={closeMenu} className="navbar-mobile-sell"><FiTrendingUp size={14} /> Vendre</NavLink>
+        )}
         <div className="navbar-mobile-divider" />
         {user ? (
           <>

@@ -31,6 +31,8 @@ import SellerProfile from './pages/SellerProfile';
 import SellerStats from './pages/SellerStats';
 import Messenger from './pages/Messenger';
 import Privacy from './pages/Privacy';
+import RepriseForm from './pages/RepriseForm';
+import RepriseList from './pages/RepriseList';
 import Legal from './pages/Legal';
 
 const pageVariants = {
@@ -80,6 +82,8 @@ export default function App() {
           <Route path="/admin/tickets" element={<AnimatedPage><AdminRoute><AdminTickets /></AdminRoute></AnimatedPage>} />
           <Route path="/admin/vendor-logs" element={<AnimatedPage><AdminRoute><AdminVendorLogs /></AdminRoute></AnimatedPage>} />
           <Route path="/vendre" element={<AnimatedPage><SellPage /></AnimatedPage>} />
+          <Route path="/reprise" element={<AnimatedPage><RepriseForm /></AnimatedPage>} />
+          <Route path="/reprise/list" element={<AnimatedPage><RepriseList /></AnimatedPage>} />
           <Route path="/seller" element={<AnimatedPage><SellerRoute><SellerDashboard /></SellerRoute></AnimatedPage>} />
           <Route path="/seller/stats" element={<AnimatedPage><SellerRoute><SellerStats /></SellerRoute></AnimatedPage>} />
           <Route path="/seller/products/new" element={<AnimatedPage><SellerRoute><SellerProductForm /></SellerRoute></AnimatedPage>} />

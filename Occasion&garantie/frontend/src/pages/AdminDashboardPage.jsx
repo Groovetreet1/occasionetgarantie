@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
-import { FiCreditCard, FiClock, FiPackage, FiUsers, FiArrowLeft, FiTrendingUp, FiPlus, FiHeadphones, FiShield, FiMonitor } from 'react-icons/fi';
+import { FiCreditCard, FiClock, FiPackage, FiUsers, FiArrowLeft, FiTrendingUp, FiPlus, FiHeadphones, FiShield, FiMonitor, FiSmartphone } from 'react-icons/fi';
 import api from '../api/axios';
 
 function CardWrapper({ link, children, ...rest }) {
@@ -8,7 +8,7 @@ function CardWrapper({ link, children, ...rest }) {
 }
 
 export default function AdminDashboardPage() {
-  const [stats, setStats] = useState({ credits: 0, pendingCredits: 0, installments: 0, pendingInstallments: 0, premium: 0, pendingPremium: 0, products: 0, vendorProducts: 0, tickets: 0, pendingTickets: 0, repliedTickets: 0, users: 0 });
+  const [stats, setStats] = useState({ credits: 0, pendingCredits: 0, installments: 0, pendingInstallments: 0, premium: 0, pendingPremium: 0, products: 0, vendorProducts: 0, tickets: 0, pendingTickets: 0, repliedTickets: 0, users: 0, pendingReprises: 0 });
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
@@ -19,8 +19,10 @@ export default function AdminDashboardPage() {
       api.get('/admin/products').catch(() => ({ data: [] })),
       api.get('/contact/tickets').catch(() => ({ data: [] })),
       api.get('/admin/users').catch(() => ({ data: [] })),
-    ]).then(([credits, installments, premium, products, tickets, users]) => {
+      api.get('/reprises').catch(() => ({ data: [] })),
+    ]).then(([credits, installments, premium, products, tickets, users, reprises]) => {
       const ticketData = tickets.data || [];
+      const repriseData = reprises.data || [];
       setStats({
         credits: credits.data.length,
         pendingCredits: credits.data.filter(c => c.status === 'en_attente').length,
@@ -34,6 +36,7 @@ export default function AdminDashboardPage() {
         pendingTickets: ticketData.filter(t => !t.replied_at).length,
         repliedTickets: ticketData.filter(t => t.replied_at).length,
         users: users.data.length,
+        pendingReprises: repriseData.filter(r => r.status === 'en_attente').length,
       });
     }).catch(() => {}).finally(() => setLoading(false));
   }, []);
@@ -60,6 +63,9 @@ export default function AdminDashboardPage() {
       { label: 'En attente', value: stats.pendingTickets, highlight: true },
       { label: 'Repondu', value: stats.repliedTickets },
     ], link: '/admin/tickets' },
+    { title: 'Reprises', icon: FiSmartphone, color: '#10b981', bg: 'rgba(16,185,129,0.1)', items: [
+      { label: 'En attente', value: stats.pendingReprises ?? '...' },
+    ], link: '/reprise/list' },
     { title: 'Journal Vendeurs', icon: FiMonitor, color: '#6366f1', bg: 'rgba(99,102,241,0.1)', items: [
       { label: 'Activite', value: 'IP, ISP, UA' },
     ], link: '/admin/vendor-logs' },
