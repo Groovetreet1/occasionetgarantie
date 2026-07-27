@@ -171,28 +171,28 @@ export default function Navbar() {
                       exit={{ opacity: 0, y: -8 }}
                       transition={{ duration: 0.15 }}
                     >
-                      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '10px 14px', borderBottom: '1px solid var(--border)' }}>
-                        <strong style={{ fontSize: 14 }}>Notifications</strong>
+                      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '8px 12px', borderBottom: '1px solid var(--border)' }}>
+                        <strong style={{ fontSize: 13 }}>Notifications</strong>
                         {notifications.some(n => !n.read_at) && (
-                          <button onClick={markAllRead} style={{ fontSize: 11, background: 'none', border: 'none', color: 'var(--primary)', cursor: 'pointer', fontFamily: 'var(--font)' }}>
+                          <button onClick={markAllRead} style={{ fontSize: 10, background: 'none', border: 'none', color: 'var(--primary)', cursor: 'pointer', fontFamily: 'var(--font)', padding: 0 }}>
                             Tout marquer lu
                           </button>
                         )}
                       </div>
-                      <div style={{ maxHeight: 320, overflowY: 'auto' }}>
+                      <div style={{ maxHeight: 280, overflowY: 'auto' }}>
                         {notifications.length === 0 ? (
-                          <div style={{ padding: '24px 16px', textAlign: 'center', fontSize: 13, color: 'var(--text-muted)' }}>
+                          <div style={{ padding: '20px 16px', textAlign: 'center', fontSize: 12, color: 'var(--text-muted)' }}>
                             Aucune notification
                           </div>
-                        ) : notifications.slice(0, 20).map(n => (
+                        ) : notifications.slice(0, 10).map(n => (
                           <button key={n.id} onClick={() => markRead(n)} style={{
-                            display: 'block', width: '100%', textAlign: 'left', padding: '10px 14px',
+                            display: 'block', width: '100%', textAlign: 'left', padding: '8px 12px',
                             border: 'none', borderBottom: '1px solid var(--border)', background: n.read_at ? 'transparent' : 'rgba(99,102,241,0.04)',
                             cursor: 'pointer', color: 'inherit', fontFamily: 'var(--font)',
                           }}>
-                            <div style={{ fontSize: 13, fontWeight: n.read_at ? 400 : 600 }}>{n.title}</div>
-                            <div style={{ fontSize: 11, color: 'var(--text-muted)', marginTop: 2, lineHeight: 1.4 }}>{n.message}</div>
-                            <div style={{ fontSize: 10, color: 'var(--text-muted)', marginTop: 4 }}>
+                            <div style={{ fontSize: 12, fontWeight: n.read_at ? 400 : 600 }}>{n.title}</div>
+                            {n.message && <div style={{ fontSize: 10, color: 'var(--text-muted)', marginTop: 1, lineHeight: 1.3, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{n.message}</div>}
+                            <div style={{ fontSize: 9, color: 'var(--text-muted)', marginTop: 2 }}>
                               {new Date(n.created_at).toLocaleDateString('fr-FR')} {new Date(n.created_at).toLocaleTimeString('fr-FR', { hour: '2-digit', minute: '2-digit' })}
                             </div>
                           </button>
@@ -300,7 +300,6 @@ export default function Navbar() {
         {user ? (
           <>
             <NavLink to="/profile" onClick={closeMenu}><FiUser size={14} /> Mon Profil</NavLink>
-            <NavLink to="/notifications" onClick={closeMenu}><FiBell size={14} /> Notifications{unreadCount > 0 && <span style={{ marginLeft: 6, background: 'var(--primary)', color: '#fff', borderRadius: 10, padding: '1px 7px', fontSize: 11 }}>{unreadCount}</span>}</NavLink>
             <NavLink to="/messenger" onClick={closeMenu}><FiMessageCircle size={14} /> Messages</NavLink>
             {user.role !== 'admin' && (
               user.premium ? (

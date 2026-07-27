@@ -252,7 +252,11 @@ input, textarea, select, button { font-family: inherit; }
 .navbar-notif-btn { background: none; border: none; color: var(--text-secondary); cursor: pointer; padding: 6px; display: flex; align-items: center; position: relative; }
 .navbar-notif-btn:hover { color: var(--text); }
 .navbar-notif-badge { position: absolute; top: 0; right: 0; background: var(--primary); color: #fff; font-size: 9px; font-weight: 700; min-width: 16px; height: 16px; border-radius: 8px; display: flex; align-items: center; justify-content: center; padding: 0 4px; }
-.navbar-notif-dropdown { position: absolute; top: 100%; right: 0; width: 360px; max-width: 90vw; background: var(--bg-card); border: 1px solid var(--border); border-radius: 12px; box-shadow: 0 8px 32px rgba(0,0,0,0.12); z-index: 10000; margin-top: 8px; overflow: hidden; }
+.navbar-notif-dropdown { position: absolute; top: 100%; right: 0; width: 320px; max-width: calc(100vw - 24px); background: var(--bg-card); border: 1px solid var(--border); border-radius: 10px; box-shadow: 0 8px 32px rgba(0,0,0,0.12); z-index: 10000; margin-top: 8px; overflow: hidden; }
+@media (max-width: 900px) {
+  .navbar-notif-dropdown { position: fixed; top: var(--nav-height, 60px); left: 12px; right: 12px; width: auto; max-width: none; margin-top: 0; border-radius: 8px; }
+  .navbar-notif-dropdown > div:last-child { max-height: 50vh !important; }
+}
 .navbar-mobile-panel { display: none; }
 @media (max-width: 900px) {
   .navbar-desktop-nav, .navbar-actions .navbar-auth, .navbar-actions .navbar-dropdown { display: none; }
