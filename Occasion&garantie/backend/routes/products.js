@@ -26,7 +26,7 @@ async function validateCategory(categoryId) {
 // Public: list products (only disponible)
 router.get('/', async (req, res) => {
   try {
-    const { category, search, min, max, state, sort, seller } = req.query;
+    const { category, search, min, max, state, sort, seller, ville } = req.query;
     let sql = `
       SELECT p.*, c.name as category_name,
              u.store_name as seller_name, u.store_logo as seller_logo, u.avatar as seller_avatar, u.premium as seller_premium,
@@ -45,6 +45,7 @@ router.get('/', async (req, res) => {
     if (max) { sql += ' AND p.price <= ?'; params.push(max); }
     if (state) { sql += ' AND p.state = ?'; params.push(state); }
     if (seller) { sql += ' AND p.seller_id = ?'; params.push(seller); }
+    if (ville) { sql += ' AND p.ville = ?'; params.push(ville); }
 
     sql += ' ORDER BY (u.premium = TRUE AND (u.premium_expires_at IS NULL OR u.premium_expires_at > NOW())) DESC';
     if (sort === 'price_asc') sql += ', p.price ASC';
@@ -286,6 +287,15 @@ router.delete('/:id', authenticate, async (req, res) => {
     res.json({ message: 'Produit supprimé.' });
   } catch (err) {
     res.status(500).json({ message: 'Erreur serveur.', error: err.message });
+  }
+});
+
+router.get('/cities', async (req, res) => {
+  try {
+    const [rows] = await pool.query('SELECT DISTINCT ville FROM products WHERE ville IS NOT NULL AND ville != "" AND active = TRUE AND status = "disponible" ORDER BY ville');
+    res.json(rows.map(r => r.ville));
+  } catch (err) {
+    res.json([]);
   }
 });
 

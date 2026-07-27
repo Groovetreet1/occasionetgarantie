@@ -1790,6 +1790,144 @@ select.form-control, .form-group select { cursor: pointer; appearance: auto; }
   .hero-slide-card h2 { font-size: 18px; }
 }
 
+/* ============ Avito-style Hero ============ */
+.avito-hero {
+  background: linear-gradient(135deg, var(--primary) 0%, var(--primary-dark) 100%);
+  padding: 32px 0 40px;
+  text-align: center;
+}
+.avito-hero-content h1 {
+  font-size: 28px;
+  font-weight: 800;
+  color: #fff;
+  margin: 0 0 4px;
+}
+.avito-hero-sub {
+  color: rgba(255,255,255,0.8);
+  font-size: 14px;
+  margin: 0 0 20px;
+}
+.avito-search-bar {
+  display: flex;
+  gap: 0;
+  max-width: 700px;
+  margin: 0 auto;
+  border-radius: 10px;
+  overflow: hidden;
+  box-shadow: 0 4px 20px rgba(0,0,0,0.15);
+  background: #fff;
+}
+.avito-search-input-wrap {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  background: #fff;
+  padding: 0 14px;
+  position: relative;
+}
+.avito-search-input-wrap input {
+  flex: 1;
+  border: none;
+  outline: none;
+  padding: 14px 0 14px 30px;
+  font-size: 14px;
+  font-family: var(--font);
+  color: #333;
+  background: transparent;
+}
+.avito-search-icon {
+  position: absolute;
+  left: 14px;
+  color: #999;
+  pointer-events: none;
+}
+.avito-search-select {
+  position: relative;
+  border-left: 1px solid #e5e7eb;
+}
+.avito-search-select select {
+  padding: 14px 30px 14px 14px;
+  border: none;
+  outline: none;
+  font-size: 13px;
+  font-family: var(--font);
+  color: #333;
+  background: #fff;
+  cursor: pointer;
+  appearance: none;
+  -webkit-appearance: none;
+  min-width: 140px;
+}
+.avito-search-icon-inside {
+  position: absolute;
+  right: 10px;
+  top: 50%;
+  transform: translateY(-50%);
+  color: #999;
+  pointer-events: none;
+  z-index: 1;
+}
+.avito-search-btn {
+  background: #ff6b35;
+  color: #fff;
+  border: none;
+  padding: 14px 28px;
+  font-size: 14px;
+  font-weight: 600;
+  cursor: pointer;
+  font-family: var(--font);
+  transition: background 0.2s;
+  white-space: nowrap;
+}
+.avito-search-btn:hover { background: #e55a2b; }
+
+.avito-categories {
+  display: flex;
+  gap: 12px;
+  justify-content: center;
+  flex-wrap: wrap;
+  margin-top: -16px;
+  position: relative;
+  z-index: 2;
+}
+.avito-cat-card {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 6px;
+  padding: 16px 24px;
+  background: var(--bg-card);
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  text-decoration: none;
+  color: var(--text);
+  font-size: 13px;
+  font-weight: 600;
+  transition: all 0.2s;
+  min-width: 110px;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.05);
+}
+.avito-cat-card:hover {
+  border-color: var(--primary);
+  color: var(--primary);
+  transform: translateY(-2px);
+  box-shadow: 0 4px 16px rgba(0,0,0,0.1);
+}
+.avito-cat-icon {
+  color: var(--primary);
+  line-height: 1;
+}
+
+@media (max-width: 640px) {
+  .avito-search-bar { flex-direction: column; border-radius: 8px; }
+  .avito-search-select { border-left: none; border-top: 1px solid #e5e7eb; }
+  .avito-search-btn { padding: 12px; }
+  .avito-cat-card { min-width: 80px; padding: 12px 16px; font-size: 12px; }
+  .avito-cat-icon svg { width: 22px; height: 22px; }
+  .avito-hero-content h1 { font-size: 22px; }
+  .avito-search-select select { min-width: 100%; }
+}
+
 /* ============ Page Transition ============ */
 .page-enter { opacity: 0; }
 .page-enter-active { opacity: 1; transition: opacity 0.3s ease; }
