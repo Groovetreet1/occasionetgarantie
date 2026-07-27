@@ -52,15 +52,17 @@ export default function ProductDetail() {
   }, [slug]);
 
   useEffect(() => {
-    if (product && user && user.role === 'seller' && user.id === product.seller_id) {
+    if (!product || !user) return;
+    if (user.role === 'seller' && user.id === product.seller_id) {
       api.get(`/reprises?product_id=${product.id}`).then(res => {
         setVendorReprises(Array.isArray(res.data) ? res.data.filter(r => r.product_id == product.id) : []);
       }).catch(() => {});
     }
-    if (product && user && user.role !== 'seller') {
+    if (user.role !== 'seller') {
       setCheckingReprise(true);
       api.get(`/reprises/check/${product.id}`).then(res => {
-        if (res.data.exists) setExistingReprise(res.data.reprise);
+        if (!res.data.exists) return;
+        setExistingReprise(res.data.reprise.status === 'en_attente' || res.data.reprise.status === 'estime' || res.data.reprise.status === 'accepte' ? res.data.reprise : null);
       }).catch(() => {}).finally(() => setCheckingReprise(false));
     }
   }, [product, user]);
@@ -120,6 +122,7 @@ export default function ProductDetail() {
       if (repNotes) fd.append('client_notes', repNotes);
       for (const [k, f] of Object.entries(repPhotos)) fd.append(k, f);
       await api.post('/reprises', fd, { headers: { 'Content-Type': 'multipart/form-data' } });
+      setExistingReprise(null);
       setRepDone(true);
     } catch (e) { alert(e?.response?.data?.message || "Erreur lors de l'envoi"); }
     setSubmittingRep(false);

@@ -36,12 +36,12 @@ export default function RepriseList() {
 
   const imgUrl = (p) => p?.startsWith('http') ? p : `${API_BASE}${p}`;
 
-  const firstProductImg = (r) => {
-    if (!r.product_images) return null;
+  const productImgs = (r) => {
+    if (!r.product_images) return [];
     try {
       const imgs = JSON.parse(r.product_images);
-      return Array.isArray(imgs) && imgs.length > 0 ? imgUrl(imgs[0]) : null;
-    } catch { return null; }
+      return Array.isArray(imgs) ? imgs.map(i => imgUrl(i)) : [];
+    } catch { return []; }
   };
 
   return (
@@ -70,9 +70,9 @@ export default function RepriseList() {
           <div style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
             {reprises.map(r => {
               const st = statusStyles[r.status] || statusStyles.en_attente;
-              const pImg = firstProductImg(r);
               const photos = (() => { try { return JSON.parse(r.photos || '{}'); } catch { return {}; } })();
               const hasPhotos = Object.keys(photos).length > 0;
+              const pImgs = productImgs(r);
 
               return (
                 <div key={r.id} style={{
@@ -82,17 +82,30 @@ export default function RepriseList() {
                   {/* Product info header */}
                   {r.product_name && (
                     <div style={{
-                      display: 'flex', alignItems: 'center', gap: 10, padding: '10px 14px',
                       background: 'var(--bg-secondary)', borderBottom: '1px solid var(--border)',
                     }}>
-                      {pImg && (
-                        <img src={pImg} alt={r.product_name} style={{
-                          width: 36, height: 36, borderRadius: 6, objectFit: 'cover', border: '1px solid var(--border)',
-                        }} />
-                      )}
-                      <div style={{ fontSize: 13, fontWeight: 600, color: 'var(--text)' }}>
-                        Article: {r.product_name}
+                      <div style={{ display: 'flex', alignItems: 'center', gap: 10, padding: '10px 14px' }}>
+                        {pImgs.length > 0 && (
+                          <img src={pImgs[0]} alt={r.product_name} style={{
+                            width: 36, height: 36, borderRadius: 6, objectFit: 'cover', border: '1px solid var(--border)',
+                          }} />
+                        )}
+                        <div style={{ fontSize: 13, fontWeight: 600, color: 'var(--text)' }}>
+                          Article: {r.product_name}
+                        </div>
                       </div>
+                      {pImgs.length > 1 && (
+                        <div style={{ display: 'flex', gap: 6, padding: '0 14px 10px', overflowX: 'auto' }}>
+                          {pImgs.map((url, i) => (
+                            <a key={i} href={url} target="_blank" rel="noopener noreferrer">
+                              <img src={url} alt="" style={{
+                                width: 60, height: 60, borderRadius: 6, objectFit: 'cover',
+                                border: '1px solid var(--border)', flexShrink: 0,
+                              }} />
+                            </a>
+                          ))}
+                        </div>
+                      )}
                     </div>
                   )}
 
