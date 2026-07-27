@@ -137,6 +137,7 @@ export default function AdminDashboardPage() {
             <Link to="/admin/installments" className="btn btn-outline"><FiClock size={16} /> Paiements echelonnes</Link>
             <Link to="/admin/premium" className="btn btn-outline"><FiShield size={16} /> Demandes Prime</Link>
             <Link to="/admin/products" className="btn btn-outline"><FiPackage size={16} /> Tous les produits</Link>
+            <Link to="/admin/products/pending" className="btn btn-outline"><FiShield size={16} /> Approuver produits</Link>
             <Link to="/admin/users" className="btn btn-outline"><FiUsers size={16} /> Utilisateurs</Link>
           </div>
         </div>

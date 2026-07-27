@@ -18,7 +18,7 @@ export default function AdminDashboard() {
 
   const load = () => {
     setLoading(true);
-    api.get('/products')
+    api.get('/admin/products')
       .then((res) => setProducts(res.data))
       .catch(() => {})
       .finally(() => setLoading(false));

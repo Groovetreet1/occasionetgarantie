@@ -21,6 +21,7 @@ import AdminPremium from './pages/AdminPremium';
 import AdminCreditPurchases from './pages/AdminCreditPurchases';
 import AdminInstallments from './pages/AdminInstallments';
 import AdminDashboardPage from './pages/AdminDashboardPage';
+import AdminDashboard from './pages/AdminDashboard';
 import AdminUsers from './pages/AdminUsers';
 import AdminTickets from './pages/AdminTickets';
 import AdminVendorLogs from './pages/AdminVendorLogs';
@@ -84,6 +85,7 @@ export default function App() {
           <Route path="/admin/tickets" element={<AnimatedPage><AdminRoute><AdminTickets /></AdminRoute></AnimatedPage>} />
           <Route path="/admin/vendor-logs" element={<AnimatedPage><AdminRoute><AdminVendorLogs /></AdminRoute></AnimatedPage>} />
           <Route path="/admin/products/pending" element={<AnimatedPage><AdminRoute><AdminPendingProducts /></AdminRoute></AnimatedPage>} />
+          <Route path="/admin/products" element={<AnimatedPage><AdminRoute><AdminDashboard /></AdminRoute></AnimatedPage>} />
           <Route path="/vendre" element={<AnimatedPage><SellPage /></AnimatedPage>} />
           <Route path="/reprise" element={<AnimatedPage><RepriseForm /></AnimatedPage>} />
           <Route path="/reprise/list" element={<AnimatedPage><RepriseList /></AnimatedPage>} />
