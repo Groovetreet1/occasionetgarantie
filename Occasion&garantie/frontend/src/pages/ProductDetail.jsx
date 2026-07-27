@@ -38,6 +38,8 @@ export default function ProductDetail() {
   const [submittingRep, setSubmittingRep] = useState(false);
   const [repDone, setRepDone] = useState(false);
   const [vendorReprises, setVendorReprises] = useState([]);
+  const [existingReprise, setExistingReprise] = useState(null);
+  const [checkingReprise, setCheckingReprise] = useState(false);
   const repFileRef = useRef(null);
 
   useEffect(() => {
@@ -54,6 +56,12 @@ export default function ProductDetail() {
       api.get(`/reprises?product_id=${product.id}`).then(res => {
         setVendorReprises(Array.isArray(res.data) ? res.data.filter(r => r.product_id == product.id) : []);
       }).catch(() => {});
+    }
+    if (product && user && user.role !== 'seller') {
+      setCheckingReprise(true);
+      api.get(`/reprises/check/${product.id}`).then(res => {
+        if (res.data.exists) setExistingReprise(res.data.reprise);
+      }).catch(() => {}).finally(() => setCheckingReprise(false));
     }
   }, [product, user]);
 
@@ -231,8 +239,19 @@ export default function ProductDetail() {
                     <div style={{ textAlign: 'center', padding: '12px', background: 'rgba(16,185,129,0.1)', borderRadius: 10, fontSize: 14, color: '#10b981', fontWeight: 600 }}>
                       Reprise soumise ! Le vendeur va vous contacter.
                     </div>
+                  ) : existingReprise ? (
+                    <div style={{ textAlign: 'center', padding: '16px', background: 'rgba(245,158,11,0.1)', borderRadius: 10, fontSize: 14, color: '#f59e0b', fontWeight: 600 }}>
+                      <FiClock size={20} style={{ display: 'block', margin: '0 auto 6px' }} />
+                      Vous avez deja une demande de reprise en attente pour cet article.
+                      <div style={{ fontSize: 12, fontWeight: 400, marginTop: 6, color: 'var(--text-muted)' }}>
+                        Statut: {existingReprise.status === 'en_attente' ? 'En attente' : existingReprise.status === 'estime' ? 'Estime' : 'Accepte'}
+                      </div>
+                    </div>
                   ) : !showReprise ? (
-                    <button onClick={() => setShowReprise(true)} className="btn" style={{
+                    <button onClick={() => {
+                      if (checkingReprise) return;
+                      setShowReprise(true);
+                    }} className="btn" style={{
                       width: '100%', background: 'transparent', border: '2px dashed var(--primary)', color: 'var(--primary)',
                       fontSize: '14px', padding: '12px', justifyContent: 'center', borderRadius: 10, cursor: 'pointer', fontFamily: 'var(--font)',
                     }}>

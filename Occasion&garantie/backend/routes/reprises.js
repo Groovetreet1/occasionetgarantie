@@ -3,6 +3,7 @@ const router = express.Router();
 const pool = require('../config/db');
 const { authenticate } = require('../middleware/auth');
 const { upload } = require('../services/uploader');
+const emails = require('../emails');
 const multer = require('multer');
 const path = require('path');
 const fs = require('fs');
@@ -78,16 +79,31 @@ router.post('/', authenticate, (req, res) => {
 router.get('/', authenticate, async (req, res) => {
   try {
     await ensureTable();
+
+    // Auto-reject pending reprises older than 5 days
+    await pool.query(
+      `UPDATE reprises SET status = 'refuse', vendor_notes = 'Automatiquement refuse - delai de 5 jours depasse'
+       WHERE status = 'en_attente' AND created_at < NOW() - INTERVAL 5 DAY`
+    );
+
     let query, params;
 
     if (req.user.role === 'admin') {
-      query = `SELECT r.*, u.full_name, u.email, u.phone, u.store_name
-               FROM reprises r JOIN users u ON r.user_id = u.id ORDER BY r.created_at DESC`;
+      query = `SELECT r.*, u.full_name, u.email, u.phone, u.store_name,
+               p.name AS product_name, p.images AS product_images
+               FROM reprises r
+               JOIN users u ON r.user_id = u.id
+               LEFT JOIN products p ON r.product_id = p.id
+               ORDER BY r.created_at DESC`;
       params = [];
     } else if (req.user.role === 'seller') {
-      query = `SELECT r.*, u.full_name, u.email, u.phone, u.store_name
-               FROM reprises r JOIN users u ON r.user_id = u.id
-               WHERE (r.vendor_id = ? OR r.vendor_id IS NULL) ORDER BY r.created_at DESC`;
+      query = `SELECT r.*, u.full_name, u.email, u.phone, u.store_name,
+               p.name AS product_name, p.images AS product_images
+               FROM reprises r
+               JOIN users u ON r.user_id = u.id
+               LEFT JOIN products p ON r.product_id = p.id
+               WHERE (r.vendor_id = ? OR r.vendor_id IS NULL)
+               ORDER BY r.created_at DESC`;
       params = [req.user.id];
     } else {
       query = `SELECT r.* FROM reprises r WHERE r.user_id = ? ORDER BY r.created_at DESC`;
@@ -104,6 +120,22 @@ router.get('/', authenticate, async (req, res) => {
     }
 
     res.json(rows);
+  } catch (err) {
+    res.status(500).json({ message: 'Erreur serveur.', error: err.message });
+  }
+});
+
+// Check if user already has a pending reprise for a product
+router.get('/check/:productId', authenticate, async (req, res) => {
+  try {
+    await ensureTable();
+    const [rows] = await pool.query(
+      `SELECT id, status FROM reprises
+       WHERE user_id = ? AND product_id = ? AND status IN ('en_attente','estime','accepte')
+       LIMIT 1`,
+      [req.user.id, req.params.productId]
+    );
+    res.json({ exists: rows.length > 0, reprise: rows[0] || null });
   } catch (err) {
     res.status(500).json({ message: 'Erreur serveur.', error: err.message });
   }
@@ -141,6 +173,33 @@ router.put('/:id', authenticate, async (req, res) => {
       'UPDATE reprises SET estimated_price = ?, status = ?, vendor_notes = ?, vendor_id = COALESCE(vendor_id, ?) WHERE id = ?',
       [estimated_price || null, status || rows[0].status, vendor_notes || null, req.user.id, req.params.id]
     );
+
+    // Send email to client if rejected
+    if (status === 'refuse' && rows[0].status !== 'refuse') {
+      try {
+        const [userRow] = await pool.query('SELECT full_name, email FROM users WHERE id = ?', [rows[0].user_id]);
+        if (userRow.length > 0 && userRow[0].email) {
+          const u = userRow[0];
+          await emails.send({
+            to: u.email,
+            subject: 'Reprise refuse - Occasion & Garantie',
+            html: `<div style="font-family:Arial;max-width:480px;margin:0 auto;padding:24px">
+              <h2 style="font-size:20px;margin-bottom:12px">Bonjour ${u.full_name},</h2>
+              <p style="font-size:14px;color:#444;line-height:1.6">
+                Votre demande de reprise pour <strong>${rows[0].brand} ${rows[0].model}</strong>
+                a ete refuse par le vendeur.
+              </p>
+              <p style="font-size:14px;color:#444;line-height:1.6">
+                Vous pouvez consulter d'autres articles sur notre site.
+              </p>
+              <p style="font-size:12px;color:#888;">Cordialement,<br>L'equipe Occasion & Garantie</p>
+            </div>`,
+          });
+        }
+      } catch (mailErr) {
+        console.error('Reprise rejection email failed:', mailErr.message);
+      }
+    }
 
     res.json({ message: 'Reprise mise a jour.' });
   } catch (err) {
