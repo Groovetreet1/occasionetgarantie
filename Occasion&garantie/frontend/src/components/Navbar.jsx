@@ -179,22 +179,22 @@ export default function Navbar() {
         <button onClick={() => setMobileProdsOpen(o => !o)} style={{
           background: 'none', border: 'none', color: 'inherit', cursor: 'pointer', width: '100%',
           padding: '16px', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 6,
-          fontSize: 14, fontFamily: 'var(--font)',
+          fontSize: 16, fontFamily: 'var(--font)', fontWeight: 500,
         }}>
-          <span className={location.pathname.startsWith('/products') ? 'active' : ''}>Produits</span>
-          <FiChevronDown size={14} style={{ transform: mobileProdsOpen ? 'rotate(180deg)' : 'none', transition: 'transform 0.2s' }} />
+          Produits
+          <FiChevronDown size={16} style={{ transform: mobileProdsOpen ? 'rotate(180deg)' : 'none', transition: 'transform 0.2s' }} />
         </button>
         {mobileProdsOpen && categories.map((cat) => {
           const isActive = location.search === `?category=${cat.slug}`;
           return (
             <Link key={cat.slug} to={`/products?category=${cat.slug}`} onClick={closeMenu}
-              style={{ textAlign: 'center', display: 'block', fontSize: '14px', opacity: 0.7, padding: '8px 16px' }}
+              style={{ display: 'block', fontSize: 16, padding: '16px', opacity: 0.7, fontWeight: 500 }}
               className={isActive ? 'active' : ''}>
-              <cat.icon size={14} style={{ marginRight: 6 }} /> {cat.name}
+              <cat.icon size={16} style={{ marginRight: 6 }} /> {cat.name}
             </Link>
           );
         })}
-        <Link to="/products" onClick={closeMenu} style={{ textAlign: 'center', display: 'block', fontSize: '13px', opacity: 0.6, padding: '8px 16px' }}>Tous les produits →</Link>
+        <Link to="/products" onClick={closeMenu} style={{ display: 'block', fontSize: 16, padding: '16px', opacity: 0.6, fontWeight: 500 }}>Tous les produits →</Link>
         <NavLink to="/about" onClick={closeMenu}>À propos</NavLink>
         {user?.role == 'seller' ? (
           <NavLink to="/reprise/list" onClick={closeMenu}><FiSmartphone size={14} /> Demandes reprise</NavLink>
@@ -213,12 +213,12 @@ export default function Navbar() {
             <NavLink to="/messenger" onClick={closeMenu}><FiMessageCircle size={14} /> Messages</NavLink>
             {user.role !== 'admin' && (
               user.premium ? (
-                <span className="navbar-premium-badge" style={{ padding: '16px', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 8, fontSize: 14 }}>
-                  <FiStar size={14} /> Premium
+                <span className="navbar-premium-badge" style={{ padding: '16px', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 8, fontSize: 16, fontWeight: 500 }}>
+                  <FiStar size={16} /> Premium
                 </span>
               ) : (
-                <button onClick={() => { closeMenu(); setShowPremium(true); }} style={{ padding: '16px', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 8, fontSize: 14, background: 'none', border: 'none', color: 'inherit', cursor: 'pointer', width: '100%' }}>
-                  <FiStar size={14} /> Passer Premium
+                <button onClick={() => { closeMenu(); setShowPremium(true); }} style={{ padding: '16px', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 8, fontSize: 16, fontWeight: 500, background: 'none', border: 'none', color: 'inherit', cursor: 'pointer', width: '100%' }}>
+                  <FiStar size={16} /> Passer Premium
                 </button>
               )
             )}
