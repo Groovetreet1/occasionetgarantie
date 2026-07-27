@@ -23,6 +23,14 @@ export default function AdminPendingProducts() {
     } catch {}
   };
 
+  const approveAll = async () => {
+    try {
+      const res = await api.post('/admin/products/approve-existing');
+      alert(res.data.message);
+      load();
+    } catch {}
+  };
+
   return (
     <section className="admin-dashboard">
       <div className="container" style={{ position: 'relative', zIndex: 1 }}>
@@ -31,6 +39,9 @@ export default function AdminPendingProducts() {
           <h1 style={{ fontSize: 28, fontWeight: 800, display: 'flex', alignItems: 'center', gap: 10 }}>
             <FiPackage size={28} style={{ color: 'var(--primary)' }} /> Produits en attente
           </h1>
+          <button onClick={approveAll} className="btn btn-primary" style={{ fontSize: 13, padding: '8px 16px' }}>
+            <FiCheck size={14} /> Approuver tous les anciens
+          </button>
         </div>
 
         {loading ? (

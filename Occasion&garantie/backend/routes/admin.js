@@ -308,6 +308,15 @@ router.get('/products/pending', authenticate, adminOnly, async (req, res) => {
   }
 });
 
+router.post('/products/approve-existing', authenticate, adminOnly, async (req, res) => {
+  try {
+    const [result] = await pool.query('UPDATE products SET approved = 1 WHERE approved IS NULL OR approved = 0');
+    res.json({ message: `${result.affectedRows} produits approuves.` });
+  } catch (err) {
+    res.status(500).json({ message: 'Erreur serveur.' });
+  }
+});
+
 router.put('/products/:id/approve', authenticate, adminOnly, async (req, res) => {
   try {
     await pool.query('UPDATE products SET approved = TRUE WHERE id = ?', [req.params.id]);
