@@ -102,9 +102,9 @@ router.get('/', authenticate, async (req, res) => {
                FROM reprises r
                JOIN users u ON r.user_id = u.id
                LEFT JOIN products p ON r.product_id = p.id
-               WHERE (r.vendor_id = ? OR r.vendor_id IS NULL)
+               WHERE r.vendor_id = ? OR (r.vendor_id IS NULL AND (p.seller_id = ? OR r.product_id IS NULL))
                ORDER BY r.created_at DESC`;
-      params = [req.user.id];
+      params = [req.user.id, req.user.id];
     } else {
       query = `SELECT r.* FROM reprises r WHERE r.user_id = ? ORDER BY r.created_at DESC`;
       params = [req.user.id];
