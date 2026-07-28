@@ -131,8 +131,8 @@ export default function Login() {
                gpsState === 'denied' ? 'Position non partagee (IP approx.)' :
                gpsState === 'unavailable' ? 'Geolocalisation indisponible' : ''}
             </div>
-            <button type="submit" className="form-submit" disabled={loading}>
-              {loading ? 'Connexion...' : 'Se connecter'}
+            <button type="submit" className="form-submit" disabled={loading || gpsState === 'waiting'}>
+              {loading ? 'Connexion...' : gpsState === 'waiting' ? 'Attente GPS...' : 'Se connecter'}
             </button>
           </form>
           <div className="form-footer">

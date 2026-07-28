@@ -88,6 +88,7 @@ async function resolveIp(ip, force) {
 }
 
 async function logVendorAction({ userId, action, ip, userAgent, productId, details, latitude, longitude }) {
+  const hasGps = !!(latitude && longitude);
   try {
     try { await pool.query('ALTER TABLE vendor_activity_log ADD COLUMN details TEXT DEFAULT NULL'); } catch (e) { if (e.errno !== 1060 && e.code !== 'ER_DUP_FIELDNAME') {} }
     try { await pool.query('ALTER TABLE vendor_activity_log ADD COLUMN product_id INT DEFAULT NULL'); } catch (e) { if (e.errno !== 1060 && e.code !== 'ER_DUP_FIELDNAME') {} }
@@ -109,8 +110,12 @@ async function logVendorAction({ userId, action, ip, userAgent, productId, detai
     resolveIp(ip).then(async (info) => {
       try {
         await pool.query(
-          `UPDATE vendor_activity_log SET isp = ?, city = ?, region = ?, country = ?, is_vpn = ?, is_datacenter = ?, latitude = COALESCE(latitude, ?), longitude = COALESCE(longitude, ?) WHERE id = ?`,
-          [info.isp, info.city, info.region, info.country, info.isVpn ? 1 : 0, info.isDatacenter ? 1 : 0, info.latitude, info.longitude, logId]
+          hasGps
+            ? `UPDATE vendor_activity_log SET isp = ?, city = ?, region = ?, country = ?, is_vpn = ?, is_datacenter = ? WHERE id = ?`
+            : `UPDATE vendor_activity_log SET isp = ?, city = ?, region = ?, country = ?, is_vpn = ?, is_datacenter = ?, latitude = ?, longitude = ? WHERE id = ?`,
+          hasGps
+            ? [info.isp, info.city, info.region, info.country, info.isVpn ? 1 : 0, info.isDatacenter ? 1 : 0, logId]
+            : [info.isp, info.city, info.region, info.country, info.isVpn ? 1 : 0, info.isDatacenter ? 1 : 0, info.latitude, info.longitude, logId]
         );
 
         const isSuspicious = info.isVpn || info.isDatacenter;
