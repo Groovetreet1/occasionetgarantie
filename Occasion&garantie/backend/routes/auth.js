@@ -213,7 +213,7 @@ router.post('/login', [
     try { await pool.query("ALTER TABLE users ADD COLUMN suspension_reason VARCHAR(255) DEFAULT NULL"); } catch (e) { if (e.errno !== 1060 && e.code !== 'ER_DUP_FIELDNAME') console.log('suspension_reason col:', e.message); }
     try { await pool.query("ALTER TABLE users ADD COLUMN vpn_warned_at DATETIME DEFAULT NULL"); } catch (e) { if (e.errno !== 1060 && e.code !== 'ER_DUP_FIELDNAME') console.log('vpn_warned_at col:', e.message); }
 
-    const { email, password } = req.body;
+    const { email, password, latitude, longitude } = req.body;
     const [users] = await pool.query('SELECT * FROM users WHERE email = ?', [email]);
     if (users.length === 0) {
       return res.status(400).json({ message: 'Email ou mot de passe incorrect.' });
@@ -236,12 +236,10 @@ router.post('/login', [
     const token = jwt.sign(
       { id: user.id, email: user.email, role: user.role },
       process.env.JWT_SECRET,
-      { expiresIn: '7d' }
+      { expiresIn: '6h' }
     );
-    if (user.role === 'seller') {
-      const ip = req.headers['x-forwarded-for']?.split(',')[0]?.trim() || req.socket.remoteAddress || 'unknown';
-      logVendorAction({ userId: user.id, action: 'connexion', ip, userAgent: req.headers['user-agent'] });
-    }
+    const ip = req.headers['x-forwarded-for']?.split(',')[0]?.trim() || req.socket.remoteAddress || 'unknown';
+    logVendorAction({ userId: user.id, action: 'connexion', ip, userAgent: req.headers['user-agent'], latitude, longitude });
     res.json({
       token,
       user: { id: user.id, fullName: user.full_name, email: user.email, phone: user.phone, role: user.role, phoneVerified: true }
@@ -522,7 +520,7 @@ router.post('/verify-upgrade', authenticate, [
     const token = jwt.sign(
       { id: req.user.id, email: req.user.email, role: 'seller' },
       process.env.JWT_SECRET,
-      { expiresIn: '7d' }
+      { expiresIn: '6h' }
     );
     const [users] = await pool.query('SELECT id, full_name, email, phone, role, phone_verified, created_at, store_name, premium, premium_expires_at, avatar FROM users WHERE id = ?', [req.user.id]);
     res.json({ message: 'Compte vendeur active avec succes.', token, user: users[0] });

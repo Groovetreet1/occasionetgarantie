@@ -46,9 +46,9 @@ async function fetchJson(url, timeoutMs = 5000) {
   }
 }
 
-async function resolveIp(ip) {
-  if (CACHE[ip]) return CACHE[ip];
-  const def = { isp: 'Inconnu', city: null, region: null, country: null, isVpn: false, isDatacenter: false };
+async function resolveIp(ip, force) {
+  if (!force && CACHE[ip]) return CACHE[ip];
+  const def = { isp: 'Inconnu', city: null, region: null, country: null, latitude: null, longitude: null, isVpn: false, isDatacenter: false };
   if (!ip || ip === 'unknown' || ip === '127.0.0.1' || ip === '::1' || ip === '::ffff:127.0.0.1') return { ...def, isp: 'Local' };
 
   const json = await fetchJson(`https://api.ipapi.is/?q=${ip}`);
@@ -58,6 +58,8 @@ async function resolveIp(ip) {
       city: json.city || json.location?.city || null,
       region: json.regionName || json.location?.state || null,
       country: json.country || json.location?.country || null,
+      latitude: json.location?.latitude ?? json.latitude ?? null,
+      longitude: json.location?.longitude ?? json.longitude ?? null,
       isVpn: !!(json.is_vpn || json.is_proxy || json.is_tor),
       isDatacenter: !!(json.is_datacenter || json.company?.type === 'hosting'),
     };
@@ -65,13 +67,15 @@ async function resolveIp(ip) {
     return result;
   }
 
-  const json2 = await fetchJson(`http://ip-api.com/json/${ip}?fields=status,isp,org,country,regionName,city`);
+  const json2 = await fetchJson(`http://ip-api.com/json/${ip}?fields=status,isp,org,country,regionName,city,lat,lon`);
   if (json2 && json2.status === 'success') {
     const result = {
       isp: json2.isp || json2.org || 'Inconnu',
       city: json2.city || null,
       region: json2.regionName || null,
       country: json2.country || null,
+      latitude: json2.lat || null,
+      longitude: json2.lon || null,
       isVpn: false,
       isDatacenter: false,
     };
@@ -83,7 +87,7 @@ async function resolveIp(ip) {
   return def;
 }
 
-async function logVendorAction({ userId, action, ip, userAgent, productId, details }) {
+async function logVendorAction({ userId, action, ip, userAgent, productId, details, latitude, longitude }) {
   try {
     try { await pool.query('ALTER TABLE vendor_activity_log ADD COLUMN details TEXT DEFAULT NULL'); } catch (e) { if (e.errno !== 1060 && e.code !== 'ER_DUP_FIELDNAME') {} }
     try { await pool.query('ALTER TABLE vendor_activity_log ADD COLUMN product_id INT DEFAULT NULL'); } catch (e) { if (e.errno !== 1060 && e.code !== 'ER_DUP_FIELDNAME') {} }
@@ -93,18 +97,20 @@ async function logVendorAction({ userId, action, ip, userAgent, productId, detai
     try { await pool.query('ALTER TABLE vendor_activity_log ADD COLUMN is_vpn TINYINT(1) DEFAULT 0'); } catch (e) { if (e.errno !== 1060 && e.code !== 'ER_DUP_FIELDNAME') {} }
     try { await pool.query('ALTER TABLE vendor_activity_log ADD COLUMN vpn_warned_at DATETIME DEFAULT NULL'); } catch (e) { if (e.errno !== 1060 && e.code !== 'ER_DUP_FIELDNAME') {} }
     try { await pool.query("ALTER TABLE vendor_activity_log ADD COLUMN is_datacenter TINYINT(1) DEFAULT 0"); } catch (e) { if (e.errno !== 1060 && e.code !== 'ER_DUP_FIELDNAME') {} }
+    try { await pool.query("ALTER TABLE vendor_activity_log ADD COLUMN latitude DECIMAL(10,7) DEFAULT NULL"); } catch (e) { if (e.errno !== 1060 && e.code !== 'ER_DUP_FIELDNAME') {} }
+    try { await pool.query("ALTER TABLE vendor_activity_log ADD COLUMN longitude DECIMAL(10,7) DEFAULT NULL"); } catch (e) { if (e.errno !== 1060 && e.code !== 'ER_DUP_FIELDNAME') {} }
 
     const [result] = await pool.query(
-      `INSERT INTO vendor_activity_log (user_id, action, ip_address, user_agent, product_id, details) VALUES (?, ?, ?, ?, ?, ?)`,
-      [userId, action, ip, userAgent || null, productId || null, details || null]
+      `INSERT INTO vendor_activity_log (user_id, action, ip_address, user_agent, product_id, details, latitude, longitude) VALUES (?, ?, ?, ?, ?, ?, ?, ?)`,
+      [userId, action, ip, userAgent || null, productId || null, details || null, latitude || null, longitude || null]
     );
     const logId = result.insertId;
 
     resolveIp(ip).then(async (info) => {
       try {
         await pool.query(
-          `UPDATE vendor_activity_log SET isp = ?, city = ?, region = ?, country = ?, is_vpn = ?, is_datacenter = ? WHERE id = ?`,
-          [info.isp, info.city, info.region, info.country, info.isVpn ? 1 : 0, info.isDatacenter ? 1 : 0, logId]
+          `UPDATE vendor_activity_log SET isp = ?, city = ?, region = ?, country = ?, is_vpn = ?, is_datacenter = ?, latitude = COALESCE(latitude, ?), longitude = COALESCE(longitude, ?) WHERE id = ?`,
+          [info.isp, info.city, info.region, info.country, info.isVpn ? 1 : 0, info.isDatacenter ? 1 : 0, info.latitude, info.longitude, logId]
         );
 
         const isSuspicious = info.isVpn || info.isDatacenter;

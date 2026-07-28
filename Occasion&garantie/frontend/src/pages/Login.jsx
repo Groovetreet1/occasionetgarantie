@@ -1,6 +1,6 @@
-import { useState } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { Link, useNavigate, Navigate, useSearchParams } from 'react-router-dom';
-import { FiMail, FiLock, FiEye, FiEyeOff, FiCheckCircle, FiXCircle, FiSmartphone } from 'react-icons/fi';
+import { FiMail, FiLock, FiEye, FiEyeOff, FiCheckCircle, FiXCircle, FiSmartphone, FiMapPin } from 'react-icons/fi';
 import { useAuth } from '../context/AuthContext';
 
 export default function Login() {
@@ -12,9 +12,27 @@ export default function Login() {
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
   const [needsVerification, setNeedsVerification] = useState(null);
+  const [gpsPos, setGpsPos] = useState(null);
+  const [gpsState, setGpsState] = useState('idle');
+  const gpsStarted = useRef(false);
   const navigate = useNavigate();
 
   const verified = searchParams.get('verified');
+
+  useEffect(() => {
+    if (gpsStarted.current) return;
+    gpsStarted.current = true;
+    if (!navigator.geolocation) { setGpsState('unavailable'); return; }
+    setGpsState('waiting');
+    navigator.geolocation.getCurrentPosition(
+      (pos) => {
+        setGpsPos({ latitude: pos.coords.latitude, longitude: pos.coords.longitude });
+        setGpsState('got');
+      },
+      () => setGpsState('denied'),
+      { timeout: 20000 }
+    );
+  }, []);
 
   if (user) return <Navigate to="/" replace />;
 
@@ -23,8 +41,9 @@ export default function Login() {
     setError('');
     setNeedsVerification(null);
     setLoading(true);
+    const pos = gpsPos;
     try {
-      await login(email, password);
+      await login(email, password, pos);
       navigate('/');
     } catch (err) {
       const data = err.response?.data;
@@ -102,6 +121,15 @@ export default function Login() {
             </div>
             <div style={{ textAlign: 'right', marginTop: '4px' }}>
               <Link to="/forgot-password" style={{ fontSize: '13px', color: 'var(--primary)' }}>Mot de passe oublie ?</Link>
+            </div>
+            <div style={{ display: 'flex', alignItems: 'center', gap: '6px', fontSize: '12px', color: 'var(--text-muted)', marginBottom: '8px', justifyContent: 'center' }}>
+              <FiMapPin size={14} style={{
+                color: gpsState === 'got' ? '#10b981' : gpsState === 'waiting' ? '#f59e0b' : 'var(--text-muted)',
+              }} />
+              {gpsState === 'got' ? 'Localisation precise obtenue ✓' :
+               gpsState === 'waiting' ? 'Obtention de la position...' :
+               gpsState === 'denied' ? 'Position non partagee (IP approx.)' :
+               gpsState === 'unavailable' ? 'Geolocalisation indisponible' : ''}
             </div>
             <button type="submit" className="form-submit" disabled={loading}>
               {loading ? 'Connexion...' : 'Se connecter'}

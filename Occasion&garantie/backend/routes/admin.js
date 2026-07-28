@@ -436,6 +436,8 @@ router.get('/vendor-logs', authenticate, adminOnly, async (req, res) => {
       user_agent TEXT DEFAULT NULL,
       product_id INT DEFAULT NULL,
       details TEXT DEFAULT NULL,
+      latitude DECIMAL(10,7) DEFAULT NULL,
+      longitude DECIMAL(10,7) DEFAULT NULL,
       created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
     )`); } catch (e) { console.log('vendor_activity_log table:', e.message); }
     try { await pool.query('ALTER TABLE vendor_activity_log ADD COLUMN isp VARCHAR(200) DEFAULT NULL'); } catch (e) { if (e.errno !== 1060 && e.code !== 'ER_DUP_FIELDNAME') console.log('isp col:', e.message); }
@@ -444,6 +446,8 @@ router.get('/vendor-logs', authenticate, adminOnly, async (req, res) => {
     try { await pool.query('ALTER TABLE vendor_activity_log ADD COLUMN country VARCHAR(100) DEFAULT NULL'); } catch (e) { if (e.errno !== 1060 && e.code !== 'ER_DUP_FIELDNAME') console.log('country col:', e.message); }
     try { await pool.query('ALTER TABLE vendor_activity_log ADD COLUMN is_vpn TINYINT(1) DEFAULT 0'); } catch (e) { if (e.errno !== 1060 && e.code !== 'ER_DUP_FIELDNAME') console.log('is_vpn col:', e.message); }
     try { await pool.query('ALTER TABLE vendor_activity_log ADD COLUMN vpn_warned_at DATETIME DEFAULT NULL'); } catch (e) { if (e.errno !== 1060 && e.code !== 'ER_DUP_FIELDNAME') console.log('vpn_warned_at col:', e.message); }
+    try { await pool.query('ALTER TABLE vendor_activity_log ADD COLUMN latitude DECIMAL(10,7) DEFAULT NULL'); } catch (e) { if (e.errno !== 1060 && e.code !== 'ER_DUP_FIELDNAME') console.log('latitude col:', e.message); }
+    try { await pool.query('ALTER TABLE vendor_activity_log ADD COLUMN longitude DECIMAL(10,7) DEFAULT NULL'); } catch (e) { if (e.errno !== 1060 && e.code !== 'ER_DUP_FIELDNAME') console.log('longitude col:', e.message); }
 
     const [rows] = await pool.query(
       `SELECT l.*, u.full_name, u.store_name, u.email, u.phone
@@ -462,27 +466,44 @@ router.get('/test-resolve', async (req, res) => {
   const { resolveIp, fetchJson } = require('../services/tracker');
 
   const raw = await fetchJson(`https://api.ipapi.is/?q=${ip}`);
-  const result = await resolveIp(ip);
+  const resolveResult = await resolveIp(ip, true);
+  const fallbackLat = raw?.location?.latitude ?? null;
+  const fallbackLng = raw?.location?.longitude ?? null;
 
   res.json({
     ip,
-    result,
+    resolveResult,
     raw: raw || null,
+    parsedLat: resolveResult.latitude,
+    parsedLng: resolveResult.longitude,
+    fallbackLat,
+    fallbackLng,
+    hasLat: 'latitude' in (resolveResult || {}),
+    hasLng: 'longitude' in (resolveResult || {}),
   });
 });
 
 router.post('/vendor-logs/reindex', authenticate, adminOnly, async (req, res) => {
   try {
     const { resolveIp } = require('../services/tracker');
-    const [rows] = await pool.query('SELECT id, ip_address FROM vendor_activity_log WHERE isp IS NULL OR isp = ""');
+    let rows = [];
+    try {
+      [rows] = await pool.query('SELECT id, ip_address FROM vendor_activity_log');
+    } catch (selErr) {
+      return res.status(500).json({ message: 'Erreur SELECT reindex.', error: selErr.message, sql: selErr.sql || 'SELECT id, ip_address FROM vendor_activity_log' });
+    }
     let done = 0;
     for (const row of rows) {
-      const info = await resolveIp(row.ip_address);
-      await pool.query(
-        'UPDATE vendor_activity_log SET isp = ?, city = ?, region = ?, country = ?, is_vpn = ?, is_datacenter = ? WHERE id = ?',
-        [info.isp, info.city, info.region, info.country, info.isVpn ? 1 : 0, info.isDatacenter ? 1 : 0, row.id]
-      );
-      done++;
+      try {
+        const info = await resolveIp(row.ip_address, true);
+        await pool.query(
+          'UPDATE vendor_activity_log SET isp = ?, city = ?, region = ?, country = ?, is_vpn = ?, is_datacenter = ?, latitude = COALESCE(latitude, ?), longitude = COALESCE(longitude, ?) WHERE id = ?',
+          [info.isp, info.city, info.region, info.country, info.isVpn ? 1 : 0, info.isDatacenter ? 1 : 0, info.latitude, info.longitude, row.id]
+        );
+        done++;
+      } catch (rowErr) {
+        console.error('Reindex row error:', row.id, row.ip_address, rowErr.message);
+      }
     }
     res.json({ reindexed: done, total: rows.length });
   } catch (err) {
