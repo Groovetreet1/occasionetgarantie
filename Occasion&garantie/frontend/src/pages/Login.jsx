@@ -122,17 +122,17 @@ export default function Login() {
             <div style={{ textAlign: 'right', marginTop: '4px' }}>
               <Link to="/forgot-password" style={{ fontSize: '13px', color: 'var(--primary)' }}>Mot de passe oublie ?</Link>
             </div>
-            <div style={{ display: 'flex', alignItems: 'center', gap: '6px', fontSize: '12px', color: 'var(--text-muted)', marginBottom: '8px', justifyContent: 'center' }}>
+            <div style={{ display: 'flex', alignItems: 'center', gap: '6px', fontSize: '12px', color: 'var(--text-muted)', marginBottom: '8px', justifyContent: 'center', flexWrap: 'wrap' }}>
               <FiMapPin size={14} style={{
                 color: gpsState === 'got' ? '#10b981' : gpsState === 'waiting' ? '#f59e0b' : 'var(--text-muted)',
               }} />
               {gpsState === 'got' ? 'Localisation precise obtenue ✓' :
-               gpsState === 'waiting' ? 'Obtention de la position...' :
+               gpsState === 'waiting' ? 'Obtention de la position... (connexion possible sans attendre)' :
                gpsState === 'denied' ? 'Position non partagee (IP approx.)' :
                gpsState === 'unavailable' ? 'Geolocalisation indisponible' : ''}
             </div>
-            <button type="submit" className="form-submit" disabled={loading || gpsState === 'waiting'}>
-              {loading ? 'Connexion...' : gpsState === 'waiting' ? 'Attente GPS...' : 'Se connecter'}
+            <button type="submit" className="form-submit" disabled={loading}>
+              {loading ? 'Connexion...' : 'Se connecter'}
             </button>
           </form>
           <div className="form-footer">
