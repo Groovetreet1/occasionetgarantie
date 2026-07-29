@@ -129,13 +129,13 @@ const PORT = process.env.PORT || 5000;
 
 const limiter = rateLimit({
   windowMs: 15 * 60 * 1000,
-  max: 100,
+  max: 1000,
   message: { message: 'Trop de requêtes. Réessayez dans 15 minutes.' },
 });
 
 const authLimiter = rateLimit({
   windowMs: 15 * 60 * 1000,
-  max: 20,
+  max: 60,
   message: { message: 'Trop de tentatives. Réessayez dans 15 minutes.' },
 });
 
