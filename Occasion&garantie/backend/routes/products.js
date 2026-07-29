@@ -26,7 +26,7 @@ async function validateCategory(categoryId) {
 // Public: list products (only disponible)
 router.get('/', async (req, res) => {
   try {
-    const { category, search, min, max, state, sort, seller, ville } = req.query;
+    const { category, search, min, max, state, sort, seller, ville, user_ville } = req.query;
     let sql = `
       SELECT p.*, c.name as category_name,
              u.store_name as seller_name, u.store_logo as seller_logo, u.avatar as seller_avatar, u.premium as seller_premium,
@@ -48,6 +48,10 @@ router.get('/', async (req, res) => {
     if (ville) { sql += ' AND p.ville = ?'; params.push(ville); }
 
     sql += ' ORDER BY (u.premium = TRUE AND (u.premium_expires_at IS NULL OR u.premium_expires_at > NOW())) DESC';
+    if (user_ville) {
+      sql += ', CASE WHEN p.ville = ? THEN 0 ELSE 1 END';
+      params.push(user_ville);
+    }
     if (sort === 'price_asc') sql += ', p.price ASC';
     else if (sort === 'price_desc') sql += ', p.price DESC';
     else if (sort === 'newest') sql += ', p.created_at DESC';

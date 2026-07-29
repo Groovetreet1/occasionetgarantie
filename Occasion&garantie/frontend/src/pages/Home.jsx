@@ -1,7 +1,7 @@
 import { Link, useNavigate } from 'react-router-dom';
 import { useEffect, useState } from 'react';
 import { motion } from 'framer-motion';
-import { FiSmartphone, FiShield, FiArrowRight, FiTrendingUp, FiShoppingBag, FiStar, FiSearch, FiMapPin } from 'react-icons/fi';
+import { FiSmartphone, FiShield, FiArrowRight, FiTrendingUp, FiShoppingBag, FiStar, FiSearch, FiMapPin, FiNavigation } from 'react-icons/fi';
 import api from '../api/axios';
 import ProductCard from '../components/ProductCard';
 import TrustBar from '../components/TrustBar';
@@ -37,6 +37,8 @@ export default function Home() {
   const [selectedCity, setSelectedCity] = useState('');
   const [loading, setLoading] = useState(true);
   const [cities, setCities] = useState(MOROCCAN_CITIES);
+  const [userCity, setUserCity] = useState('');
+  const [geoLoading, setGeoLoading] = useState(true);
 
   useEffect(() => { document.title = 'Occasion & Garantie - Achetez et vendez des produits électroniques d\'occasion au Maroc'; }, []);
 
@@ -45,10 +47,31 @@ export default function Home() {
   }, []);
 
   useEffect(() => {
-    api.get('/products?sort=newest').then(res => {
+    if ('geolocation' in navigator) {
+      navigator.geolocation.getCurrentPosition(async (pos) => {
+        try {
+          const res = await fetch(`https://api.bigdatacloud.net/data/reverse-geocode-client?latitude=${pos.coords.latitude}&longitude=${pos.coords.longitude}&localityLanguage=fr`);
+          const data = await res.json();
+          const city = data.city || data.locality || data.principalSubdivision || '';
+          if (city) {
+            const found = MOROCCAN_CITIES.find(c => city.toLowerCase().includes(c.toLowerCase()) || c.toLowerCase().includes(city.toLowerCase()));
+            setUserCity(found || city);
+          }
+        } catch {}
+        setGeoLoading(false);
+      }, () => setGeoLoading(false), { timeout: 8000 });
+    } else {
+      setGeoLoading(false);
+    }
+  }, []);
+
+  useEffect(() => {
+    const params = new URLSearchParams({ sort: 'newest' });
+    if (userCity) params.set('user_ville', userCity);
+    api.get(`/products?${params}`).then(res => {
       setProducts(res.data.slice(0, 20));
     }).catch(() => {}).finally(() => setLoading(false));
-  }, []);
+  }, [userCity]);
 
   const handleSearch = (e) => {
     e.preventDefault();
@@ -68,6 +91,11 @@ export default function Home() {
           <div className="avito-hero-content">
             <h1>Occasion & Garantie</h1>
             <p className="avito-hero-sub">Des milliers d'annonces. Achetez et vendez en toute confiance.</p>
+            {userCity && (
+              <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 6, marginBottom: 16, fontSize: 13, color: 'rgba(0,0,0,0.6)' }}>
+                <FiNavigation size={14} /> Annonces proches de <strong>{userCity}</strong>
+              </div>
+            )}
             <form onSubmit={handleSearch} className="avito-search-bar">
               <div className="avito-search-input-wrap">
                 <FiSearch size={18} className="avito-search-icon" />
@@ -99,8 +127,8 @@ export default function Home() {
         <div className="container">
           <div className="section-header">
             <div>
-              <h2 className="section-title">Dernieres annonces</h2>
-              <p className="section-subtitle">{products.length} telephones disponibles a la vente</p>
+              <h2 className="section-title">{userCity ? `A proximite de ${userCity}` : 'Dernieres annonces'}</h2>
+              <p className="section-subtitle">{products.length} telephones disponibles a la vente{userCity ? ` pres de chez vous` : ''}</p>
             </div>
             <Link to="/products" className="btn btn-secondary">Voir tout <FiArrowRight size={16} /></Link>
           </div>

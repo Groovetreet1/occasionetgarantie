@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react';
 import { useSearchParams } from 'react-router-dom';
-import { FiSearch, FiSliders, FiPackage, FiX, FiGrid, FiList } from 'react-icons/fi';
+import { FiSearch, FiSliders, FiPackage, FiX, FiGrid, FiList, FiNavigation } from 'react-icons/fi';
 
 import { motion } from 'framer-motion';
 import api from '../api/axios';
@@ -15,6 +15,12 @@ const CATEGORIES = ['Tous', 'Smartphones', 'Tablettes', 'Ordinateurs', 'Accessoi
 
 const fadeUp = { hidden: { opacity: 0, y: 24 }, show: { opacity: 1, y: 0, transition: { duration: 0.4 } } };
 
+const MOROCCAN_CITIES = [
+  'Casablanca', 'Rabat', 'Marrakech', 'Fes', 'Tanger', 'Agadir', 'Meknes', 'Oujda',
+  'Kenitra', 'Tetouan', 'Safi', 'El Jadida', 'Beni Mellal', 'Nador', 'Taza',
+  'Mohammedia', 'Laayoune', 'Khouribga', 'Settat', 'Berrechid',
+];
+
 export default function Products() {
   const [searchParams] = useSearchParams();
   const [allProducts, setAllProducts] = useState([]);
@@ -26,6 +32,7 @@ export default function Products() {
   const [priceMin, setPriceMin] = useState('');
   const [priceMax, setPriceMax] = useState('');
   const [visibleCount, setVisibleCount] = useState(12);
+  const [userCity, setUserCity] = useState('');
 
   useEffect(() => { document.title = 'Tous les produits - Occasion & Garantie'; }, []);
 
@@ -35,12 +42,31 @@ export default function Products() {
   }, [searchParams]);
 
   useEffect(() => {
+    if ('geolocation' in navigator) {
+      navigator.geolocation.getCurrentPosition(async (pos) => {
+        try {
+          const res = await fetch(`https://api.bigdatacloud.net/data/reverse-geocode-client?latitude=${pos.coords.latitude}&longitude=${pos.coords.longitude}&localityLanguage=fr`);
+          const data = await res.json();
+          const city = data.city || data.locality || data.principalSubdivision || '';
+          if (city) {
+            const found = MOROCCAN_CITIES.find(c => city.toLowerCase().includes(c.toLowerCase()) || c.toLowerCase().includes(c.toLowerCase()));
+            setUserCity(found || city);
+          }
+        } catch {}
+      }, () => {}, { timeout: 8000 });
+    }
+  }, []);
+
+  useEffect(() => {
     setLoading(true);
-    api.get(`/products${search ? `?search=${search}` : ''}`)
+    const params = new URLSearchParams();
+    if (search) params.set('search', search);
+    if (userCity) params.set('user_ville', userCity);
+    api.get(`/products${params.toString() ? `?${params}` : ''}`)
       .then(res => setAllProducts(res.data))
       .catch(() => {})
       .finally(() => setLoading(false));
-  }, [search]);
+  }, [search, userCity]);
 
   const filtered = allProducts.filter(p => {
     if (category !== 'Tous' && p.category_name !== category) return false;
@@ -59,7 +85,10 @@ export default function Products() {
   const handleSearchSubmit = (e) => {
     e.preventDefault();
     setLoading(true);
-    api.get(`/products${search ? `?search=${search}` : ''}`)
+    const params = new URLSearchParams();
+    if (search) params.set('search', search);
+    if (userCity) params.set('user_ville', userCity);
+    api.get(`/products${params.toString() ? `?${params}` : ''}`)
       .then(res => setAllProducts(res.data))
       .catch(() => {})
       .finally(() => setLoading(false));
@@ -67,12 +96,11 @@ export default function Products() {
 
   return (
     <section className="products-page">
-      {/* Header */}
       <div className="products-page-hero">
         <div className="container">
           <motion.div initial="hidden" animate="show" variants={fadeUp}>
             <h1>Marketplace</h1>
-            <p>{filtered.length} article{filtered.length > 1 ? 's' : ''} disponible{filtered.length > 1 ? 's' : ''}</p>
+            <p>{filtered.length} article{filtered.length > 1 ? 's' : ''} disponible{filtered.length > 1 ? 's' : ''}{userCity ? ` près de ${userCity}` : ''}</p>
           </motion.div>
           <motion.form initial="hidden" animate="show" variants={fadeUp} onSubmit={handleSearchSubmit} className="products-page-search">
             <FiSearch size={18} />
@@ -83,7 +111,6 @@ export default function Products() {
       </div>
 
       <div className="products-page-body container">
-        {/* Categories pills */}
         <motion.div className="products-categories" initial="hidden" animate="show" variants={fadeUp}>
           {CATEGORIES.map(c => (
             <button key={c} className={`cat-pill ${category === c ? 'active' : ''}`} onClick={() => { setCategory(c); setVisibleCount(12); }}>
@@ -92,8 +119,12 @@ export default function Products() {
           ))}
         </motion.div>
 
-        {/* Toolbar */}
         <div className="products-toolbar">
+          {userCity && (
+            <span style={{ fontSize: 12, color: 'var(--primary)', display: 'flex', alignItems: 'center', gap: 4, background: 'var(--primary-light)', padding: '4px 10px', borderRadius: 8 }}>
+              <FiNavigation size={14} /> {userCity}
+            </span>
+          )}
           <button className={`btn ${hasFilters ? 'btn-primary' : 'btn-outline'}`} onClick={() => setShowFilters(o => !o)}>
             <FiSliders size={14} /> Filtres{hasFilters ? ` (${[category !== 'Tous', stateFilter !== 'Tous', !!priceMin || !!priceMax].filter(Boolean).length})` : ''}
           </button>
@@ -103,7 +134,6 @@ export default function Products() {
           <span className="products-count">{filtered.length} résultat{filtered.length > 1 ? 's' : ''}</span>
         </div>
 
-        {/* Filters panel */}
         {showFilters && (
           <motion.div initial={{ opacity: 0, y: -8 }} animate={{ opacity: 1, y: 0 }} className="filters-panel">
             <div className="filters-header">
@@ -140,7 +170,6 @@ export default function Products() {
           </motion.div>
         )}
 
-        {/* Products grid */}
         {loading ? (
           <div className="products-loading"><div className="spinner" /></div>
         ) : filtered.length > 0 ? (
