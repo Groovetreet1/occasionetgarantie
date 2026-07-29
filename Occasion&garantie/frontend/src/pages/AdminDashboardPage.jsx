@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
-import { FiCreditCard, FiClock, FiPackage, FiUsers, FiArrowLeft, FiTrendingUp, FiPlus, FiHeadphones, FiShield, FiMonitor, FiSmartphone } from 'react-icons/fi';
+import { FiCreditCard, FiClock, FiPackage, FiUsers, FiArrowLeft, FiTrendingUp, FiPlus, FiHeadphones, FiShield, FiMonitor, FiSmartphone, FiUserCheck } from 'react-icons/fi';
 import api from '../api/axios';
 
 function CardWrapper({ link, children, ...rest }) {
@@ -72,6 +72,9 @@ export default function AdminDashboardPage() {
     { title: 'Reprises', icon: FiSmartphone, color: '#10b981', bg: 'rgba(16,185,129,0.1)', items: [
       { label: 'En attente', value: stats.pendingReprises ?? '...' },
     ], link: '/reprise/list' },
+    { title: 'Comptes Vendeur', icon: FiUserCheck, color: '#06b6d4', bg: 'rgba(6,182,212,0.1)', items: [
+      { label: 'Gerer les comptes', value: 'Creer / Supprimer' },
+    ], link: '/admin/managed-vendors' },
     { title: 'Journal Vendeurs', icon: FiMonitor, color: '#6366f1', bg: 'rgba(99,102,241,0.1)', items: [
       { label: 'Activite', value: 'IP, ISP, UA' },
     ], link: '/admin/vendor-logs' },

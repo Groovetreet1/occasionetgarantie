@@ -2,6 +2,7 @@ const express = require('express');
 const router = express.Router();
 const pool = require('../config/db');
 const { authenticate } = require('../middleware/auth');
+const emails = require('../emails');
 
 (async () => {
   try {
@@ -48,6 +49,27 @@ router.post('/conversations', authenticate, async (req, res) => {
       [req.user.id, sellerId, productId || null, productName || null]
     );
     const conv = { id: result.insertId, buyer_id: req.user.id, seller_id: sellerId, product_id: productId, product_name: productName };
+
+    try {
+      const [sellerRows] = await pool.query('SELECT admin_managed_id FROM users WHERE id = ?', [sellerId]);
+      if (sellerRows.length > 0 && sellerRows[0].admin_managed_id) {
+        const [adminRows] = await pool.query('SELECT email FROM users WHERE id = ?', [sellerRows[0].admin_managed_id]);
+        if (adminRows.length > 0) {
+          const buyer = req.user;
+          const msg = "Nouveau message recu sur un compte vendeur gere.<br><br>" +
+            "<strong>Vendeur :</strong> " + (conv.product_name || '#' + sellerId) + "<br>" +
+            "<strong>Client :</strong> " + (buyer.fullName || buyer.full_name || 'Inconnu') + " (" + (buyer.email || '') + ")<br>" +
+            "<strong>Message :</strong> (aucun message pour l'instant, conversation ouverte)<br><br>" +
+            "Connectez-vous au compte vendeur pour repondre.";
+          await emails.send({
+            to: adminRows[0].email,
+            subject: 'Nouvelle conversation - Compte vendeur',
+            html: '<div style="font-family:sans-serif;max-width:560px;margin:0 auto;padding:20px"><h2>Nouvelle conversation</h2>' + msg + '</div>'
+          });
+        }
+      }
+    } catch (e) { console.error('Managed vendor notification error:', e.message); }
+
     res.status(201).json(conv);
   } catch (err) {
     console.error('POST /conversations:', err.message);
@@ -152,6 +174,33 @@ router.post('/conversations/:id/messages', authenticate, async (req, res) => {
       [req.params.id, req.user.id, text.trim()]
     );
     const msg = { id: result.insertId, conversation_id: Number(req.params.id), sender_id: req.user.id, text: text.trim(), created_at: new Date().toISOString(), sender_name: req.user.fullName || req.user.full_name };
+
+    try {
+      const conv = convs[0];
+      const recipientId = conv.buyer_id === req.user.id ? conv.seller_id : conv.buyer_id;
+      const [userRows] = await pool.query('SELECT admin_managed_id, full_name, store_name, email FROM users WHERE id = ?', [recipientId]);
+      if (userRows.length > 0 && userRows[0].admin_managed_id) {
+        const [adminRows] = await pool.query('SELECT email FROM users WHERE id = ?', [userRows[0].admin_managed_id]);
+        if (adminRows.length > 0) {
+          const sellerName = userRows[0].store_name || userRows[0].full_name || 'Vendeur #' + recipientId;
+          await emails.send({
+            to: adminRows[0].email,
+            subject: 'Nouveau message pour ' + sellerName,
+            html: '<div style="font-family:sans-serif;max-width:560px;margin:0 auto;padding:20px">' +
+              '<h2 style="color:#3b82f6;">Nouveau message recu</h2>' +
+              '<div style="background:#f8fafc;padding:16px;border-radius:8px;margin:12px 0">' +
+              '<p><strong>Vendeur :</strong> ' + sellerName + ' (' + userRows[0].email + ')</p>' +
+              '<p><strong>Produit :</strong> ' + (conv.product_name || 'N/A') + '</p>' +
+              '<p><strong>Message :</strong><br><em>' + text.trim().substring(0, 200) + '</em></p>' +
+              '</div>' +
+              '<p><a href="https://www.occasionetgarantie.store/messenger/' + conv.id + '" style="display:inline-block;background:#3b82f6;color:#fff;padding:10px 20px;border-radius:8px;text-decoration:none">Voir la conversation</a></p>' +
+              '<p style="font-size:12px;color:#888;margin-top:16px">Connectez-vous au compte vendeur pour repondre.</p>' +
+              '</div>'
+          });
+        }
+      }
+    } catch (e) { console.error('Managed vendor message notification error:', e.message); }
+
     res.status(201).json(msg);
   } catch (err) {
     console.error('POST /conversations/:id/messages:', err.message);
