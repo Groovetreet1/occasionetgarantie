@@ -1,7 +1,7 @@
 import { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
-import { FiPlus, FiEdit2, FiTrash2, FiPackage, FiCheckCircle, FiPercent, FiCreditCard, FiDollarSign, FiX, FiCopy, FiCheck, FiUpload, FiLock, FiStar, FiSmartphone, FiArrowRight, FiClock, FiAlertCircle, FiEye } from 'react-icons/fi';
+import { FiPlus, FiEdit2, FiTrash2, FiPackage, FiCheckCircle, FiPercent, FiCreditCard, FiDollarSign, FiX, FiCopy, FiCheck, FiUpload, FiLock, FiStar, FiSmartphone, FiArrowRight, FiClock, FiAlertCircle, FiEye, FiInfo } from 'react-icons/fi';
 import api from '../api/axios';
 import { useAuth } from '../context/AuthContext';
 import SellerNav from '../components/SellerNav';
@@ -38,6 +38,7 @@ export default function SellerDashboard() {
   const [copiedField, setCopiedField] = useState(null);
   const [sellerRatings, setSellerRatings] = useState(null);
   const [pendingReprises, setPendingReprises] = useState([]);
+  const [rejectedPopup, setRejectedPopup] = useState(null);
   useEffect(() => {
     Promise.allSettled([
       api.get('/seller/me'),
@@ -317,39 +318,6 @@ export default function SellerDashboard() {
             </div>
           )}
 
-          {(() => {
-            const rejected = products.filter(p => p.rejection_reason);
-            if (rejected.length === 0) return null;
-            return (
-              <div style={{ background: 'var(--bg-card)', border: '1px solid rgba(239,68,68,0.3)', borderRadius: 'var(--radius-lg)', padding: 16, marginTop: 16 }}>
-                <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 12 }}>
-                  <FiAlertCircle size={18} color="#dc2626" />
-                  <span style={{ fontWeight: 700, fontSize: 15, color: '#dc2626' }}>Annonces refusées ({rejected.length})</span>
-                </div>
-                <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
-                  {rejected.map(p => (
-                    <div key={p.id} style={{
-                      display: 'flex', alignItems: 'center', gap: 10, padding: '10px 12px',
-                      background: 'rgba(239,68,68,0.04)', borderRadius: 10, fontSize: 13,
-                    }}>
-                      {p.image && <img src={p.image.startsWith('http') ? p.image : `/uploads/${p.image}`} alt="" style={{ width: 40, height: 40, borderRadius: 6, objectFit: 'cover' }} />}
-                      <div style={{ flex: 1, minWidth: 0 }}>
-                        <div style={{ fontWeight: 600 }}>{p.name}</div>
-                        <div style={{ fontSize: 11, color: '#dc2626', marginTop: 2, lineHeight: 1.4 }}>
-                          <FiEye size={10} style={{ verticalAlign: 'middle', marginRight: 3 }} />
-                          Motif : {p.rejection_reason}
-                        </div>
-                      </div>
-                      <button onClick={() => handleDelete(p.id)} className="btn-icon btn-icon-danger" title="Supprimer">
-                        <FiTrash2 size={15} />
-                      </button>
-                    </div>
-                  ))}
-                </div>
-              </div>
-            );
-          })()}
-
           <div className="dashboard-products">
           <h3>Mes annonces ({products.length})</h3>
           {products.length === 0 ? (
@@ -397,8 +365,8 @@ export default function SellerDashboard() {
                             <FiCheckCircle size={13} /> Approuvée
                           </span>
                         ) : p.rejection_reason ? (
-                          <span style={{ fontSize: 12, color: '#dc2626', display: 'flex', alignItems: 'center', gap: 4 }} title={p.rejection_reason}>
-                            <FiAlertCircle size={13} /> Refusée
+                          <span onClick={() => setRejectedPopup(p)} style={{ fontSize: 12, color: '#dc2626', display: 'flex', alignItems: 'center', gap: 4, cursor: 'pointer', textDecoration: 'underline dotted' }} title="Cliquez pour voir le motif">
+                            <FiInfo size={13} /> Refusée
                           </span>
                         ) : (
                           <span style={{ fontSize: 12, color: '#d97706', display: 'flex', alignItems: 'center', gap: 4 }}>
@@ -424,6 +392,48 @@ export default function SellerDashboard() {
           )}
         </div>
       </motion.div>
+
+      {rejectedPopup && (
+        <div style={{ position: 'fixed', inset: 0, background: 'rgba(0,0,0,0.5)', zIndex: 1001, display: 'flex', alignItems: 'center', justifyContent: 'center', padding: 16 }}
+          onClick={() => setRejectedPopup(null)}>
+          <div style={{ background: 'var(--bg-card)', borderRadius: 16, maxWidth: 440, width: '100%', boxShadow: '0 20px 60px rgba(0,0,0,0.3)', overflow: 'hidden' }}
+            onClick={e => e.stopPropagation()}>
+            {rejectedPopup.image && (
+              <img src={rejectedPopup.image.startsWith('http') ? rejectedPopup.image : `/uploads/${rejectedPopup.image}`} alt=""
+                style={{ width: '100%', height: 200, objectFit: 'contain', background: '#f8f9fc', display: 'block' }} />
+            )}
+            <div style={{ padding: 20 }}>
+              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: 8 }}>
+                <h3 style={{ fontSize: 16, fontWeight: 700, margin: 0 }}>{rejectedPopup.name}</h3>
+                <button onClick={() => setRejectedPopup(null)} style={{ background: 'none', border: 'none', color: 'var(--text-muted)', cursor: 'pointer', padding: 4 }}>
+                  <FiX size={18} />
+                </button>
+              </div>
+              <div style={{ fontSize: 14, fontWeight: 600, color: 'var(--primary)', marginBottom: 12 }}>{rejectedPopup.price} DH</div>
+
+              <div style={{ background: 'rgba(239,68,68,0.08)', borderRadius: 10, padding: 14, marginBottom: 16 }}>
+                <div style={{ display: 'flex', alignItems: 'center', gap: 6, marginBottom: 6 }}>
+                  <FiAlertCircle size={15} color="#dc2626" />
+                  <span style={{ fontWeight: 700, fontSize: 13, color: '#dc2626' }}>Motif du refus</span>
+                </div>
+                <p style={{ fontSize: 13, color: '#991b1b', lineHeight: 1.5, margin: 0, whiteSpace: 'pre-wrap' }}>
+                  {rejectedPopup.rejection_reason}
+                </p>
+              </div>
+
+              <div style={{ display: 'flex', gap: 8 }}>
+                <Link to={`/seller/products/edit/${rejectedPopup.id}`} className="btn btn-primary" style={{ flex: 1, justifyContent: 'center', fontSize: 13, padding: '8px 12px', textDecoration: 'none' }}>
+                  <FiEdit2 size={14} /> Modifier
+                </Link>
+                <button onClick={() => { if (window.confirm('Supprimer ce produit ?')) { handleDelete(rejectedPopup.id); setRejectedPopup(null); } }}
+                  className="btn btn-outline" style={{ flex: 1, justifyContent: 'center', fontSize: 13, padding: '8px 12px', color: 'var(--error)', borderColor: 'var(--error)' }}>
+                  <FiTrash2 size={14} /> Supprimer
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }
