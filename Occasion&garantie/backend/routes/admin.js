@@ -301,7 +301,7 @@ router.get('/products/pending', authenticate, adminOnly, async (req, res) => {
     const [rows] = await pool.query(
       `SELECT p.*, u.full_name as seller_name, u.store_name FROM products p
        LEFT JOIN users u ON p.seller_id = u.id
-       WHERE p.approved = FALSE ORDER BY p.created_at DESC`
+       WHERE p.approved = FALSE AND p.rejection_reason IS NULL ORDER BY p.created_at DESC`
     );
     res.json(rows);
   } catch (err) {
@@ -312,8 +312,21 @@ router.get('/products/pending', authenticate, adminOnly, async (req, res) => {
 router.post('/products/approve-existing', authenticate, adminOnly, async (req, res) => {
   try {
     try { await pool.query('ALTER TABLE products ADD COLUMN approved TINYINT(1) DEFAULT 1'); } catch {}
-    const [result] = await pool.query('UPDATE products SET approved = 1 WHERE approved IS NULL OR approved = 0');
-    res.json({ message: `${result.affectedRows} produits approuves.` });
+    try { await pool.query(`ALTER TABLE products ADD COLUMN rejection_reason VARCHAR(500) DEFAULT NULL`); } catch {}
+    const [pending] = await pool.query('SELECT id, seller_id, name FROM products WHERE approved = FALSE OR approved IS NULL');
+    await pool.query('UPDATE products SET approved = 1 WHERE approved IS NULL OR approved = 0');
+    for (const prod of pending) {
+      if (prod.seller_id) {
+        try {
+          await pool.query('CREATE TABLE IF NOT EXISTS notifications (id INT AUTO_INCREMENT PRIMARY KEY, user_id INT NOT NULL, type VARCHAR(50) DEFAULT "general", title VARCHAR(200) NOT NULL, message TEXT DEFAULT NULL, link VARCHAR(500) DEFAULT NULL, read_at TIMESTAMP NULL DEFAULT NULL, created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP)');
+          await pool.query('INSERT INTO notifications (user_id, type, title, message, link) VALUES (?, ?, ?, ?, ?)',
+            [prod.seller_id, 'product_approved', 'Annonce approuvée',
+             `Votre annonce "${prod.name}" a été approuvée et est maintenant visible sur le site.`,
+             '/seller/dashboard']);
+        } catch (nErr) { console.error('Notif failed:', nErr.message); }
+      }
+    }
+    res.json({ message: `${pending.length} produits approuves.` });
   } catch (err) {
     res.status(500).json({ message: 'Erreur serveur.' });
   }
@@ -322,8 +335,42 @@ router.post('/products/approve-existing', authenticate, adminOnly, async (req, r
 router.put('/products/:id/approve', authenticate, adminOnly, async (req, res) => {
   try {
     try { await pool.query('ALTER TABLE products ADD COLUMN approved TINYINT(1) DEFAULT 1'); } catch {}
-    await pool.query('UPDATE products SET approved = TRUE WHERE id = ?', [req.params.id]);
+    try { await pool.query(`ALTER TABLE products ADD COLUMN rejection_reason VARCHAR(500) DEFAULT NULL`); } catch {}
+    const [prod] = await pool.query('SELECT seller_id, name FROM products WHERE id = ?', [req.params.id]);
+    await pool.query('UPDATE products SET approved = TRUE, rejection_reason = NULL WHERE id = ?', [req.params.id]);
+    if (prod.length > 0 && prod[0].seller_id) {
+      try {
+        await pool.query('CREATE TABLE IF NOT EXISTS notifications (id INT AUTO_INCREMENT PRIMARY KEY, user_id INT NOT NULL, type VARCHAR(50) DEFAULT "general", title VARCHAR(200) NOT NULL, message TEXT DEFAULT NULL, link VARCHAR(500) DEFAULT NULL, read_at TIMESTAMP NULL DEFAULT NULL, created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP)');
+        await pool.query('INSERT INTO notifications (user_id, type, title, message, link) VALUES (?, ?, ?, ?, ?)',
+          [prod[0].seller_id, 'product_approved', 'Annonce approuvée',
+           `Votre annonce "${prod[0].name}" a été approuvée et est maintenant visible sur le site.`,
+           '/seller/dashboard']);
+      } catch (nErr) { console.error('Notif failed:', nErr.message); }
+    }
     res.json({ message: 'Produit approuve.' });
+  } catch (err) {
+    res.status(500).json({ message: 'Erreur serveur.' });
+  }
+});
+
+router.put('/products/:id/reject', authenticate, adminOnly, async (req, res) => {
+  try {
+    try { await pool.query('ALTER TABLE products ADD COLUMN approved TINYINT(1) DEFAULT 1'); } catch {}
+    try { await pool.query(`ALTER TABLE products ADD COLUMN rejection_reason VARCHAR(500) DEFAULT NULL`); } catch {}
+    const { reason } = req.body;
+    const rejectionReason = reason || 'Annonce non conforme à nos conditions.';
+    const [prod] = await pool.query('SELECT seller_id, name FROM products WHERE id = ?', [req.params.id]);
+    await pool.query('UPDATE products SET approved = FALSE, rejection_reason = ? WHERE id = ?', [rejectionReason, req.params.id]);
+    if (prod.length > 0 && prod[0].seller_id) {
+      try {
+        await pool.query('CREATE TABLE IF NOT EXISTS notifications (id INT AUTO_INCREMENT PRIMARY KEY, user_id INT NOT NULL, type VARCHAR(50) DEFAULT "general", title VARCHAR(200) NOT NULL, message TEXT DEFAULT NULL, link VARCHAR(500) DEFAULT NULL, read_at TIMESTAMP NULL DEFAULT NULL, created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP)');
+        await pool.query('INSERT INTO notifications (user_id, type, title, message, link) VALUES (?, ?, ?, ?, ?)',
+          [prod[0].seller_id, 'product_rejected', 'Annonce refusée',
+           `Votre annonce "${prod[0].name}" a été refusée. Raison : ${rejectionReason}`,
+           '/seller/dashboard']);
+      } catch (nErr) { console.error('Notif failed:', nErr.message); }
+    }
+    res.json({ message: 'Produit refusé.', reason: rejectionReason });
   } catch (err) {
     res.status(500).json({ message: 'Erreur serveur.' });
   }

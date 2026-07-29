@@ -8,6 +8,8 @@ const API_BASE = import.meta.env.VITE_API_URL || '';
 export default function AdminPendingProducts() {
   const [products, setProducts] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [rejectModal, setRejectModal] = useState(null);
+  const [rejectReason, setRejectReason] = useState('');
 
   const load = () => {
     setLoading(true);
@@ -30,6 +32,18 @@ export default function AdminPendingProducts() {
       load();
     } catch (e) {
       alert(e?.response?.data?.message || 'Erreur: ' + (e.message || 'inconnue'));
+    }
+  };
+
+  const confirmReject = async () => {
+    if (!rejectModal) return;
+    try {
+      await api.put(`/admin/products/${rejectModal.id}/reject`, { reason: rejectReason });
+      setProducts(prev => prev.filter(p => p.id !== rejectModal.id));
+      setRejectModal(null);
+      setRejectReason('');
+    } catch (e) {
+      alert(e?.response?.data?.message || 'Erreur');
     }
   };
 
@@ -70,12 +84,46 @@ export default function AdminPendingProducts() {
                   <button onClick={() => approve(p.id)} className="btn btn-primary" style={{ fontSize: 12, padding: '6px 14px' }}>
                     <FiCheck size={13} /> Approuver
                   </button>
+                  <button onClick={() => setRejectModal(p)} className="btn btn-outline" style={{ fontSize: 12, padding: '6px 14px', color: 'var(--error)', borderColor: 'var(--error)' }}>
+                    <FiX size={13} /> Refuser
+                  </button>
                 </div>
               </div>
             ))}
           </div>
         )}
       </div>
+
+      {rejectModal && (
+        <div style={{ position: 'fixed', inset: 0, background: 'rgba(0,0,0,0.5)', zIndex: 1001, display: 'flex', alignItems: 'center', justifyContent: 'center', padding: 16 }}
+          onClick={() => { setRejectModal(null); setRejectReason(''); }}>
+          <div style={{ background: 'var(--bg-card)', borderRadius: 16, padding: 24, maxWidth: 420, width: '100%', boxShadow: '0 20px 60px rgba(0,0,0,0.3)' }}
+            onClick={e => e.stopPropagation()}>
+            <h3 style={{ fontSize: 16, marginBottom: 8 }}>Refuser l'annonce</h3>
+            <p style={{ fontSize: 13, color: 'var(--text-secondary)', marginBottom: 12 }}>
+              {rejectModal?.name}
+            </p>
+            <div className="form-group">
+              <label>Raison du refus</label>
+              <textarea
+                className="form-input"
+                rows={3}
+                value={rejectReason}
+                onChange={e => setRejectReason(e.target.value)}
+                placeholder="Annonce non conforme..."
+              />
+            </div>
+            <div style={{ display: 'flex', gap: 10, marginTop: 16 }}>
+              <button className="btn btn-outline" onClick={() => { setRejectModal(null); setRejectReason(''); }} style={{ flex: 1, justifyContent: 'center' }}>
+                Annuler
+              </button>
+              <button className="form-submit" onClick={confirmReject} style={{ flex: 1, justifyContent: 'center', background: 'var(--error)', borderColor: 'var(--error)' }}>
+                <FiX size={14} /> Confirmer le refus
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </section>
   );
 }

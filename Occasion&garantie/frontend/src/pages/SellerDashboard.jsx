@@ -1,7 +1,7 @@
 import { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
-import { FiPlus, FiEdit2, FiTrash2, FiPackage, FiCheckCircle, FiPercent, FiCreditCard, FiDollarSign, FiX, FiCopy, FiCheck, FiUpload, FiLock, FiStar, FiSmartphone, FiArrowRight } from 'react-icons/fi';
+import { FiPlus, FiEdit2, FiTrash2, FiPackage, FiCheckCircle, FiPercent, FiCreditCard, FiDollarSign, FiX, FiCopy, FiCheck, FiUpload, FiLock, FiStar, FiSmartphone, FiArrowRight, FiClock, FiAlertCircle } from 'react-icons/fi';
 import api from '../api/axios';
 import { useAuth } from '../context/AuthContext';
 import SellerNav from '../components/SellerNav';
@@ -332,9 +332,10 @@ export default function SellerDashboard() {
               <table className="admin-table">
                 <thead>
                   <tr>
-                    <th>Produit</th>
+                      <th>Produit</th>
                     <th>Prix</th>
                     <th>Statut</th>
+                    <th>Approbation</th>
                     <th>Actions</th>
                   </tr>
                 </thead>
@@ -356,6 +357,21 @@ export default function SellerDashboard() {
                           style={{ background: statusColors[p.status || 'disponible'] }}>
                           {p.status === 'disponible' ? 'Disponible' : p.status === 'en_attente' ? 'En attente' : 'Vendu'}
                         </button>
+                      </td>
+                      <td>
+                        {p.approved === 1 ? (
+                          <span style={{ fontSize: 12, color: '#059669', display: 'flex', alignItems: 'center', gap: 4 }}>
+                            <FiCheckCircle size={13} /> Approuvée
+                          </span>
+                        ) : p.rejection_reason ? (
+                          <span style={{ fontSize: 12, color: '#dc2626', display: 'flex', alignItems: 'center', gap: 4 }} title={p.rejection_reason}>
+                            <FiAlertCircle size={13} /> Refusée
+                          </span>
+                        ) : (
+                          <span style={{ fontSize: 12, color: '#d97706', display: 'flex', alignItems: 'center', gap: 4 }}>
+                            <FiClock size={13} /> En cours
+                          </span>
+                        )}
                       </td>
                       <td>
                         <div className="action-btns">
