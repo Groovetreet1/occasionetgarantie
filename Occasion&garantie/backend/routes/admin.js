@@ -550,24 +550,33 @@ router.post('/vendor-logs/reindex', authenticate, adminOnly, async (req, res) =>
     const { resolveIp } = require('../services/tracker');
     let rows = [];
     try {
-      [rows] = await pool.query('SELECT id, ip_address FROM vendor_activity_log');
+      [rows] = await pool.query('SELECT id, ip_address, user_id FROM vendor_activity_log');
     } catch (selErr) {
       return res.status(500).json({ message: 'Erreur SELECT reindex.', error: selErr.message, sql: selErr.sql || 'SELECT id, ip_address FROM vendor_activity_log' });
     }
     let done = 0;
+    const vpnUsers = new Set();
     for (const row of rows) {
       try {
         const info = await resolveIp(row.ip_address, true);
+        const isVpn = info.isVpn ? 1 : 0;
         await pool.query(
           'UPDATE vendor_activity_log SET isp = ?, city = ?, region = ?, country = ?, is_vpn = ?, is_datacenter = ?, latitude = COALESCE(latitude, ?), longitude = COALESCE(longitude, ?) WHERE id = ?',
-          [info.isp, info.city, info.region, info.country, info.isVpn ? 1 : 0, info.isDatacenter ? 1 : 0, info.latitude, info.longitude, row.id]
+          [info.isp, info.city, info.region, info.country, isVpn, info.isDatacenter ? 1 : 0, info.latitude, info.longitude, row.id]
         );
+        if (isVpn && row.user_id) vpnUsers.add(row.user_id);
         done++;
       } catch (rowErr) {
         console.error('Reindex row error:', row.id, row.ip_address, rowErr.message);
       }
     }
-    res.json({ reindexed: done, total: rows.length });
+    if (vpnUsers.size > 0) {
+      try { await pool.query("ALTER TABLE users ADD COLUMN has_vpn_history TINYINT(1) DEFAULT 0"); } catch (e) {}
+      for (const uid of vpnUsers) {
+        await pool.query('UPDATE users SET has_vpn_history = 1 WHERE id = ?', [uid]);
+      }
+    }
+    res.json({ reindexed: done, total: rows.length, vpn_users_found: vpnUsers.size });
   } catch (err) {
     res.status(500).json({ message: 'Erreur serveur.', error: err.message });
   }
