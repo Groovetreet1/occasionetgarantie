@@ -91,6 +91,11 @@ export default function Navbar() {
     try { await api.put('/notifications/read-all'); setNotifications(n => n.map(n => ({ ...n, read_at: 'now' }))); setUnreadCount(0); } catch {}
   };
 
+  const cleanAll = async () => {
+    if (!window.confirm('Supprimer toutes les notifications ?')) return;
+    try { await api.delete('/notifications/all'); setNotifications([]); setUnreadCount(0); } catch {}
+  };
+
   const closeMenu = () => { setMenuOpen(false); setMobileProdsOpen(false); };
 
   return (
@@ -173,11 +178,18 @@ export default function Navbar() {
                     >
                       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '8px 12px', borderBottom: '1px solid var(--border)' }}>
                         <strong style={{ fontSize: 13 }}>Notifications</strong>
-                        {notifications.some(n => !n.read_at) && (
-                          <button onClick={markAllRead} style={{ fontSize: 10, background: 'none', border: 'none', color: 'var(--primary)', cursor: 'pointer', fontFamily: 'var(--font)', padding: 0 }}>
-                            Tout marquer lu
-                          </button>
-                        )}
+                        <div style={{ display: 'flex', gap: 8 }}>
+                          {notifications.length > 0 && (
+                            <button onClick={cleanAll} style={{ fontSize: 10, background: 'none', border: 'none', color: 'var(--error)', cursor: 'pointer', fontFamily: 'var(--font)', padding: 0 }}>
+                              Vider
+                            </button>
+                          )}
+                          {notifications.some(n => !n.read_at) && (
+                            <button onClick={markAllRead} style={{ fontSize: 10, background: 'none', border: 'none', color: 'var(--primary)', cursor: 'pointer', fontFamily: 'var(--font)', padding: 0 }}>
+                              Tout marquer lu
+                            </button>
+                          )}
+                        </div>
                       </div>
                       <div style={{ maxHeight: 280, overflowY: 'auto' }}>
                         {notifications.length === 0 ? (

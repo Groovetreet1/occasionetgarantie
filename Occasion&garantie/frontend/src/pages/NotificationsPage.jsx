@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
-import { FiArrowLeft, FiBell, FiCheck } from 'react-icons/fi';
+import { FiArrowLeft, FiBell, FiCheck, FiTrash2 } from 'react-icons/fi';
 import api from '../api/axios';
 
 export default function NotificationsPage() {
@@ -25,6 +25,11 @@ export default function NotificationsPage() {
     } catch {}
   };
 
+  const cleanAll = async () => {
+    if (!window.confirm('Supprimer toutes les notifications ?')) return;
+    try { await api.delete('/notifications/all'); setNotifications([]); } catch {}
+  };
+
   return (
     <section className="admin-dashboard">
       <div className="container" style={{ position: 'relative', zIndex: 1, maxWidth: 600, margin: '0 auto', padding: '20px' }}>
@@ -35,11 +40,18 @@ export default function NotificationsPage() {
               <FiBell size={22} style={{ color: 'var(--primary)' }} /> Notifications
             </h1>
           </div>
-          {notifications.some(n => !n.read_at) && (
-            <button onClick={markAllRead} className="btn btn-ghost" style={{ fontSize: 13, display: 'flex', alignItems: 'center', gap: 6 }}>
-              <FiCheck size={14} /> Tout marquer lu
-            </button>
-          )}
+          <div style={{ display: 'flex', gap: 8 }}>
+            {notifications.length > 0 && (
+              <button onClick={cleanAll} className="btn btn-ghost" style={{ fontSize: 13, display: 'flex', alignItems: 'center', gap: 6, color: 'var(--error)' }}>
+                <FiTrash2 size={14} /> Vider
+              </button>
+            )}
+            {notifications.some(n => !n.read_at) && (
+              <button onClick={markAllRead} className="btn btn-ghost" style={{ fontSize: 13, display: 'flex', alignItems: 'center', gap: 6 }}>
+                <FiCheck size={14} /> Tout marquer lu
+              </button>
+            )}
+          </div>
         </div>
 
         {loading ? (

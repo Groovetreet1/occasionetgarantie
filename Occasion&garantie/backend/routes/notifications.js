@@ -68,4 +68,14 @@ router.put('/read-all', authenticate, async (req, res) => {
   }
 });
 
+router.delete('/all', authenticate, async (req, res) => {
+  try {
+    await ensureTable();
+    await pool.query('DELETE FROM notifications WHERE user_id = ?', [req.user.id]);
+    res.json({ message: 'Notifications supprimees.' });
+  } catch (err) {
+    res.status(500).json({ message: 'Erreur serveur.' });
+  }
+});
+
 module.exports = router;
