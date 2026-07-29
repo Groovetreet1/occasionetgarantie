@@ -151,6 +151,7 @@ export default function SellerProductForm() {
         gallery: galleryUrls,
         stock: 1,
         active: true,
+        ...(gpsPos ? { latitude: gpsPos.latitude, longitude: gpsPos.longitude } : {}),
       };
       if (isEdit) {
         await api.put(`/products/${id}`, payload);
