@@ -124,15 +124,15 @@ export default function Login() {
             </div>
             <div style={{ display: 'flex', alignItems: 'center', gap: '6px', fontSize: '12px', color: 'var(--text-muted)', marginBottom: '8px', justifyContent: 'center' }}>
               <FiMapPin size={14} style={{
-                color: gpsState === 'got' ? '#10b981' : gpsState === 'waiting' ? '#f59e0b' : '#ef4444',
+                color: gpsState === 'got' ? '#10b981' : gpsState === 'waiting' ? '#f59e0b' : 'var(--text-muted)',
               }} />
               {gpsState === 'got' ? 'Localisation precise obtenue ✓' :
-               gpsState === 'waiting' ? 'Obtention de la position... Veuillez autoriser la localisation.' :
-               gpsState === 'denied' ? 'Localisation refusee — impossible de se connecter' :
-               gpsState === 'unavailable' ? 'Geolocalisation indisponible sur cet appareil' : ''}
+               gpsState === 'waiting' ? 'Obtention de la position...' :
+               gpsState === 'denied' ? 'Position non partagee (IP approx.)' :
+               gpsState === 'unavailable' ? 'Geolocalisation indisponible' : ''}
             </div>
-            <button type="submit" className="form-submit" disabled={loading || gpsState === 'waiting' || gpsState === 'denied' || gpsState === 'unavailable'}>
-              {loading ? 'Connexion...' : gpsState === 'waiting' ? 'Attente GPS...' : gpsState === 'denied' || gpsState === 'unavailable' ? 'Localisation requise' : 'Se connecter'}
+            <button type="submit" className="form-submit" disabled={loading}>
+              {loading ? 'Connexion...' : 'Se connecter'}
             </button>
           </form>
           <div className="form-footer">
