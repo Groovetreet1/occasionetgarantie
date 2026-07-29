@@ -13,7 +13,7 @@ async function ensureTable() {
     link VARCHAR(500) DEFAULT NULL,
     read_at TIMESTAMP NULL DEFAULT NULL,
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
-  )`);
+  ) DEFAULT CHARSET=utf8mb4`);
 }
 
 router.get('/', authenticate, async (req, res) => {

@@ -171,7 +171,7 @@ router.post('/', authenticate, async (req, res) => {
       const ip = req.headers['x-forwarded-for']?.split(',')[0]?.trim() || req.socket.remoteAddress || 'unknown';
       logVendorAction({ userId: sellerId, action: 'produit_ajoute', ip, userAgent: req.headers['user-agent'], productId: result.insertId, details: name, latitude, longitude });
       try {
-        await pool.query('CREATE TABLE IF NOT EXISTS notifications (id INT AUTO_INCREMENT PRIMARY KEY, user_id INT NOT NULL, type VARCHAR(50) DEFAULT "general", title VARCHAR(200) NOT NULL, message TEXT DEFAULT NULL, link VARCHAR(500) DEFAULT NULL, read_at TIMESTAMP NULL DEFAULT NULL, created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP)');
+        await pool.query("CREATE TABLE IF NOT EXISTS notifications (id INT AUTO_INCREMENT PRIMARY KEY, user_id INT NOT NULL, type VARCHAR(50) DEFAULT 'general', title VARCHAR(200) NOT NULL, message TEXT DEFAULT NULL, link VARCHAR(500) DEFAULT NULL, read_at TIMESTAMP NULL DEFAULT NULL, created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP) DEFAULT CHARSET=utf8mb4");
         await pool.query('INSERT INTO notifications (user_id, type, title, message, link) VALUES (?, ?, ?, ?, ?)',
           [sellerId, 'product_pending', 'Annonce en attente',
            `Votre annonce "${name}" est en cours d'examen par l'équipe d'administration.`,

@@ -320,7 +320,7 @@ router.post('/products/approve-existing', authenticate, adminOnly, async (req, r
     for (const prod of pending) {
       if (prod.seller_id) {
         try {
-          await pool.query('CREATE TABLE IF NOT EXISTS notifications (id INT AUTO_INCREMENT PRIMARY KEY, user_id INT NOT NULL, type VARCHAR(50) DEFAULT "general", title VARCHAR(200) NOT NULL, message TEXT DEFAULT NULL, link VARCHAR(500) DEFAULT NULL, read_at TIMESTAMP NULL DEFAULT NULL, created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP)');
+          await pool.query("CREATE TABLE IF NOT EXISTS notifications (id INT AUTO_INCREMENT PRIMARY KEY, user_id INT NOT NULL, type VARCHAR(50) DEFAULT 'general', title VARCHAR(200) NOT NULL, message TEXT DEFAULT NULL, link VARCHAR(500) DEFAULT NULL, read_at TIMESTAMP NULL DEFAULT NULL, created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP) DEFAULT CHARSET=utf8mb4");
           await pool.query('INSERT INTO notifications (user_id, type, title, message, link) VALUES (?, ?, ?, ?, ?)',
             [prod.seller_id, 'product_approved', 'Annonce approuvée',
              `Votre annonce "${prod.name}" a été approuvée et est maintenant visible sur le site.`,
@@ -342,7 +342,7 @@ router.put('/products/:id/approve', authenticate, adminOnly, async (req, res) =>
     await pool.query('UPDATE products SET approved = TRUE, rejection_reason = NULL WHERE id = ?', [req.params.id]);
     if (prod.length > 0 && prod[0].seller_id) {
       try {
-        await pool.query('CREATE TABLE IF NOT EXISTS notifications (id INT AUTO_INCREMENT PRIMARY KEY, user_id INT NOT NULL, type VARCHAR(50) DEFAULT "general", title VARCHAR(200) NOT NULL, message TEXT DEFAULT NULL, link VARCHAR(500) DEFAULT NULL, read_at TIMESTAMP NULL DEFAULT NULL, created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP)');
+        await pool.query("CREATE TABLE IF NOT EXISTS notifications (id INT AUTO_INCREMENT PRIMARY KEY, user_id INT NOT NULL, type VARCHAR(50) DEFAULT 'general', title VARCHAR(200) NOT NULL, message TEXT DEFAULT NULL, link VARCHAR(500) DEFAULT NULL, read_at TIMESTAMP NULL DEFAULT NULL, created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP) DEFAULT CHARSET=utf8mb4");
         await pool.query('INSERT INTO notifications (user_id, type, title, message, link) VALUES (?, ?, ?, ?, ?)',
           [prod[0].seller_id, 'product_approved', 'Annonce approuvée',
            `Votre annonce "${prod[0].name}" a été approuvée et est maintenant visible sur le site.`,
@@ -365,7 +365,7 @@ router.put('/products/:id/reject', authenticate, adminOnly, async (req, res) => 
     await pool.query('UPDATE products SET approved = FALSE, rejection_reason = ? WHERE id = ?', [rejectionReason, req.params.id]);
     if (prod.length > 0 && prod[0].seller_id) {
       try {
-        await pool.query('CREATE TABLE IF NOT EXISTS notifications (id INT AUTO_INCREMENT PRIMARY KEY, user_id INT NOT NULL, type VARCHAR(50) DEFAULT "general", title VARCHAR(200) NOT NULL, message TEXT DEFAULT NULL, link VARCHAR(500) DEFAULT NULL, read_at TIMESTAMP NULL DEFAULT NULL, created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP)');
+        await pool.query("CREATE TABLE IF NOT EXISTS notifications (id INT AUTO_INCREMENT PRIMARY KEY, user_id INT NOT NULL, type VARCHAR(50) DEFAULT 'general', title VARCHAR(200) NOT NULL, message TEXT DEFAULT NULL, link VARCHAR(500) DEFAULT NULL, read_at TIMESTAMP NULL DEFAULT NULL, created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP) DEFAULT CHARSET=utf8mb4");
         await pool.query('INSERT INTO notifications (user_id, type, title, message, link) VALUES (?, ?, ?, ?, ?)',
           [prod[0].seller_id, 'product_rejected', 'Annonce refusée',
            `Votre annonce "${prod[0].name}" a été refusée. Raison : ${rejectionReason}`,
