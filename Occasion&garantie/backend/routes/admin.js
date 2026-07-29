@@ -398,6 +398,19 @@ router.get('/users', authenticate, adminOnly, async (req, res) => {
   }
 });
 
+router.put('/users/:id/store-name', authenticate, adminOnly, async (req, res) => {
+  try {
+    const { store_name } = req.body;
+    if (!store_name || !store_name.trim()) return res.status(400).json({ message: 'Nom de store requis.' });
+    const [users] = await pool.query('SELECT id FROM users WHERE id = ?', [req.params.id]);
+    if (users.length === 0) return res.status(404).json({ message: 'Utilisateur introuvable.' });
+    await pool.query('UPDATE users SET store_name = ? WHERE id = ?', [store_name.trim(), req.params.id]);
+    res.json({ message: 'Nom de store mis a jour avec succes.' });
+  } catch (err) {
+    res.status(500).json({ message: 'Erreur serveur.' });
+  }
+});
+
 // ---- Installments (admin confirm/reject) ----
 router.get('/installments', authenticate, adminOnly, async (req, res) => {
   try {

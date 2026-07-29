@@ -32,7 +32,7 @@ function getClientIp(req) {
 
 router.post('/', async (req, res) => {
   try {
-    const { name, message, email } = req.body;
+    const { name, message, email, type } = req.body;
     if (!name || !name.trim()) return res.status(400).json({ message: 'Nom requis.' });
     if (!message || !message.trim()) return res.status(400).json({ message: 'Message requis.' });
 
@@ -45,12 +45,14 @@ router.post('/', async (req, res) => {
         ip_address VARCHAR(45) DEFAULT NULL,
         name VARCHAR(100) NOT NULL,
         message TEXT NOT NULL,
+        type VARCHAR(50) DEFAULT 'information',
         created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
-      )`);
+      ) DEFAULT CHARSET=utf8mb4`);
       try { await pool.query('ALTER TABLE support_tickets ADD COLUMN ticket_number VARCHAR(10) NOT NULL UNIQUE'); } catch (e) { if (e.errno !== 1060 && e.code !== 'ER_DUP_FIELDNAME') console.log('ticket_number col:', e.message); }
       try { await pool.query('ALTER TABLE support_tickets ADD COLUMN user_id INT DEFAULT NULL'); } catch (e) { if (e.errno !== 1060 && e.code !== 'ER_DUP_FIELDNAME') console.log('user_id col:', e.message); }
       try { await pool.query('ALTER TABLE support_tickets ADD COLUMN email VARCHAR(200) DEFAULT NULL'); } catch (e) { if (e.errno !== 1060 && e.code !== 'ER_DUP_FIELDNAME') console.log('email col:', e.message); }
       try { await pool.query('ALTER TABLE support_tickets ADD COLUMN ip_address VARCHAR(45) DEFAULT NULL'); } catch (e) { if (e.errno !== 1060 && e.code !== 'ER_DUP_FIELDNAME') console.log('ip_address col:', e.message); }
+      try { await pool.query("ALTER TABLE support_tickets ADD COLUMN type VARCHAR(50) DEFAULT 'information'"); } catch (e) { if (e.errno !== 1060 && e.code !== 'ER_DUP_FIELDNAME') console.log('type col:', e.message); }
     } catch (tableErr) {
       console.log('support_tickets table check:', tableErr.message);
     }
@@ -77,11 +79,25 @@ router.post('/', async (req, res) => {
     }
 
     const ticketNumber = await generateTicketNumber();
+    const ticketType = type || 'information';
 
     await pool.query(
-      'INSERT INTO support_tickets (ticket_number, user_id, email, ip_address, name, message) VALUES (?, ?, ?, ?, ?, ?)',
-      [ticketNumber, userId, userEmail, userId ? null : ip, name.trim(), message.trim()]
+      'INSERT INTO support_tickets (ticket_number, user_id, email, ip_address, name, message, type) VALUES (?, ?, ?, ?, ?, ?, ?)',
+      [ticketNumber, userId, userEmail, userId ? null : ip, name.trim(), message.trim(), ticketType]
     );
+
+    if (ticketType === 'changement_nom_store') {
+      try {
+        const { send } = require('../emails');
+        await send({
+          to: 'contact-occasionetgarantie@proton.me',
+          subject: `[Admin] Demande de changement de nom de store - Ticket #${ticketNumber}`,
+          html: `<!DOCTYPE html><html lang="fr"><head><meta charset="utf-8"></head><body style="margin:0;padding:0;font-family:Arial,sans-serif;background:#f8f9fc"><table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="padding:40px 16px"><tr><td align="center"><table role="presentation" width="100%" style="max-width:480px;background:#fff;border-radius:12px;padding:32px"><tr><td><h1 style="font-size:18px;color:#1e293b;margin:0 0 8px">Demande de changement de nom de store</h1><p style="font-size:14px;color:#64748b;margin:0 0 16px">Ticket #${ticketNumber}</p><div style="margin-bottom:12px;padding:12px;background:#f0f1f5;border-radius:8px;font-size:13px;color:#64748b"><strong>Client :</strong> ${name.trim()}<br><strong>Email :</strong> ${userEmail}</div><div style="padding:16px;background:rgba(245,158,11,0.05);border:1px solid rgba(245,158,11,0.15);border-radius:8px;font-size:14px;color:#1e293b;line-height:1.6">${message.trim().replace(/\n/g, '<br>')}</div><p style="font-size:12px;color:#94a3b8;margin-top:16px">Connectez-vous sur le dashboard admin pour traiter cette demande.</p></td></tr></table></td></tr></table></body></html>`,
+        });
+      } catch (emailErr) {
+        console.error('Email notification to admin failed:', emailErr.message);
+      }
+    }
 
     res.json({ message: 'Message envoye avec succes.', ticketNumber });
   } catch (err) {
