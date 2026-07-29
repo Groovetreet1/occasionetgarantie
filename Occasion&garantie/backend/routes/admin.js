@@ -299,8 +299,9 @@ router.get('/products/pending', authenticate, adminOnly, async (req, res) => {
   try {
     try { await pool.query('ALTER TABLE products ADD COLUMN approved TINYINT(1) DEFAULT 1'); } catch {}
     const [rows] = await pool.query(
-      `SELECT p.*, u.full_name as seller_name, u.store_name FROM products p
+      `SELECT p.*, u.full_name as seller_name, u.store_name, c.name as category_name FROM products p
        LEFT JOIN users u ON p.seller_id = u.id
+       LEFT JOIN categories c ON p.category_id = c.id
        WHERE p.approved = FALSE AND p.rejection_reason IS NULL ORDER BY p.created_at DESC`
     );
     res.json(rows);
