@@ -2,6 +2,7 @@ import { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
 import { FiCheck, FiX, FiClock, FiArrowLeft, FiStar, FiEye, FiThumbsDown, FiTrash2 } from 'react-icons/fi';
 import api from '../api/axios';
+import ConfirmModal from '../components/ConfirmModal';
 
 const API_BASE = import.meta.env.VITE_API_URL || '';
 
@@ -10,6 +11,8 @@ export default function AdminPremium() {
   const [loading, setLoading] = useState(true);
   const [actionId, setActionId] = useState(null);
   const [rejectModal, setRejectModal] = useState(null);
+  const [confirmTarget, setConfirmTarget] = useState(null);
+  const [deleteTarget, setDeleteTarget] = useState(null);
 
   useEffect(() => {
     api.get('/admin/premium-payments')
@@ -18,8 +21,10 @@ export default function AdminPremium() {
       .finally(() => setLoading(false));
   }, []);
 
-  const handleConfirm = async (id) => {
-    if (!window.confirm('Confirmer ce paiement Premium ?')) return;
+  const executeConfirm = async () => {
+    if (!confirmTarget) return;
+    const id = confirmTarget;
+    setConfirmTarget(null);
     setActionId(id);
     try {
       await api.post(`/admin/premium-payments/${id}/confirm`);
@@ -44,8 +49,10 @@ export default function AdminPremium() {
     }
   };
 
-  const handleDelete = async (id) => {
-    if (!window.confirm('Supprimer definitivement cette demande ?')) return;
+  const executeDelete = async () => {
+    if (!deleteTarget) return;
+    const id = deleteTarget;
+    setDeleteTarget(null);
     setActionId(id);
     try {
       await api.delete(`/admin/premium-payments/${id}`);
@@ -124,7 +131,7 @@ export default function AdminPremium() {
                       {p.status === 'en_attente' ? (
                         <div style={{ display: 'flex', gap: '6px' }}>
                           <button
-                            onClick={() => handleConfirm(p.id)}
+                            onClick={() => setConfirmTarget(p.id)}
                             disabled={actionId === p.id}
                             className="btn btn-primary"
                             style={{ padding: '6px 14px', fontSize: '12px' }}
@@ -146,7 +153,7 @@ export default function AdminPremium() {
                         <span style={{ color: 'var(--success)', fontSize: '12px', fontWeight: 600 }}>Confirmé</span>
                       )}
                       <button
-                        onClick={() => handleDelete(p.id)}
+                        onClick={() => setDeleteTarget(p.id)}
                         disabled={actionId === p.id}
                         style={{
                           marginLeft: '8px',
@@ -191,6 +198,26 @@ export default function AdminPremium() {
           </div>
         </div>
       )}
+
+      <ConfirmModal
+        open={!!confirmTarget}
+        onClose={() => setConfirmTarget(null)}
+        onConfirm={executeConfirm}
+        title="Confirmer ce paiement Premium ?"
+        message="Cette action confirmera le paiement premium."
+        confirmText="Confirmer"
+        confirmColor="#059669"
+      />
+      <ConfirmModal
+        open={!!deleteTarget}
+        onClose={() => setDeleteTarget(null)}
+        onConfirm={executeDelete}
+        title="Supprimer cette demande ?"
+        message="Cette action est irreversible."
+        confirmText="Supprimer"
+        confirmColor="#dc2626"
+        icon={<FiTrash2 size={26} color="#dc2626" />}
+      />
     </section>
   );
 }

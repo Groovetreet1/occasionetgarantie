@@ -3,6 +3,7 @@ import { Link } from 'react-router-dom';
 import { FiPlus, FiEdit2, FiTrash2, FiPackage, FiArrowLeft, FiStar, FiCheck, FiX, FiClock, FiEye, FiThumbsDown } from 'react-icons/fi';
 import { BsWhatsapp } from 'react-icons/bs';
 import api from '../api/axios';
+import ConfirmModal from '../components/ConfirmModal';
 const stateLabels = { neuf: 'Neuf', comme_neuf: 'Comme neuf', tres_bon: 'Très bon', bon: 'Bon', acceptable: 'Acceptable' };
 const formatPrice = (p) => new Intl.NumberFormat('fr-FR', { style: 'currency', currency: 'MAD' }).format(p).replace('MAD', '').trim() + ' DH';
 
@@ -15,6 +16,9 @@ export default function AdminDashboard() {
   const [pLoading, setPLoading] = useState(true);
   const [actionId, setActionId] = useState(null);
   const [rejectModal, setRejectModal] = useState(null);
+  const [deleteTarget, setDeleteTarget] = useState(null);
+  const [confirmTarget, setConfirmTarget] = useState(null);
+  const [deletePremiumTarget, setDeletePremiumTarget] = useState(null);
 
   const load = () => {
     setLoading(true);
@@ -33,16 +37,20 @@ export default function AdminDashboard() {
       .finally(() => setPLoading(false));
   }, []);
 
-  const handleDelete = async (id, name) => {
-    if (!window.confirm(`Supprimer "${name}" ?`)) return;
+  const executeDelete = async () => {
+    if (!deleteTarget) return;
+    const id = deleteTarget;
+    setDeleteTarget(null);
     try {
       await api.delete(`/products/${id}`);
       load();
     } catch { alert('Erreur lors de la suppression.'); }
   };
 
-  const handleConfirm = async (id) => {
-    if (!window.confirm('Confirmer ce paiement Premium ?')) return;
+  const executeConfirm = async () => {
+    if (!confirmTarget) return;
+    const id = confirmTarget;
+    setConfirmTarget(null);
     setActionId(id);
     try {
       await api.post(`/admin/premium-payments/${id}/confirm`);
@@ -67,8 +75,10 @@ export default function AdminDashboard() {
     }
   };
 
-  const handleDeletePremium = async (id) => {
-    if (!window.confirm('Supprimer definitivement cette demande ?')) return;
+  const executeDeletePremium = async () => {
+    if (!deletePremiumTarget) return;
+    const id = deletePremiumTarget;
+    setDeletePremiumTarget(null);
     setActionId(id);
     try {
       await api.delete(`/admin/premium-payments/${id}`);
@@ -135,7 +145,7 @@ export default function AdminDashboard() {
                     <td style={{ padding: '12px 8px' }}>
                       <div style={{ display: 'flex', gap: '6px' }}>
                         <Link to={`/admin/products/edit/${p.id}`} className="btn btn-secondary" style={{ padding: '6px 12px', fontSize: '12px' }}><FiEdit2 size={14} /></Link>
-                        <button onClick={() => handleDelete(p.id, p.name)} className="btn" style={{ padding: '6px 12px', fontSize: '12px', background: 'rgba(239,68,68,0.15)', color: 'var(--error)', border: 'none' }}><FiTrash2 size={14} /></button>
+                        <button onClick={() => setDeleteTarget(p.id)} className="btn" style={{ padding: '6px 12px', fontSize: '12px', background: 'rgba(239,68,68,0.15)', color: 'var(--error)', border: 'none' }}><FiTrash2 size={14} /></button>
                       </div>
                     </td>
                   </tr>
@@ -202,7 +212,7 @@ export default function AdminDashboard() {
                     <td style={{ padding: '12px 8px' }}>
                       {p.status === 'en_attente' ? (
                         <div style={{ display: 'flex', gap: '6px' }}>
-                          <button onClick={() => handleConfirm(p.id)} disabled={actionId === p.id} className="btn btn-primary" style={{ padding: '6px 14px', fontSize: '12px' }}>
+                          <button onClick={() => setConfirmTarget(p.id)} disabled={actionId === p.id} className="btn btn-primary" style={{ padding: '6px 14px', fontSize: '12px' }}>
                             {actionId === p.id ? '...' : <><FiCheck size={14} /> Confirmer</>}
                           </button>
                           <button onClick={() => setRejectModal(p)} disabled={actionId === p.id} className="btn" style={{ padding: '6px 14px', fontSize: '12px', background: 'rgba(239,68,68,0.15)', color: 'var(--error)', border: 'none' }}>
@@ -210,7 +220,7 @@ export default function AdminDashboard() {
                           </button>
                         </div>
                       ) : (
-                        <button onClick={() => handleDeletePremium(p.id)} disabled={actionId === p.id} style={{ background: 'none', border: 'none', color: 'var(--text-muted)', cursor: 'pointer', padding: '4px' }} title="Supprimer">
+                        <button onClick={() => setDeletePremiumTarget(p.id)} disabled={actionId === p.id} style={{ background: 'none', border: 'none', color: 'var(--text-muted)', cursor: 'pointer', padding: '4px' }} title="Supprimer">
                           <FiTrash2 size={14} />
                         </button>
                       )}
@@ -240,6 +250,36 @@ export default function AdminDashboard() {
           </div>
         </div>
       )}
+
+      <ConfirmModal
+        open={!!deleteTarget}
+        onClose={() => setDeleteTarget(null)}
+        onConfirm={executeDelete}
+        title="Supprimer ce produit ?"
+        message="Cette action est irreversible."
+        confirmText="Supprimer"
+        confirmColor="#dc2626"
+        icon={<FiTrash2 size={26} color="#dc2626" />}
+      />
+      <ConfirmModal
+        open={!!confirmTarget}
+        onClose={() => setConfirmTarget(null)}
+        onConfirm={executeConfirm}
+        title="Confirmer ce paiement Premium ?"
+        message="Cette action confirmera le paiement premium."
+        confirmText="Confirmer"
+        confirmColor="#059669"
+      />
+      <ConfirmModal
+        open={!!deletePremiumTarget}
+        onClose={() => setDeletePremiumTarget(null)}
+        onConfirm={executeDeletePremium}
+        title="Supprimer cette demande ?"
+        message="Cette action est irreversible."
+        confirmText="Supprimer"
+        confirmColor="#dc2626"
+        icon={<FiTrash2 size={26} color="#dc2626" />}
+      />
     </section>
   );
 }

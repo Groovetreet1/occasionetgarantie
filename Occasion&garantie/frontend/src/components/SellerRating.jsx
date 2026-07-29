@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react';
 import { FiStar, FiEdit2, FiTrash2 } from 'react-icons/fi';
 import api from '../api/axios';
+import ConfirmModal from './ConfirmModal';
 
 const starStyle = (fill) => ({
   background: 'none', border: 'none', cursor: 'pointer', padding: '2px',
@@ -16,6 +17,7 @@ export default function SellerRating({ sellerId, currentUserId }) {
   const [submitting, setSubmitting] = useState(false);
   const [showForm, setShowForm] = useState(false);
   const [editId, setEditId] = useState(null);
+  const [deleteTargetId, setDeleteTargetId] = useState(null);
 
   const load = () => {
     api.get('/ratings/seller/' + sellerId)
@@ -54,8 +56,10 @@ export default function SellerRating({ sellerId, currentUserId }) {
     }
   };
 
-  const handleDelete = async (id) => {
-    if (!window.confirm('Supprimer votre avis ?')) return;
+  const executeDelete = async () => {
+    if (!deleteTargetId) return;
+    const id = deleteTargetId;
+    setDeleteTargetId(null);
     try {
       await api.delete('/ratings/' + id);
       load();
@@ -125,7 +129,7 @@ export default function SellerRating({ sellerId, currentUserId }) {
             <p style={{ color: 'var(--success)', fontSize: '13px', marginBottom: '16px', display: 'flex', alignItems: 'center', gap: '8px' }}>
               <span>Merci pour votre avis !</span>
               <button onClick={() => startEdit(myExisting)} className="btn btn-ghost" style={{ padding: '4px 10px', fontSize: '12px' }}><FiEdit2 size={12} /> Modifier</button>
-              <button onClick={() => handleDelete(myExisting.id)} className="btn btn-ghost" style={{ padding: '4px 10px', fontSize: '12px', color: 'var(--error)' }}><FiTrash2 size={12} /> Supprimer</button>
+              <button onClick={() => setDeleteTargetId(myExisting.id)} className="btn btn-ghost" style={{ padding: '4px 10px', fontSize: '12px', color: 'var(--error)' }}><FiTrash2 size={12} /> Supprimer</button>
             </p>
           )}
         </div>
@@ -153,7 +157,7 @@ export default function SellerRating({ sellerId, currentUserId }) {
                   {currentUserId && r.user_id === currentUserId && !editId && (
                     <div style={{ display: 'flex', gap: '4px' }}>
                       <button onClick={() => startEdit(r)} style={{ background: 'none', border: 'none', cursor: 'pointer', color: 'var(--text-muted)', padding: '2px' }} title="Modifier"><FiEdit2 size={12} /></button>
-                      <button onClick={() => handleDelete(r.id)} style={{ background: 'none', border: 'none', cursor: 'pointer', color: 'var(--error)', padding: '2px' }} title="Supprimer"><FiTrash2 size={12} /></button>
+                      <button onClick={() => setDeleteTargetId(r.id)} style={{ background: 'none', border: 'none', cursor: 'pointer', color: 'var(--error)', padding: '2px' }} title="Supprimer"><FiTrash2 size={12} /></button>
                     </div>
                   )}
                 </div>
@@ -164,6 +168,17 @@ export default function SellerRating({ sellerId, currentUserId }) {
           ))}
         </div>
       )}
+
+      <ConfirmModal
+        open={!!deleteTargetId}
+        onClose={() => setDeleteTargetId(null)}
+        onConfirm={executeDelete}
+        title="Supprimer votre avis ?"
+        message="Cette action est irreversible."
+        confirmText="Supprimer"
+        confirmColor="#dc2626"
+        icon={<FiTrash2 size={26} color="#dc2626" />}
+      />
     </div>
   );
 }

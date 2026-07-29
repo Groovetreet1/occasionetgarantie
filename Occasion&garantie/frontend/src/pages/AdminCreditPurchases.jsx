@@ -2,6 +2,7 @@ import { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
 import { FiCheck, FiX, FiClock, FiArrowLeft, FiCreditCard, FiThumbsDown, FiTrash2, FiEye } from 'react-icons/fi';
 import api from '../api/axios';
+import ConfirmModal from '../components/ConfirmModal';
 
 const API_BASE = import.meta.env.VITE_API_URL || '';
 
@@ -10,6 +11,8 @@ export default function AdminCreditPurchases() {
   const [loading, setLoading] = useState(true);
   const [actionId, setActionId] = useState(null);
   const [rejectModal, setRejectModal] = useState(null);
+  const [confirmTarget, setConfirmTarget] = useState(null);
+  const [deleteTarget, setDeleteTarget] = useState(null);
 
   useEffect(() => {
     api.get('/admin/credit-purchases')
@@ -18,8 +21,10 @@ export default function AdminCreditPurchases() {
       .finally(() => setLoading(false));
   }, []);
 
-  const handleConfirm = async (id) => {
-    if (!window.confirm('Confirmer cet achat de credits ?')) return;
+  const executeConfirm = async () => {
+    if (!confirmTarget) return;
+    const id = confirmTarget;
+    setConfirmTarget(null);
     setActionId(id);
     try {
       await api.post(`/admin/credit-purchases/${id}/confirm`);
@@ -44,8 +49,10 @@ export default function AdminCreditPurchases() {
     }
   };
 
-  const handleDelete = async (id) => {
-    if (!window.confirm('Supprimer cette demande ?')) return;
+  const executeDelete = async () => {
+    if (!deleteTarget) return;
+    const id = deleteTarget;
+    setDeleteTarget(null);
     setActionId(id);
     try {
       await api.delete(`/admin/credit-purchases/${id}`);
@@ -122,7 +129,7 @@ export default function AdminCreditPurchases() {
                     <td style={{ padding: '12px 8px' }}>
                       {p.status === 'en_attente' ? (
                         <div style={{ display: 'flex', gap: '6px' }}>
-                          <button onClick={() => handleConfirm(p.id)} disabled={actionId === p.id}
+                          <button onClick={() => setConfirmTarget(p.id)} disabled={actionId === p.id}
                             className="btn btn-primary" style={{ padding: '6px 14px', fontSize: '12px' }}>
                             {actionId === p.id ? '...' : <><FiCheck size={14} /> Confirmer</>}
                           </button>
@@ -136,7 +143,7 @@ export default function AdminCreditPurchases() {
                           {p.status === 'confirme' ? 'Confirme' : 'Rejete'}
                         </span>
                       )}
-                      <button onClick={() => handleDelete(p.id)} disabled={actionId === p.id}
+                      <button onClick={() => setDeleteTarget(p.id)} disabled={actionId === p.id}
                         style={{ marginLeft: '8px', background: 'none', border: 'none', color: 'var(--text-muted)', cursor: 'pointer', padding: '4px', verticalAlign: 'middle' }} title="Supprimer">
                         <FiTrash2 size={14} />
                       </button>
@@ -167,6 +174,26 @@ export default function AdminCreditPurchases() {
           </div>
         </div>
       )}
+
+      <ConfirmModal
+        open={!!confirmTarget}
+        onClose={() => setConfirmTarget(null)}
+        onConfirm={executeConfirm}
+        title="Confirmer cet achat de credits ?"
+        message="Cette action confirmera l'achat de credits."
+        confirmText="Confirmer"
+        confirmColor="#059669"
+      />
+      <ConfirmModal
+        open={!!deleteTarget}
+        onClose={() => setDeleteTarget(null)}
+        onConfirm={executeDelete}
+        title="Supprimer cette demande ?"
+        message="Cette action est irreversible."
+        confirmText="Supprimer"
+        confirmColor="#dc2626"
+        icon={<FiTrash2 size={26} color="#dc2626" />}
+      />
     </section>
   );
 }

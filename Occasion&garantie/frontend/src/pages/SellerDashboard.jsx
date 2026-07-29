@@ -5,6 +5,7 @@ import { FiPlus, FiEdit2, FiTrash2, FiPackage, FiCheckCircle, FiPercent, FiCredi
 import api from '../api/axios';
 import { useAuth } from '../context/AuthContext';
 import SellerNav from '../components/SellerNav';
+import ConfirmModal from '../components/ConfirmModal';
 
 const copyText = async (text) => {
   try { await navigator.clipboard.writeText(text); return true; } catch {
@@ -39,6 +40,8 @@ export default function SellerDashboard() {
   const [sellerRatings, setSellerRatings] = useState(null);
   const [pendingReprises, setPendingReprises] = useState([]);
   const [rejectedPopup, setRejectedPopup] = useState(null);
+  const [deleteTarget, setDeleteTarget] = useState(null);
+  const [deleteRejectedTarget, setDeleteRejectedTarget] = useState(null);
   useEffect(() => {
     Promise.allSettled([
       api.get('/seller/me'),
@@ -92,11 +95,15 @@ export default function SellerDashboard() {
     }
   };
 
-  const handleDelete = async (id) => {
-    if (!window.confirm('Supprimer ce produit ?')) return;
+  const executeDelete = async () => {
+    const id = deleteTarget || deleteRejectedTarget;
+    setDeleteTarget(null);
+    setDeleteRejectedTarget(null);
+    if (!id) return;
     try {
       await api.delete(`/products/${id}`);
       setProducts(products.filter(p => p.id !== id));
+      setRejectedPopup(null);
     } catch (err) {
       alert(err.response?.data?.message || 'Erreur');
     }
@@ -379,7 +386,7 @@ export default function SellerDashboard() {
                           <Link to={`/seller/products/edit/${p.id}`} className="btn-icon" title="Modifier">
                             <FiEdit2 size={16} />
                           </Link>
-                          <button className="btn-icon btn-icon-danger" onClick={() => handleDelete(p.id)} title="Supprimer">
+                          <button className="btn-icon btn-icon-danger" onClick={() => setDeleteTarget(p.id)} title="Supprimer">
                             <FiTrash2 size={16} />
                           </button>
                         </div>
@@ -425,7 +432,7 @@ export default function SellerDashboard() {
                 <Link to={`/seller/products/edit/${rejectedPopup.id}`} className="btn btn-primary" style={{ flex: 1, justifyContent: 'center', fontSize: 13, padding: '8px 12px', textDecoration: 'none' }}>
                   <FiEdit2 size={14} /> Modifier
                 </Link>
-                <button onClick={() => { if (window.confirm('Supprimer ce produit ?')) { handleDelete(rejectedPopup.id); setRejectedPopup(null); } }}
+                <button onClick={() => setDeleteRejectedTarget(rejectedPopup.id)}
                   className="btn btn-outline" style={{ flex: 1, justifyContent: 'center', fontSize: 13, padding: '8px 12px', color: 'var(--error)', borderColor: 'var(--error)' }}>
                   <FiTrash2 size={14} /> Supprimer
                 </button>
@@ -434,6 +441,17 @@ export default function SellerDashboard() {
           </div>
         </div>
       )}
+
+      <ConfirmModal
+        open={!!deleteTarget || !!deleteRejectedTarget}
+        onClose={() => { setDeleteTarget(null); setDeleteRejectedTarget(null); }}
+        onConfirm={executeDelete}
+        title="Supprimer ce produit ?"
+        message="Cette action est irreversible."
+        confirmText="Supprimer"
+        confirmColor="#dc2626"
+        icon={<FiTrash2 size={26} color="#dc2626" />}
+      />
     </div>
   );
 }

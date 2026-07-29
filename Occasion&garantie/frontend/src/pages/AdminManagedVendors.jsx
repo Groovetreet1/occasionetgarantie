@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import { FiArrowLeft, FiUser, FiPlus, FiCopy, FiTrash2, FiKey, FiX } from 'react-icons/fi';
 import api from '../api/axios';
+import ConfirmModal from '../components/ConfirmModal';
 
 export default function AdminManagedVendors() {
   const [vendors, setVendors] = useState([]);
@@ -14,6 +15,8 @@ export default function AdminManagedVendors() {
   const [deleting, setDeleting] = useState(null);
   const [resetPwResult, setResetPwResult] = useState(null);
   const [resettingId, setResettingId] = useState(null);
+  const [resetPwTarget, setResetPwTarget] = useState(null);
+  const [deleteTarget, setDeleteTarget] = useState(null);
 
   const load = () => {
     setLoading(true);
@@ -42,8 +45,10 @@ export default function AdminManagedVendors() {
     setCreating(false);
   };
 
-  const handleResetPassword = async (v) => {
-    if (!confirm(`Reinitialiser le mot de passe de "${v.full_name}" ?`)) return;
+  const executeResetPw = async () => {
+    if (!resetPwTarget) return;
+    const v = resetPwTarget;
+    setResetPwTarget(null);
     setResettingId(v.id);
     try {
       const res = await api.post(`/admin/managed-vendors/${v.id}/reset-password`);
@@ -54,8 +59,10 @@ export default function AdminManagedVendors() {
     setResettingId(null);
   };
 
-  const handleDelete = async (id) => {
-    if (!confirm('Supprimer ce vendeur ?')) return;
+  const executeDelete = async () => {
+    if (!deleteTarget) return;
+    const id = deleteTarget;
+    setDeleteTarget(null);
     setDeleting(id);
     try {
       await api.delete(`/admin/managed-vendors/${id}`);
@@ -176,10 +183,10 @@ export default function AdminManagedVendors() {
                     <td style={{ fontSize: '12px', color: 'var(--text-muted)' }}>{new Date(v.created_at).toLocaleDateString('fr-FR')}</td>
                     <td>
                       <div style={{ display: 'flex', gap: 4 }}>
-                        <button onClick={() => handleResetPassword(v)} disabled={resettingId === v.id} className="btn btn-ghost" style={{ color: '#3b82f6', padding: '4px 8px' }} title="Reinitialiser mot de passe">
+                        <button onClick={() => setResetPwTarget(v)} disabled={resettingId === v.id} className="btn btn-ghost" style={{ color: '#3b82f6', padding: '4px 8px' }} title="Reinitialiser mot de passe">
                           <FiKey size={15} />
                         </button>
-                        <button onClick={() => handleDelete(v.id)} disabled={deleting === v.id} className="btn btn-ghost" style={{ color: '#ef4444', padding: '4px 8px' }} title="Supprimer">
+                        <button onClick={() => setDeleteTarget(v.id)} disabled={deleting === v.id} className="btn btn-ghost" style={{ color: '#ef4444', padding: '4px 8px' }} title="Supprimer">
                           <FiTrash2 size={16} />
                         </button>
                       </div>
@@ -191,6 +198,27 @@ export default function AdminManagedVendors() {
           </div>
         )}
       </div>
+
+      <ConfirmModal
+        open={!!resetPwTarget}
+        onClose={() => setResetPwTarget(null)}
+        onConfirm={executeResetPw}
+        title={`Reinitialiser le mot de passe ?`}
+        message={`Le mot de passe de "${resetPwTarget?.full_name || ''}" sera reinitialise.`}
+        confirmText="Reinitialiser"
+        confirmColor="#3b82f6"
+        icon={<FiKey size={26} color="#3b82f6" />}
+      />
+      <ConfirmModal
+        open={!!deleteTarget}
+        onClose={() => setDeleteTarget(null)}
+        onConfirm={executeDelete}
+        title="Supprimer ce vendeur ?"
+        message="Cette action est irreversible."
+        confirmText="Supprimer"
+        confirmColor="#dc2626"
+        icon={<FiTrash2 size={26} color="#dc2626" />}
+      />
     </section>
   );
 }

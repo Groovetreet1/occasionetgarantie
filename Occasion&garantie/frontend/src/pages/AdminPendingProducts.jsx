@@ -2,6 +2,7 @@ import { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
 import { FiArrowLeft, FiPackage, FiCheck, FiX, FiClock, FiDollarSign, FiMapPin, FiTag, FiShield, FiBox, FiChevronLeft, FiChevronRight } from 'react-icons/fi';
 import api from '../api/axios';
+import ConfirmModal from '../components/ConfirmModal';
 
 const API_BASE = import.meta.env.VITE_API_URL || '';
 
@@ -27,6 +28,7 @@ export default function AdminPendingProducts() {
   const [rejectSubmitted, setRejectSubmitted] = useState(false);
   const [actionLoading, setActionLoading] = useState(false);
   const [galleryIndex, setGalleryIndex] = useState(0);
+  const [quickApprove, setQuickApprove] = useState(null);
 
   const load = () => {
     setLoading(true);
@@ -141,7 +143,7 @@ export default function AdminPendingProducts() {
                   </div>
                 </div>
                 <div style={{ display: 'flex', gap: 6 }} onClick={e => e.stopPropagation()}>
-                  <button onClick={async (e) => { e.stopPropagation(); if (!window.confirm(`Approuver "${p.name}" ?`)) return; try { await api.put(`/admin/products/${p.id}/approve`); setProducts(prev => prev.filter(x => x.id !== p.id)); } catch {} }}
+                  <button onClick={(e) => { e.stopPropagation(); setQuickApprove(p.id); }}
                     className="btn btn-primary" style={{ fontSize: 12, padding: '6px 14px' }}>
                     <FiCheck size={13} /> Approuver
                   </button>
@@ -155,6 +157,19 @@ export default function AdminPendingProducts() {
         )}
       </div>
 
+      <ConfirmModal
+        open={!!quickApprove}
+        onClose={() => setQuickApprove(null)}
+        onConfirm={async () => {
+          const id = quickApprove;
+          setQuickApprove(null);
+          try { await api.put(`/admin/products/${id}/approve`); setProducts(prev => prev.filter(x => x.id !== id)); } catch {}
+        }}
+        title="Approuver ce produit ?"
+        message="Le produit sera visible sur le site."
+        confirmText="Approuver"
+        confirmColor="#059669"
+      />
       {selectedProduct && (
         <div style={{ position: 'fixed', inset: 0, background: 'rgba(0,0,0,0.6)', zIndex: 1001, display: 'flex', alignItems: 'center', justifyContent: 'center', padding: 16, overflowY: 'auto' }}
           onClick={closeProduct}>

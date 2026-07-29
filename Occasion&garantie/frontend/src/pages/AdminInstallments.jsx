@@ -2,6 +2,7 @@ import { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
 import { FiCheck, FiX, FiClock, FiArrowLeft, FiThumbsDown } from 'react-icons/fi';
 import api from '../api/axios';
+import ConfirmModal from '../components/ConfirmModal';
 
 const statusLabels = { en_attente: 'En attente', actif: 'Actif', rejete: 'Rejete' };
 const statusColors = { en_attente: '#d97706', actif: 'var(--success)', rejete: 'var(--error)' };
@@ -12,6 +13,7 @@ export default function AdminInstallments() {
   const [loading, setLoading] = useState(true);
   const [actionId, setActionId] = useState(null);
   const [rejectModal, setRejectModal] = useState(null);
+  const [confirmTarget, setConfirmTarget] = useState(null);
 
   useEffect(() => {
     api.get('/admin/installments')
@@ -20,8 +22,10 @@ export default function AdminInstallments() {
       .finally(() => setLoading(false));
   }, []);
 
-  const handleConfirm = async (id) => {
-    if (!window.confirm('Confirmer cette demande de paiement echelonne ?')) return;
+  const executeConfirm = async () => {
+    if (!confirmTarget) return;
+    const id = confirmTarget;
+    setConfirmTarget(null);
     setActionId(id);
     try {
       await api.post(`/admin/installments/${id}/confirm`);
@@ -111,7 +115,7 @@ export default function AdminInstallments() {
                     <td style={{ padding: '10px 6px' }}>
                       {i.status === 'en_attente' ? (
                         <div style={{ display: 'flex', gap: '4px' }}>
-                          <button onClick={() => handleConfirm(i.id)} disabled={actionId === i.id}
+                          <button onClick={() => setConfirmTarget(i.id)} disabled={actionId === i.id}
                             className="btn btn-primary" style={{ padding: '5px 10px', fontSize: '11px' }}>
                             {actionId === i.id ? '...' : <><FiCheck size={12} /> OK</>}
                           </button>
@@ -150,6 +154,16 @@ export default function AdminInstallments() {
           </div>
         </div>
       )}
+
+      <ConfirmModal
+        open={!!confirmTarget}
+        onClose={() => setConfirmTarget(null)}
+        onConfirm={executeConfirm}
+        title="Confirmer le paiement echelonne"
+        message="Cette action confirmera la demande de paiement echelonne."
+        confirmText="Confirmer"
+        confirmColor="#059669"
+      />
     </section>
   );
 }

@@ -2,11 +2,13 @@ import { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
 import { FiTrash2, FiArrowLeft, FiUsers as FiUsersIcon, FiShield } from 'react-icons/fi';
 import api from '../api/axios';
+import ConfirmModal from '../components/ConfirmModal';
 
 export default function AdminUsers() {
   const [users, setUsers] = useState([]);
   const [loading, setLoading] = useState(true);
   const [deleting, setDeleting] = useState(null);
+  const [deleteTarget, setDeleteTarget] = useState(null);
 
   useEffect(() => {
     api.get('/admin/users')
@@ -15,8 +17,10 @@ export default function AdminUsers() {
       .finally(() => setLoading(false));
   }, []);
 
-  const handleDelete = async (id, name) => {
-    if (!window.confirm(`Supprimer definitivement "${name}" ?\nToutes ses annonces et donnees seront effacees.`)) return;
+  const executeDelete = async () => {
+    if (!deleteTarget) return;
+    const { id } = deleteTarget;
+    setDeleteTarget(null);
     setDeleting(id);
     try {
       await api.delete(`/admin/users/${id}`);
@@ -83,7 +87,7 @@ export default function AdminUsers() {
                     <td style={{ padding: '10px 6px', fontSize: '11px', color: 'var(--text-secondary)' }}>{formatDate(u.created_at)}</td>
                     <td style={{ padding: '10px 6px' }}>
                       {u.id !== 1 && (
-                        <button onClick={() => handleDelete(u.id, u.full_name)} disabled={deleting === u.id}
+                        <button onClick={() => setDeleteTarget({ id: u.id, name: u.full_name })} disabled={deleting === u.id}
                           className="btn" style={{ padding: '5px 10px', fontSize: '11px', background: 'rgba(239,68,68,0.15)', color: 'var(--error)', border: 'none' }}>
                           {deleting === u.id ? '...' : <><FiTrash2 size={12} /> Supprimer</>}
                         </button>
@@ -97,6 +101,17 @@ export default function AdminUsers() {
           </div>
         )}
       </div>
+
+      <ConfirmModal
+        open={!!deleteTarget}
+        onClose={() => setDeleteTarget(null)}
+        onConfirm={executeDelete}
+        title={`Supprimer "${deleteTarget?.name || ''}" ?`}
+        message="Toutes ses annonces et donnees seront effacees."
+        confirmText="Supprimer"
+        confirmColor="#dc2626"
+        icon={<FiTrash2 size={26} color="#dc2626" />}
+      />
     </section>
   );
 }
