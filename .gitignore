@@ -55,6 +55,8 @@ coverage/
 
 # Uploads
 game_hub/uploads/
+Occasion&garantie/backend/uploads/
+Occasion&garantie/backend/public/
 
 # Junction (symlink) duplicate of Occasion&garantie
 Occasion-Garantie/
