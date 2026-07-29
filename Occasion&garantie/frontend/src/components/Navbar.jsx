@@ -1,5 +1,5 @@
 import { Link, NavLink, useNavigate, useLocation } from 'react-router-dom';
-import { FiUser, FiLogOut, FiSettings, FiChevronDown, FiSmartphone, FiMonitor, FiHeadphones, FiTablet, FiShoppingBag, FiTrendingUp, FiStar, FiMessageCircle, FiPackage, FiBell } from 'react-icons/fi';
+import { FiUser, FiLogOut, FiSettings, FiChevronDown, FiSmartphone, FiMonitor, FiHeadphones, FiTablet, FiShoppingBag, FiTrendingUp, FiStar, FiMessageCircle, FiPackage, FiBell, FiTrash2, FiAlertTriangle } from 'react-icons/fi';
 import { useState, useRef, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useAuth } from '../context/AuthContext';
@@ -51,6 +51,7 @@ export default function Navbar() {
   const [notifOpen, setNotifOpen] = useState(false);
   const [notifications, setNotifications] = useState([]);
   const [unreadCount, setUnreadCount] = useState(0);
+  const [showCleanConfirm, setShowCleanConfirm] = useState(false);
   const notifRef = useRef(null);
 
   useEffect(() => {
@@ -92,7 +93,11 @@ export default function Navbar() {
   };
 
   const cleanAll = async () => {
-    if (!window.confirm('Supprimer toutes les notifications ?')) return;
+    setShowCleanConfirm(true);
+  };
+
+  const confirmClean = async () => {
+    setShowCleanConfirm(false);
     try { await api.delete('/notifications/all'); setNotifications([]); setUnreadCount(0); } catch {}
   };
 
@@ -343,6 +348,31 @@ export default function Navbar() {
       </div>
 
       <PremiumPopup open={showPremium} onClose={() => setShowPremium(false)} />
+
+      {showCleanConfirm && (
+        <div style={{ position: 'fixed', inset: 0, background: 'rgba(0,0,0,0.5)', zIndex: 99999, display: 'flex', alignItems: 'center', justifyContent: 'center', padding: 16 }}
+          onClick={() => setShowCleanConfirm(false)}>
+          <motion.div initial={{ opacity: 0, scale: 0.9 }} animate={{ opacity: 1, scale: 1 }} exit={{ opacity: 0, scale: 0.9 }}
+            style={{ background: 'var(--bg-card)', borderRadius: 20, padding: 32, maxWidth: 360, width: '100%', boxShadow: '0 25px 80px rgba(0,0,0,0.35)', textAlign: 'center' }}
+            onClick={e => e.stopPropagation()}>
+            <div style={{ width: 56, height: 56, borderRadius: '50%', background: 'rgba(239,68,68,0.1)', display: 'flex', alignItems: 'center', justifyContent: 'center', margin: '0 auto 16px' }}>
+              <FiTrash2 size={26} color="#dc2626" />
+            </div>
+            <h3 style={{ fontSize: 18, fontWeight: 700, marginBottom: 8 }}>Vider les notifications ?</h3>
+            <p style={{ fontSize: 14, color: 'var(--text-secondary)', marginBottom: 24, lineHeight: 1.5 }}>
+              Cette action est irreversible. Toutes vos notifications seront supprimees.
+            </p>
+            <div style={{ display: 'flex', gap: 10 }}>
+              <button onClick={() => setShowCleanConfirm(false)} className="btn btn-outline" style={{ flex: 1, justifyContent: 'center', padding: '10px 0' }}>
+                Annuler
+              </button>
+              <button onClick={confirmClean} className="form-submit" style={{ flex: 1, justifyContent: 'center', padding: '10px 0', background: '#dc2626', borderColor: '#dc2626' }}>
+                <FiTrash2 size={14} /> Vider
+              </button>
+            </div>
+          </motion.div>
+        </div>
+      )}
     </>
   );
 }

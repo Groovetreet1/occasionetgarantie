@@ -1,5 +1,6 @@
 import { useEffect, useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
+import { motion, AnimatePresence } from 'framer-motion';
 import { FiArrowLeft, FiBell, FiCheck, FiTrash2 } from 'react-icons/fi';
 import api from '../api/axios';
 
@@ -7,6 +8,7 @@ export default function NotificationsPage() {
   const navigate = useNavigate();
   const [notifications, setNotifications] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [showCleanConfirm, setShowCleanConfirm] = useState(false);
 
   useEffect(() => {
     api.get('/notifications').then(res => setNotifications(res.data)).catch(() => {}).finally(() => setLoading(false));
@@ -25,8 +27,8 @@ export default function NotificationsPage() {
     } catch {}
   };
 
-  const cleanAll = async () => {
-    if (!window.confirm('Supprimer toutes les notifications ?')) return;
+  const confirmClean = async () => {
+    setShowCleanConfirm(false);
     try { await api.delete('/notifications/all'); setNotifications([]); } catch {}
   };
 
@@ -42,7 +44,7 @@ export default function NotificationsPage() {
           </div>
           <div style={{ display: 'flex', gap: 8 }}>
             {notifications.length > 0 && (
-              <button onClick={cleanAll} className="btn btn-ghost" style={{ fontSize: 13, display: 'flex', alignItems: 'center', gap: 6, color: 'var(--error)' }}>
+              <button onClick={() => setShowCleanConfirm(true)} className="btn btn-ghost" style={{ fontSize: 13, display: 'flex', alignItems: 'center', gap: 6, color: 'var(--error)' }}>
                 <FiTrash2 size={14} /> Vider
               </button>
             )}
@@ -83,6 +85,33 @@ export default function NotificationsPage() {
           </div>
         )}
       </div>
+
+      <AnimatePresence>
+      {showCleanConfirm && (
+        <div style={{ position: 'fixed', inset: 0, background: 'rgba(0,0,0,0.5)', zIndex: 99999, display: 'flex', alignItems: 'center', justifyContent: 'center', padding: 16 }}
+          onClick={() => setShowCleanConfirm(false)}>
+          <motion.div initial={{ opacity: 0, scale: 0.9 }} animate={{ opacity: 1, scale: 1 }} exit={{ opacity: 0, scale: 0.9 }}
+            style={{ background: 'var(--bg-card)', borderRadius: 20, padding: 32, maxWidth: 360, width: '100%', boxShadow: '0 25px 80px rgba(0,0,0,0.35)', textAlign: 'center' }}
+            onClick={e => e.stopPropagation()}>
+            <div style={{ width: 56, height: 56, borderRadius: '50%', background: 'rgba(239,68,68,0.1)', display: 'flex', alignItems: 'center', justifyContent: 'center', margin: '0 auto 16px' }}>
+              <FiTrash2 size={26} color="#dc2626" />
+            </div>
+            <h3 style={{ fontSize: 18, fontWeight: 700, marginBottom: 8 }}>Vider les notifications ?</h3>
+            <p style={{ fontSize: 14, color: 'var(--text-secondary)', marginBottom: 24, lineHeight: 1.5 }}>
+              Cette action est irreversible. Toutes vos notifications seront supprimees.
+            </p>
+            <div style={{ display: 'flex', gap: 10 }}>
+              <button onClick={() => setShowCleanConfirm(false)} className="btn btn-outline" style={{ flex: 1, justifyContent: 'center', padding: '10px 0' }}>
+                Annuler
+              </button>
+              <button onClick={confirmClean} className="form-submit" style={{ flex: 1, justifyContent: 'center', padding: '10px 0', background: '#dc2626', borderColor: '#dc2626' }}>
+                <FiTrash2 size={14} /> Vider
+              </button>
+            </div>
+          </motion.div>
+        </div>
+      )}
+      </AnimatePresence>
     </section>
   );
 }
