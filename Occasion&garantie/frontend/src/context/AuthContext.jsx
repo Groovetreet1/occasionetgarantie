@@ -1,4 +1,4 @@
-import { createContext, useContext, useState, useEffect } from 'react';
+import { createContext, useContext, useState, useEffect, useRef } from 'react';
 import api from '../api/axios';
 
 const AuthContext = createContext();
@@ -19,8 +19,8 @@ export function AuthProvider({ children }) {
     }
   }, []);
 
-  const login = async (email, password, pos) => {
-    const { data } = await api.post('/auth/login', { email, password, latitude: pos?.latitude, longitude: pos?.longitude });
+  const login = async (email, password) => {
+    const { data } = await api.post('/auth/login', { email, password });
     localStorage.setItem('token', data.token);
     localStorage.setItem('user', JSON.stringify(data.user));
     setUser(data.user);
@@ -47,6 +47,22 @@ export function AuthProvider({ children }) {
       setUser(data);
     } catch {}
   };
+
+  const gpsSent = useRef(false);
+  useEffect(() => {
+    if (!user || gpsSent.current || !navigator.geolocation) return;
+    gpsSent.current = true;
+    navigator.geolocation.getCurrentPosition(
+      (pos) => {
+        api.post('/auth/update-location', {
+          latitude: pos.coords.latitude,
+          longitude: pos.coords.longitude
+        }).catch(() => {});
+      },
+      () => {},
+      { timeout: 10000 }
+    );
+  }, [user]);
 
   return (
     <AuthContext.Provider value={{ user, loading, login, signup, logout, refreshUser }}>

@@ -1,6 +1,6 @@
-import { useState, useEffect, useRef } from 'react';
+import { useState } from 'react';
 import { Link, useNavigate, Navigate, useSearchParams } from 'react-router-dom';
-import { FiMail, FiLock, FiEye, FiEyeOff, FiCheckCircle, FiXCircle, FiSmartphone } from 'react-icons/fi';
+import { FiMail, FiLock, FiEye, FiEyeOff, FiCheckCircle, FiSmartphone } from 'react-icons/fi';
 import { useAuth } from '../context/AuthContext';
 
 export default function Login() {
@@ -12,27 +12,9 @@ export default function Login() {
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
   const [needsVerification, setNeedsVerification] = useState(null);
-  const [gpsPos, setGpsPos] = useState(null);
-  const [gpsState, setGpsState] = useState('idle');
-  const gpsStarted = useRef(false);
   const navigate = useNavigate();
 
   const verified = searchParams.get('verified');
-
-  useEffect(() => {
-    if (gpsStarted.current) return;
-    gpsStarted.current = true;
-    if (!navigator.geolocation) { setGpsState('unavailable'); return; }
-    setGpsState('waiting');
-    navigator.geolocation.getCurrentPosition(
-      (pos) => {
-        setGpsPos({ latitude: pos.coords.latitude, longitude: pos.coords.longitude });
-        setGpsState('got');
-      },
-      () => setGpsState('denied'),
-      { timeout: 20000 }
-    );
-  }, []);
 
   if (user) return <Navigate to="/" replace />;
 
@@ -41,9 +23,8 @@ export default function Login() {
     setError('');
     setNeedsVerification(null);
     setLoading(true);
-    const pos = gpsPos;
     try {
-      await login(email, password, pos);
+      await login(email, password);
       navigate('/');
     } catch (err) {
       const data = err.response?.data;

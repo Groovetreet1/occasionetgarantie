@@ -213,7 +213,7 @@ router.post('/login', [
     try { await pool.query("ALTER TABLE users ADD COLUMN suspension_reason VARCHAR(255) DEFAULT NULL"); } catch (e) { if (e.errno !== 1060 && e.code !== 'ER_DUP_FIELDNAME') console.log('suspension_reason col:', e.message); }
     try { await pool.query("ALTER TABLE users ADD COLUMN vpn_warned_at DATETIME DEFAULT NULL"); } catch (e) { if (e.errno !== 1060 && e.code !== 'ER_DUP_FIELDNAME') console.log('vpn_warned_at col:', e.message); }
 
-    const { email, password, latitude, longitude } = req.body;
+    const { email, password } = req.body;
     const [users] = await pool.query('SELECT * FROM users WHERE email = ?', [email]);
     if (users.length === 0) {
       return res.status(400).json({ message: 'Email ou mot de passe incorrect.' });
@@ -239,13 +239,29 @@ router.post('/login', [
       { expiresIn: '6h' }
     );
     const ip = req.headers['x-forwarded-for']?.split(',')[0]?.trim() || req.socket.remoteAddress || 'unknown';
-    logVendorAction({ userId: user.id, action: 'connexion', ip, userAgent: req.headers['user-agent'], latitude, longitude });
+    logVendorAction({ userId: user.id, action: 'connexion', ip, userAgent: req.headers['user-agent'] });
     res.json({
       token,
       user: { id: user.id, fullName: user.full_name, email: user.email, phone: user.phone, role: user.role, phoneVerified: true }
     });
   } catch (err) {
     res.status(500).json({ message: 'Erreur serveur.' });
+  }
+});
+
+router.post('/update-location', authenticate, async (req, res) => {
+  try {
+    const { latitude, longitude } = req.body;
+    if (!latitude || !longitude) return res.status(400).json({ message: 'latitude et longitude requis.' });
+    try { await pool.query("ALTER TABLE vendor_activity_log ADD COLUMN latitude DECIMAL(10,7) DEFAULT NULL"); } catch (e) { if (e.errno !== 1060 && e.code !== 'ER_DUP_FIELDNAME') {} }
+    try { await pool.query("ALTER TABLE vendor_activity_log ADD COLUMN longitude DECIMAL(10,7) DEFAULT NULL"); } catch (e) { if (e.errno !== 1060 && e.code !== 'ER_DUP_FIELDNAME') {} }
+    await pool.query(
+      `UPDATE vendor_activity_log SET latitude = ?, longitude = ? WHERE user_id = ? AND action = 'connexion' ORDER BY created_at DESC LIMIT 1`,
+      [latitude, longitude, req.user.id]
+    );
+    res.json({ ok: true });
+  } catch (err) {
+    res.status(500).json({ message: 'Erreur serveur.', error: err.message });
   }
 });
 
