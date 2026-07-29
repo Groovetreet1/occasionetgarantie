@@ -4,7 +4,7 @@ const { authenticate } = require('../middleware/auth');
 const fs = require('fs');
 const path = require('path');
 const { destroy: cloudDestroy, USE_CLOUDINARY } = require('../services/uploader');
-const { classifyImage } = require('../services/ai-validator');
+
 const { logVendorAction } = require('../services/tracker');
 
 const router = express.Router();
@@ -137,17 +137,6 @@ router.post('/', authenticate, async (req, res) => {
     const catError = await validateCategory(category_id);
     if (catError) return res.status(400).json({ message: catError });
 
-    if (image) {
-      const imgResult = await classifyImage(image);
-      if (!imgResult.valid) return res.status(400).json({ message: imgResult.reason });
-    }
-    if (gallery && Array.isArray(gallery)) {
-      for (const img of gallery) {
-        const imgResult = await classifyImage(img);
-        if (!imgResult.valid) return res.status(400).json({ message: 'Galerie - ' + imgResult.reason });
-      }
-    }
-
     // Credit deduction for sellers > 3 months (5% of price)
     if (req.user.role === 'seller' && price) {
       try {
@@ -200,16 +189,6 @@ router.put('/:id', authenticate, async (req, res) => {
     if (category_id) {
       const catError = await validateCategory(category_id);
       if (catError) return res.status(400).json({ message: catError });
-    }
-    if (image) {
-      const imgResult = await classifyImage(image);
-      if (!imgResult.valid) return res.status(400).json({ message: imgResult.reason });
-    }
-    if (gallery && Array.isArray(gallery)) {
-      for (const img of gallery) {
-        const imgResult = await classifyImage(img);
-        if (!imgResult.valid) return res.status(400).json({ message: 'Galerie - ' + imgResult.reason });
-      }
     }
     await pool.query(
       `UPDATE products SET name=?, slug=?, description=?, price=?, old_price=?, category_id=?, brand=?, state=?, warranty=?, stock=?, featured=?, image=?, gallery=?, specs=?, status=?, ville=? WHERE id = ?`,
