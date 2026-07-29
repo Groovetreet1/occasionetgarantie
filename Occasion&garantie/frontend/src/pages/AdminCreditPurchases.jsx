@@ -71,7 +71,7 @@ export default function AdminCreditPurchases() {
       <div className="container" style={{ position: 'relative', zIndex: 1 }}>
         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '32px', flexWrap: 'wrap', gap: '12px' }}>
           <div>
-            <Link to="/" className="btn btn-ghost" style={{ marginBottom: '8px' }}><FiArrowLeft /> Retour au site</Link>
+            <Link to="/admin" className="btn btn-ghost" style={{ marginBottom: '8px' }}><FiArrowLeft /> Dashboard</Link>
             <h1 style={{ fontSize: '28px', fontWeight: 800 }}>Achats de Credits</h1>
             <p style={{ color: 'var(--text-secondary)' }}>{purchases.length} demande{purchases.length > 1 ? 's' : ''}</p>
           </div>
