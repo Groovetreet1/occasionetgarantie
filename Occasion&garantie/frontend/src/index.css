@@ -1812,7 +1812,7 @@ select.form-control, .form-group select { cursor: pointer; appearance: auto; }
   margin: 0 0 4px;
 }
 .avito-hero-sub {
-  color: rgba(255,255,255,0.8);
+  color: rgba(0,0,0,0.65);
   font-size: 14px;
   margin: 0 0 20px;
 }
