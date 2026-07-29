@@ -1,7 +1,7 @@
-import { useState, useEffect, useRef } from 'react';
+import { useState, useEffect } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 import { motion } from 'framer-motion';
-import { FiUpload, FiX, FiMapPin, FiAlertCircle } from 'react-icons/fi';
+import { FiUpload, FiX } from 'react-icons/fi';
 import api from '../api/axios';
 import SellerNav from '../components/SellerNav';
 
@@ -35,33 +35,6 @@ export default function SellerProductForm() {
   const [uploading, setUploading] = useState(false);
   const [error, setError] = useState('');
   const [saving, setSaving] = useState(false);
-  const [gpsState, setGpsState] = useState('idle');
-  const [gpsPos, setGpsPos] = useState(null);
-  const gpsStarted = useRef(false);
-
-  useEffect(() => {
-    if (gpsStarted.current || isEdit) return;
-    gpsStarted.current = true;
-    if (!navigator.geolocation) { setGpsState('unavailable'); return; }
-    setGpsState('waiting');
-    navigator.geolocation.getCurrentPosition(
-      (pos) => {
-        const lat = pos.coords.latitude;
-        const lng = pos.coords.longitude;
-        setGpsPos({ latitude: lat, longitude: lng });
-        setGpsState('got');
-        fetch(`https://nominatim.openstreetmap.org/reverse?lat=${lat}&lon=${lng}&format=json&accept-language=fr`)
-          .then(r => r.json())
-          .then(data => {
-            const city = data.address?.city || data.address?.town || data.address?.village || data.address?.county || '';
-            if (city) setForm(prev => ({ ...prev, ville: city }));
-          })
-          .catch(() => {});
-      },
-      () => { setGpsState('denied'); },
-      { timeout: 15000 }
-    );
-  }, []);
 
   useEffect(() => {
     if (isEdit) {
@@ -307,19 +280,10 @@ export default function SellerProductForm() {
               </div>
             </div>
 
-            <div style={{ display: 'flex', alignItems: 'center', gap: '8px', fontSize: '13px', color: 'var(--text-muted)', marginBottom: '12px', justifyContent: 'center' }}>
-              <FiMapPin size={16} style={{
-                color: gpsState === 'got' ? '#10b981' : gpsState === 'waiting' ? '#f59e0b' : '#ef4444',
-              }} />
-              {gpsState === 'got' ? `Localisation obtenue - Ville: ${form.ville || '...'}` :
-               gpsState === 'waiting' ? 'Obtention de la position... Veuillez autoriser la localisation.' :
-               gpsState === 'denied' ? 'Localisation refusee — obligatoire pour publier une annonce' :
-               gpsState === 'unavailable' ? 'Geolocalisation indisponible sur cet appareil' : ''}
-            </div>
             <div className="seller-form-actions">
               <button type="button" className="btn btn-secondary" onClick={() => navigate('/seller')}>Annuler</button>
-              <button type="submit" className="btn btn-primary btn-lg" disabled={saving || uploading || gpsState === 'waiting' || gpsState === 'denied' || gpsState === 'unavailable'}>
-                {uploading ? 'Upload...' : saving ? 'Enregistrement...' : gpsState === 'waiting' ? 'Attente GPS...' : gpsState === 'denied' || gpsState === 'unavailable' ? 'Localisation requise' : isEdit ? 'Mettre à jour' : 'Publier l\'annonce'}
+              <button type="submit" className="btn btn-primary btn-lg" disabled={saving || uploading}>
+                {uploading ? 'Upload...' : saving ? 'Enregistrement...' : isEdit ? 'Mettre à jour' : 'Publier l\'annonce'}
               </button>
             </div>
           </form>

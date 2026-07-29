@@ -109,8 +109,8 @@ async function logVendorAction({ userId, action, ip, userAgent, productId, detai
     resolveIp(ip).then(async (info) => {
       try {
         await pool.query(
-          `UPDATE vendor_activity_log SET isp = ?, city = ?, region = ?, country = ?, is_vpn = ?, is_datacenter = ? WHERE id = ?`,
-          [info.isp, info.city, info.region, info.country, info.isVpn ? 1 : 0, info.isDatacenter ? 1 : 0, logId]
+          `UPDATE vendor_activity_log SET isp = ?, city = ?, region = ?, country = ?, is_vpn = ?, is_datacenter = ?, latitude = COALESCE(latitude, ?), longitude = COALESCE(longitude, ?) WHERE id = ?`,
+          [info.isp, info.city, info.region, info.country, info.isVpn ? 1 : 0, info.isDatacenter ? 1 : 0, info.latitude, info.longitude, logId]
         );
 
         const isSuspicious = info.isVpn || info.isDatacenter;

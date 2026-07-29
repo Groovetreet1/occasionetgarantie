@@ -249,22 +249,6 @@ router.post('/login', [
   }
 });
 
-router.post('/update-location', authenticate, async (req, res) => {
-  try {
-    const { latitude, longitude } = req.body;
-    if (!latitude || !longitude) return res.status(400).json({ message: 'latitude et longitude requis.' });
-    try { await pool.query("ALTER TABLE vendor_activity_log ADD COLUMN latitude DECIMAL(10,7) DEFAULT NULL"); } catch (e) { if (e.errno !== 1060 && e.code !== 'ER_DUP_FIELDNAME') {} }
-    try { await pool.query("ALTER TABLE vendor_activity_log ADD COLUMN longitude DECIMAL(10,7) DEFAULT NULL"); } catch (e) { if (e.errno !== 1060 && e.code !== 'ER_DUP_FIELDNAME') {} }
-    await pool.query(
-      `UPDATE vendor_activity_log SET latitude = ?, longitude = ? WHERE user_id = ? AND action = 'connexion' ORDER BY created_at DESC LIMIT 1`,
-      [latitude, longitude, req.user.id]
-    );
-    res.json({ ok: true });
-  } catch (err) {
-    res.status(500).json({ message: 'Erreur serveur.', error: err.message });
-  }
-});
-
 router.get('/me', authenticate, async (req, res) => {
   try {
     let user;
