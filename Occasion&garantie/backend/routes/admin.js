@@ -565,6 +565,7 @@ router.post('/vendor-logs/reindex', authenticate, adminOnly, async (req, res) =>
 router.get('/managed-vendors', authenticate, adminOnly, async (req, res) => {
   try {
     try { await pool.query("ALTER TABLE users ADD COLUMN admin_managed_id INT DEFAULT NULL"); } catch (e) { if (e.errno !== 1060 && e.code !== 'ER_DUP_FIELDNAME') {} }
+    try { await pool.query("ALTER TABLE users ADD COLUMN ville VARCHAR(100) DEFAULT NULL"); } catch (e) { if (e.errno !== 1060 && e.code !== 'ER_DUP_FIELDNAME') {} }
     const [rows] = await pool.query(
       `SELECT id, full_name, store_name, email, phone, ville, created_at FROM users WHERE admin_managed_id IS NOT NULL ORDER BY created_at DESC`
     );
@@ -578,13 +579,14 @@ router.post('/managed-vendors', authenticate, adminOnly, async (req, res) => {
   try {
     const bcrypt = require('bcryptjs');
     try { await pool.query("ALTER TABLE users ADD COLUMN admin_managed_id INT DEFAULT NULL"); } catch (e) { if (e.errno !== 1060 && e.code !== 'ER_DUP_FIELDNAME') {} }
+    try { await pool.query("ALTER TABLE users ADD COLUMN ville VARCHAR(100) DEFAULT NULL"); } catch (e) { if (e.errno !== 1060 && e.code !== 'ER_DUP_FIELDNAME') {} }
     const { full_name, store_name, ville } = req.body;
     const rawPw = Math.random().toString(36).slice(2, 8) + Math.random().toString(36).slice(2, 8);
     const password = await bcrypt.hash(rawPw, 10);
     const email = `vendeur-${Date.now()}@occasionetgarantie.store`;
     const [result] = await pool.query(
-      `INSERT INTO users (full_name, store_name, email, password, phone, role, phone_verified, admin_managed_id, created_at) VALUES (?, ?, ?, ?, ?, 'seller', 1, ?, NOW())`,
-      [full_name || 'Vendeur', store_name || null, email, password, null, req.user.id]
+      `INSERT INTO users (full_name, store_name, email, password, phone, role, phone_verified, admin_managed_id, ville, created_at) VALUES (?, ?, ?, ?, ?, 'seller', 1, ?, ?, NOW())`,
+      [full_name || 'Vendeur', store_name || null, email, password, null, req.user.id, ville || null]
     );
     res.json({ id: result.insertId, email, password: rawPw, full_name, store_name, ville });
   } catch (err) {
