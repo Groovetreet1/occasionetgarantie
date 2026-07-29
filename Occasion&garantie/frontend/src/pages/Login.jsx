@@ -1,6 +1,6 @@
 import { useState, useEffect, useRef } from 'react';
 import { Link, useNavigate, Navigate, useSearchParams } from 'react-router-dom';
-import { FiMail, FiLock, FiEye, FiEyeOff, FiCheckCircle, FiXCircle, FiSmartphone, FiMapPin } from 'react-icons/fi';
+import { FiMail, FiLock, FiEye, FiEyeOff, FiCheckCircle, FiXCircle, FiSmartphone } from 'react-icons/fi';
 import { useAuth } from '../context/AuthContext';
 
 export default function Login() {
@@ -121,15 +121,6 @@ export default function Login() {
             </div>
             <div style={{ textAlign: 'right', marginTop: '4px' }}>
               <Link to="/forgot-password" style={{ fontSize: '13px', color: 'var(--primary)' }}>Mot de passe oublie ?</Link>
-            </div>
-            <div style={{ display: 'flex', alignItems: 'center', gap: '6px', fontSize: '12px', color: 'var(--text-muted)', marginBottom: '8px', justifyContent: 'center' }}>
-              <FiMapPin size={14} style={{
-                color: gpsState === 'got' ? '#10b981' : gpsState === 'waiting' ? '#f59e0b' : 'var(--text-muted)',
-              }} />
-              {gpsState === 'got' ? 'Localisation precise obtenue ✓' :
-               gpsState === 'waiting' ? 'Obtention de la position...' :
-               gpsState === 'denied' ? 'Position non partagee (IP approx.)' :
-               gpsState === 'unavailable' ? 'Geolocalisation indisponible' : ''}
             </div>
             <button type="submit" className="form-submit" disabled={loading}>
               {loading ? 'Connexion...' : 'Se connecter'}
