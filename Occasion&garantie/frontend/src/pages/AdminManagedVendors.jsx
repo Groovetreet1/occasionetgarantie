@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
-import { FiArrowLeft, FiUser, FiPlus, FiCopy, FiEye, FiEyeOff, FiTrash2, FiMail, FiSmartphone, FiMapPin } from 'react-icons/fi';
+import { FiArrowLeft, FiUser, FiPlus, FiCopy, FiTrash2, FiKey, FiX } from 'react-icons/fi';
 import api from '../api/axios';
 
 export default function AdminManagedVendors() {
@@ -12,6 +12,8 @@ export default function AdminManagedVendors() {
   const [creating, setCreating] = useState(false);
   const [createdCreds, setCreatedCreds] = useState(null);
   const [deleting, setDeleting] = useState(null);
+  const [resetPwResult, setResetPwResult] = useState(null);
+  const [resettingId, setResettingId] = useState(null);
 
   const load = () => {
     setLoading(true);
@@ -38,6 +40,18 @@ export default function AdminManagedVendors() {
       alert('Erreur: ' + (err.response?.data?.error || err.message));
     }
     setCreating(false);
+  };
+
+  const handleResetPassword = async (v) => {
+    if (!confirm(`Reinitialiser le mot de passe de "${v.full_name}" ?`)) return;
+    setResettingId(v.id);
+    try {
+      const res = await api.post(`/admin/managed-vendors/${v.id}/reset-password`);
+      setResetPwResult(res.data);
+    } catch (err) {
+      alert('Erreur: ' + (err.response?.data?.error || err.message));
+    }
+    setResettingId(null);
   };
 
   const handleDelete = async (id) => {
@@ -107,6 +121,18 @@ export default function AdminManagedVendors() {
           </div>
         )}
 
+        {resetPwResult && (
+          <div style={{ background: 'rgba(59,130,246,0.08)', border: '1px solid rgba(59,130,246,0.3)', borderRadius: 'var(--radius)', padding: '20px', marginBottom: '24px', position: 'relative' }}>
+            <button onClick={() => setResetPwResult(null)} style={{ position: 'absolute', top: 8, right: 8, background: 'none', border: 'none', color: 'var(--text-muted)', cursor: 'pointer' }}><FiX size={16} /></button>
+            <h3 style={{ color: '#3b82f6', marginBottom: '8px' }}>Mot de passe reinitialise</h3>
+            <p style={{ fontSize: '13px', color: 'var(--text-secondary)', marginBottom: '12px' }}>Nouveau mot de passe pour <strong>{resetPwResult.full_name}</strong> :</p>
+            <div style={{ fontFamily: 'monospace', fontSize: '14px', background: 'rgba(0,0,0,0.05)', padding: '12px', borderRadius: '8px', lineHeight: '2' }}>
+              <div><strong>Email :</strong> {resetPwResult.email} <button onClick={() => copy(resetPwResult.email)} className="btn btn-ghost" style={{ padding: '2px 6px', fontSize: '11px' }}><FiCopy size={12} /></button></div>
+              <div><strong>Mot de passe :</strong> <span style={{ color: '#3b82f6', fontWeight: 700 }}>{resetPwResult.password}</span> <button onClick={() => copy(resetPwResult.password)} className="btn btn-ghost" style={{ padding: '2px 6px', fontSize: '11px' }}><FiCopy size={12} /></button></div>
+            </div>
+          </div>
+        )}
+
         {createdCreds && (
           <div style={{ background: 'rgba(16,185,129,0.08)', border: '1px solid rgba(16,185,129,0.3)', borderRadius: 'var(--radius)', padding: '20px', marginBottom: '24px' }}>
             <h3 style={{ color: '#10b981', marginBottom: '8px' }}>Compte cree avec succes</h3>
@@ -149,9 +175,14 @@ export default function AdminManagedVendors() {
                     <td>{v.ville || '-'}</td>
                     <td style={{ fontSize: '12px', color: 'var(--text-muted)' }}>{new Date(v.created_at).toLocaleDateString('fr-FR')}</td>
                     <td>
-                      <button onClick={() => handleDelete(v.id)} disabled={deleting === v.id} className="btn btn-ghost" style={{ color: '#ef4444', padding: '4px 8px' }} title="Supprimer">
-                        <FiTrash2 size={16} />
-                      </button>
+                      <div style={{ display: 'flex', gap: 4 }}>
+                        <button onClick={() => handleResetPassword(v)} disabled={resettingId === v.id} className="btn btn-ghost" style={{ color: '#3b82f6', padding: '4px 8px' }} title="Reinitialiser mot de passe">
+                          <FiKey size={15} />
+                        </button>
+                        <button onClick={() => handleDelete(v.id)} disabled={deleting === v.id} className="btn btn-ghost" style={{ color: '#ef4444', padding: '4px 8px' }} title="Supprimer">
+                          <FiTrash2 size={16} />
+                        </button>
+                      </div>
                     </td>
                   </tr>
                 ))}

@@ -603,4 +603,18 @@ router.delete('/managed-vendors/:id', authenticate, adminOnly, async (req, res) 
   }
 });
 
+router.post('/managed-vendors/:id/reset-password', authenticate, adminOnly, async (req, res) => {
+  try {
+    const bcrypt = require('bcryptjs');
+    const [vendors] = await pool.query('SELECT id, full_name, email FROM users WHERE id = ? AND admin_managed_id IS NOT NULL', [req.params.id]);
+    if (vendors.length === 0) return res.status(404).json({ message: 'Vendeur introuvable.' });
+    const rawPw = Math.random().toString(36).slice(2, 8) + Math.random().toString(36).slice(2, 8);
+    const password = await bcrypt.hash(rawPw, 10);
+    await pool.query('UPDATE users SET password = ? WHERE id = ?', [password, req.params.id]);
+    res.json({ id: vendors[0].id, email: vendors[0].email, password: rawPw, full_name: vendors[0].full_name });
+  } catch (err) {
+    res.status(500).json({ message: 'Erreur reinitialisation.', error: err.message });
+  }
+});
+
 module.exports = router;
