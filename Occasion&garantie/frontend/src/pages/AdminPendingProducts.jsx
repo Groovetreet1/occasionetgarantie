@@ -24,6 +24,7 @@ export default function AdminPendingProducts() {
   const [approveDone, setApproveDone] = useState(null);
   const [rejectReasons, setRejectReasons] = useState([]);
   const [rejectConfirming, setRejectConfirming] = useState(false);
+  const [rejectSubmitted, setRejectSubmitted] = useState(false);
   const [actionLoading, setActionLoading] = useState(false);
   const [galleryIndex, setGalleryIndex] = useState(0);
 
@@ -39,6 +40,7 @@ export default function AdminPendingProducts() {
     setApproveDone(null);
     setRejectReasons([]);
     setRejectConfirming(false);
+    setRejectSubmitted(false);
     setGalleryIndex(0);
   };
 
@@ -47,6 +49,7 @@ export default function AdminPendingProducts() {
     setApproveDone(null);
     setRejectReasons([]);
     setRejectConfirming(false);
+    setRejectSubmitted(false);
     setGalleryIndex(0);
   };
 
@@ -77,7 +80,7 @@ export default function AdminPendingProducts() {
     try {
       await api.put(`/admin/products/${selectedProduct.id}/reject`, { reason });
       setProducts(prev => prev.filter(p => p.id !== selectedProduct.id));
-      setRejectConfirming(true);
+      setRejectSubmitted(true);
     } catch (e) {
       alert(e?.response?.data?.message || 'Erreur');
     } finally {
@@ -169,7 +172,7 @@ export default function AdminPendingProducts() {
                 </p>
                 <button className="btn btn-primary" onClick={closeProduct}>Fermer</button>
               </div>
-            ) : rejectConfirming ? (
+            ) : rejectSubmitted ? (
               <div style={{ padding: 48, textAlign: 'center' }}>
                 <div style={{ width: 64, height: 64, borderRadius: '50%', background: 'rgba(239,68,68,0.1)', display: 'flex', alignItems: 'center', justifyContent: 'center', margin: '0 auto 16px' }}>
                   <FiX size={32} color="#dc2626" />
@@ -182,6 +185,34 @@ export default function AdminPendingProducts() {
                   Raison envoyée au vendeur :<br/><strong>{rejectReasons.join(' ; ')}</strong>
                 </p>
                 <button className="btn btn-primary" onClick={closeProduct}>Fermer</button>
+              </div>
+            ) : rejectConfirming && !rejectSubmitted ? (
+              <div style={{ padding: 20 }}>
+                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 16 }}>
+                  <h3 style={{ fontSize: 16, fontWeight: 600, margin: 0 }}>سبب الرفض :</h3>
+                  <button onClick={() => { setRejectConfirming(false); setRejectReasons([]); }} style={{ background: 'none', border: 'none', color: 'var(--text-muted)', cursor: 'pointer', padding: 4 }}>
+                    <FiX size={18} />
+                  </button>
+                </div>
+                <div style={{ display: 'flex', flexDirection: 'column', gap: 8, marginBottom: 16 }}>
+                  {rejectOptions.map(opt => (
+                    <label key={opt.value} style={{
+                      display: 'flex', alignItems: 'center', gap: 10, padding: '10px 14px',
+                      borderRadius: 10, cursor: 'pointer', fontSize: 14,
+                      background: rejectReasons.includes(opt.value) ? 'rgba(239,68,68,0.1)' : 'var(--bg-secondary)',
+                      border: rejectReasons.includes(opt.value) ? '1px solid var(--error)' : '1px solid var(--border)',
+                    }}>
+                      <input type="checkbox" checked={rejectReasons.includes(opt.value)}
+                        onChange={() => toggleReason(opt.value)}
+                        style={{ accentColor: 'var(--error)' }} />
+                      <span>{opt.value}</span>
+                    </label>
+                  ))}
+                </div>
+                <button onClick={handleReject} disabled={rejectReasons.length === 0 || actionLoading}
+                  className="form-submit" style={{ width: '100%', justifyContent: 'center', background: 'var(--error)', borderColor: 'var(--error)', padding: 12 }}>
+                  <FiX size={14} /> {actionLoading ? '...' : 'تأكيد الرفض (Confirmer)'}
+                </button>
               </div>
             ) : (
               <>
@@ -333,38 +364,6 @@ export default function AdminPendingProducts() {
                   </div>
                 </div>
               </>
-            )}
-
-            {rejectConfirming && !approveDone && !actionLoading && (
-              <div style={{ padding: '0 20px 20px' }}>
-                <div style={{ borderTop: '1px solid var(--border)', paddingTop: 16, marginTop: 0 }}>
-                  <h3 style={{ fontSize: 15, fontWeight: 600, marginBottom: 8 }}>سبب الرفض :</h3>
-                  <div style={{ display: 'flex', flexDirection: 'column', gap: 8, marginBottom: 16 }}>
-                    {rejectOptions.map(opt => (
-                      <label key={opt.value} style={{
-                        display: 'flex', alignItems: 'center', gap: 10, padding: '10px 14px',
-                        borderRadius: 10, cursor: 'pointer', fontSize: 14,
-                        background: rejectReasons.includes(opt.value) ? 'rgba(239,68,68,0.1)' : 'var(--bg-secondary)',
-                        border: rejectReasons.includes(opt.value) ? '1px solid var(--error)' : '1px solid var(--border)',
-                      }}>
-                        <input type="checkbox" checked={rejectReasons.includes(opt.value)}
-                          onChange={() => toggleReason(opt.value)}
-                          style={{ accentColor: 'var(--error)' }} />
-                        <span>{opt.value}</span>
-                      </label>
-                    ))}
-                  </div>
-                  <div style={{ display: 'flex', gap: 10 }}>
-                    <button onClick={() => { setRejectConfirming(false); setRejectReasons([]); }} className="btn btn-outline" style={{ flex: 1, justifyContent: 'center' }}>
-                      رجوع (Retour)
-                    </button>
-                    <button onClick={handleReject} disabled={rejectReasons.length === 0 || actionLoading}
-                      className="form-submit" style={{ flex: 1, justifyContent: 'center', background: 'var(--error)', borderColor: 'var(--error)' }}>
-                      <FiX size={14} /> {actionLoading ? '...' : 'تأكيد الرفض (Confirmer)'}
-                    </button>
-                  </div>
-                </div>
-              </div>
             )}
           </div>
         </div>
