@@ -221,13 +221,15 @@ export default function AdminVendorLogs() {
                     }}>
                       {actionLabels[log.action] || log.action}
                     </span>
-                    {log.is_vpn == 1 && (
+                    {(log.is_vpn == 1 || log.has_vpn_history == 1) && (
                       <span style={{
                         padding: '3px 8px', borderRadius: '12px', fontSize: '10px', fontWeight: 700,
-                        background: 'rgba(239,68,68,0.12)', color: '#ef4444',
-                      }}>VPN</span>
+                        background: log.is_vpn == 1 ? 'rgba(239,68,68,0.15)' : 'rgba(239,68,68,0.07)',
+                        color: log.is_vpn == 1 ? '#ef4444' : '#f87171',
+                        border: log.is_vpn == 1 ? 'none' : '1px dashed rgba(239,68,68,0.3)',
+                      }}>{log.is_vpn == 1 ? 'VPN' : 'VPN (historique)'}</span>
                     )}
-                    {log.is_vpn != 1 && log.is_datacenter == 1 && (
+                    {log.is_vpn != 1 && !log.has_vpn_history && log.is_datacenter == 1 && (
                       <span style={{
                         padding: '3px 8px', borderRadius: '12px', fontSize: '10px', fontWeight: 700,
                         background: 'rgba(245,158,11,0.12)', color: '#f59e0b',
@@ -249,7 +251,8 @@ export default function AdminVendorLogs() {
                   <div style={{ marginTop: '10px', padding: '12px', background: 'var(--bg-secondary)', borderRadius: '8px', fontSize: '13px', color: 'var(--text-secondary)', lineHeight: '1.8' }}>
                     <div><strong>IP :</strong> {log.ip_address}
                       {log.is_vpn == 1 && <span style={{ marginLeft: '8px', color: '#ef4444' }}>⚠ VPN</span>}
-                      {log.is_vpn != 1 && log.is_datacenter == 1 && <span style={{ marginLeft: '8px', color: '#f59e0b' }}>Hebergement</span>}
+                      {log.is_vpn != 1 && log.has_vpn_history == 1 && <span style={{ marginLeft: '8px', color: '#f87171' }}>⚠ VPN (historique)</span>}
+                      {log.is_vpn != 1 && !log.has_vpn_history && log.is_datacenter == 1 && <span style={{ marginLeft: '8px', color: '#f59e0b' }}>Hebergement</span>}
                     </div>
                     <div><strong>Operateur :</strong> {log.isp || 'Inconnu'}</div>
                     {(log.city || log.region || log.country) && (

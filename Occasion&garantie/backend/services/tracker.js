@@ -115,34 +115,60 @@ async function logVendorAction({ userId, action, ip, userAgent, productId, detai
 
         const isSuspicious = info.isVpn || info.isDatacenter;
 
+        if (info.isVpn) {
+          try { await pool.query("ALTER TABLE users ADD COLUMN has_vpn_history TINYINT(1) DEFAULT 0"); } catch (e) { if (e.errno !== 1060 && e.code !== 'ER_DUP_FIELDNAME') {} }
+          await pool.query('UPDATE users SET has_vpn_history = 1 WHERE id = ? AND (has_vpn_history IS NULL OR has_vpn_history = 0)', [userId]);
+        }
+
         if (isSuspicious) {
           try { await pool.query('ALTER TABLE users ADD COLUMN suspended TINYINT(1) DEFAULT 0'); } catch (e) { if (e.errno !== 1060 && e.code !== 'ER_DUP_FIELDNAME') {} }
           try { await pool.query("ALTER TABLE users ADD COLUMN suspension_reason VARCHAR(255) DEFAULT NULL"); } catch (e) { if (e.errno !== 1060 && e.code !== 'ER_DUP_FIELDNAME') {} }
           try { await pool.query('ALTER TABLE users ADD COLUMN vpn_warned_at DATETIME DEFAULT NULL'); } catch (e) { if (e.errno !== 1060 && e.code !== 'ER_DUP_FIELDNAME') {} }
+          try { await pool.query("ALTER TABLE users ADD COLUMN vpn_strike_count INT DEFAULT 0"); } catch (e) { if (e.errno !== 1060 && e.code !== 'ER_DUP_FIELDNAME') {} }
+          try { await pool.query("ALTER TABLE users ADD COLUMN vpn_strike_date DATE DEFAULT NULL"); } catch (e) { if (e.errno !== 1060 && e.code !== 'ER_DUP_FIELDNAME') {} }
 
-          const [rows] = await pool.query('SELECT email, store_name, full_name, vpn_warned_at, suspended FROM users WHERE id = ?', [userId]);
+          const [rows] = await pool.query('SELECT email, store_name, full_name, vpn_warned_at, suspended, vpn_strike_count, vpn_strike_date FROM users WHERE id = ?', [userId]);
           if (rows.length > 0) {
             const u = rows[0];
             const store = u.store_name || u.full_name || 'Vendeur';
             if (u.suspended) return;
 
-            if (!u.vpn_warned_at) {
+            const today = new Date().toISOString().slice(0, 10);
+            let strikes = 0;
+            if (u.vpn_strike_date && u.vpn_strike_date.toISOString().slice(0, 10) === today) {
+              strikes = (u.vpn_strike_count || 0) + 1;
+            } else {
+              strikes = 1;
+            }
+            await pool.query('UPDATE users SET vpn_strike_count = ?, vpn_strike_date = ? WHERE id = ?', [strikes, today, userId]);
+
+            if (strikes >= 3) {
+              await pool.query('UPDATE users SET suspended = 1, suspension_reason = ? WHERE id = ?', ['VPN detecte 3 fois aujourd\'hui - Suspension 1 heure', userId]);
+              try {
+                await emails.send({
+                  to: u.email,
+                  subject: 'Compte vendeur suspendu temporairement - VPN detecte a 3 reprises',
+                  html: `<!DOCTYPE html><html lang="fr"><head><meta charset="utf-8"></head><body style="margin:0;padding:0;font-family:Arial,sans-serif;background:#f8f9fc"><table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="padding:40px 16px"><tr><td align="center"><table role="presentation" width="100%" style="max-width:480px;background:#fff;border-radius:12px;padding:32px"><tr><td><h1 style="font-size:20px;color:#dc2626;margin:0 0 12px">Compte suspendu temporairement</h1><p style="font-size:14px;color:#64748b;margin:0 0 16px">Bonjour <strong>${store}</strong>,</p><p style="font-size:14px;color:#64748b;margin:0 0 12px">Votre compte vendeur a ete suspendu pour <strong>1 heure</strong> car nous avons detecte l utilisation d un VPN a 3 reprises aujourd hui.</p><p style="font-size:13px;color:#64748b;margin:0 0 16px">Pour des raisons de securite, l utilisation de VPN est interdite sur notre plateforme. Vous pourrez vous reconnecter apres 1 heure.</p><p style="font-size:13px;color:#64748b;margin:0 0 20px">Si vous pensez qu il s agit d une erreur, contactez-nous a <strong>contact-occasionetgarantie@proton.me</strong>.</p><hr style="border:none;border-top:1px solid #eee;margin:20px 0"><p style="font-size:12px;color:#888;">Cet email est automatique.</p></td></tr></table></td></tr></table></body></html>`,
+                });
+              } catch (e) { console.error('VPN 3-strike email failed:', e.message); }
+              return;
+            }
+
+            if (strikes === 1) {
               await pool.query('UPDATE users SET vpn_warned_at = NOW() WHERE id = ?', [userId]);
               await pool.query('UPDATE vendor_activity_log SET vpn_warned_at = NOW() WHERE id = ?', [logId]);
               try {
                 await emails.send({ to: u.email, subject: 'Alerte securite - VPN detecte sur votre compte vendeur', html: VPN_WARN_HTML({ store, ip }) });
                 console.log(`VPN warning sent to ${u.email}`);
               } catch (e) { console.error('VPN warn email failed:', e.message); }
-            } else {
-              const diff = Date.now() - new Date(u.vpn_warned_at).getTime();
-              if (diff > 60 * 60 * 1000) {
-                await pool.query('UPDATE users SET suspended = 1, suspension_reason = ? WHERE id = ?', ['VPN detecte pendant plus d\'une heure', userId]);
-                await pool.query('UPDATE vendor_activity_log SET vpn_warned_at = NOW() WHERE id = ?', [logId]);
-                try {
-                  await emails.send({ to: u.email, subject: 'Compte vendeur suspendu - VPN persistant', html: VPN_SUSPEND_HTML({ store, ip }) });
-                  console.log(`VPN suspension sent to ${u.email}`);
-                } catch (e) { console.error('VPN suspend email failed:', e.message); }
-              }
+            } else if (strikes === 2) {
+              try {
+                await emails.send({
+                  to: u.email,
+                  subject: '2eme alerte - Desactivez votre VPN',
+                  html: `<!DOCTYPE html><html lang="fr"><head><meta charset="utf-8"></head><body style="margin:0;padding:0;font-family:Arial,sans-serif;background:#f8f9fc"><table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="padding:40px 16px"><tr><td align="center"><table role="presentation" width="100%" style="max-width:480px;background:#fff;border-radius:12px;padding:32px"><tr><td><h1 style="font-size:20px;color:#dc2626;margin:0 0 12px">2eme alerte VPN</h1><p style="font-size:14px;color:#64748b;margin:0 0 12px">Bonjour <strong>${store}</strong>,</p><p style="font-size:14px;color:#64748b;margin:0 0 12px">Nous avons detecte une connexion VPN pour la <strong>2eme fois</strong> aujourd hui.</p><p style="font-size:14px;color:#dc2626;margin:0 0 16px"><strong>Attention :</strong> Si cela se reproduit une 3eme fois, votre compte sera automatiquement suspendu pour 1 heure.</p><p style="font-size:13px;color:#64748b;margin:0 0 20px">Veuillez desactiver votre VPN immédiatement.</p><hr style="border:none;border-top:1px solid #eee;margin:20px 0"><p style="font-size:12px;color:#888;">Cet email est automatique.</p></td></tr></table></td></tr></table></body></html>`,
+                });
+              } catch (e) { console.error('VPN 2nd alert email failed:', e.message); }
             }
           }
         }

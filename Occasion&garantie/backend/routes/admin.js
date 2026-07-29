@@ -512,7 +512,7 @@ router.get('/vendor-logs', authenticate, adminOnly, async (req, res) => {
     try { await pool.query('ALTER TABLE vendor_activity_log ADD COLUMN longitude DECIMAL(10,7) DEFAULT NULL'); } catch (e) { if (e.errno !== 1060 && e.code !== 'ER_DUP_FIELDNAME') console.log('longitude col:', e.message); }
 
     const [rows] = await pool.query(
-      `SELECT l.*, u.full_name, u.store_name, u.email, u.phone
+      `SELECT l.*, u.full_name, u.store_name, u.email, u.phone, u.has_vpn_history
        FROM vendor_activity_log l
        JOIN users u ON l.user_id = u.id
        ORDER BY l.created_at DESC LIMIT 200`
