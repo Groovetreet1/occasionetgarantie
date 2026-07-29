@@ -535,7 +535,7 @@ router.post('/managed-vendors', authenticate, adminOnly, async (req, res) => {
     const email = `vendeur-${Date.now()}@occasionetgarantie.store`;
     const [result] = await pool.query(
       `INSERT INTO users (full_name, store_name, email, password, phone, role, phone_verified, admin_managed_id, created_at) VALUES (?, ?, ?, ?, ?, 'seller', 1, ?, NOW())`,
-      [full_name || 'Vendeur', store_name || null, email, password, req.user.id]
+      [full_name || 'Vendeur', store_name || null, email, password, null, req.user.id]
     );
     res.json({ id: result.insertId, email, password: rawPw, full_name, store_name, ville });
   } catch (err) {
