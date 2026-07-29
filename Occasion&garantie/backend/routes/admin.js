@@ -324,7 +324,7 @@ router.post('/products/approve-existing', authenticate, adminOnly, async (req, r
           await pool.query('INSERT INTO notifications (user_id, type, title, message, link) VALUES (?, ?, ?, ?, ?)',
             [prod.seller_id, 'product_approved', 'Annonce approuvée',
              `Votre annonce "${prod.name}" a été approuvée et est maintenant visible sur le site.`,
-             '/seller/dashboard']);
+             '/seller']);
         } catch (nErr) { console.error('Notif failed:', nErr.message); }
       }
     }
@@ -346,7 +346,7 @@ router.put('/products/:id/approve', authenticate, adminOnly, async (req, res) =>
         await pool.query('INSERT INTO notifications (user_id, type, title, message, link) VALUES (?, ?, ?, ?, ?)',
           [prod[0].seller_id, 'product_approved', 'Annonce approuvée',
            `Votre annonce "${prod[0].name}" a été approuvée et est maintenant visible sur le site.`,
-           '/seller/dashboard']);
+           '/seller']);
       } catch (nErr) { console.error('Notif failed:', nErr.message); }
     }
     res.json({ message: 'Produit approuve.' });
@@ -369,7 +369,7 @@ router.put('/products/:id/reject', authenticate, adminOnly, async (req, res) => 
         await pool.query('INSERT INTO notifications (user_id, type, title, message, link) VALUES (?, ?, ?, ?, ?)',
           [prod[0].seller_id, 'product_rejected', 'Annonce refusée',
            `Votre annonce "${prod[0].name}" a été refusée. Raison : ${rejectionReason}`,
-           '/seller/dashboard']);
+           '/seller']);
       } catch (nErr) { console.error('Notif failed:', nErr.message); }
     }
     res.json({ message: 'Produit refusé.', reason: rejectionReason });

@@ -175,7 +175,7 @@ router.post('/', authenticate, async (req, res) => {
         await pool.query('INSERT INTO notifications (user_id, type, title, message, link) VALUES (?, ?, ?, ?, ?)',
           [sellerId, 'product_pending', 'Annonce en attente',
            `Votre annonce "${name}" est en cours d'examen par l'équipe d'administration.`,
-           '/seller/dashboard']);
+           '/seller']);
       } catch (nErr) { console.error('Notif failed:', nErr.message); }
     }
     res.status(201).json({ id: result.insertId, message: 'Produit ajouté.' });

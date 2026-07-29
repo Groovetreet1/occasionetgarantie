@@ -1,7 +1,7 @@
 import { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
-import { FiPlus, FiEdit2, FiTrash2, FiPackage, FiCheckCircle, FiPercent, FiCreditCard, FiDollarSign, FiX, FiCopy, FiCheck, FiUpload, FiLock, FiStar, FiSmartphone, FiArrowRight, FiClock, FiAlertCircle } from 'react-icons/fi';
+import { FiPlus, FiEdit2, FiTrash2, FiPackage, FiCheckCircle, FiPercent, FiCreditCard, FiDollarSign, FiX, FiCopy, FiCheck, FiUpload, FiLock, FiStar, FiSmartphone, FiArrowRight, FiClock, FiAlertCircle, FiEye } from 'react-icons/fi';
 import api from '../api/axios';
 import { useAuth } from '../context/AuthContext';
 import SellerNav from '../components/SellerNav';
@@ -316,6 +316,39 @@ export default function SellerDashboard() {
               </div>
             </div>
           )}
+
+          {(() => {
+            const rejected = products.filter(p => p.rejection_reason);
+            if (rejected.length === 0) return null;
+            return (
+              <div style={{ background: 'var(--bg-card)', border: '1px solid rgba(239,68,68,0.3)', borderRadius: 'var(--radius-lg)', padding: 16, marginTop: 16 }}>
+                <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 12 }}>
+                  <FiAlertCircle size={18} color="#dc2626" />
+                  <span style={{ fontWeight: 700, fontSize: 15, color: '#dc2626' }}>Annonces refusées ({rejected.length})</span>
+                </div>
+                <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
+                  {rejected.map(p => (
+                    <div key={p.id} style={{
+                      display: 'flex', alignItems: 'center', gap: 10, padding: '10px 12px',
+                      background: 'rgba(239,68,68,0.04)', borderRadius: 10, fontSize: 13,
+                    }}>
+                      {p.image && <img src={p.image.startsWith('http') ? p.image : `/uploads/${p.image}`} alt="" style={{ width: 40, height: 40, borderRadius: 6, objectFit: 'cover' }} />}
+                      <div style={{ flex: 1, minWidth: 0 }}>
+                        <div style={{ fontWeight: 600 }}>{p.name}</div>
+                        <div style={{ fontSize: 11, color: '#dc2626', marginTop: 2, lineHeight: 1.4 }}>
+                          <FiEye size={10} style={{ verticalAlign: 'middle', marginRight: 3 }} />
+                          Motif : {p.rejection_reason}
+                        </div>
+                      </div>
+                      <button onClick={() => handleDelete(p.id)} className="btn-icon btn-icon-danger" title="Supprimer">
+                        <FiTrash2 size={15} />
+                      </button>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            );
+          })()}
 
           <div className="dashboard-products">
           <h3>Mes annonces ({products.length})</h3>
