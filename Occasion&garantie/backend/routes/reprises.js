@@ -6,6 +6,7 @@ const { uploadBuffer } = require('../services/uploader');
 const multer = require('multer');
 const path = require('path');
 const fs = require('fs');
+const sharp = require('sharp');
 
 const REP_DIR = path.join(__dirname, '..', 'uploads', 'reprises');
 if (!fs.existsSync(REP_DIR)) fs.mkdirSync(REP_DIR, { recursive: true });
@@ -62,8 +63,14 @@ router.post('/', authenticate, (req, res) => {
             const f = req.files[key][0];
             try {
               const buf = fs.readFileSync(f.path);
-              const { url } = await uploadBuffer(buf, f.originalname, 'reprises');
-              photos[key] = url;
+              const resized = await sharp(buf).resize(300, 300, { fit: 'inside', withoutEnlargement: true }).jpeg({ quality: 60 }).toBuffer();
+              try {
+                const { url } = await uploadBuffer(resized, 'reprise_' + key + '.jpg', 'reprises');
+                photos[key] = url;
+              } catch {
+                const b64 = resized.toString('base64');
+                photos[key] = `data:image/jpeg;base64,${b64}`;
+              }
             } catch (upErr) {
               console.error(`Upload error for ${key}:`, upErr.message);
             }
@@ -188,18 +195,26 @@ router.get('/photos/batch', authenticate, async (req, res) => {
     if (idArr.length === 0) return res.json({});
     const placeholders = idArr.map(() => '?').join(',');
     const [rows] = await pool.query(
-      `SELECT id, photos FROM reprises WHERE id IN (${placeholders}) AND (photos IS NULL OR OCTET_LENGTH(photos) < 500)`,
+      `SELECT id, photos FROM reprises WHERE id IN (${placeholders})`,
       idArr
     );
     const result = {};
     for (const r of rows) {
       if (!r.photos) continue;
       const p = typeof r.photos === 'object' ? r.photos : (() => { try { return JSON.parse(r.photos || '{}'); } catch { return {}; } })();
-      const filtered = {};
-      for (const [key, val] of Object.entries(p)) {
-        if (typeof val === 'string' && val.startsWith('http')) filtered[key] = val;
+      const resized = {};
+      for (let [key, val] of Object.entries(p)) {
+        if (typeof val === 'string' && val.startsWith('http')) {
+          resized[key] = val;
+        } else if (typeof val === 'string' && val.startsWith('data:')) {
+          try {
+            const raw = Buffer.from(val.split(',')[1], 'base64');
+            const small = await sharp(raw).resize(200, 200, { fit: 'inside', withoutEnlargement: true }).jpeg({ quality: 50 }).toBuffer();
+            resized[key] = `data:image/jpeg;base64,${small.toString('base64')}`;
+          } catch {}
+        }
       }
-      if (Object.keys(filtered).length > 0) result[r.id] = filtered;
+      if (Object.keys(resized).length > 0) result[r.id] = resized;
     }
     res.json(result);
   } catch (err) {
