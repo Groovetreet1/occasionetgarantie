@@ -116,7 +116,7 @@ router.get('/', authenticate, async (req, res) => {
 
     let query, params;
 
-    let selectCols = `r.id, r.user_id, r.product_id, r.brand, r.model, r.imei, r.status, r.estimated_price, r.vendor_id, r.vendor_notes, r.client_notes, r.photos, r.created_at, r.updated_at,
+    let selectCols = `r.id, r.user_id, r.product_id, r.brand, r.model, r.imei, r.status, r.estimated_price, r.vendor_id, r.vendor_notes, r.client_notes, r.created_at, r.updated_at, CASE WHEN r.photos IS NOT NULL THEN JSON_LENGTH(r.photos) ELSE 0 END AS photo_count,
                u.full_name, u.email, u.phone, u.store_name,
                p.name AS product_name, p.images AS product_images`;
 
@@ -174,6 +174,29 @@ router.get('/check/:productId', authenticate, async (req, res) => {
       [req.user.id, req.params.productId]
     );
     res.json({ exists: rows.length > 0, reprise: rows[0] || null });
+  } catch (err) {
+    res.status(500).json({ message: 'Erreur serveur.', error: err.message });
+  }
+});
+
+// Batch fetch photos for multiple reprises
+router.get('/photos/batch', authenticate, async (req, res) => {
+  try {
+    const ids = req.query.ids;
+    if (!ids) return res.json({});
+    const idArr = ids.split(',').map(Number).filter(Boolean);
+    if (idArr.length === 0) return res.json({});
+    const placeholders = idArr.map(() => '?').join(',');
+    const [rows] = await pool.query(
+      `SELECT id, photos FROM reprises WHERE id IN (${placeholders})`,
+      idArr
+    );
+    const result = {};
+    for (const r of rows) {
+      const p = typeof r.photos === 'object' ? r.photos : (() => { try { return JSON.parse(r.photos || '{}'); } catch { return {}; } })();
+      result[r.id] = p;
+    }
+    res.json(result);
   } catch (err) {
     res.status(500).json({ message: 'Erreur serveur.', error: err.message });
   }

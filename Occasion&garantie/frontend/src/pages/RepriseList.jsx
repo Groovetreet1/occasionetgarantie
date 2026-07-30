@@ -21,6 +21,7 @@ export default function RepriseList() {
   const [deleteTarget, setDeleteTarget] = useState(null);
   const [photoErrors, setPhotoErrors] = useState({});
   const [lightbox, setLightbox] = useState(null);
+  const [reprisePhotos, setReprisePhotos] = useState({});
 
   const [error, setError] = useState(null);
   const user = JSON.parse(localStorage.getItem('user') || '{}');
@@ -32,11 +33,17 @@ export default function RepriseList() {
     api.get('/reprises').then(res => setReprises(res.data)).catch(e => setError(e?.response?.data?.message || e.message || 'Erreur de chargement')).finally(() => setLoading(false));
   };
 
-  const [photosReady, setPhotosReady] = useState(false);
-
   useEffect(() => { load(); }, []);
 
-  useEffect(() => { if (reprises.length > 0) { const t = setTimeout(() => setPhotosReady(true), 300); return () => clearTimeout(t); } }, [reprises]);
+  useEffect(() => {
+    if (reprises.length === 0) return;
+    const withPhotos = reprises.filter(r => r.photo_count > 0).map(r => r.id);
+    if (withPhotos.length === 0) return;
+    const t = setTimeout(() => {
+      api.get(`/reprises/photos/batch?ids=${withPhotos.join(',')}`).then(res => setReprisePhotos(res.data)).catch(() => {});
+    }, 500);
+    return () => clearTimeout(t);
+  }, [reprises]);
 
   const update = async (id, data) => {
     setActionLoading(id);
@@ -62,11 +69,7 @@ export default function RepriseList() {
 
   const imgUrl = (p) => p?.startsWith('http') || p?.startsWith('data:') ? p : `${API_BASE}${p}`;
 
-  const parsePhotos = (r) => {
-    if (!r.photos) return {};
-    if (typeof r.photos === 'object') return r.photos;
-    try { return JSON.parse(r.photos); } catch { return {}; }
-  };
+  const getPhotos = (id) => reprisePhotos[id] || {};
 
   const productImgs = (r) => {
     if (!r.product_images) return [];
@@ -105,8 +108,8 @@ export default function RepriseList() {
           <div style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
             {reprises.map(r => {
               const st = statusStyles[r.status] || statusStyles.en_attente;
-              const photos = parsePhotos(r);
-              const hasPhotos = Object.keys(photos).length > 0;
+              const photos = getPhotos(r.id);
+              const hasPhotos = r.photo_count > 0;
               const pImgs = productImgs(r);
 
               return (
@@ -175,18 +178,20 @@ export default function RepriseList() {
                     {/* Reprise photos */}
                     {hasPhotos && (
                       <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap' }}>
-                        {Object.entries(photos).map(([key, url]) => (
+                        {Object.keys(photos).length > 0 ? Object.entries(photos).map(([key, url]) => (
                           <div key={key} onClick={() => setLightbox(imgUrl(url))} style={{
                             width: 64, height: 64, borderRadius: 8, overflow: 'hidden', cursor: 'pointer',
                             border: '1px solid var(--border)', background: 'var(--bg-secondary)',
                           }}>
-                            {photosReady ? (
-                              <img src={imgUrl(url)} alt={key} style={{ width: '100%', height: '100%', objectFit: 'cover' }}
-                                onError={() => setPhotoErrors(p => ({ ...p, [r.id + '-' + key]: true }))} />
-                            ) : (
-                              <div style={{ width: '100%', height: '100%', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 10, color: 'var(--text-muted)' }}>...</div>
-                            )}
+                            <img src={imgUrl(url)} alt={key} style={{ width: '100%', height: '100%', objectFit: 'cover' }}
+                              onError={() => setPhotoErrors(p => ({ ...p, [r.id + '-' + key]: true }))} />
                           </div>
+                        )) : Array.from({ length: r.photo_count }).map((_, i) => (
+                          <div key={i} style={{
+                            width: 64, height: 64, borderRadius: 8, border: '1px solid var(--border)',
+                            background: 'var(--bg-secondary)', display: 'flex', alignItems: 'center', justifyContent: 'center',
+                            fontSize: 10, color: 'var(--text-muted)',
+                          }}>...</div>
                         ))}
                       </div>
                     )}
