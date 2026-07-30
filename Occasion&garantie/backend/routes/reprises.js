@@ -120,24 +120,21 @@ router.get('/', authenticate, async (req, res) => {
       query = `SELECT ${selectCols}
                FROM reprises r
                JOIN users u ON r.user_id = u.id
-               LEFT JOIN products p ON r.product_id = p.id
-               ORDER BY r.created_at DESC`;
+               LEFT JOIN products p ON r.product_id = p.id`;
       params = [];
     } else if (req.user.role === 'seller') {
       query = `SELECT ${selectCols}
                FROM reprises r
                JOIN users u ON r.user_id = u.id
                LEFT JOIN products p ON r.product_id = p.id
-               WHERE r.vendor_id = ? OR r.user_id = ? OR (r.vendor_id IS NULL AND r.product_id IS NOT NULL AND EXISTS (SELECT 1 FROM products WHERE id = r.product_id AND seller_id = ?))
-               ORDER BY r.created_at DESC`;
+               WHERE r.vendor_id = ? OR r.user_id = ? OR (r.vendor_id IS NULL AND r.product_id IS NOT NULL AND EXISTS (SELECT 1 FROM products WHERE id = r.product_id AND seller_id = ?))`;
       params = [req.user.id, req.user.id, req.user.id];
     } else {
       query = `SELECT ${selectCols}
                FROM reprises r
                JOIN users u ON r.user_id = u.id
                LEFT JOIN products p ON r.product_id = p.id
-               WHERE r.user_id = ?
-               ORDER BY r.created_at DESC`;
+               WHERE r.user_id = ?`;
       params = [req.user.id];
     }
 
@@ -149,11 +146,8 @@ router.get('/', authenticate, async (req, res) => {
       [rows] = [];
     }
 
-    if (rows.length === 0 && req.user.role === 'seller') {
-      const [myProds] = await pool.query('SELECT id FROM products WHERE seller_id = ?', [req.user.id]);
-      const [allReps] = await pool.query('SELECT id, user_id, product_id, vendor_id FROM reprises ORDER BY id DESC LIMIT 20');
-      console.log('DEBUG seller fetch:', { userId: req.user.id, myProductIds: myProds.map(p => p.id), totalReprises: allReps.length });
-    }
+    // Sort in JS to avoid MySQL sort buffer overflow
+    rows.sort((a, b) => new Date(b.created_at) - new Date(a.created_at));
 
     if (req.query.product_id) {
       rows = rows.filter(r => r.product_id == req.query.product_id);
