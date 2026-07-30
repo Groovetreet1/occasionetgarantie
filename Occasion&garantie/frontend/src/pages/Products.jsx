@@ -15,27 +15,6 @@ const CATEGORIES = ['Tous', 'Smartphones', 'Tablettes', 'Ordinateurs', 'Accessoi
 
 const fadeUp = { hidden: { opacity: 0, y: 24 }, show: { opacity: 1, y: 0, transition: { duration: 0.4 } } };
 
-const CITY_COORDS = {
-  'Casablanca': [33.5731, -7.5898], 'Rabat': [34.0209, -6.8416], 'Marrakech': [31.6295, -7.9811],
-  'Fes': [34.0333, -5.0000], 'Tanger': [35.7673, -5.7998], 'Agadir': [30.4278, -9.5981],
-  'Meknes': [33.8935, -5.5473], 'Oujda': [34.6814, -1.9086], 'Kenitra': [34.2610, -6.5802],
-  'Tetouan': [35.5782, -5.3684], 'Safi': [32.2994, -9.2372], 'El Jadida': [33.2318, -8.5008],
-  'Beni Mellal': [32.3394, -6.3608], 'Nador': [35.1688, -2.9335], 'Taza': [34.2148, -4.0191],
-  'Mohammedia': [33.6881, -7.3837], 'Laayoune': [27.1253, -13.1625], 'Khouribga': [32.8811, -6.9063],
-  'Settat': [33.0010, -7.6167], 'Berrechid': [33.2656, -7.5875],
-  'Bouskoura': [33.4497, -7.6484], 'Nouaceur': [33.3543, -7.6119], 'Mediouna': [33.4518, -7.5261],
-  'Tit Mellil': [33.5628, -7.4874], 'Ain Harrouda': [33.6377, -7.4418],
-};
-
-function nearestCity(lat, lon) {
-  let closest = 'Casablanca', minDist = Infinity;
-  for (const [city, [clat, clon]] of Object.entries(CITY_COORDS)) {
-    const d = (lat - clat) ** 2 + (lon - clon) ** 2;
-    if (d < minDist) { minDist = d; closest = city; }
-  }
-  return closest;
-}
-
 export default function Products() {
   const [searchParams] = useSearchParams();
   const [allProducts, setAllProducts] = useState([]);
@@ -47,7 +26,6 @@ export default function Products() {
   const [priceMin, setPriceMin] = useState('');
   const [priceMax, setPriceMax] = useState('');
   const [visibleCount, setVisibleCount] = useState(12);
-  const [userCity, setUserCity] = useState('');
 
   useEffect(() => { document.title = 'Tous les produits - Occasion & Garantie'; }, []);
 
@@ -57,23 +35,14 @@ export default function Products() {
   }, [searchParams]);
 
   useEffect(() => {
-    if ('geolocation' in navigator) {
-      navigator.geolocation.getCurrentPosition((pos) => {
-        setUserCity(nearestCity(pos.coords.latitude, pos.coords.longitude));
-      }, () => {}, { timeout: 8000 });
-    }
-  }, []);
-
-  useEffect(() => {
     setLoading(true);
     const params = new URLSearchParams();
     if (search) params.set('search', search);
-    if (userCity) params.set('user_ville', userCity);
     api.get(`/products${params.toString() ? `?${params}` : ''}`)
       .then(res => setAllProducts(res.data))
       .catch(() => {})
       .finally(() => setLoading(false));
-  }, [search, userCity]);
+  }, [search]);
 
   const filtered = allProducts.filter(p => {
     if (category !== 'Tous' && p.category_name !== category) return false;
@@ -107,7 +76,7 @@ export default function Products() {
         <div className="container">
           <motion.div initial="hidden" animate="show" variants={fadeUp}>
             <h1>Marketplace</h1>
-            <p>{filtered.length} article{filtered.length > 1 ? 's' : ''} disponible{filtered.length > 1 ? 's' : ''}{userCity ? ` près de ${userCity}` : ''}</p>
+            <p>{filtered.length} article{filtered.length > 1 ? 's' : ''} disponible{filtered.length > 1 ? 's' : ''}</p>
           </motion.div>
           <motion.form initial="hidden" animate="show" variants={fadeUp} onSubmit={handleSearchSubmit} className="products-page-search">
             <FiSearch size={18} />
@@ -127,11 +96,6 @@ export default function Products() {
         </motion.div>
 
         <div className="products-toolbar">
-          {userCity && (
-            <span style={{ fontSize: 12, color: 'var(--primary)', display: 'flex', alignItems: 'center', gap: 4, background: 'var(--primary-light)', padding: '4px 10px', borderRadius: 8 }}>
-              <FiNavigation size={14} /> {userCity}
-            </span>
-          )}
           <button className={`btn ${hasFilters ? 'btn-primary' : 'btn-outline'}`} onClick={() => setShowFilters(o => !o)}>
             <FiSliders size={14} /> Filtres{hasFilters ? ` (${[category !== 'Tous', stateFilter !== 'Tous', !!priceMin || !!priceMax].filter(Boolean).length})` : ''}
           </button>
