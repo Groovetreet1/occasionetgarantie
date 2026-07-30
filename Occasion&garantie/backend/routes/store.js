@@ -65,6 +65,7 @@ router.post('/contact', async (req, res) => {
     await pool.query(
       `CREATE TABLE IF NOT EXISTS store_contacts (id INT AUTO_INCREMENT PRIMARY KEY, product_id INT NOT NULL, product_name VARCHAR(200) DEFAULT NULL, client_name VARCHAR(100) NOT NULL, client_phone VARCHAR(20) NOT NULL, message TEXT DEFAULT NULL, created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP)`
     );
+    try { await pool.query("ALTER TABLE store_contacts ADD COLUMN status VARCHAR(20) DEFAULT 'en_attente'"); } catch (e) { if (e.errno !== 1060 && e.code !== 'ER_DUP_FIELDNAME') {} }
     await pool.query(
       'INSERT INTO store_contacts (product_id, product_name, client_name, client_phone, message) VALUES (?, ?, ?, ?, ?)',
       [productId, productName || rows[0].name, name, phone, message || null]

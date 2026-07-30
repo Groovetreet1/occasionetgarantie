@@ -450,11 +450,13 @@ router.get('/store-contacts', authenticate, adminOnly, async (req, res) => {
 
 router.put('/store-contacts/:id/status', authenticate, adminOnly, async (req, res) => {
   try {
+    try { await pool.query("ALTER TABLE store_contacts ADD COLUMN status VARCHAR(20) DEFAULT 'en_attente'"); } catch (e) { if (e.errno !== 1060 && e.code !== 'ER_DUP_FIELDNAME') {} }
     const { status } = req.body;
     if (!['en_attente', 'contacte', 'termine'].includes(status)) return res.status(400).json({ message: 'Statut invalide.' });
     await pool.query('UPDATE store_contacts SET status = ? WHERE id = ?', [status, req.params.id]);
     res.json({ message: 'Statut mis a jour.' });
   } catch (err) {
+    console.error('store-contact status update error:', err.sqlMessage || err.message);
     res.status(500).json({ message: 'Erreur serveur.' });
   }
 });
