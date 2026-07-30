@@ -34,17 +34,23 @@ export default function Products() {
   useEffect(() => {
     const catParam = searchParams.get('category');
     if (catParam) setCategory(catParam);
+    const brandParam = searchParams.get('brand');
+    if (brandParam) setSearch(brandParam);
   }, [searchParams]);
 
   useEffect(() => {
     setLoading(true);
     const params = new URLSearchParams();
-    if (search) params.set('search', search);
+    if (search) {
+      const brandParam = searchParams.get('brand');
+      if (brandParam && search === brandParam) params.set('brand', brandParam);
+      else params.set('search', search);
+    }
     api.get(`/products${params.toString() ? `?${params}` : ''}`)
       .then(res => setAllProducts(res.data.products || res.data))
       .catch(() => {})
       .finally(() => setLoading(false));
-  }, [search]);
+  }, [search, searchParams]);
 
   useEffect(() => {
     api.get('/store/products/featured').then(r => setStoreProducts(r.data)).catch(() => {}).finally(() => setStoreLoad(false));

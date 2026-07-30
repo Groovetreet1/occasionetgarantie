@@ -26,7 +26,7 @@ async function validateCategory(categoryId) {
 // Public: list products (only disponible)
 router.get('/', async (req, res) => {
   try {
-    const { category, search, min, max, state, sort, seller, ville, user_ville, page, limit } = req.query;
+    const { category, search, min, max, state, sort, seller, ville, user_ville, page, limit, brand } = req.query;
     const pageNum = Math.max(1, parseInt(page) || 1);
     const limitNum = Math.min(100, Math.max(1, parseInt(limit) || 20));
     const offset = (pageNum - 1) * limitNum;
@@ -42,6 +42,7 @@ router.get('/', async (req, res) => {
     if (state) { where += ' AND p.state = ?'; params.push(state); }
     if (seller) { where += ' AND p.seller_id = ?'; params.push(seller); }
     if (ville) { where += ' AND p.ville = ?'; params.push(ville); }
+    if (brand) { where += ' AND LOWER(TRIM(p.brand)) = LOWER(TRIM(?))'; params.push(brand); }
 
     const countSql = `SELECT COUNT(*) as total FROM products p LEFT JOIN categories c ON p.category_id = c.id LEFT JOIN users u ON p.seller_id = u.id${where}`;
     const [countRows] = await pool.query(countSql, params);
@@ -310,8 +311,14 @@ router.get('/cities', async (req, res) => {
 
 router.get('/brands/list', async (req, res) => {
   try {
-    const [rows] = await pool.query("SELECT DISTINCT TRIM(brand) as brand FROM products WHERE brand IS NOT NULL AND brand != '' AND active = TRUE AND status = 'disponible' AND approved = TRUE ORDER BY brand");
-    const brands = rows.map(r => r.brand).filter(Boolean);
+    const [rows] = await pool.query("SELECT DISTINCT TRIM(brand) as brand FROM products WHERE brand IS NOT NULL AND brand != '' AND active = TRUE AND status = 'disponible' AND approved = TRUE");
+    const seen = new Set();
+    const brands = rows.map(r => r.brand).filter(Boolean).map(b => b.trim()).filter(b => {
+      const lower = b.toLowerCase();
+      if (seen.has(lower)) return false;
+      seen.add(lower);
+      return true;
+    }).sort();
     res.json(brands);
   } catch (err) {
     res.json([]);
