@@ -47,9 +47,10 @@ export default function Products() {
         try {
           const res = await fetch(`https://api.bigdatacloud.net/data/reverse-geocode-client?latitude=${pos.coords.latitude}&longitude=${pos.coords.longitude}&localityLanguage=fr`);
           const data = await res.json();
-          const city = data.city || data.locality || data.principalSubdivision || '';
+          const city = data.locality || data.city || data.principalSubdivision || '';
           if (city) {
-            const found = MOROCCAN_CITIES.find(c => city.toLowerCase().includes(c.toLowerCase()) || c.toLowerCase().includes(c.toLowerCase()));
+            const raw = city.toLowerCase();
+            const found = MOROCCAN_CITIES.find(c => raw.includes(c.toLowerCase()) || c.toLowerCase().includes(raw));
             setUserCity(found || city);
           }
         } catch {}
