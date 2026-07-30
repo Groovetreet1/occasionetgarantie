@@ -9,6 +9,9 @@
     "preview": "vite preview"
   },
   "dependencies": {
+    "@capacitor/android": "^8.4.2",
+    "@capacitor/cli": "^8.4.2",
+    "@capacitor/core": "^8.4.2",
     "axios": "^1.7.7",
     "framer-motion": "^12.42.2",
     "leaflet": "^1.9.4",
