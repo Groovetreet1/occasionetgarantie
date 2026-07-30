@@ -23,6 +23,22 @@ export default function AdminStoreProducts() {
   const [cLimit, setCLimit] = useState(20);
   const [cTotal, setCTotal] = useState(0);
   const [cTotalPages, setCTotalPages] = useState(0);
+  const [seedLoading, setSeedLoading] = useState(false);
+  const [seedMsg, setSeedMsg] = useState(null);
+
+  const handleSeed = async () => {
+    setSeedLoading(true); setSeedMsg(null);
+    try {
+      const res = await api.post('/admin/seed');
+      setSeedMsg({ type: 'success', text: res.data.message || 'Seed terminé.' });
+      fetchProducts(page, limit);
+    } catch (err) {
+      setSeedMsg({ type: 'error', text: err.response?.data?.error || err.response?.data?.message || 'Erreur seed.' });
+    } finally {
+      setSeedLoading(false);
+      setTimeout(() => setSeedMsg(null), 5000);
+    }
+  };
 
   const fetchProducts = (p, l) => {
     setLoading(true);
@@ -103,9 +119,20 @@ export default function AdminStoreProducts() {
               <FiShield style={{ color: '#d97706' }} /> Boutique Officielle
             </h1>
           </div>
-          <Link to="/seller/products/new?type=store" className="btn" style={{ background: '#d97706', color: '#fff', padding: '10px 20px', borderRadius: 10, fontWeight: 600, fontSize: 14, display: 'flex', alignItems: 'center', gap: 8 }}>
-            <FiPlus size={18} /> Nouveau produit
-          </Link>
+          <div style={{ display: 'flex', alignItems: 'center', gap: 8, flexWrap: 'wrap' }}>
+            {seedMsg && (
+              <div style={{ padding: '8px 14px', borderRadius: 8, fontSize: 13, fontWeight: 600, background: seedMsg.type === 'success' ? 'rgba(5,150,105,0.1)' : 'rgba(220,38,38,0.1)', color: seedMsg.type === 'success' ? '#059669' : '#dc2626' }}>
+                {seedMsg.text}
+              </div>
+            )}
+            <button onClick={handleSeed} disabled={seedLoading}
+              style={{ padding: '10px 20px', borderRadius: 10, fontWeight: 600, fontSize: 14, border: '1px solid var(--border)', background: 'var(--bg-card)', color: 'var(--text)', cursor: seedLoading ? 'wait' : 'pointer', display: 'flex', alignItems: 'center', gap: 8, opacity: seedLoading ? 0.6 : 1 }}>
+              <FiPackage size={18} /> {seedLoading ? 'Génération...' : 'Générer produits'}
+            </button>
+            <Link to="/seller/products/new?type=store" className="btn" style={{ background: '#d97706', color: '#fff', padding: '10px 20px', borderRadius: 10, fontWeight: 600, fontSize: 14, display: 'flex', alignItems: 'center', gap: 8 }}>
+              <FiPlus size={18} /> Nouveau produit
+            </Link>
+          </div>
         </div>
 
         <div style={{ display: 'grid', gap: '16px', gridTemplateColumns: 'repeat(auto-fill, minmax(180px, 1fr))', marginBottom: '24px' }}>
