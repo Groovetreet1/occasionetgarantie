@@ -60,9 +60,6 @@ export default function AdminDashboardPage() {
       { label: 'Par vendeurs', value: stats.vendorProducts, highlight: true },
       { label: 'En attente', value: stats.pendingProducts, highlight: stats.pendingProducts > 0 },
     ], link: '/admin/products/pending' },
-    { title: 'Approbation', icon: FiShield, color: '#f59e0b', bg: 'rgba(245,158,11,0.1)', items: [
-      { label: 'Produits en attente', value: stats.pendingProducts, highlight: stats.pendingProducts > 0 },
-    ], link: '/admin/products/pending' },
     { title: 'Boutique Officielle', icon: FiShield, color: '#d97706', bg: 'rgba(217,119,6,0.1)', items: [
       { label: 'Produits en boutique', value: stats.storeProducts },
     ], link: '/admin/store-products' },
