@@ -90,7 +90,6 @@ export default function Home() {
         <div className="container">
           <div className="avito-hero-content">
             <h1>Occasion & Garantie</h1>
-            <p className="avito-hero-sub">Des milliers d'annonces. Achetez et vendez en toute confiance.</p>
             {userCity && (
               <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 6, marginBottom: 16, fontSize: 13, color: 'var(--text-primary)' }}>
                 <FiNavigation size={14} /> Annonces proches de <strong>{userCity}</strong>

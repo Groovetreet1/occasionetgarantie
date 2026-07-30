@@ -69,6 +69,8 @@ async function resolveIp(ip, force) {
 
   const json2 = await fetchJson(`http://ip-api.com/json/${ip}?fields=status,isp,org,country,regionName,city,lat,lon`);
   if (json2 && json2.status === 'success') {
+    const org = (json2.org || json2.isp || '').toLowerCase();
+    const isDatacenter = !!(org.match(/aws|amazon|google cloud|gcp|azure|microsoft|digitalocean|linode|vultr|hetzner|ovh|scaleway|ionos|netcup|rackspace|softlayer|oracle cloud|ibm cloud|upcloud|kamatera|hostinger|contabo|googledc/));
     const result = {
       isp: json2.isp || json2.org || 'Inconnu',
       city: json2.city || null,
@@ -77,7 +79,7 @@ async function resolveIp(ip, force) {
       latitude: json2.lat || null,
       longitude: json2.lon || null,
       isVpn: false,
-      isDatacenter: false,
+      isDatacenter,
     };
     CACHE[ip] = result;
     return result;
