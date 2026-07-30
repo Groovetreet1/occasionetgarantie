@@ -511,8 +511,9 @@ router.get('/vendor-logs', authenticate, adminOnly, async (req, res) => {
     try { await pool.query('ALTER TABLE vendor_activity_log ADD COLUMN latitude DECIMAL(10,7) DEFAULT NULL'); } catch (e) { if (e.errno !== 1060 && e.code !== 'ER_DUP_FIELDNAME') console.log('latitude col:', e.message); }
     try { await pool.query('ALTER TABLE vendor_activity_log ADD COLUMN longitude DECIMAL(10,7) DEFAULT NULL'); } catch (e) { if (e.errno !== 1060 && e.code !== 'ER_DUP_FIELDNAME') console.log('longitude col:', e.message); }
 
+    try { await pool.query("ALTER TABLE users ADD COLUMN has_vpn_history TINYINT(1) DEFAULT 0"); } catch (e) { if (e.errno !== 1060 && e.code !== 'ER_DUP_FIELDNAME') console.log('has_vpn_history col:', e.message); }
     const [rows] = await pool.query(
-      `SELECT l.*, u.full_name, u.store_name, u.email, u.phone, u.has_vpn_history
+      `SELECT l.*, COALESCE(u.has_vpn_history, 0) AS has_vpn_history, u.full_name, u.store_name, u.email, u.phone
        FROM vendor_activity_log l
        LEFT JOIN users u ON l.user_id = u.id
        ORDER BY l.created_at DESC LIMIT 200`
