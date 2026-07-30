@@ -112,17 +112,19 @@ router.get('/', authenticate, async (req, res) => {
 
     let query, params;
 
+    let selectCols = `r.id, r.user_id, r.product_id, r.brand, r.model, r.imei, r.status, r.estimated_price, r.vendor_id, r.vendor_notes, r.client_notes, r.created_at, r.updated_at, r.photos IS NOT NULL AND JSON_LENGTH(r.photos) > 0 AS has_photos,
+               u.full_name, u.email, u.phone, u.store_name,
+               p.name AS product_name, p.images AS product_images`;
+
     if (req.user.role === 'admin') {
-      query = `SELECT r.*, u.full_name, u.email, u.phone, u.store_name,
-               p.name AS product_name, p.images AS product_images
+      query = `SELECT ${selectCols}
                FROM reprises r
                JOIN users u ON r.user_id = u.id
                LEFT JOIN products p ON r.product_id = p.id
                ORDER BY r.created_at DESC`;
       params = [];
     } else if (req.user.role === 'seller') {
-      query = `SELECT r.*, u.full_name, u.email, u.phone, u.store_name,
-               p.name AS product_name, p.images AS product_images
+      query = `SELECT ${selectCols}
                FROM reprises r
                JOIN users u ON r.user_id = u.id
                LEFT JOIN products p ON r.product_id = p.id
@@ -130,7 +132,10 @@ router.get('/', authenticate, async (req, res) => {
                ORDER BY r.created_at DESC`;
       params = [req.user.id, req.user.id, req.user.id];
     } else {
-      query = `SELECT r.* FROM reprises r WHERE r.user_id = ? ORDER BY r.created_at DESC`;
+      query = `SELECT ${selectCols}
+               FROM reprises r
+               WHERE r.user_id = ?
+               ORDER BY r.created_at DESC`;
       params = [req.user.id];
     }
 

@@ -83,8 +83,7 @@ export default function RepriseList() {
           <div style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
             {reprises.map(r => {
               const st = statusStyles[r.status] || statusStyles.en_attente;
-              const photos = (() => { if (r.photos && typeof r.photos === 'object') return r.photos; try { return JSON.parse(r.photos || '{}'); } catch { return {}; } })();
-              const hasPhotos = Object.keys(photos).length > 0;
+              const hasPhotos = r.has_photos || (r.photos && typeof r.photos === 'object' ? Object.keys(r.photos).length > 0 : false);
               const pImgs = productImgs(r);
 
               return (
@@ -152,15 +151,8 @@ export default function RepriseList() {
 
                     {/* Reprise photos */}
                     {hasPhotos && (
-                      <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap' }}>
-                        {Object.entries(photos).map(([key, url]) => (
-                          <a key={key} href={imgUrl(url)} target="_blank" rel="noopener noreferrer" style={{
-                            width: 64, height: 64, borderRadius: 8, overflow: 'hidden', display: 'block',
-                            border: '1px solid var(--border)',
-                          }}>
-                            <img src={imgUrl(url)} alt={key} style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
-                          </a>
-                        ))}
+                      <div style={{ fontSize: 12, color: 'var(--primary)', fontWeight: 600, padding: '4px 0' }}>
+                        Photos disponibles ✓
                       </div>
                     )}
 
