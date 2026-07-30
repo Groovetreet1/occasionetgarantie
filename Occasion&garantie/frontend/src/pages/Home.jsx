@@ -39,6 +39,8 @@ export default function Home() {
   const [storeLoad, setStoreLoad] = useState(true);
   const [brands, setBrands] = useState([]);
 
+  const toLogoUrl = (brand) => `https://cdn.simpleicons.org/${brand.toLowerCase().replace(/[^a-z0-9]/g, '')}`;
+
   useEffect(() => { document.title = 'Occasion & Garantie - Achetez et vendez des produits électroniques d\'occasion au Maroc'; }, []);
 
   useEffect(() => {
@@ -107,7 +109,7 @@ export default function Home() {
                       onMouseLeave={e => e.currentTarget.style.transform = 'scale(1)'}>
                       <div style={{ width: 56, height: 56, borderRadius: '50%', background: '#fff', border: '2px solid rgba(217,119,6,0.2)', display: 'flex', alignItems: 'center', justifyContent: 'center', position: 'relative', overflow: 'hidden' }}>
                         <span style={{ position: 'absolute', fontSize: 18, fontWeight: 800, color: '#d97706' }}>{brand.charAt(0).toUpperCase()}</span>
-                        <img src={`https://cdn.simpleicons.org/${brand.toLowerCase().replace(/\s+/g, '')}`} alt={brand}
+                        <img src={toLogoUrl(brand)} alt={brand}
                           style={{ width: '70%', height: '70%', objectFit: 'contain', position: 'relative', zIndex: 1 }}
                           onError={e => { e.target.style.display = 'none'; }} />
                       </div>
