@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
-import { FiTrash2, FiArrowLeft, FiUsers as FiUsersIcon, FiShield, FiEdit3, FiSave, FiX, FiCheck } from 'react-icons/fi';
+import { FiTrash2, FiArrowLeft, FiUsers as FiUsersIcon, FiShield, FiEdit3, FiSave, FiX, FiCheck, FiLock, FiUnlock } from 'react-icons/fi';
 import api from '../api/axios';
 import ConfirmModal from '../components/ConfirmModal';
 
@@ -13,6 +13,9 @@ export default function AdminUsers() {
   const [newStoreName, setNewStoreName] = useState('');
   const [storeLoading, setStoreLoading] = useState(false);
   const [storeSuccess, setStoreSuccess] = useState('');
+  const [suspendModal, setSuspendModal] = useState(null);
+  const [suspendReason, setSuspendReason] = useState('');
+  const [suspendLoading, setSuspendLoading] = useState(false);
 
   useEffect(() => {
     api.get('/admin/users')
@@ -52,6 +55,31 @@ export default function AdminUsers() {
     }
   };
 
+  const handleSuspend = async () => {
+    if (!suspendModal) return;
+    setSuspendLoading(true);
+    try {
+      await api.put(`/admin/users/${suspendModal.id}/suspend`, { reason: suspendReason.trim() || undefined });
+      setUsers(users.map(u => u.id === suspendModal.id ? { ...u, suspended: 1, suspension_reason: suspendReason.trim() || 'Compte suspendu par l\'administration' } : u));
+      setSuspendModal(null);
+      setSuspendReason('');
+    } catch (err) {
+      alert(err.response?.data?.message || 'Erreur');
+    } finally {
+      setSuspendLoading(false);
+    }
+  };
+
+  const handleUnsuspend = async (user) => {
+    if (!confirm(`Debloquer le compte de "${user.full_name}" ?`)) return;
+    try {
+      await api.put(`/admin/users/${user.id}/unsuspend`);
+      setUsers(users.map(u => u.id === user.id ? { ...u, suspended: 0, suspension_reason: null } : u));
+    } catch (err) {
+      alert(err.response?.data?.message || 'Erreur');
+    }
+  };
+
   const formatDate = (d) => d ? new Date(d).toLocaleDateString('fr-FR', { day: 'numeric', month: 'short', year: 'numeric' }) : '-';
 
   return (
@@ -80,6 +108,7 @@ export default function AdminUsers() {
                   <th style={{ padding: '10px 6px', textAlign: 'left' }}>Telephone</th>
                   <th style={{ padding: '10px 6px', textAlign: 'left' }}>Role</th>
                   <th style={{ padding: '10px 6px', textAlign: 'left' }}>Credits</th>
+                  <th style={{ padding: '10px 6px', textAlign: 'left' }}>Statut</th>
                   <th style={{ padding: '10px 6px', textAlign: 'left' }}>Inscrit le</th>
                   <th style={{ padding: '10px 6px', textAlign: 'left' }}>Actions</th>
                 </tr>
@@ -104,12 +133,35 @@ export default function AdminUsers() {
                       )}
                     </td>
                     <td style={{ padding: '10px 6px', fontWeight: 700 }}>{Number(u.credit_balance || 0).toLocaleString()}</td>
+                    <td style={{ padding: '10px 6px', fontSize: '11px' }}>
+                      {u.suspended ? (
+                        <span style={{ color: '#dc2626', fontWeight: 600, background: 'rgba(220,38,38,0.1)', padding: '2px 8px', borderRadius: 8, display: 'inline-flex', alignItems: 'center', gap: 3 }}>
+                          <FiLock size={11} /> Suspendu
+                        </span>
+                      ) : (
+                        <span style={{ color: '#059669', fontWeight: 600, display: 'inline-flex', alignItems: 'center', gap: 3 }}>
+                          <FiCheck size={12} /> Actif
+                        </span>
+                      )}
+                    </td>
                     <td style={{ padding: '10px 6px', fontSize: '11px', color: 'var(--text-secondary)' }}>{formatDate(u.created_at)}</td>
                     <td style={{ padding: '10px 6px' }}>
                       {u.role === 'seller' && (
                         <button onClick={() => { setStoreModal(u); setNewStoreName(u.store_name || ''); }}
                           className="btn" style={{ padding: '5px 10px', fontSize: '11px', background: 'rgba(59,130,246,0.15)', color: '#3b82f6', border: 'none', marginRight: 4 }}>
                           <FiEdit3 size={12} /> Store
+                        </button>
+                      )}
+                      {u.id !== 1 && !u.suspended && (
+                        <button onClick={() => setSuspendModal(u)}
+                          className="btn" style={{ padding: '5px 10px', fontSize: '11px', background: 'rgba(245,158,11,0.15)', color: '#d97706', border: 'none', marginRight: 4 }}>
+                          <FiLock size={12} /> Suspendre
+                        </button>
+                      )}
+                      {u.id !== 1 && u.suspended && (
+                        <button onClick={() => handleUnsuspend(u)}
+                          className="btn" style={{ padding: '5px 10px', fontSize: '11px', background: 'rgba(5,150,105,0.15)', color: '#059669', border: 'none', marginRight: 4 }}>
+                          <FiUnlock size={12} /> Debloquer
                         </button>
                       )}
                       {u.id !== 1 && (
@@ -167,6 +219,38 @@ export default function AdminUsers() {
                 </div>
               </>
             )}
+          </div>
+        </div>
+      )}
+
+      {suspendModal && (
+        <div style={{ position: 'fixed', inset: 0, background: 'rgba(0,0,0,0.5)', zIndex: 99999, display: 'flex', alignItems: 'center', justifyContent: 'center', padding: 16 }}
+          onClick={() => { if (!suspendLoading) { setSuspendModal(null); setSuspendReason(''); } }}>
+          <div style={{ background: 'var(--bg-card)', borderRadius: 20, padding: 32, maxWidth: 400, width: '100%', boxShadow: '0 25px 80px rgba(0,0,0,0.35)' }}
+            onClick={e => e.stopPropagation()}>
+            <div style={{ display: 'flex', alignItems: 'center', gap: 12, marginBottom: 20 }}>
+              <div style={{ width: 48, height: 48, borderRadius: '50%', background: 'rgba(245,158,11,0.1)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                <FiLock size={24} color="#d97706" />
+              </div>
+              <div>
+                <h3 style={{ fontSize: 18, fontWeight: 700, margin: 0 }}>Suspendre le compte</h3>
+                <p style={{ fontSize: 13, color: 'var(--text-muted)', margin: '4px 0 0' }}>{suspendModal.full_name} &middot; {suspendModal.email}</p>
+              </div>
+            </div>
+            <div className="form-group" style={{ marginBottom: 16 }}>
+              <label>Raison de la suspension</label>
+              <textarea value={suspendReason} onChange={e => setSuspendReason(e.target.value)}
+                className="form-control" rows={3} placeholder="Optionnel : saisissez le motif..." />
+            </div>
+            <div style={{ display: 'flex', gap: 10 }}>
+              <button onClick={() => { setSuspendModal(null); setSuspendReason(''); }} className="btn btn-outline" disabled={suspendLoading} style={{ flex: 1, justifyContent: 'center', padding: '10px 0' }}>
+                Annuler
+              </button>
+              <button onClick={handleSuspend} disabled={suspendLoading}
+                className="form-submit" style={{ flex: 1, justifyContent: 'center', padding: '10px 0', background: '#d97706', borderColor: '#d97706' }}>
+                <FiLock size={14} /> {suspendLoading ? '...' : 'Suspendre'}
+              </button>
+            </div>
           </div>
         </div>
       )}

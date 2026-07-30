@@ -64,7 +64,12 @@ export default function Login() {
               </Link>
             </div>
           )}
-          {error && <div className="alert alert-error">{error}</div>}
+          {error && (
+            <div className={error.includes('suspend') ? 'alert alert-suspension' : 'alert alert-error'}>
+              {error.includes('suspendu') && <FiLock size={18} style={{ flexShrink: 0 }} />}
+              {error}
+            </div>
+          )}
           <form onSubmit={handleSubmit}>
             <div className="form-group">
               <label>Email</label>

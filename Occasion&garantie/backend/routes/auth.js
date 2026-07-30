@@ -254,9 +254,12 @@ router.get('/me', authenticate, async (req, res) => {
   try {
     let user;
     try {
-      const [users] = await pool.query('SELECT id, full_name, email, phone, role, phone_verified, created_at, store_name, premium, premium_expires_at, avatar FROM users WHERE id = ?', [req.user.id]);
+      const [users] = await pool.query('SELECT id, full_name, email, phone, role, phone_verified, created_at, store_name, premium, premium_expires_at, avatar, suspended, suspension_reason FROM users WHERE id = ?', [req.user.id]);
       if (users.length === 0) return res.status(404).json({ message: 'Utilisateur introuvable.' });
       user = users[0];
+      if (user.suspended) {
+        return res.status(403).json({ message: 'Votre compte a ete suspendu. Raison : ' + (user.suspension_reason || 'Non specifiee') + '. Contactez l\'administration (contact-occasionetgarantie@proton.me).', suspended: true, suspension_reason: user.suspension_reason });
+      }
     } catch (e) {
       if (e.errno === 1054 || e.code === 'ER_BAD_FIELD_ERROR') {
         const [users] = await pool.query('SELECT id, full_name, email, phone, role, phone_verified, created_at, store_name, avatar FROM users WHERE id = ?', [req.user.id]);

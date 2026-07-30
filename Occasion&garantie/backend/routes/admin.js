@@ -380,6 +380,31 @@ router.put('/products/:id/reject', authenticate, adminOnly, async (req, res) => 
   }
 });
 
+// ---- Suspend / Un-suspend users (VPN, manual) ----
+router.put('/users/:id/suspend', authenticate, adminOnly, async (req, res) => {
+  try {
+    const { reason } = req.body;
+    const userId = Number(req.params.id);
+    await pool.query('UPDATE users SET suspended = 1, suspension_reason = ? WHERE id = ?', [
+      reason || 'Compte suspendu par l\'administration',
+      userId
+    ]);
+    res.json({ message: 'Compte suspendu avec succes.' });
+  } catch (err) {
+    res.status(500).json({ message: 'Erreur suspension.', error: err.message });
+  }
+});
+
+router.put('/users/:id/unsuspend', authenticate, adminOnly, async (req, res) => {
+  try {
+    const userId = Number(req.params.id);
+    await pool.query('UPDATE users SET suspended = 0, suspension_reason = NULL, vpn_strike_count = 0, vpn_strike_date = NULL WHERE id = ?', [userId]);
+    res.json({ message: 'Compte re-active avec succes.' });
+  } catch (err) {
+    res.status(500).json({ message: 'Erreur reactivation.', error: err.message });
+  }
+});
+
 // ---- Admin stats ----
 router.get('/products', authenticate, adminOnly, async (req, res) => {
   try {
@@ -393,7 +418,7 @@ router.get('/products', authenticate, adminOnly, async (req, res) => {
 
 router.get('/users', authenticate, adminOnly, async (req, res) => {
   try {
-    const [rows] = await pool.query('SELECT id, full_name, email, phone, role, phone_verified, created_at, store_name, premium, credit_balance, terms_accepted FROM users ORDER BY id ASC');
+    const [rows] = await pool.query('SELECT id, full_name, email, phone, role, phone_verified, created_at, store_name, premium, credit_balance, terms_accepted, suspended, suspension_reason FROM users ORDER BY id ASC');
     res.json(rows);
   } catch (err) {
     res.status(500).json({ message: 'Erreur serveur.' });

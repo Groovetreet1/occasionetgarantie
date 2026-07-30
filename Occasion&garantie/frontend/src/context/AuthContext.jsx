@@ -47,7 +47,12 @@ export function AuthProvider({ children }) {
     try {
       const { data } = await api.get('/auth/me');
       setUser(data);
-    } catch (err) { console.error('refreshUser failed:', err); }
+    } catch (err) {
+      if (err.response?.status === 403 && err.response?.data?.suspended) {
+        logout();
+      }
+      console.error('refreshUser failed:', err);
+    }
   };
 
   return (

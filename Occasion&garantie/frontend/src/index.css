@@ -771,6 +771,8 @@ select.form-control, .form-group select { cursor: pointer; appearance: auto; }
 .alert-error { background: rgba(239, 68, 68, 0.1); color: var(--error); border: 1px solid rgba(239, 68, 68, 0.2); }
 .alert-success { background: rgba(16, 185, 129, 0.1); color: var(--success); border: 1px solid rgba(16, 185, 129, 0.2); }
 .alert-warning { background: rgba(245, 158, 11, 0.1); color: #d97706; border: 1px solid rgba(245, 158, 11, 0.2); }
+.alert-suspension { background: rgba(220, 38, 38, 0.12); color: #dc2626; border: 1px solid rgba(220, 38, 38, 0.25); display: flex; align-items: flex-start; gap: 8px; font-weight: 500; }
+.alert-suspension a { color: #dc2626; text-decoration: underline; font-weight: 600; }
 .spin { animation: spin 1s linear infinite; }
 
 .footer {
