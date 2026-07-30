@@ -77,7 +77,7 @@ export default function AdminCreditPurchases() {
           </div>
           <div style={{ display: 'flex', gap: 8 }}>
             <Link to="/admin/credits" className="btn btn-primary" style={{ fontSize: 13 }}>Credits</Link>
-            <Link to="/admin/installments" className="btn btn-outline" style={{ fontSize: 13 }}>Echelonnement</Link>
+
           </div>
         </div>
 

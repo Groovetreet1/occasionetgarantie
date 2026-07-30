@@ -19,7 +19,7 @@ import Profile from './pages/Profile';
 import NotFound from './pages/NotFound';
 import AdminPremium from './pages/AdminPremium';
 import AdminCreditPurchases from './pages/AdminCreditPurchases';
-import AdminInstallments from './pages/AdminInstallments';
+
 import AdminDashboardPage from './pages/AdminDashboardPage';
 import AdminDashboard from './pages/AdminDashboard';
 import AdminUsers from './pages/AdminUsers';
@@ -81,7 +81,7 @@ export default function App() {
           <Route path="/admin" element={<AnimatedPage><AdminRoute><AdminDashboardPage /></AdminRoute></AnimatedPage>} />
           <Route path="/admin/premium" element={<AnimatedPage><AdminRoute><AdminPremium /></AdminRoute></AnimatedPage>} />
           <Route path="/admin/credits" element={<AnimatedPage><AdminRoute><AdminCreditPurchases /></AdminRoute></AnimatedPage>} />
-          <Route path="/admin/installments" element={<AnimatedPage><AdminRoute><AdminInstallments /></AdminRoute></AnimatedPage>} />
+
           <Route path="/admin/users" element={<AnimatedPage><AdminRoute><AdminUsers /></AdminRoute></AnimatedPage>} />
           <Route path="/admin/tickets" element={<AnimatedPage><AdminRoute><AdminTickets /></AdminRoute></AnimatedPage>} />
           <Route path="/admin/vendor-logs" element={<AnimatedPage><AdminRoute><AdminVendorLogs /></AdminRoute></AnimatedPage>} />

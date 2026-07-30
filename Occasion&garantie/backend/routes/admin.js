@@ -11,7 +11,7 @@ router.post('/clean-db', authenticate, adminOnly, async (req, res) => {
     const tables = [
       'messages', 'conversations', 'product_images', 'order_items', 'orders',
       'premium_payments', 'commissions', 'credit_transactions', 'credit_purchases',
-      'installments', 'contact_messages', 'reservations', 'products'
+      'contact_messages', 'reservations', 'products'
     ];
     for (const t of tables) {
       try { await pool.query(`DELETE FROM \`${t}\``); } catch {}
@@ -412,48 +412,7 @@ router.put('/users/:id/store-name', authenticate, adminOnly, async (req, res) =>
 });
 
 // ---- Installments (admin confirm/reject) ----
-router.get('/installments', authenticate, adminOnly, async (req, res) => {
-  try {
-    const [rows] = await pool.query(
-      `SELECT i.*, p.name as product_name, p.price as product_price, u.full_name as buyer_name, u.email as buyer_email, u.phone as buyer_phone, s.store_name as seller_name
-       FROM installments i
-       JOIN products p ON i.product_id = p.id
-       JOIN users u ON i.buyer_id = u.id
-       LEFT JOIN users s ON i.seller_id = s.id
-       ORDER BY i.created_at DESC`
-    );
-    res.json(rows);
-  } catch (err) {
-    res.status(500).json({ message: 'Erreur serveur.', error: err.message });
-  }
-});
 
-router.post('/installments/:id/confirm', authenticate, adminOnly, async (req, res) => {
-  try {
-    const instId = Number(req.params.id);
-    const [rows] = await pool.query('SELECT * FROM installments WHERE id = ?', [instId]);
-    if (rows.length === 0) return res.status(404).json({ message: 'Demande introuvable.' });
-    if (rows[0].status !== 'en_attente') return res.status(400).json({ message: 'Deja traitee.' });
-    await pool.query('UPDATE installments SET status = ? WHERE id = ?', ['actif', instId]);
-    res.json({ message: 'Paiement echelonne confirme.' });
-  } catch (err) {
-    res.status(500).json({ message: 'Erreur serveur.' });
-  }
-});
-
-router.post('/installments/:id/reject', authenticate, adminOnly, async (req, res) => {
-  try {
-    const instId = Number(req.params.id);
-    const { reason } = req.body;
-    const [rows] = await pool.query('SELECT * FROM installments WHERE id = ?', [instId]);
-    if (rows.length === 0) return res.status(404).json({ message: 'Demande introuvable.' });
-    if (rows[0].status !== 'en_attente') return res.status(400).json({ message: 'Deja traitee.' });
-    await pool.query('UPDATE installments SET status = ?, rejection_reason = ? WHERE id = ?', ['rejete', reason || 'Demande refuse.', instId]);
-    res.json({ message: 'Demande de paiement echelonne refuse.' });
-  } catch (err) {
-    res.status(500).json({ message: 'Erreur serveur.' });
-  }
-});
 
 // ---- Newsletter ----
 router.post('/newsletter/send', authenticate, adminOnly, async (req, res) => {

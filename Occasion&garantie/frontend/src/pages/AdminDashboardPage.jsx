@@ -14,7 +14,7 @@ export default function AdminDashboardPage() {
   useEffect(() => {
     Promise.all([
       api.get('/admin/credit-purchases').catch(() => ({ data: [] })),
-      api.get('/admin/installments').catch(() => ({ data: [] })),
+
       api.get('/admin/premium-payments').catch(() => ({ data: [] })),
       api.get('/admin/products').catch(() => ({ data: [] })),
       api.get('/contact/tickets').catch(() => ({ data: [] })),
@@ -27,8 +27,7 @@ export default function AdminDashboardPage() {
       setStats({
         credits: credits.data.length,
         pendingCredits: credits.data.filter(c => c.status === 'en_attente').length,
-        installments: installments.data.length,
-        pendingInstallments: installments.data.filter(i => i.status === 'en_attente').length,
+
         premium: premium.data.length,
         pendingPremium: premium.data.filter(p => p.status === 'en_attente').length,
         products: products.data.length,
@@ -48,10 +47,7 @@ export default function AdminDashboardPage() {
       { label: 'Total demandes', value: stats.credits },
       { label: 'En attente', value: stats.pendingCredits, highlight: true },
     ], link: '/admin/credits' },
-    { title: 'Echelonnement', icon: FiClock, color: '#8b5cf6', bg: 'rgba(139,92,246,0.1)', items: [
-      { label: 'Total demandes', value: stats.installments },
-      { label: 'En attente', value: stats.pendingInstallments, highlight: true },
-    ], link: '/admin/installments' },
+
     { title: 'Prime', icon: FiShield, color: '#ec4899', bg: 'rgba(236,72,153,0.1)', items: [
       { label: 'Total demandes', value: stats.premium },
       { label: 'En attente', value: stats.pendingPremium, highlight: true },
@@ -137,7 +133,7 @@ export default function AdminDashboardPage() {
           <h2 style={{ fontSize: '18px', fontWeight: 700, marginBottom: '16px' }}>Actions rapides</h2>
           <div style={{ display: 'flex', gap: '12px', flexWrap: 'wrap' }}>
             <Link to="/admin/credits" className="btn btn-outline"><FiCreditCard size={16} /> Achats de credits</Link>
-            <Link to="/admin/installments" className="btn btn-outline"><FiClock size={16} /> Paiements echelonnes</Link>
+
             <Link to="/admin/premium" className="btn btn-outline"><FiShield size={16} /> Demandes Prime</Link>
             <Link to="/admin/products" className="btn btn-outline"><FiPackage size={16} /> Tous les produits</Link>
             <Link to="/admin/products/pending" className="btn btn-outline"><FiShield size={16} /> Approuver produits</Link>
