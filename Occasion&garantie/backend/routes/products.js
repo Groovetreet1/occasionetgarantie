@@ -308,4 +308,14 @@ router.get('/cities', async (req, res) => {
   }
 });
 
+router.get('/brands/list', async (req, res) => {
+  try {
+    const [rows] = await pool.query("SELECT DISTINCT TRIM(brand) as brand FROM products WHERE brand IS NOT NULL AND brand != '' AND active = TRUE AND status = 'disponible' AND approved = TRUE ORDER BY brand");
+    const brands = rows.map(r => r.brand).filter(Boolean);
+    res.json(brands);
+  } catch (err) {
+    res.json([]);
+  }
+});
+
 module.exports = router;

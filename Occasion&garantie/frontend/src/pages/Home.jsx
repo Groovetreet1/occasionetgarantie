@@ -37,11 +37,13 @@ export default function Home() {
   const [cities, setCities] = useState([]);
   const [storeProducts, setStoreProducts] = useState([]);
   const [storeLoad, setStoreLoad] = useState(true);
+  const [brands, setBrands] = useState([]);
 
   useEffect(() => { document.title = 'Occasion & Garantie - Achetez et vendez des produits électroniques d\'occasion au Maroc'; }, []);
 
   useEffect(() => {
     api.get('/products/cities').then(res => { if (res.data.length) setCities(res.data); }).catch(() => {});
+    api.get('/products/brands/list').then(res => setBrands(res.data || [])).catch(() => {});
   }, []);
 
   useEffect(() => {
@@ -95,6 +97,23 @@ export default function Home() {
               </div>
               <button type="submit" className="avito-search-btn">Rechercher</button>
             </form>
+            {brands.length > 0 && (
+              <div style={{ marginTop: 28, position: 'relative', overflow: 'hidden', maskImage: 'linear-gradient(to right, transparent, black 40px, black calc(100% - 40px), transparent)', WebkitMaskImage: 'linear-gradient(to right, transparent, black 40px, black calc(100% - 40px), transparent)' }}>
+                <div className="brands-scroll" style={{ display: 'flex', gap: 20, width: 'max-content' }}>
+                  {brands.concat(brands).map((brand, i) => (
+                    <Link key={i} to={`/products?search=${encodeURIComponent(brand)}`}
+                      style={{ flexShrink: 0, textDecoration: 'none', display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 6, transition: 'transform 0.2s' }}
+                      onMouseEnter={e => e.currentTarget.style.transform = 'scale(1.1)'}
+                      onMouseLeave={e => e.currentTarget.style.transform = 'scale(1)'}>
+                      <div style={{ width: 56, height: 56, borderRadius: '50%', background: 'rgba(217,119,6,0.1)', border: '2px solid rgba(217,119,6,0.2)', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 18, fontWeight: 800, color: '#d97706' }}>
+                        {brand.charAt(0).toUpperCase()}
+                      </div>
+                      <span style={{ fontSize: 11, color: 'var(--text-muted)', whiteSpace: 'nowrap', fontWeight: 500 }}>{brand}</span>
+                    </Link>
+                  ))}
+                </div>
+              </div>
+            )}
           </div>
         </div>
       </section>

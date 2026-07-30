@@ -1944,3 +1944,16 @@ select.form-control, .form-group select { cursor: pointer; appearance: auto; }
 /* ============ Page Transition ============ */
 .page-enter { opacity: 0; }
 .page-enter-active { opacity: 1; transition: opacity 0.3s ease; }
+
+/* ============ Brands Carousel ============ */
+.brands-scroll::-webkit-scrollbar { display: none; }
+@keyframes brandsLoop {
+  0% { transform: translateX(0); }
+  100% { transform: translateX(-50%); }
+}
+.brands-scroll {
+  animation: brandsLoop 40s linear infinite;
+}
+.brands-scroll:hover {
+  animation-play-state: paused;
+}
