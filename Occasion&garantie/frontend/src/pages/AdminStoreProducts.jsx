@@ -76,7 +76,7 @@ export default function AdminStoreProducts() {
             </h1>
             <p style={{ color: 'var(--text-secondary)' }}>{total} produit{total > 1 ? 's' : ''} en boutique</p>
           </div>
-          <Link to="/admin/products/new?type=store" className="btn" style={{ background: '#d97706', color: '#fff', padding: '10px 20px', borderRadius: 10, fontWeight: 600, fontSize: 14, display: 'flex', alignItems: 'center', gap: 8 }}>
+          <Link to="/seller/products/new?type=store" className="btn" style={{ background: '#d97706', color: '#fff', padding: '10px 20px', borderRadius: 10, fontWeight: 600, fontSize: 14, display: 'flex', alignItems: 'center', gap: 8 }}>
             <FiPlus size={18} /> Nouveau produit
           </Link>
         </div>
@@ -107,7 +107,7 @@ export default function AdminStoreProducts() {
           <div style={{ padding: '60px 0' }}><div className="spinner" /></div>
         ) : products.length === 0 ? (
           <div className="empty-state"><FiPackage size={48} /><p>Aucun produit dans la boutique officielle.</p>
-            <Link to="/admin/products/new?type=store" className="btn" style={{ marginTop: 12, background: '#d97706', color: '#fff', padding: '10px 20px', borderRadius: 10, fontWeight: 600, fontSize: 14 }}><FiPlus size={16} /> Ajouter un produit</Link>
+            <Link to="/seller/products/new?type=store" className="btn" style={{ marginTop: 12, background: '#d97706', color: '#fff', padding: '10px 20px', borderRadius: 10, fontWeight: 600, fontSize: 14 }}><FiPlus size={16} /> Ajouter un produit</Link>
           </div>
         ) : (
           <>
@@ -160,7 +160,7 @@ export default function AdminStoreProducts() {
                         <Link to={`/boutique/${p.slug}`} target="_blank" style={{ padding: 6, borderRadius: 6, background: 'rgba(59,130,246,0.1)', color: '#3b82f6', display: 'flex', alignItems: 'center' }}>
                           <FiEye size={14} />
                         </Link>
-                        <Link to={`/admin/products/edit/${p.id}`} style={{ padding: 6, borderRadius: 6, background: 'rgba(5,150,105,0.1)', color: '#059669', display: 'flex', alignItems: 'center' }}>
+                        <Link to={`/seller/products/edit/${p.id}`} style={{ padding: 6, borderRadius: 6, background: 'rgba(5,150,105,0.1)', color: '#059669', display: 'flex', alignItems: 'center' }}>
                           <FiEdit2 size={14} />
                         </Link>
                         <button onClick={() => handleDelete(p.id)} disabled={actionId === p.id}

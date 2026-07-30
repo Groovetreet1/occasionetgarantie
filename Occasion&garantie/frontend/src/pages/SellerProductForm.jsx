@@ -1,5 +1,5 @@
 import { useState, useEffect, useRef } from 'react';
-import { useNavigate, useParams } from 'react-router-dom';
+import { useNavigate, useParams, useSearchParams } from 'react-router-dom';
 import { motion } from 'framer-motion';
 import { FiUpload, FiX, FiMapPin } from 'react-icons/fi';
 import api from '../api/axios';
@@ -21,9 +21,11 @@ const defaultSpecs = {
 
 export default function SellerProductForm() {
   const { id } = useParams();
+  const [searchParams] = useSearchParams();
   const navigate = useNavigate();
   const isEdit = Boolean(id);
   const fileInputRef = useRef(null);
+  const isStore = searchParams.get('type') === 'store';
 
   const [form, setForm] = useState({
     name: '', slug: '', description: '', price: '', old_price: '',
@@ -152,13 +154,14 @@ export default function SellerProductForm() {
         stock: 1,
         active: true,
         ...(gpsPos ? { latitude: gpsPos.latitude, longitude: gpsPos.longitude } : {}),
+        ...(isStore ? { product_type: 'store', featured: true } : {}),
       };
       if (isEdit) {
         await api.put(`/products/${id}`, payload);
       } else {
         await api.post('/products', payload);
       }
-      navigate('/seller');
+      navigate(isStore ? '/admin/store-products' : '/seller');
     } catch (err) {
       setError(err.response?.data?.message || 'Erreur lors de l\'enregistrement.');
     }
@@ -168,8 +171,8 @@ export default function SellerProductForm() {
   return (
     <div className="seller-page">
       <div className="seller-page-header">
-        <h1>{isEdit ? 'Modifier le produit' : 'Nouvelle annonce'}</h1>
-        <button className="btn btn-outline" onClick={() => navigate('/seller')}>← Retour</button>
+        <h1>{isEdit ? 'Modifier le produit' : 'Nouvelle annonce'} {isStore && <span style={{ fontSize: 14, fontWeight: 600, color: '#d97706', background: 'rgba(217,119,6,0.1)', padding: '4px 10px', borderRadius: 8, marginLeft: 8, verticalAlign: 'middle' }}>Boutique Officielle</span>}</h1>
+        <button className="btn btn-outline" onClick={() => navigate(isStore ? '/admin/store-products' : '/seller')}>← Retour</button>
       </div>
 
       <SellerNav />
