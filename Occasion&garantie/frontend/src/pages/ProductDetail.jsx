@@ -179,6 +179,7 @@ export default function ProductDetail() {
                 <span className="product-detail-tag state">{stateLabels[product.state] || product.state}</span>
                 <span className="product-detail-tag verified"><FiCheck size={12} /> Vérifié</span>
                 {product.brand && <span className="product-detail-tag brand">{product.brand}</span>}
+                {product.ville && <span className="product-detail-tag location"><FiMapPin size={12} /> {product.ville}</span>}
               </div>
 
               <p className="product-detail-desc">{product.description}</p>

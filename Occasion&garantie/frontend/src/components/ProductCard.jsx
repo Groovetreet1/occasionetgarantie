@@ -1,6 +1,6 @@
 import { Link } from 'react-router-dom';
 import { motion } from 'framer-motion';
-import { FiShoppingBag, FiUser, FiShield, FiStar } from 'react-icons/fi';
+import { FiShoppingBag, FiUser, FiShield, FiStar, FiMapPin } from 'react-icons/fi';
 
 const API_BASE = import.meta.env.VITE_API_URL || '';
 
@@ -63,6 +63,9 @@ export default function ProductCard({ product, index = 0 }) {
           <div className="product-card-meta">
             {product.state && (
               <span className="meta-chip">{stateLabels[product.state] || product.state}</span>
+            )}
+            {product.ville && (
+              <span className="meta-chip meta-chip-location"><FiMapPin size={10} /> {product.ville}</span>
             )}
             {product.warranty && product.warranty !== 'Sans garantie' && (
               <span className="meta-chip meta-chip-warranty"><FiShield size={10} /> {product.warranty}</span>
