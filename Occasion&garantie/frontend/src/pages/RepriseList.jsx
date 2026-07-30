@@ -19,6 +19,8 @@ export default function RepriseList() {
   const [loading, setLoading] = useState(true);
   const [actionLoading, setActionLoading] = useState(null);
   const [deleteTarget, setDeleteTarget] = useState(null);
+  const [openPhotos, setOpenPhotos] = useState(null);
+  const [photosData, setPhotosData] = useState({});
 
   const [error, setError] = useState(null);
 
@@ -53,6 +55,17 @@ export default function RepriseList() {
   const del = (id) => setDeleteTarget(id);
 
   const imgUrl = (p) => p?.startsWith('http') || p?.startsWith('data:') ? p : `${API_BASE}${p}`;
+
+  const togglePhotos = async (id) => {
+    if (openPhotos === id) { setOpenPhotos(null); return; }
+    if (photosData[id]) { setOpenPhotos(id); return; }
+    try {
+      const { data } = await api.get(`/reprises/${id}`);
+      const p = typeof data.photos === 'object' ? data.photos : (() => { try { return JSON.parse(data.photos || '{}'); } catch { return {}; } })();
+      setPhotosData(prev => ({ ...prev, [id]: p }));
+      setOpenPhotos(id);
+    } catch {}
+  };
 
   const productImgs = (r) => {
     if (!r.product_images) return [];
@@ -159,8 +172,22 @@ export default function RepriseList() {
 
                     {/* Reprise photos */}
                     {hasPhotos && (
-                      <div style={{ fontSize: 12, color: 'var(--primary)', fontWeight: 600, padding: '4px 0' }}>
-                        Photos disponibles ✓
+                      <div>
+                        <button onClick={() => togglePhotos(r.id)} className="btn btn-ghost" style={{ fontSize: 12, padding: '4px 10px' }}>
+                          {openPhotos === r.id ? 'Masquer les photos' : 'Voir les photos'}
+                        </button>
+                        {openPhotos === r.id && photosData[r.id] && Object.keys(photosData[r.id]).length > 0 && (
+                          <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap', marginTop: 8 }}>
+                            {Object.entries(photosData[r.id]).map(([key, url]) => (
+                              <a key={key} href={imgUrl(url)} target="_blank" rel="noopener noreferrer" style={{
+                                width: 64, height: 64, borderRadius: 8, overflow: 'hidden', display: 'block',
+                                border: '1px solid var(--border)',
+                              }}>
+                                <img src={imgUrl(url)} alt={key} style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
+                              </a>
+                            ))}
+                          </div>
+                        )}
                       </div>
                     )}
 
