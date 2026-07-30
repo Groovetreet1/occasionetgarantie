@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
 import { FiArrowLeft, FiSmartphone, FiClock, FiRefreshCw, FiCheck, FiX, FiPhone, FiMessageCircle, FiDollarSign, FiTrash2 } from 'react-icons/fi';
+import ConfirmModal from '../components/ConfirmModal';
 import api from '../api/axios';
 
 const API_BASE = import.meta.env.VITE_API_URL || '';
@@ -17,6 +18,7 @@ export default function RepriseList() {
   const [reprises, setReprises] = useState([]);
   const [loading, setLoading] = useState(true);
   const [actionLoading, setActionLoading] = useState(null);
+  const [deleteTarget, setDeleteTarget] = useState(null);
 
   const load = () => {
     setLoading(true);
@@ -34,15 +36,18 @@ export default function RepriseList() {
     setActionLoading(null);
   };
 
-  const del = async (id) => {
-    if (!window.confirm('Supprimer cette demande de reprise ?')) return;
-    setActionLoading(id);
+  const executeDelete = async () => {
+    if (!deleteTarget) return;
+    setActionLoading(deleteTarget);
     try {
-      await api.delete(`/reprises/${id}`);
+      await api.delete(`/reprises/${deleteTarget}`);
+      setDeleteTarget(null);
       load();
     } catch {}
     setActionLoading(null);
   };
+
+  const del = (id) => setDeleteTarget(id);
 
   const imgUrl = (p) => p?.startsWith('http') || p?.startsWith('data:') ? p : `${API_BASE}${p}`;
 
@@ -217,6 +222,17 @@ export default function RepriseList() {
           </div>
         )}
       </div>
+
+      <ConfirmModal
+        open={!!deleteTarget}
+        onClose={() => !actionLoading && setDeleteTarget(null)}
+        onConfirm={executeDelete}
+        title="Supprimer cette demande ?"
+        message="Cette action est irreversible."
+        confirmText="Supprimer"
+        confirmColor="#dc2626"
+        icon={<FiTrash2 size={26} color="#dc2626" />}
+      />
     </section>
   );
 }
