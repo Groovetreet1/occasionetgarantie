@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
-import { FiArrowLeft, FiSmartphone, FiClock, FiRefreshCw, FiCheck, FiX, FiPhone, FiMessageCircle, FiDollarSign } from 'react-icons/fi';
+import { FiArrowLeft, FiSmartphone, FiClock, FiRefreshCw, FiCheck, FiX, FiPhone, FiMessageCircle, FiDollarSign, FiTrash2 } from 'react-icons/fi';
 import api from '../api/axios';
 
 const API_BASE = import.meta.env.VITE_API_URL || '';
@@ -29,6 +29,16 @@ export default function RepriseList() {
     setActionLoading(id);
     try {
       await api.put(`/reprises/${id}`, data);
+      load();
+    } catch {}
+    setActionLoading(null);
+  };
+
+  const del = async (id) => {
+    if (!window.confirm('Supprimer cette demande de reprise ?')) return;
+    setActionLoading(id);
+    try {
+      await api.delete(`/reprises/${id}`);
       load();
     } catch {}
     setActionLoading(null);
@@ -192,6 +202,13 @@ export default function RepriseList() {
                       <div style={{ fontSize: 12, color: 'var(--text-secondary)', fontStyle: 'italic', padding: '4px 0' }}>
                         Raison: {r.vendor_notes}
                       </div>
+                    )}
+
+                    {(r.status === 'accepte' || r.status === 'refuse' || r.status === 'converti') && (
+                      <button onClick={() => del(r.id)} disabled={actionLoading === r.id}
+                        className="btn btn-primary" style={{ fontSize: 12, padding: '6px 14px', alignSelf: 'flex-start', background: '#ef4444' }}>
+                        <FiTrash2 size={13} /> Supprimer
+                      </button>
                     )}
                   </div>
                 </div>

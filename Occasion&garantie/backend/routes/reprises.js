@@ -253,4 +253,18 @@ router.post('/:id/convert', authenticate, async (req, res) => {
   }
 });
 
+router.delete('/:id', authenticate, async (req, res) => {
+  try {
+    await ensureTable();
+    const [rows] = await pool.query('SELECT * FROM reprises WHERE id = ?', [req.params.id]);
+    if (rows.length === 0) return res.status(404).json({ message: 'Reprise introuvable.' });
+    if (req.user.role !== 'admin' && req.user.role !== 'seller')
+      return res.status(403).json({ message: 'Acces refuse.' });
+    await pool.query('DELETE FROM reprises WHERE id = ?', [req.params.id]);
+    res.json({ message: 'Reprise supprimee.' });
+  } catch (err) {
+    res.status(500).json({ message: 'Erreur serveur.', error: err.message });
+  }
+});
+
 module.exports = router;
