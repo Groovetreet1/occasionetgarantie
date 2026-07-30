@@ -188,13 +188,18 @@ router.get('/photos/batch', authenticate, async (req, res) => {
     if (idArr.length === 0) return res.json({});
     const placeholders = idArr.map(() => '?').join(',');
     const [rows] = await pool.query(
-      `SELECT id, photos FROM reprises WHERE id IN (${placeholders})`,
+      `SELECT id, photos FROM reprises WHERE id IN (${placeholders}) AND (photos IS NULL OR OCTET_LENGTH(photos) < 500)`,
       idArr
     );
     const result = {};
     for (const r of rows) {
+      if (!r.photos) continue;
       const p = typeof r.photos === 'object' ? r.photos : (() => { try { return JSON.parse(r.photos || '{}'); } catch { return {}; } })();
-      result[r.id] = p;
+      const filtered = {};
+      for (const [key, val] of Object.entries(p)) {
+        if (typeof val === 'string' && val.startsWith('http')) filtered[key] = val;
+      }
+      if (Object.keys(filtered).length > 0) result[r.id] = filtered;
     }
     res.json(result);
   } catch (err) {
