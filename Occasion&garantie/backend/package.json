@@ -4,7 +4,8 @@
   "private": true,
   "scripts": {
     "dev": "nodemon server.js",
-    "start": "node server.js"
+    "start": "node server.js",
+    "seed": "node seed-complete.js"
   },
   "dependencies": {
     "bcryptjs": "^2.4.3",
