@@ -433,6 +433,32 @@ router.get('/store-products', authenticate, adminOnly, async (req, res) => {
   }
 });
 
+router.get('/store-contacts', authenticate, adminOnly, async (req, res) => {
+  try {
+    await pool.query("CREATE TABLE IF NOT EXISTS store_contacts (id INT AUTO_INCREMENT PRIMARY KEY, product_id INT NOT NULL, product_name VARCHAR(200) DEFAULT NULL, client_name VARCHAR(100) NOT NULL, client_phone VARCHAR(20) NOT NULL, message TEXT DEFAULT NULL, status VARCHAR(20) DEFAULT 'en_attente', created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP)");
+    const page = Math.max(1, parseInt(req.query.page) || 1);
+    const limit = Math.min(100, Math.max(1, parseInt(req.query.limit) || 50));
+    const offset = (page - 1) * limit;
+    const [countRows] = await pool.query('SELECT COUNT(*) as total FROM store_contacts');
+    const total = countRows[0].total;
+    const [rows] = await pool.query('SELECT sc.*, p.slug, p.image FROM store_contacts sc LEFT JOIN products p ON sc.product_id = p.id ORDER BY sc.created_at DESC LIMIT ? OFFSET ?', [limit, offset]);
+    res.json({ contacts: rows, total, page, limit, totalPages: Math.ceil(total / limit) });
+  } catch (err) {
+    res.status(500).json({ message: 'Erreur serveur.' });
+  }
+});
+
+router.put('/store-contacts/:id/status', authenticate, adminOnly, async (req, res) => {
+  try {
+    const { status } = req.body;
+    if (!['en_attente', 'contacte', 'termine'].includes(status)) return res.status(400).json({ message: 'Statut invalide.' });
+    await pool.query('UPDATE store_contacts SET status = ? WHERE id = ?', [status, req.params.id]);
+    res.json({ message: 'Statut mis a jour.' });
+  } catch (err) {
+    res.status(500).json({ message: 'Erreur serveur.' });
+  }
+});
+
 router.get('/users', authenticate, adminOnly, async (req, res) => {
   try {
     const page = Math.max(1, parseInt(req.query.page) || 1);

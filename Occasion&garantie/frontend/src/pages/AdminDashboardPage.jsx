@@ -8,7 +8,7 @@ function CardWrapper({ link, children, ...rest }) {
 }
 
 export default function AdminDashboardPage() {
-  const [stats, setStats] = useState({ credits: 0, pendingCredits: 0, premium: 0, pendingPremium: 0, products: 0, vendorProducts: 0, tickets: 0, pendingTickets: 0, repliedTickets: 0, users: 0, pendingReprises: 0, pendingProducts: 0, storeProducts: 0 });
+  const [stats, setStats] = useState({ credits: 0, pendingCredits: 0, premium: 0, pendingPremium: 0, products: 0, vendorProducts: 0, tickets: 0, pendingTickets: 0, repliedTickets: 0, users: 0, pendingReprises: 0, pendingProducts: 0, storeProducts: 0, storeContacts: 0 });
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
@@ -22,10 +22,12 @@ export default function AdminDashboardPage() {
       api.get('/reprises').catch(() => ({ data: [] })),
       api.get('/admin/products/pending').catch(() => ({ data: [] })),
       api.get('/admin/store-products?limit=1').catch(() => ({ data: { stats: { total: 0 } } })),
-    ]).then(([credits, premium, products, tickets, users, reprises, pendingProds, store]) => {
+      api.get('/admin/store-contacts?limit=1').catch(() => ({ data: { total: 0 } })),
+    ]).then(([credits, premium, products, tickets, users, reprises, pendingProds, store, contacts]) => {
       const ticketData = tickets.data || [];
       const repriseData = reprises.data || [];
       const storeData = store.data?.stats || {};
+      const contactsData = contacts.data || {};
       setStats({
         credits: credits.data.length,
         pendingCredits: credits.data.filter(c => c.status === 'en_attente').length,
@@ -41,6 +43,7 @@ export default function AdminDashboardPage() {
         pendingReprises: repriseData.filter(r => r.status === 'en_attente').length,
         pendingProducts: pendingProds.data.length,
         storeProducts: storeData.total || 0,
+        storeContacts: contactsData.total || 0,
       });
     }).catch(() => {}).finally(() => setLoading(false));
   }, []);
@@ -62,6 +65,7 @@ export default function AdminDashboardPage() {
     ], link: '/admin/products/pending' },
     { title: 'Boutique Officielle', icon: FiShield, color: '#d97706', bg: 'rgba(217,119,6,0.1)', items: [
       { label: 'Produits en boutique', value: stats.storeProducts },
+      { label: 'Demandes', value: stats.storeContacts, highlight: stats.storeContacts > 0 },
     ], link: '/admin/store-products' },
     { title: 'Tickets Support', icon: FiHeadphones, color: '#f59e0b', bg: 'rgba(245,158,11,0.1)', items: [
       { label: 'Total', value: stats.tickets },
