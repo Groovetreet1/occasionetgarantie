@@ -149,6 +149,12 @@ router.get('/', authenticate, async (req, res) => {
       [rows] = [];
     }
 
+    if (rows.length === 0 && req.user.role === 'seller') {
+      const [myProds] = await pool.query('SELECT id FROM products WHERE seller_id = ?', [req.user.id]);
+      const [allReps] = await pool.query('SELECT id, user_id, product_id, vendor_id FROM reprises ORDER BY id DESC LIMIT 20');
+      console.log('DEBUG seller fetch:', { userId: req.user.id, myProductIds: myProds.map(p => p.id), totalReprises: allReps.length });
+    }
+
     if (req.query.product_id) {
       rows = rows.filter(r => r.product_id == req.query.product_id);
     }
