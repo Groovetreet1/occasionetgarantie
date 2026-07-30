@@ -416,6 +416,23 @@ router.get('/products', authenticate, adminOnly, async (req, res) => {
   }
 });
 
+router.get('/store-products', authenticate, adminOnly, async (req, res) => {
+  try {
+    const page = Math.max(1, parseInt(req.query.page) || 1);
+    const limit = Math.min(100, Math.max(1, parseInt(req.query.limit) || 50));
+    const offset = (page - 1) * limit;
+    const [countRows] = await pool.query("SELECT COUNT(*) as total FROM products WHERE product_type = 'store'");
+    const total = countRows[0].total;
+    const [rows] = await pool.query("SELECT * FROM products WHERE product_type = 'store' ORDER BY id DESC LIMIT ? OFFSET ?", [limit, offset]);
+    const [featuredCount] = await pool.query("SELECT COUNT(*) as c FROM products WHERE product_type = 'store' AND featured = 1");
+    const [inStock] = await pool.query("SELECT COUNT(*) as c FROM products WHERE product_type = 'store' AND stock > 0");
+    const [soldCount] = await pool.query("SELECT COUNT(*) as c FROM products WHERE product_type = 'store' AND status = 'vendu'");
+    res.json({ products: rows, total, page, limit, totalPages: Math.ceil(total / limit), stats: { total, featured: featuredCount[0].c, inStock: inStock[0].c, sold: soldCount[0].c } });
+  } catch (err) {
+    res.status(500).json({ message: 'Erreur serveur.' });
+  }
+});
+
 router.get('/users', authenticate, adminOnly, async (req, res) => {
   try {
     const page = Math.max(1, parseInt(req.query.page) || 1);

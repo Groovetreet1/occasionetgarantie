@@ -1,5 +1,5 @@
 import { useEffect, useState, useRef } from 'react';
-import { useNavigate, useParams, Link } from 'react-router-dom';
+import { useNavigate, useParams, useSearchParams, Link } from 'react-router-dom';
 import { FiArrowLeft, FiSave, FiUpload, FiX } from 'react-icons/fi';
 import api from '../api/axios';
 const stateOptions = [
@@ -14,6 +14,7 @@ const defaultSpecs = { Ecran: '', Processeur: '', RAM: '', Stockage: '', Batteri
 
 export default function AdminProductForm() {
   const { id } = useParams();
+  const [searchParams] = useSearchParams();
   const isEdit = !!id;
   const navigate = useNavigate();
   const [saving, setSaving] = useState(false);
@@ -24,7 +25,7 @@ export default function AdminProductForm() {
   const [form, setForm] = useState({
     name: '', slug: '', description: '', price: '', old_price: '', category_id: 1,
     brand: '', state: 'tres_bon', warranty: '12 mois', stock: 1, featured: false,
-    image: '', gallery: [], specs: { ...defaultSpecs }, ville: '', product_type: 'vendor',
+    image: '', gallery: [], specs: { ...defaultSpecs }, ville: '', product_type: searchParams.get('type') === 'store' ? 'store' : 'vendor',
   });
 
   useEffect(() => {

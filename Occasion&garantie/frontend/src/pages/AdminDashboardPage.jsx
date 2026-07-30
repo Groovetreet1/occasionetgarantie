@@ -8,7 +8,7 @@ function CardWrapper({ link, children, ...rest }) {
 }
 
 export default function AdminDashboardPage() {
-  const [stats, setStats] = useState({ credits: 0, pendingCredits: 0, premium: 0, pendingPremium: 0, products: 0, vendorProducts: 0, tickets: 0, pendingTickets: 0, repliedTickets: 0, users: 0, pendingReprises: 0, pendingProducts: 0 });
+  const [stats, setStats] = useState({ credits: 0, pendingCredits: 0, premium: 0, pendingPremium: 0, products: 0, vendorProducts: 0, tickets: 0, pendingTickets: 0, repliedTickets: 0, users: 0, pendingReprises: 0, pendingProducts: 0, storeProducts: 0 });
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
@@ -21,9 +21,11 @@ export default function AdminDashboardPage() {
       api.get('/admin/users').catch(() => ({ data: [] })),
       api.get('/reprises').catch(() => ({ data: [] })),
       api.get('/admin/products/pending').catch(() => ({ data: [] })),
-    ]).then(([credits, premium, products, tickets, users, reprises, pendingProds]) => {
+      api.get('/admin/store-products?limit=1').catch(() => ({ data: { stats: { total: 0 } } })),
+    ]).then(([credits, premium, products, tickets, users, reprises, pendingProds, store]) => {
       const ticketData = tickets.data || [];
       const repriseData = reprises.data || [];
+      const storeData = store.data?.stats || {};
       setStats({
         credits: credits.data.length,
         pendingCredits: credits.data.filter(c => c.status === 'en_attente').length,
@@ -38,6 +40,7 @@ export default function AdminDashboardPage() {
         users: users.data.length,
         pendingReprises: repriseData.filter(r => r.status === 'en_attente').length,
         pendingProducts: pendingProds.data.length,
+        storeProducts: storeData.total || 0,
       });
     }).catch(() => {}).finally(() => setLoading(false));
   }, []);
@@ -60,6 +63,9 @@ export default function AdminDashboardPage() {
     { title: 'Approbation', icon: FiShield, color: '#f59e0b', bg: 'rgba(245,158,11,0.1)', items: [
       { label: 'Produits en attente', value: stats.pendingProducts, highlight: stats.pendingProducts > 0 },
     ], link: '/admin/products/pending' },
+    { title: 'Boutique Officielle', icon: FiShield, color: '#d97706', bg: 'rgba(217,119,6,0.1)', items: [
+      { label: 'Produits en boutique', value: stats.storeProducts },
+    ], link: '/admin/store-products' },
     { title: 'Tickets Support', icon: FiHeadphones, color: '#f59e0b', bg: 'rgba(245,158,11,0.1)', items: [
       { label: 'Total', value: stats.tickets },
       { label: 'En attente', value: stats.pendingTickets, highlight: true },
@@ -137,6 +143,7 @@ export default function AdminDashboardPage() {
             <Link to="/admin/premium" className="btn btn-outline"><FiShield size={16} /> Demandes Prime</Link>
             <Link to="/admin/products" className="btn btn-outline"><FiPackage size={16} /> Tous les produits</Link>
             <Link to="/admin/products/pending" className="btn btn-outline"><FiShield size={16} /> Approuver produits</Link>
+            <Link to="/admin/store-products" className="btn btn-outline" style={{ borderColor: '#d97706', color: '#d97706' }}><FiShield size={16} /> Boutique Officielle</Link>
             <Link to="/admin/users" className="btn btn-outline"><FiUsers size={16} /> Utilisateurs</Link>
           </div>
         </div>
