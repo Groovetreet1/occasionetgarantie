@@ -113,6 +113,7 @@ export default function AdminUsers() {
         ) : users.length === 0 ? (
           <div className="empty-state"><FiUsersIcon size={48} /><p>Aucun utilisateur.</p></div>
         ) : (
+          <>
           <div style={{ overflowX: 'auto' }}>
             <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: '13px' }}>
               <thead>
@@ -241,6 +242,7 @@ export default function AdminUsers() {
                 style={{ padding: '6px 14px', borderRadius: 8, border: '1px solid var(--border)', background: 'var(--bg-card)', color: 'var(--text)', cursor: page >= totalPages ? 'not-allowed' : 'pointer', opacity: page >= totalPages ? 0.4 : 1, fontSize: 13 }}>Suivant →</button>
             </div>
           </div>
+          </>
         )}
       </div>
 
