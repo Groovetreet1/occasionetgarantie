@@ -23,6 +23,8 @@ export default function RepriseList() {
   const [photosData, setPhotosData] = useState({});
 
   const [error, setError] = useState(null);
+  const user = JSON.parse(localStorage.getItem('user') || '{}');
+  const isVendor = user.role === 'seller' || user.role === 'admin';
 
   const load = () => {
     setLoading(true);
@@ -191,8 +193,13 @@ export default function RepriseList() {
                       </div>
                     )}
 
-                    {/* Actions */}
-                    {r.status === 'en_attente' && (
+                    {r.status === 'refuse' && r.vendor_notes && (
+                      <div style={{ fontSize: 12, color: 'var(--text-secondary)', fontStyle: 'italic', padding: '4px 0' }}>
+                        Raison: {r.vendor_notes}
+                      </div>
+                    )}
+
+                    {isVendor && r.status === 'en_attente' && (
                       <div style={{ display: 'flex', gap: 8 }}>
                         <button onClick={() => update(r.id, { status: 'accepte' })}
                           disabled={actionLoading === r.id}
@@ -209,7 +216,7 @@ export default function RepriseList() {
                       </div>
                     )}
 
-                    {r.status === 'accepte' && r.phone && (
+                    {isVendor && r.status === 'accepte' && r.phone && (
                       <div style={{
                         display: 'flex', alignItems: 'center', gap: 10, padding: '10px 14px',
                         background: 'rgba(16,185,129,0.08)', borderRadius: 10,
@@ -230,13 +237,7 @@ export default function RepriseList() {
                       </div>
                     )}
 
-                    {r.status === 'refuse' && r.vendor_notes && (
-                      <div style={{ fontSize: 12, color: 'var(--text-secondary)', fontStyle: 'italic', padding: '4px 0' }}>
-                        Raison: {r.vendor_notes}
-                      </div>
-                    )}
-
-                    {(r.status === 'accepte' || r.status === 'refuse' || r.status === 'converti') && (
+                    {isVendor && (r.status === 'accepte' || r.status === 'refuse' || r.status === 'converti') && (
                       <button onClick={() => del(r.id)} disabled={actionLoading === r.id}
                         className="btn btn-primary" style={{ fontSize: 12, padding: '6px 14px', alignSelf: 'flex-start', background: '#ef4444' }}>
                         <FiTrash2 size={13} /> Supprimer
