@@ -8,21 +8,23 @@ export function AuthProvider({ children }) {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
+    let cancelled = false;
     const token = localStorage.getItem('token');
     if (token) {
       api.get('/auth/me')
-        .then((res) => setUser(res.data))
-        .catch(() => localStorage.removeItem('token'))
-        .finally(() => setLoading(false));
+        .then((res) => { if (!cancelled) setUser(res.data); })
+        .catch(() => { if (!cancelled) localStorage.removeItem('token'); })
+        .finally(() => { if (!cancelled) setLoading(false); });
     } else {
       setLoading(false);
     }
+    return () => { cancelled = true; };
   }, []);
 
   const login = async (email, password, latitude, longitude) => {
     const { data } = await api.post('/auth/login', { email, password, latitude, longitude });
     localStorage.setItem('token', data.token);
-    localStorage.setItem('user', JSON.stringify(data.user));
+    localStorage.setItem('user', JSON.stringify({ id: data.user.id, role: data.user.role, full_name: data.user.full_name, fullName: data.user.fullName }));
     setUser(data.user);
     return data;
   };
@@ -30,7 +32,7 @@ export function AuthProvider({ children }) {
   const signup = async (fullName, email, password, phone) => {
     const { data } = await api.post('/auth/signup', { fullName, email, password, phone });
     localStorage.setItem('token', data.token);
-    localStorage.setItem('user', JSON.stringify(data.user));
+    localStorage.setItem('user', JSON.stringify({ id: data.user.id, role: data.user.role, full_name: data.user.full_name, fullName: data.user.fullName }));
     setUser(data.user);
     return data;
   };
@@ -45,7 +47,7 @@ export function AuthProvider({ children }) {
     try {
       const { data } = await api.get('/auth/me');
       setUser(data);
-    } catch {}
+    } catch (err) { console.error('refreshUser failed:', err); }
   };
 
   return (

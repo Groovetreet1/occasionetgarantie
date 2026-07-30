@@ -53,7 +53,7 @@ export default function ProductDetail() {
     if (!product || !user) return;
     if (user.role === 'seller' && user.id === product.seller_id) {
       api.get(`/reprises?product_id=${product.id}`).then(res => {
-        setVendorReprises(Array.isArray(res.data) ? res.data.filter(r => r.product_id == product.id) : []);
+        setVendorReprises(Array.isArray(res.data) ? res.data.filter(r => String(r.product_id) === String(product.id)) : []);
       }).catch(() => {});
     }
   }, [product, user]);
@@ -123,7 +123,8 @@ export default function ProductDetail() {
   const waMsg = encodeURIComponent(`Bonjour ! Je suis intéresse(e) par : ${product.name} (${formatPrice(product.price)})`);
   const sellerPhone = product.seller_phone ? product.seller_phone.replace(/^0+/, '') : null;
   const waUrl = sellerPhone ? `https://wa.me/${sellerPhone}?text=${waMsg}` : null;
-  const specs = typeof product.specs === 'string' ? JSON.parse(product.specs) : (product.specs || {});
+  let specs = {};
+  try { specs = typeof product.specs === 'string' ? JSON.parse(product.specs) : (product.specs || {}); } catch (e) { specs = {}; }
 
   const allImages = [];
   if (product.image) allImages.push(product.image);

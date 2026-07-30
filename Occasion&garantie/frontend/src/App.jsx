@@ -1,9 +1,11 @@
 import { useEffect } from 'react';
-import { Routes, Route, Navigate, useLocation } from 'react-router-dom';
+import { Routes, Route, Navigate, useLocation, useNavigate } from 'react-router-dom';
+import api from './api/axios';
 import { AnimatePresence, motion } from 'framer-motion';
 import Navbar from './components/Navbar';
 import Footer from './components/Footer';
 import SupportFloat from './components/SupportFloat';
+import ErrorBoundary from './components/ErrorBoundary';
 import AdminRoute from './components/AdminRoute';
 import SellerRoute from './components/SellerRoute';
 import Home from './pages/Home';
@@ -60,12 +62,15 @@ function AnimatedPage({ children }) {
 
 export default function App() {
   const location = useLocation();
+  const navigate = useNavigate();
 
   useEffect(() => { window.scrollTo(0, 0); }, [location.pathname]);
+  useEffect(() => { api.onUnauthorized(() => navigate('/login', { replace: true })); }, [navigate]);
 
   return (
     <>
       <Navbar />
+      <ErrorBoundary>
       <AnimatePresence mode="wait">
         <Routes location={location} key={location.pathname}>
           <Route path="/" element={<AnimatedPage><Home /></AnimatedPage>} />
@@ -104,6 +109,7 @@ export default function App() {
           <Route path="*" element={<AnimatedPage><NotFound /></AnimatedPage>} />
         </Routes>
       </AnimatePresence>
+      </ErrorBoundary>
       <SupportFloat />
       <Footer />
     </>

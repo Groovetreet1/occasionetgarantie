@@ -8,6 +8,8 @@ const { destroy: cloudDestroy, USE_CLOUDINARY } = require('../services/uploader'
 
 router.post('/clean-db', authenticate, adminOnly, async (req, res) => {
   try {
+    if (req.body.confirm !== 'CLEAN_ALL_DATA')
+      return res.status(400).json({ message: 'Confirmation requise: envoyez { confirm: "CLEAN_ALL_DATA" }' });
     const tables = [
       'messages', 'conversations', 'product_images', 'order_items', 'orders',
       'premium_payments', 'commissions', 'credit_transactions', 'credit_purchases',
@@ -239,7 +241,7 @@ router.get('/users/:id/credits', authenticate, adminOnly, async (req, res) => {
     if (rows.length === 0) return res.status(404).json({ message: 'Utilisateur introuvable.' });
     res.json(rows[0]);
   } catch (err) {
-    res.status(500).json({ message: 'Erreur serveur.', error: err.message });
+    res.status(500).json({ message: 'Erreur serveur.' });
   }
 });
 
@@ -290,7 +292,7 @@ router.delete('/users/:id', authenticate, adminOnly, async (req, res) => {
     res.json({ message: `Compte de "${userRows[0].full_name}" et toutes ses donnees supprime.` });
   } catch (err) {
     console.error('Delete user error:', err.sqlMessage || err.message);
-    res.status(500).json({ message: 'Erreur serveur.', detail: err.sqlMessage || err.message });
+    res.status(500).json({ message: 'Erreur serveur.' });
   }
 });
 
@@ -478,31 +480,11 @@ router.get('/vendor-logs', authenticate, adminOnly, async (req, res) => {
     );
     res.json(rows);
   } catch (err) {
-    res.status(500).json({ message: 'Erreur serveur.', error: err.message });
+    res.status(500).json({ message: 'Erreur serveur.' });
   }
 });
 
-router.get('/test-resolve', async (req, res) => {
-  const ip = req.query.ip || req.ip;
-  const { resolveIp, fetchJson } = require('../services/tracker');
-
-  const raw = await fetchJson(`https://api.ipapi.is/?q=${ip}`);
-  const resolveResult = await resolveIp(ip, true);
-  const fallbackLat = raw?.location?.latitude ?? null;
-  const fallbackLng = raw?.location?.longitude ?? null;
-
-  res.json({
-    ip,
-    resolveResult,
-    raw: raw || null,
-    parsedLat: resolveResult.latitude,
-    parsedLng: resolveResult.longitude,
-    fallbackLat,
-    fallbackLng,
-    hasLat: 'latitude' in (resolveResult || {}),
-    hasLng: 'longitude' in (resolveResult || {}),
-  });
-});
+// Removed debug endpoint
 
 router.post('/vendor-logs/reindex', authenticate, adminOnly, async (req, res) => {
   try {
@@ -537,7 +519,7 @@ router.post('/vendor-logs/reindex', authenticate, adminOnly, async (req, res) =>
     }
     res.json({ reindexed: done, total: rows.length, vpn_users_found: vpnUsers.size });
   } catch (err) {
-    res.status(500).json({ message: 'Erreur serveur.', error: err.message });
+    res.status(500).json({ message: 'Erreur serveur.' });
   }
 });
 
@@ -552,7 +534,7 @@ router.get('/managed-vendors', authenticate, adminOnly, async (req, res) => {
     );
     res.json(rows);
   } catch (err) {
-    res.status(500).json({ message: 'Erreur serveur.', error: err.message });
+    res.status(500).json({ message: 'Erreur serveur.' });
   }
 });
 

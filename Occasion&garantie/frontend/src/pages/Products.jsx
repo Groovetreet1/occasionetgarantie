@@ -39,12 +39,12 @@ export default function Products() {
     const params = new URLSearchParams();
     if (search) params.set('search', search);
     api.get(`/products${params.toString() ? `?${params}` : ''}`)
-      .then(res => setAllProducts(res.data))
+      .then(res => setAllProducts(res.data.products || res.data))
       .catch(() => {})
       .finally(() => setLoading(false));
   }, [search]);
 
-  const filtered = allProducts.filter(p => {
+  const filtered = (Array.isArray(allProducts) ? allProducts : []).filter(p => {
     if (category !== 'Tous' && p.category_name !== category) return false;
     if (stateFilter !== 'Tous' && p.state !== stateFilter) return false;
     if (priceMin && Number(p.price) < Number(priceMin)) return false;
@@ -65,7 +65,7 @@ export default function Products() {
     if (search) params.set('search', search);
     if (userCity) params.set('user_ville', userCity);
     api.get(`/products${params.toString() ? `?${params}` : ''}`)
-      .then(res => setAllProducts(res.data))
+      .then(res => setAllProducts(res.data.products || res.data))
       .catch(() => {})
       .finally(() => setLoading(false));
   };
@@ -76,7 +76,7 @@ export default function Products() {
         <div className="container">
           <motion.div initial="hidden" animate="show" variants={fadeUp}>
             <h1>Marketplace</h1>
-            <p>{filtered.length} article{filtered.length > 1 ? 's' : ''} disponible{filtered.length > 1 ? 's' : ''}</p>
+            <p>{Array.isArray(allProducts) ? allProducts.length : 0} article{Array.isArray(allProducts) && allProducts.length > 1 ? 's' : ''} disponible{Array.isArray(allProducts) && allProducts.length > 1 ? 's' : ''}</p>
           </motion.div>
           <motion.form initial="hidden" animate="show" variants={fadeUp} onSubmit={handleSearchSubmit} className="products-page-search">
             <FiSearch size={18} />

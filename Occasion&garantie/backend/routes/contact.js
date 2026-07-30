@@ -101,9 +101,8 @@ router.post('/', async (req, res) => {
 
     res.json({ message: 'Message envoye avec succes.', ticketNumber });
   } catch (err) {
-    const detail = err.sqlMessage || err.message || 'Erreur inconnue';
-    console.error('POST /contact error:', detail);
-    res.status(500).json({ message: 'Erreur serveur.', detail });
+    console.error('POST /contact error:', err.sqlMessage || err.message);
+    res.status(500).json({ message: 'Erreur serveur.' });
   }
 });
 
@@ -148,9 +147,8 @@ router.post('/reply/:ticketNumber', authenticate, adminOnly, async (req, res) =>
 
     res.json({ message: 'Reponse envoyee avec succes.' });
   } catch (err) {
-    const detail = err.sqlMessage || err.message || 'Erreur inconnue';
-    console.error('POST /contact/reply error:', detail);
-    res.status(500).json({ message: 'Erreur serveur.', detail });
+    console.error('POST /contact/reply error:', err.sqlMessage || err.message);
+    res.status(500).json({ message: 'Erreur serveur.' });
   }
 });
 

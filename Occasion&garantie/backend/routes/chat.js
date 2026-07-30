@@ -56,9 +56,12 @@ router.post('/conversations', authenticate, async (req, res) => {
         const [adminRows] = await pool.query('SELECT email FROM users WHERE id = ?', [sellerRows[0].admin_managed_id]);
         if (adminRows.length > 0) {
           const buyer = req.user;
+          const sellerLabel = String(conv.product_name || '#' + sellerId).replace(/[<>]/g, '');
+          const buyerName = String(buyer.fullName || buyer.full_name || 'Inconnu').replace(/[<>]/g, '');
+          const buyerEmail = String(buyer.email || '').replace(/[<>]/g, '');
           const msg = "Nouveau message recu sur un compte vendeur gere.<br><br>" +
-            "<strong>Vendeur :</strong> " + (conv.product_name || '#' + sellerId) + "<br>" +
-            "<strong>Client :</strong> " + (buyer.fullName || buyer.full_name || 'Inconnu') + " (" + (buyer.email || '') + ")<br>" +
+            "<strong>Vendeur :</strong> " + sellerLabel + "<br>" +
+            "<strong>Client :</strong> " + buyerName + " (" + buyerEmail + ")<br>" +
             "<strong>Message :</strong> (aucun message pour l'instant, conversation ouverte)<br><br>" +
             "Connectez-vous au compte vendeur pour repondre.";
           await emails.send({
@@ -182,16 +185,19 @@ router.post('/conversations/:id/messages', authenticate, async (req, res) => {
       if (userRows.length > 0 && userRows[0].admin_managed_id) {
         const [adminRows] = await pool.query('SELECT email FROM users WHERE id = ?', [userRows[0].admin_managed_id]);
         if (adminRows.length > 0) {
-          const sellerName = userRows[0].store_name || userRows[0].full_name || 'Vendeur #' + recipientId;
+          const sellerName = (userRows[0].store_name || userRows[0].full_name || 'Vendeur #' + recipientId).replace(/[<>]/g, '');
+          const safeEmail = String(userRows[0].email || '').replace(/[<>]/g, '');
+          const safeProduct = String(conv.product_name || 'N/A').replace(/[<>]/g, '');
+          const safeText = String(text.trim().substring(0, 200)).replace(/[<>]/g, '');
           await emails.send({
             to: adminRows[0].email,
             subject: 'Nouveau message pour ' + sellerName,
             html: '<div style="font-family:sans-serif;max-width:560px;margin:0 auto;padding:20px">' +
               '<h2 style="color:#3b82f6;">Nouveau message recu</h2>' +
               '<div style="background:#f8fafc;padding:16px;border-radius:8px;margin:12px 0">' +
-              '<p><strong>Vendeur :</strong> ' + sellerName + ' (' + userRows[0].email + ')</p>' +
-              '<p><strong>Produit :</strong> ' + (conv.product_name || 'N/A') + '</p>' +
-              '<p><strong>Message :</strong><br><em>' + text.trim().substring(0, 200) + '</em></p>' +
+              '<p><strong>Vendeur :</strong> ' + sellerName + ' (' + safeEmail + ')</p>' +
+              '<p><strong>Produit :</strong> ' + safeProduct + '</p>' +
+              '<p><strong>Message :</strong><br><em>' + safeText + '</em></p>' +
               '</div>' +
               '<p><a href="https://www.occasionetgarantie.store/messenger/' + conv.id + '" style="display:inline-block;background:#3b82f6;color:#fff;padding:10px 20px;border-radius:8px;text-decoration:none">Voir la conversation</a></p>' +
               '<p style="font-size:12px;color:#888;margin-top:16px">Connectez-vous au compte vendeur pour repondre.</p>' +

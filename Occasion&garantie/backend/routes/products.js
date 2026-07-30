@@ -26,7 +26,26 @@ async function validateCategory(categoryId) {
 // Public: list products (only disponible)
 router.get('/', async (req, res) => {
   try {
-    const { category, search, min, max, state, sort, seller, ville, user_ville } = req.query;
+    const { category, search, min, max, state, sort, seller, ville, user_ville, page, limit } = req.query;
+    const pageNum = Math.max(1, parseInt(page) || 1);
+    const limitNum = Math.min(100, Math.max(1, parseInt(limit) || 20));
+    const offset = (pageNum - 1) * limitNum;
+
+    let where = ' WHERE p.active = TRUE AND p.status = \'disponible\' AND p.approved = TRUE AND u.id IS NOT NULL';
+    const params = [];
+
+    if (category) { where += ' AND LOWER(c.name) = ?'; params.push(category.toLowerCase()); }
+    if (search) { where += ' AND (p.name LIKE ? OR p.description LIKE ?)'; params.push(`%${search}%`, `%${search}%`); }
+    if (min) { where += ' AND p.price >= ?'; params.push(min); }
+    if (max) { where += ' AND p.price <= ?'; params.push(max); }
+    if (state) { where += ' AND p.state = ?'; params.push(state); }
+    if (seller) { where += ' AND p.seller_id = ?'; params.push(seller); }
+    if (ville) { where += ' AND p.ville = ?'; params.push(ville); }
+
+    const countSql = `SELECT COUNT(*) as total FROM products p LEFT JOIN categories c ON p.category_id = c.id LEFT JOIN users u ON p.seller_id = u.id${where}`;
+    const [countRows] = await pool.query(countSql, params);
+    const total = countRows[0].total;
+
     let sql = `
       SELECT p.*, c.name as category_name,
              u.store_name as seller_name, u.store_logo as seller_logo, u.avatar as seller_avatar, u.premium as seller_premium,
@@ -35,18 +54,8 @@ router.get('/', async (req, res) => {
       FROM products p
       LEFT JOIN categories c ON p.category_id = c.id
       LEFT JOIN users u ON p.seller_id = u.id
-      WHERE p.active = TRUE AND p.status = 'disponible' AND p.approved = TRUE AND u.id IS NOT NULL
     `;
-    const params = [];
-
-    if (category) { sql += ' AND LOWER(c.name) = ?'; params.push(category.toLowerCase()); }
-    if (search) { sql += ' AND (p.name LIKE ? OR p.description LIKE ?)'; params.push(`%${search}%`, `%${search}%`); }
-    if (min) { sql += ' AND p.price >= ?'; params.push(min); }
-    if (max) { sql += ' AND p.price <= ?'; params.push(max); }
-    if (state) { sql += ' AND p.state = ?'; params.push(state); }
-    if (seller) { sql += ' AND p.seller_id = ?'; params.push(seller); }
-    if (ville) { sql += ' AND p.ville = ?'; params.push(ville); }
-
+    sql += where;
     sql += ' ORDER BY (u.premium = TRUE AND (u.premium_expires_at IS NULL OR u.premium_expires_at > NOW())) DESC';
     if (user_ville) {
       sql += ', CASE WHEN p.ville = ? THEN 0 ELSE 1 END';
@@ -55,16 +64,19 @@ router.get('/', async (req, res) => {
     if (sort === 'price_asc') sql += ', p.price ASC';
     else if (sort === 'price_desc') sql += ', p.price DESC';
     else if (sort === 'newest') sql += ', p.created_at DESC';
-    else sql += ', RAND()';
+    else sql += ', p.created_at DESC';
+
+    sql += ' LIMIT ? OFFSET ?';
+    params.push(limitNum, offset);
 
     try {
       const [rows] = await pool.query(sql, params);
-      return res.json(rows);
+      return res.json({ products: rows, total, page: pageNum, limit: limitNum, totalPages: Math.ceil(total / limitNum) });
     } catch (e) {
       throw e;
     }
   } catch (err) {
-    res.status(500).json({ message: 'Erreur serveur.', error: err.message });
+    res.status(500).json({ message: 'Erreur serveur.' });
   }
 });
 
@@ -76,7 +88,7 @@ router.get('/featured', async (req, res) => {
        LEFT JOIN categories c ON p.category_id = c.id
        LEFT JOIN users u ON p.seller_id = u.id
        WHERE p.featured = TRUE AND p.active = TRUE AND p.status = 'disponible' AND p.approved = TRUE AND u.id IS NOT NULL
-       ORDER BY (u.premium = TRUE AND (u.premium_expires_at IS NULL OR u.premium_expires_at > NOW())) DESC, RAND() LIMIT 8`;
+       ORDER BY (u.premium = TRUE AND (u.premium_expires_at IS NULL OR u.premium_expires_at > NOW())) DESC, p.created_at DESC LIMIT 8`;
     try {
       const [rows] = await pool.query(sql);
       return res.json(rows);
@@ -119,7 +131,7 @@ router.get('/:slug', async (req, res) => {
       const [rows] = await pool.query(sql, [req.params.slug]);
       if (rows.length === 0) return res.status(404).json({ message: 'Produit introuvable.' });
       const product = rows[0];
-      if (!product.seller_phone) product.seller_phone = '212669017295';
+      if (!product.seller_phone) product.seller_phone = '';
       return res.json(product);
     } catch (e) {
       throw e;
@@ -184,7 +196,7 @@ router.post('/', authenticate, async (req, res) => {
     }
     res.status(201).json({ id: result.insertId, message: 'Produit ajouté.' });
   } catch (err) {
-    res.status(500).json({ message: 'Erreur serveur.', error: err.message });
+    res.status(500).json({ message: 'Erreur serveur.' });
   }
 });
 
@@ -207,7 +219,7 @@ router.put('/:id', authenticate, async (req, res) => {
     );
     res.json({ message: 'Produit mis à jour.' });
   } catch (err) {
-    res.status(500).json({ message: 'Erreur serveur.', error: err.message });
+    res.status(500).json({ message: 'Erreur serveur.' });
   }
 });
 
@@ -251,7 +263,7 @@ router.patch('/:id/status', authenticate, async (req, res) => {
 
     res.json({ message: 'Statut mis à jour.', status });
   } catch (err) {
-    res.status(500).json({ message: 'Erreur serveur.', error: err.message });
+    res.status(500).json({ message: 'Erreur serveur.' });
   }
 });
 
@@ -279,7 +291,7 @@ router.delete('/:id', authenticate, async (req, res) => {
     await pool.query('DELETE FROM products WHERE id = ?', [req.params.id]);
     res.json({ message: 'Produit supprimé.' });
   } catch (err) {
-    res.status(500).json({ message: 'Erreur serveur.', error: err.message });
+    res.status(500).json({ message: 'Erreur serveur.' });
   }
 });
 

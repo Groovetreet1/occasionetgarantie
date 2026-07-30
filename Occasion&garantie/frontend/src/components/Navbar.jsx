@@ -223,7 +223,7 @@ export default function Navbar() {
             {user ? (
               <div className="navbar-dropdown" ref={dropdownRef}>
                 <button className="navbar-user" onClick={() => setDropdownOpen((o) => !o)}>
-                  {user.avatar ? <img src={user.avatar.startsWith('http') ? user.avatar : `${API_BASE}/uploads/avatars/${user.avatar}`} alt="" className="navbar-user-avatar" /> : <FiUser size={16} />} <span>{user.fullName || user.full_name}</span> <FiChevronDown size={14} />
+                  {user.avatar ? <img src={typeof user.avatar === 'string' && user.avatar.startsWith('http') ? user.avatar : `${API_BASE}/uploads/avatars/${user.avatar}`} alt="" className="navbar-user-avatar" /> : <FiUser size={16} />} <span>{user.fullName || user.full_name}</span> <FiChevronDown size={14} />
                 </button>
                 <AnimatePresence>
                   {dropdownOpen && (

@@ -42,7 +42,8 @@ export default function Home() {
 
   useEffect(() => {
     api.get('/products?sort=newest').then(res => {
-      setProducts(res.data.slice(0, 20));
+      const items = res.data.products || res.data;
+      setProducts(items.slice(0, 20));
     }).catch(() => {}).finally(() => setLoading(false));
   }, []);
 

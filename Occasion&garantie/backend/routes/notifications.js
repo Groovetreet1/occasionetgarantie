@@ -25,7 +25,7 @@ router.get('/', authenticate, async (req, res) => {
     );
     res.json(rows);
   } catch (err) {
-    res.status(500).json({ message: 'Erreur serveur.', error: err.message });
+    res.status(500).json({ message: 'Erreur serveur.' });
   }
 });
 

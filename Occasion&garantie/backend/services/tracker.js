@@ -107,19 +107,27 @@ async function resolveIp(ip, force) {
   return def;
 }
 
+async function ensureTables() {
+  try { await pool.query('ALTER TABLE vendor_activity_log ADD COLUMN details TEXT DEFAULT NULL'); } catch (e) { if (e.errno !== 1060 && e.code !== 'ER_DUP_FIELDNAME') {} }
+  try { await pool.query('ALTER TABLE vendor_activity_log ADD COLUMN product_id INT DEFAULT NULL'); } catch (e) { if (e.errno !== 1060 && e.code !== 'ER_DUP_FIELDNAME') {} }
+  try { await pool.query('ALTER TABLE vendor_activity_log ADD COLUMN city VARCHAR(100) DEFAULT NULL'); } catch (e) { if (e.errno !== 1060 && e.code !== 'ER_DUP_FIELDNAME') {} }
+  try { await pool.query('ALTER TABLE vendor_activity_log ADD COLUMN region VARCHAR(100) DEFAULT NULL'); } catch (e) { if (e.errno !== 1060 && e.code !== 'ER_DUP_FIELDNAME') {} }
+  try { await pool.query('ALTER TABLE vendor_activity_log ADD COLUMN country VARCHAR(100) DEFAULT NULL'); } catch (e) { if (e.errno !== 1060 && e.code !== 'ER_DUP_FIELDNAME') {} }
+  try { await pool.query('ALTER TABLE vendor_activity_log ADD COLUMN is_vpn TINYINT(1) DEFAULT 0'); } catch (e) { if (e.errno !== 1060 && e.code !== 'ER_DUP_FIELDNAME') {} }
+  try { await pool.query('ALTER TABLE vendor_activity_log ADD COLUMN vpn_warned_at DATETIME DEFAULT NULL'); } catch (e) { if (e.errno !== 1060 && e.code !== 'ER_DUP_FIELDNAME') {} }
+  try { await pool.query("ALTER TABLE vendor_activity_log ADD COLUMN is_datacenter TINYINT(1) DEFAULT 0"); } catch (e) { if (e.errno !== 1060 && e.code !== 'ER_DUP_FIELDNAME') {} }
+  try { await pool.query("ALTER TABLE vendor_activity_log ADD COLUMN latitude DECIMAL(10,7) DEFAULT NULL"); } catch (e) { if (e.errno !== 1060 && e.code !== 'ER_DUP_FIELDNAME') {} }
+  try { await pool.query("ALTER TABLE vendor_activity_log ADD COLUMN longitude DECIMAL(10,7) DEFAULT NULL"); } catch (e) { if (e.errno !== 1060 && e.code !== 'ER_DUP_FIELDNAME') {} }
+  try { await pool.query("ALTER TABLE users ADD COLUMN has_vpn_history TINYINT(1) DEFAULT 0"); } catch (e) { if (e.errno !== 1060 && e.code !== 'ER_DUP_FIELDNAME') {} }
+  try { await pool.query('ALTER TABLE users ADD COLUMN suspended TINYINT(1) DEFAULT 0'); } catch (e) { if (e.errno !== 1060 && e.code !== 'ER_DUP_FIELDNAME') {} }
+  try { await pool.query("ALTER TABLE users ADD COLUMN suspension_reason VARCHAR(255) DEFAULT NULL"); } catch (e) { if (e.errno !== 1060 && e.code !== 'ER_DUP_FIELDNAME') {} }
+  try { await pool.query('ALTER TABLE users ADD COLUMN vpn_warned_at DATETIME DEFAULT NULL'); } catch (e) { if (e.errno !== 1060 && e.code !== 'ER_DUP_FIELDNAME') {} }
+  try { await pool.query("ALTER TABLE users ADD COLUMN vpn_strike_count INT DEFAULT 0"); } catch (e) { if (e.errno !== 1060 && e.code !== 'ER_DUP_FIELDNAME') {} }
+  try { await pool.query("ALTER TABLE users ADD COLUMN vpn_strike_date DATE DEFAULT NULL"); } catch (e) { if (e.errno !== 1060 && e.code !== 'ER_DUP_FIELDNAME') {} }
+}
+
 async function logVendorAction({ userId, action, ip, userAgent, productId, details, latitude, longitude }) {
   try {
-    try { await pool.query('ALTER TABLE vendor_activity_log ADD COLUMN details TEXT DEFAULT NULL'); } catch (e) { if (e.errno !== 1060 && e.code !== 'ER_DUP_FIELDNAME') {} }
-    try { await pool.query('ALTER TABLE vendor_activity_log ADD COLUMN product_id INT DEFAULT NULL'); } catch (e) { if (e.errno !== 1060 && e.code !== 'ER_DUP_FIELDNAME') {} }
-    try { await pool.query('ALTER TABLE vendor_activity_log ADD COLUMN city VARCHAR(100) DEFAULT NULL'); } catch (e) { if (e.errno !== 1060 && e.code !== 'ER_DUP_FIELDNAME') {} }
-    try { await pool.query('ALTER TABLE vendor_activity_log ADD COLUMN region VARCHAR(100) DEFAULT NULL'); } catch (e) { if (e.errno !== 1060 && e.code !== 'ER_DUP_FIELDNAME') {} }
-    try { await pool.query('ALTER TABLE vendor_activity_log ADD COLUMN country VARCHAR(100) DEFAULT NULL'); } catch (e) { if (e.errno !== 1060 && e.code !== 'ER_DUP_FIELDNAME') {} }
-    try { await pool.query('ALTER TABLE vendor_activity_log ADD COLUMN is_vpn TINYINT(1) DEFAULT 0'); } catch (e) { if (e.errno !== 1060 && e.code !== 'ER_DUP_FIELDNAME') {} }
-    try { await pool.query('ALTER TABLE vendor_activity_log ADD COLUMN vpn_warned_at DATETIME DEFAULT NULL'); } catch (e) { if (e.errno !== 1060 && e.code !== 'ER_DUP_FIELDNAME') {} }
-    try { await pool.query("ALTER TABLE vendor_activity_log ADD COLUMN is_datacenter TINYINT(1) DEFAULT 0"); } catch (e) { if (e.errno !== 1060 && e.code !== 'ER_DUP_FIELDNAME') {} }
-    try { await pool.query("ALTER TABLE vendor_activity_log ADD COLUMN latitude DECIMAL(10,7) DEFAULT NULL"); } catch (e) { if (e.errno !== 1060 && e.code !== 'ER_DUP_FIELDNAME') {} }
-    try { await pool.query("ALTER TABLE vendor_activity_log ADD COLUMN longitude DECIMAL(10,7) DEFAULT NULL"); } catch (e) { if (e.errno !== 1060 && e.code !== 'ER_DUP_FIELDNAME') {} }
-
     const [result] = await pool.query(
       `INSERT INTO vendor_activity_log (user_id, action, ip_address, user_agent, product_id, details, latitude, longitude) VALUES (?, ?, ?, ?, ?, ?, ?, ?)`,
       [userId, action, ip, userAgent || null, productId || null, details || null, latitude || null, longitude || null]
@@ -136,17 +144,10 @@ async function logVendorAction({ userId, action, ip, userAgent, productId, detai
         const isSuspicious = info.isVpn || info.isDatacenter;
 
         if (info.isVpn) {
-          try { await pool.query("ALTER TABLE users ADD COLUMN has_vpn_history TINYINT(1) DEFAULT 0"); } catch (e) { if (e.errno !== 1060 && e.code !== 'ER_DUP_FIELDNAME') {} }
           await pool.query('UPDATE users SET has_vpn_history = 1 WHERE id = ? AND (has_vpn_history IS NULL OR has_vpn_history = 0)', [userId]);
         }
 
         if (isSuspicious) {
-          try { await pool.query('ALTER TABLE users ADD COLUMN suspended TINYINT(1) DEFAULT 0'); } catch (e) { if (e.errno !== 1060 && e.code !== 'ER_DUP_FIELDNAME') {} }
-          try { await pool.query("ALTER TABLE users ADD COLUMN suspension_reason VARCHAR(255) DEFAULT NULL"); } catch (e) { if (e.errno !== 1060 && e.code !== 'ER_DUP_FIELDNAME') {} }
-          try { await pool.query('ALTER TABLE users ADD COLUMN vpn_warned_at DATETIME DEFAULT NULL'); } catch (e) { if (e.errno !== 1060 && e.code !== 'ER_DUP_FIELDNAME') {} }
-          try { await pool.query("ALTER TABLE users ADD COLUMN vpn_strike_count INT DEFAULT 0"); } catch (e) { if (e.errno !== 1060 && e.code !== 'ER_DUP_FIELDNAME') {} }
-          try { await pool.query("ALTER TABLE users ADD COLUMN vpn_strike_date DATE DEFAULT NULL"); } catch (e) { if (e.errno !== 1060 && e.code !== 'ER_DUP_FIELDNAME') {} }
-
           const [rows] = await pool.query('SELECT email, store_name, full_name, vpn_warned_at, suspended, vpn_strike_count, vpn_strike_date FROM users WHERE id = ?', [userId]);
           if (rows.length > 0) {
             const u = rows[0];
@@ -211,4 +212,4 @@ async function logVendorAction({ userId, action, ip, userAgent, productId, detai
   }
 }
 
-module.exports = { logVendorAction, resolveIp, fetchJson };
+module.exports = { ensureTables, logVendorAction, resolveIp, fetchJson };

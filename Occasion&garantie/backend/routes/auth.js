@@ -531,9 +531,9 @@ router.post('/verify-upgrade', authenticate, [
 });
 
 const CREDIT_BANK_INFO = {
-  bank: 'CIH Bank',
-  holder: 'OCCASION ET GARANTIE BOUTIQUE',
-  rib: '230780409210621100460062',
+  bank: process.env.BANK_NAME || 'CIH Bank',
+  holder: process.env.BANK_HOLDER || 'OCCASION ET GARANTIE BOUTIQUE',
+  rib: process.env.BANK_RIB || '230780409210621100460062',
 };
 
 router.post('/buy-credits', authenticate, async (req, res) => {
@@ -638,7 +638,7 @@ router.get('/my-credits', authenticate, async (req, res) => {
       if (e.errno === 1146 || e.code === 'ER_NO_SUCH_TABLE') txns = [];
       else throw e;
     }
-    res.json({ credit_balance: balance, transactions: txns, debug_user_id: req.user.id, debug_email: req.user.email });
+    res.json({ credit_balance: balance, transactions: txns });
   } catch (err) {
     console.error('/my-credits error:', err.sqlMessage || err.message);
     res.status(500).json({ message: 'Erreur serveur.' });

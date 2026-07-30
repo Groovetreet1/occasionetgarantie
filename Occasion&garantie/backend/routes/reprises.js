@@ -166,7 +166,7 @@ router.get('/', authenticate, async (req, res) => {
 
     res.json(rows);
   } catch (err) {
-    res.status(500).json({ message: 'Erreur serveur.', error: err.message });
+    res.status(500).json({ message: 'Erreur serveur.' });
   }
 });
 
@@ -182,7 +182,7 @@ router.get('/check/:productId', authenticate, async (req, res) => {
     );
     res.json({ exists: rows.length > 0, reprise: rows[0] || null });
   } catch (err) {
-    res.status(500).json({ message: 'Erreur serveur.', error: err.message });
+    res.status(500).json({ message: 'Erreur serveur.' });
   }
 });
 
@@ -218,7 +218,7 @@ router.get('/photos/batch', authenticate, async (req, res) => {
     }
     res.json(result);
   } catch (err) {
-    res.status(500).json({ message: 'Erreur serveur.', error: err.message });
+    res.status(500).json({ message: 'Erreur serveur.' });
   }
 });
 
@@ -235,7 +235,7 @@ router.get('/:id', authenticate, async (req, res) => {
       return res.status(403).json({ message: 'Acces refuse.' });
     res.json(rows[0]);
   } catch (err) {
-    res.status(500).json({ message: 'Erreur serveur.', error: err.message });
+    res.status(500).json({ message: 'Erreur serveur.' });
   }
 });
 
@@ -248,11 +248,23 @@ router.put('/:id', authenticate, async (req, res) => {
     if (req.user.role !== 'admin' && req.user.role !== 'seller')
       return res.status(403).json({ message: 'Acces refuse.' });
 
+    // Verify ownership for non-admin sellers
+    if (req.user.role === 'seller') {
+      if (rows[0].vendor_id && rows[0].vendor_id !== req.user.id) {
+        const [prod] = await pool.query('SELECT seller_id FROM products WHERE id = ?', [rows[0].product_id]);
+        if (!prod.length || prod[0].seller_id !== req.user.id)
+          return res.status(403).json({ message: 'Cette reprise ne vous appartient pas.' });
+      }
+    }
+
     const { estimated_price, status, vendor_notes } = req.body;
+
+    const priceVal = estimated_price !== undefined && estimated_price !== null && estimated_price !== '' ? Number(estimated_price) : null;
+    const notesVal = vendor_notes !== undefined ? vendor_notes : null;
 
     await pool.query(
       'UPDATE reprises SET estimated_price = ?, status = ?, vendor_notes = ?, vendor_id = COALESCE(vendor_id, ?) WHERE id = ?',
-      [estimated_price || null, status || rows[0].status, vendor_notes || null, req.user.id, req.params.id]
+      [priceVal, status || rows[0].status, notesVal, req.user.id, req.params.id]
     );
 
     // Create notification for client
@@ -261,10 +273,11 @@ router.put('/:id', authenticate, async (req, res) => {
         const [vendorRow] = await pool.query('SELECT store_name FROM users WHERE id = ?', [req.user.id]);
         const vName = vendorRow[0]?.store_name || 'Le vendeur';
         const notifTitle = status === 'accepte' ? 'Reprise acceptee' : status === 'refuse' ? 'Reprise refuse' : 'Reprise mise a jour';
+        const reason = notesVal || rows[0].vendor_notes || '';
         const notifMsg = status === 'accepte'
           ? `${vName} a accepte votre demande de reprise pour ${rows[0].brand} ${rows[0].model}. Il vous contactera bientot.`
           : status === 'refuse'
-            ? `${vName} a refuse votre demande de reprise pour ${rows[0].brand} ${rows[0].model}.${rows[0].vendor_notes ? ' Raison: ' + rows[0].vendor_notes : ''}`
+            ? `${vName} a refuse votre demande de reprise pour ${rows[0].brand} ${rows[0].model}.${reason ? ' Raison: ' + reason : ''}`
             : `Votre reprise ${rows[0].brand} ${rows[0].model} a ete mise a jour.`;
         await pool.query(
           'INSERT INTO notifications (user_id, type, title, message, link) VALUES (?, ?, ?, ?, ?)',
@@ -277,7 +290,7 @@ router.put('/:id', authenticate, async (req, res) => {
 
     res.json({ message: 'Reprise mise a jour.' });
   } catch (err) {
-    res.status(500).json({ message: 'Erreur serveur.', error: err.message });
+    res.status(500).json({ message: 'Erreur serveur.' });
   }
 });
 
@@ -306,7 +319,7 @@ router.post('/:id/convert', authenticate, async (req, res) => {
 
     res.json({ id: prod.insertId, message: 'Telephone converti en produit.' });
   } catch (err) {
-    res.status(500).json({ message: 'Erreur serveur.', error: err.message });
+    res.status(500).json({ message: 'Erreur serveur.' });
   }
 });
 
@@ -317,10 +330,17 @@ router.delete('/:id', authenticate, async (req, res) => {
     if (rows.length === 0) return res.status(404).json({ message: 'Reprise introuvable.' });
     if (req.user.role !== 'admin' && req.user.role !== 'seller')
       return res.status(403).json({ message: 'Acces refuse.' });
+    if (req.user.role === 'seller') {
+      if (rows[0].vendor_id && rows[0].vendor_id !== req.user.id) {
+        const [prod] = await pool.query('SELECT seller_id FROM products WHERE id = ?', [rows[0].product_id]);
+        if (!prod.length || prod[0].seller_id !== req.user.id)
+          return res.status(403).json({ message: 'Cette reprise ne vous appartient pas.' });
+      }
+    }
     await pool.query('DELETE FROM reprises WHERE id = ?', [req.params.id]);
     res.json({ message: 'Reprise supprimee.' });
   } catch (err) {
-    res.status(500).json({ message: 'Erreur serveur.', error: err.message });
+    res.status(500).json({ message: 'Erreur serveur.' });
   }
 });
 

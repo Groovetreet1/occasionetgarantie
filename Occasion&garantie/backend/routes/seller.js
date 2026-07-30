@@ -25,7 +25,7 @@ router.get('/me', authenticate, async (req, res) => {
     );
     res.json({ ...users[0], stats: products[0], recentProducts: recent });
   } catch (err) {
-    res.status(500).json({ message: 'Erreur serveur.', error: err.message });
+    res.status(500).json({ message: 'Erreur serveur.' });
   }
 });
 
@@ -39,7 +39,7 @@ router.put('/me', authenticate, async (req, res) => {
     await pool.query('UPDATE users SET store_name = ?, store_logo = ? WHERE id = ?', [store_name || null, store_logo || null, req.user.id]);
     res.json({ message: 'Profil vendeur mis à jour.' });
   } catch (err) {
-    res.status(500).json({ message: 'Erreur serveur.', error: err.message });
+    res.status(500).json({ message: 'Erreur serveur.' });
   }
 });
 
@@ -57,7 +57,7 @@ router.get('/me/products', authenticate, async (req, res) => {
     );
     res.json(rows);
   } catch (err) {
-    res.status(500).json({ message: 'Erreur serveur.', error: err.message });
+    res.status(500).json({ message: 'Erreur serveur.' });
   }
 });
 
@@ -79,7 +79,7 @@ router.get('/:id', async (req, res) => {
     );
     res.json({ ...users[0], productCount: count[0].total, ...rating[0] });
   } catch (err) {
-    res.status(500).json({ message: 'Erreur serveur.', error: err.message });
+    res.status(500).json({ message: 'Erreur serveur.' });
   }
 });
 
@@ -95,7 +95,7 @@ router.get('/:id/products', async (req, res) => {
     );
     res.json(rows);
   } catch (err) {
-    res.status(500).json({ message: 'Erreur serveur.', error: err.message });
+    res.status(500).json({ message: 'Erreur serveur.' });
   }
 });
 
@@ -120,7 +120,7 @@ router.get('/me/commissions', authenticate, async (req, res) => {
     if (err.errno === 1146 || err.code === 'ER_NO_SUCH_TABLE') {
       return res.json({ commissions: [], summary: { total_commission: 0, count: 0 } });
     }
-    res.status(500).json({ message: 'Erreur serveur.', error: err.message });
+    res.status(500).json({ message: 'Erreur serveur.' });
   }
 });
 

@@ -13,9 +13,9 @@ const RESERVATION_AMOUNT = 200;
 const ADMIN_PHONE = process.env.ADMIN_PHONE;
 
 const BANK_INFO = {
-  bank: 'CIH Bank',
-  holder: 'OCCASION ET GARANTIE BOUTIQUE',
-  rib: '230780409210621100460062',
+  bank: process.env.BANK_NAME || 'CIH Bank',
+  holder: process.env.BANK_HOLDER || 'OCCASION ET GARANTIE BOUTIQUE',
+  rib: process.env.BANK_RIB || '230780409210621100460062',
   amount: RESERVATION_AMOUNT,
 };
 

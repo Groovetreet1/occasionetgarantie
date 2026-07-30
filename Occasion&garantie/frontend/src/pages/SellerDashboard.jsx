@@ -43,12 +43,13 @@ export default function SellerDashboard() {
   const [deleteTarget, setDeleteTarget] = useState(null);
   const [deleteRejectedTarget, setDeleteRejectedTarget] = useState(null);
   useEffect(() => {
+    if (!user?.id) return;
     Promise.allSettled([
       api.get('/seller/me'),
       api.get('/seller/me/products'),
       api.get('/seller/me/commissions'),
       api.get('/auth/my-credits'),
-      user?.id ? api.get('/ratings/my') : Promise.resolve(),
+      api.get('/ratings/my'),
       api.get('/reprises'),
     ]).then((results) => {
       const [p, pr, c, cr, r, reps] = results;
@@ -59,7 +60,7 @@ export default function SellerDashboard() {
       if (cr.status === 'fulfilled') setCreditBalance(cr.value.data.credit_balance);
       if (r.status === 'fulfilled' && r.value?.data) setSellerRatings(r.value.data);
     }).finally(() => setLoading(false));
-  }, []);
+  }, [user?.id]);
 
   const handleBuyCredits = async () => {
     setBuyLoading(true);
@@ -115,7 +116,7 @@ export default function SellerDashboard() {
     const nextStatus = order[(currentIdx + 1) % order.length];
     try {
       await api.patch(`/products/${product.id}/status`, { status: nextStatus });
-      setProducts(products.map(p => p.id === product.id ? { ...p, status: nextStatus } : p));
+      setProducts(prev => prev.map(p => p.id === product.id ? { ...p, status: nextStatus } : p));
     } catch (err) {
       alert(err.response?.data?.message || 'Erreur');
     }

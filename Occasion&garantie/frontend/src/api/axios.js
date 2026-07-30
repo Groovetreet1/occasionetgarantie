@@ -12,13 +12,16 @@ api.interceptors.request.use((config) => {
   return config;
 });
 
+let onUnauthorized = null;
+api.onUnauthorized = (fn) => { onUnauthorized = fn; };
+
 api.interceptors.response.use(
   (res) => res,
   (err) => {
     if (err.response?.status === 401) {
       localStorage.removeItem('token');
       localStorage.removeItem('user');
-      window.location.href = '/login';
+      if (onUnauthorized) onUnauthorized();
     }
     return Promise.reject(err);
   }

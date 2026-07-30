@@ -90,8 +90,8 @@ export default function AdminVendorLogs() {
               <div style="color:#666">${l.email}${l.phone ? ' | ' + l.phone : ''}</div>
               <div style="margin:6px 0">
                 <span style="background:#3b82f6;color:#fff;padding:2px 8px;border-radius:4px;font-size:11px">${actionLabels[l.action] || l.action}</span>
-                ${l.is_vpn == 1 ? '<span style="background:#ef4444;color:#fff;padding:2px 8px;border-radius:4px;font-size:11px;margin-left:4px">VPN</span>' : ''}
-                ${l.is_vpn != 1 && l.is_datacenter == 1 ? '<span style="background:#f59e0b;color:#fff;padding:2px 8px;border-radius:4px;font-size:11px;margin-left:4px">Hebergement</span>' : ''}
+                ${l.is_vpn === 1 ? '<span style="background:#ef4444;color:#fff;padding:2px 8px;border-radius:4px;font-size:11px;margin-left:4px">VPN</span>' : ''}
+                ${l.is_vpn !== 1 && l.is_datacenter === 1 ? '<span style="background:#f59e0b;color:#fff;padding:2px 8px;border-radius:4px;font-size:11px;margin-left:4px">Hebergement</span>' : ''}
               </div>
               <div style="margin:4px 0"><strong style="font-size:13px">${lat.toFixed(5)}, ${lng.toFixed(5)}</strong></div>
               <div style="margin:4px 0">${l.city ? l.city + ', ' : ''}${l.country || ''}</div>
@@ -221,13 +221,13 @@ export default function AdminVendorLogs() {
                     }}>
                       {actionLabels[log.action] || log.action}
                     </span>
-                    {log.is_vpn == 1 && (
+                    {log.is_vpn === 1 && (
                       <span style={{
                         padding: '3px 8px', borderRadius: '12px', fontSize: '10px', fontWeight: 700,
                         background: 'rgba(239,68,68,0.15)', color: '#ef4444',
                       }}>VPN</span>
                     )}
-                    {log.is_vpn != 1 && log.is_datacenter == 1 && (
+                    {log.is_vpn !== 1 && log.is_datacenter === 1 && (
                       <span style={{
                         padding: '3px 8px', borderRadius: '12px', fontSize: '10px', fontWeight: 700,
                         background: 'rgba(245,158,11,0.12)', color: '#f59e0b',
@@ -248,8 +248,8 @@ export default function AdminVendorLogs() {
                 {expanded === log.id && (
                   <div style={{ marginTop: '10px', padding: '12px', background: 'var(--bg-secondary)', borderRadius: '8px', fontSize: '13px', color: 'var(--text-secondary)', lineHeight: '1.8' }}>
                     <div><strong>IP :</strong> {log.ip_address}
-                      {log.is_vpn == 1 && <span style={{ marginLeft: '8px', color: '#ef4444' }}>⚠ VPN</span>}
-                      {log.is_vpn != 1 && log.is_datacenter == 1 && <span style={{ marginLeft: '8px', color: '#f59e0b' }}>Hebergement</span>}
+                      {log.is_vpn === 1 && <span style={{ marginLeft: '8px', color: '#ef4444' }}>⚠ VPN</span>}
+                      {log.is_vpn !== 1 && log.is_datacenter === 1 && <span style={{ marginLeft: '8px', color: '#f59e0b' }}>Hebergement</span>}
                     </div>
                     <div><strong>Operateur :</strong> {log.isp || 'Inconnu'}</div>
                     {(log.city || log.region || log.country) && (
