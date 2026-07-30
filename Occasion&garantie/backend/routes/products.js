@@ -200,7 +200,8 @@ router.post('/', authenticate, async (req, res) => {
     }
     res.status(201).json({ id: result.insertId, message: 'Produit ajouté.' });
   } catch (err) {
-    res.status(500).json({ message: 'Erreur serveur.' });
+    console.error('Create product error:', err.message, err.sqlMessage);
+    res.status(500).json({ message: 'Erreur serveur.', detail: err.sqlMessage || err.message });
   }
 });
 
