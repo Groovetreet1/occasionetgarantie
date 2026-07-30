@@ -20,6 +20,7 @@ export default function RepriseList() {
   const [actionLoading, setActionLoading] = useState(null);
   const [deleteTarget, setDeleteTarget] = useState(null);
   const [photoErrors, setPhotoErrors] = useState({});
+  const [lightbox, setLightbox] = useState(null);
 
   const [error, setError] = useState(null);
   const user = JSON.parse(localStorage.getItem('user') || '{}');
@@ -171,13 +172,13 @@ export default function RepriseList() {
                     {hasPhotos && (
                       <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap' }}>
                         {Object.entries(photos).map(([key, url]) => (
-                          <a key={key} href={imgUrl(url)} target="_blank" rel="noopener noreferrer" style={{
-                            width: 64, height: 64, borderRadius: 8, overflow: 'hidden', display: 'block',
+                          <div key={key} onClick={() => setLightbox(imgUrl(url))} style={{
+                            width: 64, height: 64, borderRadius: 8, overflow: 'hidden', cursor: 'pointer',
                             border: '1px solid var(--border)',
                           }}>
                             <img src={imgUrl(url)} alt={key} style={{ width: '100%', height: '100%', objectFit: 'cover' }}
                               onError={() => setPhotoErrors(p => ({ ...p, [r.id + '-' + key]: true }))} />
-                          </a>
+                          </div>
                         ))}
                       </div>
                     )}
@@ -239,6 +240,18 @@ export default function RepriseList() {
           </div>
         )}
       </div>
+
+      {lightbox && (
+        <div onClick={() => setLightbox(null)} style={{
+          position: 'fixed', top: 0, left: 0, right: 0, bottom: 0, zIndex: 9999,
+          background: 'rgba(0,0,0,0.85)', display: 'flex', alignItems: 'center', justifyContent: 'center',
+          cursor: 'pointer', padding: 20,
+        }}>
+          <img src={lightbox} alt="" style={{
+            maxWidth: '100%', maxHeight: '100%', borderRadius: 8, objectFit: 'contain',
+          }} />
+        </div>
+      )}
 
       <ConfirmModal
         open={!!deleteTarget}
