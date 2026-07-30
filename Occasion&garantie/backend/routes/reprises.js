@@ -2,7 +2,7 @@ const express = require('express');
 const router = express.Router();
 const pool = require('../config/db');
 const { authenticate } = require('../middleware/auth');
-const { upload } = require('../services/uploader');
+const { uploadBuffer } = require('../services/uploader');
 const multer = require('multer');
 const path = require('path');
 const fs = require('fs');
@@ -60,9 +60,13 @@ router.post('/', authenticate, (req, res) => {
         for (const key of ['front', 'back', 'side', 'screen']) {
           if (req.files?.[key]) {
             const f = req.files[key][0];
-            const b64 = fs.readFileSync(f.path).toString('base64');
-            const mime = f.mimetype || 'image/jpeg';
-            photos[key] = `data:${mime};base64,${b64}`;
+            try {
+              const buf = fs.readFileSync(f.path);
+              const { url } = await uploadBuffer(buf, f.originalname, 'reprises');
+              photos[key] = url;
+            } catch (upErr) {
+              console.error(`Upload error for ${key}:`, upErr.message);
+            }
             try { fs.unlinkSync(f.path); } catch {}
           }
         }
@@ -112,7 +116,7 @@ router.get('/', authenticate, async (req, res) => {
 
     let query, params;
 
-    let selectCols = `r.id, r.user_id, r.product_id, r.brand, r.model, r.imei, r.status, r.estimated_price, r.vendor_id, r.vendor_notes, r.client_notes, r.created_at, r.updated_at, r.photos IS NOT NULL AND JSON_LENGTH(r.photos) > 0 AS has_photos,
+    let selectCols = `r.id, r.user_id, r.product_id, r.brand, r.model, r.imei, r.status, r.estimated_price, r.vendor_id, r.vendor_notes, r.client_notes, r.photos, r.created_at, r.updated_at,
                u.full_name, u.email, u.phone, u.store_name,
                p.name AS product_name, p.images AS product_images`;
 

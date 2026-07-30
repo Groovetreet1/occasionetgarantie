@@ -19,8 +19,7 @@ export default function RepriseList() {
   const [loading, setLoading] = useState(true);
   const [actionLoading, setActionLoading] = useState(null);
   const [deleteTarget, setDeleteTarget] = useState(null);
-  const [openPhotos, setOpenPhotos] = useState(null);
-  const [photosData, setPhotosData] = useState({});
+  const [photoErrors, setPhotoErrors] = useState({});
 
   const [error, setError] = useState(null);
   const user = JSON.parse(localStorage.getItem('user') || '{}');
@@ -58,15 +57,10 @@ export default function RepriseList() {
 
   const imgUrl = (p) => p?.startsWith('http') || p?.startsWith('data:') ? p : `${API_BASE}${p}`;
 
-  const togglePhotos = async (id) => {
-    if (openPhotos === id) { setOpenPhotos(null); return; }
-    if (photosData[id]) { setOpenPhotos(id); return; }
-    try {
-      const { data } = await api.get(`/reprises/${id}`);
-      const p = typeof data.photos === 'object' ? data.photos : (() => { try { return JSON.parse(data.photos || '{}'); } catch { return {}; } })();
-      setPhotosData(prev => ({ ...prev, [id]: p }));
-      setOpenPhotos(id);
-    } catch {}
+  const parsePhotos = (r) => {
+    if (!r.photos) return {};
+    if (typeof r.photos === 'object') return r.photos;
+    try { return JSON.parse(r.photos); } catch { return {}; }
   };
 
   const productImgs = (r) => {
@@ -106,7 +100,8 @@ export default function RepriseList() {
           <div style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
             {reprises.map(r => {
               const st = statusStyles[r.status] || statusStyles.en_attente;
-              const hasPhotos = r.has_photos || (r.photos && typeof r.photos === 'object' ? Object.keys(r.photos).length > 0 : false);
+              const photos = parsePhotos(r);
+              const hasPhotos = Object.keys(photos).length > 0;
               const pImgs = productImgs(r);
 
               return (
@@ -174,22 +169,16 @@ export default function RepriseList() {
 
                     {/* Reprise photos */}
                     {hasPhotos && (
-                      <div>
-                        <button onClick={() => togglePhotos(r.id)} className="btn btn-ghost" style={{ fontSize: 12, padding: '4px 10px' }}>
-                          {openPhotos === r.id ? 'Masquer les photos' : 'Voir les photos'}
-                        </button>
-                        {openPhotos === r.id && photosData[r.id] && Object.keys(photosData[r.id]).length > 0 && (
-                          <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap', marginTop: 8 }}>
-                            {Object.entries(photosData[r.id]).map(([key, url]) => (
-                              <a key={key} href={imgUrl(url)} target="_blank" rel="noopener noreferrer" style={{
-                                width: 64, height: 64, borderRadius: 8, overflow: 'hidden', display: 'block',
-                                border: '1px solid var(--border)',
-                              }}>
-                                <img src={imgUrl(url)} alt={key} style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
-                              </a>
-                            ))}
-                          </div>
-                        )}
+                      <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap' }}>
+                        {Object.entries(photos).map(([key, url]) => (
+                          <a key={key} href={imgUrl(url)} target="_blank" rel="noopener noreferrer" style={{
+                            width: 64, height: 64, borderRadius: 8, overflow: 'hidden', display: 'block',
+                            border: '1px solid var(--border)',
+                          }}>
+                            <img src={imgUrl(url)} alt={key} style={{ width: '100%', height: '100%', objectFit: 'cover' }}
+                              onError={() => setPhotoErrors(p => ({ ...p, [r.id + '-' + key]: true }))} />
+                          </a>
+                        ))}
                       </div>
                     )}
 
