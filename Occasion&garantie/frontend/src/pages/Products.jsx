@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react';
 import { useSearchParams } from 'react-router-dom';
-import { FiSearch, FiSliders, FiPackage, FiX, FiGrid, FiList, FiNavigation } from 'react-icons/fi';
+import { FiSearch, FiSliders, FiPackage, FiX } from 'react-icons/fi';
 
 import { motion } from 'framer-motion';
 import api from '../api/axios';
@@ -15,11 +15,26 @@ const CATEGORIES = ['Tous', 'Smartphones', 'Tablettes', 'Ordinateurs', 'Accessoi
 
 const fadeUp = { hidden: { opacity: 0, y: 24 }, show: { opacity: 1, y: 0, transition: { duration: 0.4 } } };
 
-const MOROCCAN_CITIES = [
-  'Casablanca', 'Rabat', 'Marrakech', 'Fes', 'Tanger', 'Agadir', 'Meknes', 'Oujda',
-  'Kenitra', 'Tetouan', 'Safi', 'El Jadida', 'Beni Mellal', 'Nador', 'Taza',
-  'Mohammedia', 'Laayoune', 'Khouribga', 'Settat', 'Berrechid',
-];
+const CITY_COORDS = {
+  'Casablanca': [33.5731, -7.5898], 'Rabat': [34.0209, -6.8416], 'Marrakech': [31.6295, -7.9811],
+  'Fes': [34.0333, -5.0000], 'Tanger': [35.7673, -5.7998], 'Agadir': [30.4278, -9.5981],
+  'Meknes': [33.8935, -5.5473], 'Oujda': [34.6814, -1.9086], 'Kenitra': [34.2610, -6.5802],
+  'Tetouan': [35.5782, -5.3684], 'Safi': [32.2994, -9.2372], 'El Jadida': [33.2318, -8.5008],
+  'Beni Mellal': [32.3394, -6.3608], 'Nador': [35.1688, -2.9335], 'Taza': [34.2148, -4.0191],
+  'Mohammedia': [33.6881, -7.3837], 'Laayoune': [27.1253, -13.1625], 'Khouribga': [32.8811, -6.9063],
+  'Settat': [33.0010, -7.6167], 'Berrechid': [33.2656, -7.5875],
+  'Bouskoura': [33.4497, -7.6484], 'Nouaceur': [33.3543, -7.6119], 'Mediouna': [33.4518, -7.5261],
+  'Tit Mellil': [33.5628, -7.4874], 'Ain Harrouda': [33.6377, -7.4418],
+};
+
+function nearestCity(lat, lon) {
+  let closest = 'Casablanca', minDist = Infinity;
+  for (const [city, [clat, clon]] of Object.entries(CITY_COORDS)) {
+    const d = (lat - clat) ** 2 + (lon - clon) ** 2;
+    if (d < minDist) { minDist = d; closest = city; }
+  }
+  return closest;
+}
 
 export default function Products() {
   const [searchParams] = useSearchParams();
@@ -43,17 +58,8 @@ export default function Products() {
 
   useEffect(() => {
     if ('geolocation' in navigator) {
-      navigator.geolocation.getCurrentPosition(async (pos) => {
-        try {
-          const res = await fetch(`https://api.bigdatacloud.net/data/reverse-geocode-client?latitude=${pos.coords.latitude}&longitude=${pos.coords.longitude}&localityLanguage=fr`);
-          const data = await res.json();
-          const city = data.locality || data.city || data.principalSubdivision || '';
-          if (city) {
-            const raw = city.toLowerCase();
-            const found = MOROCCAN_CITIES.find(c => raw.includes(c.toLowerCase()) || c.toLowerCase().includes(raw));
-            setUserCity(found || city);
-          }
-        } catch {}
+      navigator.geolocation.getCurrentPosition((pos) => {
+        setUserCity(nearestCity(pos.coords.latitude, pos.coords.longitude));
       }, () => {}, { timeout: 8000 });
     }
   }, []);
