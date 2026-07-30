@@ -58,7 +58,13 @@ router.post('/', authenticate, (req, res) => {
 
         const photos = {};
         for (const key of ['front', 'back', 'side', 'screen']) {
-          if (req.files?.[key]) photos[key] = `/uploads/reprises/${req.files[key][0].filename}`;
+          if (req.files?.[key]) {
+            const f = req.files[key][0];
+            const b64 = fs.readFileSync(f.path).toString('base64');
+            const mime = f.mimetype || 'image/jpeg';
+            photos[key] = `data:${mime};base64,${b64}`;
+            try { fs.unlinkSync(f.path); } catch {}
+          }
         }
 
         const [result] = await pool.query(

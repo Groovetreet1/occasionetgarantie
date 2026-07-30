@@ -34,7 +34,7 @@ export default function RepriseList() {
     setActionLoading(null);
   };
 
-  const imgUrl = (p) => p?.startsWith('http') ? p : `${API_BASE}${p}`;
+  const imgUrl = (p) => p?.startsWith('http') || p?.startsWith('data:') ? p : `${API_BASE}${p}`;
 
   const productImgs = (r) => {
     if (!r.product_images) return [];
