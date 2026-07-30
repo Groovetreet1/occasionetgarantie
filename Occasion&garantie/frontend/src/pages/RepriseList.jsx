@@ -32,7 +32,11 @@ export default function RepriseList() {
     api.get('/reprises').then(res => setReprises(res.data)).catch(e => setError(e?.response?.data?.message || e.message || 'Erreur de chargement')).finally(() => setLoading(false));
   };
 
+  const [photosReady, setPhotosReady] = useState(false);
+
   useEffect(() => { load(); }, []);
+
+  useEffect(() => { if (reprises.length > 0) { const t = setTimeout(() => setPhotosReady(true), 300); return () => clearTimeout(t); } }, [reprises]);
 
   const update = async (id, data) => {
     setActionLoading(id);
@@ -174,10 +178,14 @@ export default function RepriseList() {
                         {Object.entries(photos).map(([key, url]) => (
                           <div key={key} onClick={() => setLightbox(imgUrl(url))} style={{
                             width: 64, height: 64, borderRadius: 8, overflow: 'hidden', cursor: 'pointer',
-                            border: '1px solid var(--border)',
+                            border: '1px solid var(--border)', background: 'var(--bg-secondary)',
                           }}>
-                            <img src={imgUrl(url)} alt={key} style={{ width: '100%', height: '100%', objectFit: 'cover' }}
-                              onError={() => setPhotoErrors(p => ({ ...p, [r.id + '-' + key]: true }))} />
+                            {photosReady ? (
+                              <img src={imgUrl(url)} alt={key} style={{ width: '100%', height: '100%', objectFit: 'cover' }}
+                                onError={() => setPhotoErrors(p => ({ ...p, [r.id + '-' + key]: true }))} />
+                            ) : (
+                              <div style={{ width: '100%', height: '100%', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 10, color: 'var(--text-muted)' }}>...</div>
+                            )}
                           </div>
                         ))}
                       </div>
