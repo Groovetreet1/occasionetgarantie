@@ -25,6 +25,8 @@ function SkeletonGrid({ count = 4 }) {
 
 
 
+const formatPrice = (p) => new Intl.NumberFormat('fr-FR', { style: 'currency', currency: 'MAD' }).format(p).replace('MAD', '').trim() + ' DH';
+
 export default function Home() {
   const navigate = useNavigate();
   const [products, setProducts] = useState([]);
@@ -33,6 +35,8 @@ export default function Home() {
   const [selectedCity, setSelectedCity] = useState('');
   const [loading, setLoading] = useState(true);
   const [cities, setCities] = useState([]);
+  const [storeProducts, setStoreProducts] = useState([]);
+  const [storeLoad, setStoreLoad] = useState(true);
 
   useEffect(() => { document.title = 'Occasion & Garantie - Achetez et vendez des produits électroniques d\'occasion au Maroc'; }, []);
 
@@ -45,6 +49,10 @@ export default function Home() {
       const items = res.data.products || res.data;
       setProducts(items.slice(0, 20));
     }).catch(() => {}).finally(() => setLoading(false));
+  }, []);
+
+  useEffect(() => {
+    api.get('/store/products/featured').then(r => setStoreProducts(r.data)).catch(() => {}).finally(() => setStoreLoad(false));
   }, []);
 
   const handleSearch = (e) => {
@@ -90,6 +98,38 @@ export default function Home() {
           </div>
         </div>
       </section>
+
+      {storeProducts.length > 0 && (
+        <motion.section className="section" variants={fadeUp} initial="hidden" whileInView="show" viewport={{ once: true }} style={{ background: 'rgba(245,158,11,0.03)', borderBottom: '1px solid rgba(245,158,11,0.1)' }}>
+          <div className="container">
+            <div className="section-header">
+              <div>
+                <h2 className="section-title" style={{ display: 'flex', alignItems: 'center', gap: 8, color: '#d97706' }}>
+                  <FiShield style={{ color: '#d97706' }} /> Boutique Officielle
+                </h2>
+                <p className="section-subtitle">Produits vendus directement par Occasion & Garantie</p>
+              </div>
+              <Link to="/boutique" className="btn btn-secondary">Voir la boutique <FiArrowRight size={16} /></Link>
+            </div>
+            {storeLoad ? <SkeletonGrid count={4} /> : (
+              <div className="products-grid">
+                {storeProducts.map(p => (
+                  <Link key={p.id} to={`/boutique/${p.slug}`} className="product-card" style={{ textDecoration: 'none' }}>
+                    <div className="product-card-image" style={{ position: 'relative', background: 'var(--bg-secondary)', aspectRatio: '1/1' }}>
+                      {p.image ? <img src={p.image} alt={p.name} style={{ width: '100%', height: '100%', objectFit: 'contain' }} /> : <FiShoppingBag size={48} style={{ opacity: 0.15 }} />}
+                      <span style={{ position: 'absolute', top: 8, right: 8, background: '#d97706', color: '#fff', fontSize: 10, fontWeight: 700, padding: '2px 8px', borderRadius: 6 }}>Officiel</span>
+                    </div>
+                    <div className="product-card-info" style={{ padding: 12 }}>
+                      <h3 style={{ fontSize: 14, fontWeight: 600, margin: 0, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{p.name}</h3>
+                      <div style={{ fontSize: 16, fontWeight: 700, color: 'var(--primary)', marginTop: 6 }}>{formatPrice(p.price)}</div>
+                    </div>
+                  </Link>
+                ))}
+              </div>
+            )}
+          </div>
+        </motion.section>
+      )}
 
       <motion.section className="section" variants={fadeUp} initial="hidden" whileInView="show" viewport={{ once: true }}>
         <div className="container">

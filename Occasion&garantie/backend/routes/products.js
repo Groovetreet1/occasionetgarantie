@@ -31,7 +31,8 @@ router.get('/', async (req, res) => {
     const limitNum = Math.min(100, Math.max(1, parseInt(limit) || 20));
     const offset = (pageNum - 1) * limitNum;
 
-    let where = ' WHERE p.active = TRUE AND p.status = \'disponible\' AND p.approved = TRUE AND u.id IS NOT NULL';
+    try { await pool.query("ALTER TABLE products ADD COLUMN product_type VARCHAR(10) DEFAULT 'vendor'"); } catch (e) { if (e.errno !== 1060 && e.code !== 'ER_DUP_FIELDNAME') {} }
+    let where = " WHERE p.active = TRUE AND p.status = 'disponible' AND p.approved = TRUE AND (p.product_type IS NULL OR p.product_type = 'vendor') AND u.id IS NOT NULL";
     const params = [];
 
     if (category) { where += ' AND LOWER(c.name) = ?'; params.push(category.toLowerCase()); }
@@ -87,7 +88,7 @@ router.get('/featured', async (req, res) => {
        FROM products p
        LEFT JOIN categories c ON p.category_id = c.id
        LEFT JOIN users u ON p.seller_id = u.id
-       WHERE p.featured = TRUE AND p.active = TRUE AND p.status = 'disponible' AND p.approved = TRUE AND u.id IS NOT NULL
+       WHERE p.featured = TRUE AND p.active = TRUE AND p.status = 'disponible' AND p.approved = TRUE AND (p.product_type IS NULL OR p.product_type = 'vendor') AND u.id IS NOT NULL
        ORDER BY (u.premium = TRUE AND (u.premium_expires_at IS NULL OR u.premium_expires_at > NOW())) DESC, p.created_at DESC LIMIT 8`;
     try {
       const [rows] = await pool.query(sql);
@@ -147,7 +148,7 @@ router.post('/', authenticate, async (req, res) => {
     return res.status(403).json({ message: 'Accès réservé aux vendeurs et administrateurs.' });
   }
   try {
-    const { name, slug, description, price, old_price, category_id, brand, state, warranty, stock, featured, image, gallery, specs, ville, latitude, longitude } = req.body;
+    const { name, slug, description, price, old_price, category_id, brand, state, warranty, stock, featured, image, gallery, specs, ville, latitude, longitude, product_type } = req.body;
     const sellerId = req.user.role === 'admin' ? (req.body.seller_id || null) : req.user.id;
 
     const catError = await validateCategory(category_id);
@@ -175,13 +176,15 @@ router.post('/', authenticate, async (req, res) => {
 
     try { await pool.query('ALTER TABLE products ADD COLUMN ville VARCHAR(100) DEFAULT NULL'); } catch (e) { if (e.errno !== 1060 && e.code !== 'ER_DUP_FIELDNAME') console.log('ville col:', e.message); }
     try { await pool.query('ALTER TABLE products ADD COLUMN approved TINYINT(1) DEFAULT 1'); } catch {}
+    try { await pool.query("ALTER TABLE products ADD COLUMN product_type VARCHAR(10) DEFAULT 'vendor'"); } catch (e) { if (e.errno !== 1060 && e.code !== 'ER_DUP_FIELDNAME') {} }
 
     const approved = req.user.role === 'admin' ? 1 : 0;
+    const ptype = req.user.role === 'admin' && product_type === 'store' ? 'store' : 'vendor';
 
     const [result] = await pool.query(
-      `INSERT INTO products (name, slug, description, price, old_price, category_id, seller_id, brand, state, warranty, stock, featured, image, gallery, specs, status, ville, approved)
-       VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
-      [name, slug, description, price, old_price || null, category_id || null, sellerId, brand || null, state || 'tres_bon', warranty || '6 mois', stock || 1, featured || false, image || null, gallery ? JSON.stringify(gallery) : null, specs ? JSON.stringify(specs) : null, 'disponible', ville || null, approved]
+      `INSERT INTO products (name, slug, description, price, old_price, category_id, seller_id, brand, state, warranty, stock, featured, image, gallery, specs, status, ville, approved, product_type)
+       VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
+      [name, slug, description, price, old_price || null, category_id || null, sellerId, brand || null, state || 'tres_bon', warranty || '6 mois', stock || 1, featured || false, image || null, gallery ? JSON.stringify(gallery) : null, specs ? JSON.stringify(specs) : null, 'disponible', ville || null, approved, ptype]
     );
     if (sellerId && req.user.role === 'seller') {
       const ip = req.headers['x-forwarded-for']?.split(',')[0]?.trim() || req.socket.remoteAddress || 'unknown';
@@ -208,14 +211,15 @@ router.put('/:id', authenticate, async (req, res) => {
     if (req.user.role !== 'admin' && rows[0].seller_id !== req.user.id) {
       return res.status(403).json({ message: 'Vous ne pouvez modifier que vos propres produits.' });
     }
-    const { name, slug, description, price, old_price, category_id, brand, state, warranty, stock, featured, image, gallery, specs, status, ville } = req.body;
+    const { name, slug, description, price, old_price, category_id, brand, state, warranty, stock, featured, image, gallery, specs, status, ville, product_type } = req.body;
     if (category_id) {
       const catError = await validateCategory(category_id);
       if (catError) return res.status(400).json({ message: catError });
     }
+    const ptype = req.user.role === 'admin' && product_type === 'store' ? 'store' : 'vendor';
     await pool.query(
-      `UPDATE products SET name=?, slug=?, description=?, price=?, old_price=?, category_id=?, brand=?, state=?, warranty=?, stock=?, featured=?, image=?, gallery=?, specs=?, status=?, ville=? WHERE id = ?`,
-      [name, slug, description, price, old_price || null, category_id || null, brand || null, state || 'tres_bon', warranty || '6 mois', stock || 1, featured || false, image || null, gallery ? JSON.stringify(gallery) : null, specs ? JSON.stringify(specs) : null, status || 'disponible', ville || null, req.params.id]
+      `UPDATE products SET name=?, slug=?, description=?, price=?, old_price=?, category_id=?, brand=?, state=?, warranty=?, stock=?, featured=?, image=?, gallery=?, specs=?, status=?, ville=?, product_type=? WHERE id = ?`,
+      [name, slug, description, price, old_price || null, category_id || null, brand || null, state || 'tres_bon', warranty || '6 mois', stock || 1, featured || false, image || null, gallery ? JSON.stringify(gallery) : null, specs ? JSON.stringify(specs) : null, status || 'disponible', ville || null, ptype, req.params.id]
     );
     res.json({ message: 'Produit mis à jour.' });
   } catch (err) {

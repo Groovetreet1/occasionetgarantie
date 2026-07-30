@@ -167,6 +167,7 @@ const { ensureTables } = require('./services/tracker');
   app.use('/api/public', require('./routes/public'));
   app.use('/api/reprises', require('./routes/reprises'));
   app.use('/api/notifications', require('./routes/notifications'));
+  app.use('/api/store', require('./routes/store'));
 
   const { startNewsletterCron, sendNewsletterToAll } = require('./services/newsletterCron');
   app.post('/api/newsletter/trigger', authenticate, adminOnly, async (req, res) => {

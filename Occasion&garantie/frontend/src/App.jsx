@@ -40,6 +40,8 @@ import RepriseForm from './pages/RepriseForm';
 import RepriseList from './pages/RepriseList';
 import NotificationsPage from './pages/NotificationsPage';
 import Legal from './pages/Legal';
+import StorePage from './pages/StorePage';
+import StoreProductDetail from './pages/StoreProductDetail';
 
 const pageVariants = {
   initial: { opacity: 0, y: 12 },
@@ -106,6 +108,8 @@ export default function App() {
           <Route path="/messenger/:id" element={<AnimatedPage><Messenger /></AnimatedPage>} />
           <Route path="/privacy" element={<AnimatedPage><Privacy /></AnimatedPage>} />
           <Route path="/legal" element={<AnimatedPage><Legal /></AnimatedPage>} />
+          <Route path="/boutique" element={<AnimatedPage><StorePage /></AnimatedPage>} />
+          <Route path="/boutique/:slug" element={<AnimatedPage><StoreProductDetail /></AnimatedPage>} />
           <Route path="*" element={<AnimatedPage><NotFound /></AnimatedPage>} />
         </Routes>
       </AnimatePresence>

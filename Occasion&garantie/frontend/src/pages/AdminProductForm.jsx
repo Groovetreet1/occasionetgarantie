@@ -24,7 +24,7 @@ export default function AdminProductForm() {
   const [form, setForm] = useState({
     name: '', slug: '', description: '', price: '', old_price: '', category_id: 1,
     brand: '', state: 'tres_bon', warranty: '12 mois', stock: 1, featured: false,
-    image: '', gallery: [], specs: { ...defaultSpecs }, ville: '',
+    image: '', gallery: [], specs: { ...defaultSpecs }, ville: '', product_type: 'vendor',
   });
 
   useEffect(() => {
@@ -246,6 +246,10 @@ export default function AdminProductForm() {
             <div className="form-group" style={{ display: 'flex', alignItems: 'center', gap: '8px', paddingTop: '30px' }}>
               <input name="featured" type="checkbox" checked={form.featured} onChange={handleChange} id="featured" style={{ width: '18px', height: '18px' }} />
               <label htmlFor="featured" style={{ margin: 0, cursor: 'pointer' }}>Produit à la une</label>
+            </div>
+            <div className="form-group" style={{ display: 'flex', alignItems: 'center', gap: '8px', paddingTop: '8px' }}>
+              <input name="product_type" type="checkbox" checked={form.product_type === 'store'} onChange={(e) => setForm(f => ({ ...f, product_type: e.target.checked ? 'store' : 'vendor' }))} id="storeProduct" style={{ width: '18px', height: '18px' }} />
+              <label htmlFor="storeProduct" style={{ margin: 0, cursor: 'pointer', background: 'rgba(245,158,11,0.1)', padding: '4px 12px', borderRadius: 8, color: '#d97706', fontWeight: 600 }}>Produit Boutique Officielle</label>
             </div>
           </div>
 

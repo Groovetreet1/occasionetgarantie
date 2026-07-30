@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react';
-import { useSearchParams } from 'react-router-dom';
-import { FiSearch, FiSliders, FiPackage, FiX } from 'react-icons/fi';
+import { Link, useSearchParams } from 'react-router-dom';
+import { FiSearch, FiSliders, FiPackage, FiX, FiArrowRight, FiShield, FiShoppingBag } from 'react-icons/fi';
 
 import { motion } from 'framer-motion';
 import api from '../api/axios';
@@ -26,6 +26,8 @@ export default function Products() {
   const [priceMin, setPriceMin] = useState('');
   const [priceMax, setPriceMax] = useState('');
   const [visibleCount, setVisibleCount] = useState(12);
+  const [storeProducts, setStoreProducts] = useState([]);
+  const [storeLoad, setStoreLoad] = useState(true);
 
   useEffect(() => { document.title = 'Tous les produits - Occasion & Garantie'; }, []);
 
@@ -43,6 +45,10 @@ export default function Products() {
       .catch(() => {})
       .finally(() => setLoading(false));
   }, [search]);
+
+  useEffect(() => {
+    api.get('/store/products/featured').then(r => setStoreProducts(r.data)).catch(() => {}).finally(() => setStoreLoad(false));
+  }, []);
 
   const filtered = (Array.isArray(allProducts) ? allProducts : []).filter(p => {
     if (category !== 'Tous' && p.category_name !== category) return false;
@@ -63,7 +69,6 @@ export default function Products() {
     setLoading(true);
     const params = new URLSearchParams();
     if (search) params.set('search', search);
-    if (userCity) params.set('user_ville', userCity);
     api.get(`/products${params.toString() ? `?${params}` : ''}`)
       .then(res => setAllProducts(res.data.products || res.data))
       .catch(() => {})
@@ -87,6 +92,34 @@ export default function Products() {
       </div>
 
       <div className="products-page-body container">
+        {storeProducts.length > 0 && !search && (
+          <motion.div initial="hidden" animate="show" variants={fadeUp} style={{ marginBottom: 32, padding: '20px 24px', background: 'rgba(245,158,11,0.04)', border: '1px solid rgba(245,158,11,0.12)', borderRadius: 'var(--radius-lg)' }}>
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 16 }}>
+              <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+                <FiShield style={{ color: '#d97706' }} />
+                <span style={{ fontWeight: 700, fontSize: 16 }}>Boutique Officielle</span>
+                <span style={{ fontSize: 12, color: 'var(--text-secondary)' }}>— Vendu par Occasion & Garantie</span>
+              </div>
+              <Link to="/boutique" style={{ fontSize: 13, color: '#d97706', fontWeight: 600, textDecoration: 'none' }}>Voir tout <FiArrowRight size={14} style={{ verticalAlign: 'middle' }} /></Link>
+            </div>
+            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(160px, 1fr))', gap: 12 }}>
+              {storeProducts.slice(0, 4).map(p => (
+                <Link key={p.id} to={`/boutique/${p.slug}`} style={{ textDecoration: 'none', background: 'var(--bg-card)', borderRadius: 'var(--radius)', overflow: 'hidden', border: '1px solid var(--border)', transition: 'transform 0.2s', display: 'block' }}
+                  onMouseEnter={e => e.currentTarget.style.transform = 'translateY(-2px)'}
+                  onMouseLeave={e => e.currentTarget.style.transform = 'none'}>
+                  <div style={{ aspectRatio: '1/1', background: 'var(--bg-secondary)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                    {p.image ? <img src={p.image} alt={p.name} style={{ width: '100%', height: '100%', objectFit: 'contain' }} /> : <FiShoppingBag size={32} style={{ opacity: 0.2 }} />}
+                  </div>
+                  <div style={{ padding: 10 }}>
+                    <div style={{ fontSize: 13, fontWeight: 600, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{p.name}</div>
+                    <div style={{ fontSize: 15, fontWeight: 700, color: 'var(--primary)', marginTop: 4 }}>{new Intl.NumberFormat('fr-FR', { style: 'currency', currency: 'MAD' }).format(p.price).replace('MAD', '').trim()} DH</div>
+                  </div>
+                </Link>
+              ))}
+            </div>
+          </motion.div>
+        )}
+
         <motion.div className="products-categories" initial="hidden" animate="show" variants={fadeUp}>
           {CATEGORIES.map(c => (
             <button key={c} className={`cat-pill ${category === c ? 'active' : ''}`} onClick={() => { setCategory(c); setVisibleCount(12); }}>

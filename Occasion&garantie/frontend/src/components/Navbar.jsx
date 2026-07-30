@@ -1,5 +1,5 @@
 import { Link, NavLink, useNavigate, useLocation } from 'react-router-dom';
-import { FiUser, FiLogOut, FiSettings, FiChevronDown, FiSmartphone, FiMonitor, FiHeadphones, FiTablet, FiShoppingBag, FiTrendingUp, FiStar, FiMessageCircle, FiPackage, FiBell, FiTrash2, FiAlertTriangle } from 'react-icons/fi';
+import { FiUser, FiLogOut, FiSettings, FiChevronDown, FiSmartphone, FiMonitor, FiHeadphones, FiTablet, FiShoppingBag, FiTrendingUp, FiStar, FiMessageCircle, FiPackage, FiBell, FiTrash2, FiAlertTriangle, FiShield } from 'react-icons/fi';
 import { useState, useRef, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useAuth } from '../context/AuthContext';
@@ -137,6 +137,10 @@ export default function Navbar() {
                     transition={{ duration: 0.15 }}
                   >
                     <Link to="/products" onClick={() => setProdsOpen(false)}>Tous les produits</Link>
+                    <Link to="/boutique" onClick={() => setProdsOpen(false)} style={{ color: '#d97706', fontWeight: 600 }}>
+                      <FiShield size={14} /> Boutique Officielle
+                    </Link>
+                    <div style={{ height: 1, background: 'var(--border)', margin: '4px 0' }} />
                     {categories.map((cat) => {
                       const isActive = location.search === `?category=${cat.slug}`;
                       return (
@@ -302,6 +306,9 @@ export default function Navbar() {
           );
         })}
         <Link to="/products" onClick={closeMenu} style={{ display: 'block', fontSize: 16, padding: '16px', opacity: 0.6, fontWeight: 500 }}>Tous les produits →</Link>
+        <Link to="/boutique" onClick={closeMenu} style={{ display: 'block', fontSize: 16, padding: '16px', fontWeight: 600, color: '#d97706' }}>
+          <FiShield size={16} style={{ verticalAlign: 'middle', marginRight: 4 }} /> Boutique Officielle
+        </Link>
         <NavLink to="/about" onClick={closeMenu}>À propos</NavLink>
         {user?.role == 'seller' ? (
           <NavLink to="/reprise/list" onClick={closeMenu}><FiSmartphone size={14} /> Demandes reprise</NavLink>
