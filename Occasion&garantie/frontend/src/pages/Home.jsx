@@ -105,8 +105,11 @@ export default function Home() {
                       style={{ flexShrink: 0, textDecoration: 'none', display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 6, transition: 'transform 0.2s' }}
                       onMouseEnter={e => e.currentTarget.style.transform = 'scale(1.1)'}
                       onMouseLeave={e => e.currentTarget.style.transform = 'scale(1)'}>
-                      <div style={{ width: 56, height: 56, borderRadius: '50%', background: 'rgba(217,119,6,0.1)', border: '2px solid rgba(217,119,6,0.2)', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 18, fontWeight: 800, color: '#d97706' }}>
-                        {brand.charAt(0).toUpperCase()}
+                      <div style={{ width: 56, height: 56, borderRadius: '50%', background: '#fff', border: '2px solid rgba(217,119,6,0.2)', display: 'flex', alignItems: 'center', justifyContent: 'center', position: 'relative', overflow: 'hidden' }}>
+                        <span style={{ position: 'absolute', fontSize: 18, fontWeight: 800, color: '#d97706' }}>{brand.charAt(0).toUpperCase()}</span>
+                        <img src={`https://logo.clearbit.com/${brand.toLowerCase()}.com?size=64`} alt={brand}
+                          style={{ width: '70%', height: '70%', objectFit: 'contain', position: 'relative', zIndex: 1 }}
+                          onError={e => { e.target.style.display = 'none'; }} />
                       </div>
                       <span style={{ fontSize: 11, color: 'var(--text-muted)', whiteSpace: 'nowrap', fontWeight: 500 }}>{brand.charAt(0).toUpperCase() + brand.slice(1).toLowerCase()}</span>
                     </Link>
