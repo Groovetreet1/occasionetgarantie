@@ -128,12 +128,14 @@ router.get('/', authenticate, async (req, res) => {
                FROM reprises r
                JOIN users u ON r.user_id = u.id
                LEFT JOIN products p ON r.product_id = p.id
-               WHERE r.vendor_id = ? OR r.user_id = ? OR (r.vendor_id IS NULL AND (p.seller_id = ? OR r.product_id IS NULL))
+               WHERE r.vendor_id = ? OR r.user_id = ? OR (r.vendor_id IS NULL AND r.product_id IS NOT NULL AND EXISTS (SELECT 1 FROM products WHERE id = r.product_id AND seller_id = ?))
                ORDER BY r.created_at DESC`;
       params = [req.user.id, req.user.id, req.user.id];
     } else {
       query = `SELECT ${selectCols}
                FROM reprises r
+               JOIN users u ON r.user_id = u.id
+               LEFT JOIN products p ON r.product_id = p.id
                WHERE r.user_id = ?
                ORDER BY r.created_at DESC`;
       params = [req.user.id];
@@ -142,7 +144,10 @@ router.get('/', authenticate, async (req, res) => {
     let rows;
     try {
       [rows] = await pool.query(query, params);
-    } catch { [rows] = []; }
+    } catch (e) {
+      console.error('Reprise list query error:', e.message);
+      [rows] = [];
+    }
 
     if (req.query.product_id) {
       rows = rows.filter(r => r.product_id == req.query.product_id);

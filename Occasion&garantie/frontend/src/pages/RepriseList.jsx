@@ -20,9 +20,12 @@ export default function RepriseList() {
   const [actionLoading, setActionLoading] = useState(null);
   const [deleteTarget, setDeleteTarget] = useState(null);
 
+  const [error, setError] = useState(null);
+
   const load = () => {
     setLoading(true);
-    api.get('/reprises').then(res => setReprises(res.data)).catch(() => {}).finally(() => setLoading(false));
+    setError(null);
+    api.get('/reprises').then(res => setReprises(res.data)).catch(e => setError(e?.response?.data?.message || e.message || 'Erreur de chargement')).finally(() => setLoading(false));
   };
 
   useEffect(() => { load(); }, []);
@@ -74,6 +77,11 @@ export default function RepriseList() {
 
         {loading ? (
           <div style={{ textAlign: 'center', padding: '60px 0' }}><div className="spinner" /></div>
+        ) : error ? (
+          <div style={{ textAlign: 'center', padding: '30px 0', color: '#ef4444' }}>
+            <p>Erreur: {error}</p>
+            <button onClick={load} className="btn btn-ghost" style={{ marginTop: 12 }}>Reessayer</button>
+          </div>
         ) : reprises.length === 0 ? (
           <div style={{ textAlign: 'center', padding: '60px 0', color: 'var(--text-muted)' }}>
             <FiSmartphone size={48} style={{ opacity: 0.3, marginBottom: 12 }} />
