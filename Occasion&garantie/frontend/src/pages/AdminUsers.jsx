@@ -7,6 +7,10 @@ import ConfirmModal from '../components/ConfirmModal';
 export default function AdminUsers() {
   const [users, setUsers] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [page, setPage] = useState(1);
+  const [limit, setLimit] = useState(50);
+  const [total, setTotal] = useState(0);
+  const [totalPages, setTotalPages] = useState(0);
   const [deleting, setDeleting] = useState(null);
   const [deleteTarget, setDeleteTarget] = useState(null);
   const [storeModal, setStoreModal] = useState(null);
@@ -19,12 +23,15 @@ export default function AdminUsers() {
   const [openMenu, setOpenMenu] = useState(null);
   const menuRef = useRef(null);
 
-  useEffect(() => {
-    api.get('/admin/users')
-      .then(res => setUsers(res.data))
+  const fetchUsers = (p, l) => {
+    setLoading(true);
+    api.get(`/admin/users?page=${p}&limit=${l}`)
+      .then(res => { setUsers(res.data.users); setTotal(res.data.total); setTotalPages(res.data.totalPages); })
       .catch(() => {})
       .finally(() => setLoading(false));
-  }, []);
+  };
+
+  useEffect(() => { fetchUsers(page, limit); }, [page, limit]);
 
   const executeDelete = async () => {
     if (!deleteTarget) return;
@@ -33,7 +40,7 @@ export default function AdminUsers() {
     setDeleting(id);
     try {
       await api.delete(`/admin/users/${id}`);
-      setUsers(users.filter(u => u.id !== id));
+      fetchUsers(page, limit);
     } catch (err) {
       alert(err.response?.data?.message || 'Erreur');
     } finally {
@@ -47,7 +54,7 @@ export default function AdminUsers() {
     setStoreSuccess('');
     try {
       await api.put(`/admin/users/${storeModal.id}/store-name`, { store_name: newStoreName.trim() });
-      setUsers(users.map(u => u.id === storeModal.id ? { ...u, store_name: newStoreName.trim() } : u));
+      fetchUsers(page, limit);
       setStoreSuccess('Nom de store modifie avec succes !');
       setTimeout(() => { setStoreModal(null); setNewStoreName(''); setStoreSuccess(''); }, 1500);
     } catch (err) {
@@ -62,7 +69,7 @@ export default function AdminUsers() {
     setSuspendLoading(true);
     try {
       await api.put(`/admin/users/${suspendModal.id}/suspend`, { reason: suspendReason.trim() || undefined });
-      setUsers(users.map(u => u.id === suspendModal.id ? { ...u, suspended: 1, suspension_reason: suspendReason.trim() || 'Compte suspendu par l\'administration' } : u));
+      fetchUsers(page, limit);
       setSuspendModal(null);
       setSuspendReason('');
     } catch (err) {
@@ -76,7 +83,7 @@ export default function AdminUsers() {
     if (!confirm(`Debloquer le compte de "${user.full_name}" ?`)) return;
     try {
       await api.put(`/admin/users/${user.id}/unsuspend`);
-      setUsers(users.map(u => u.id === user.id ? { ...u, suspended: 0, suspension_reason: null } : u));
+      fetchUsers(page, limit);
     } catch (err) {
       alert(err.response?.data?.message || 'Erreur');
     }
@@ -97,7 +104,7 @@ export default function AdminUsers() {
           <div>
             <Link to="/admin" className="btn btn-ghost" style={{ marginBottom: '8px' }}><FiArrowLeft /> Dashboard</Link>
             <h1 style={{ fontSize: '28px', fontWeight: 800 }}>Gestion des Utilisateurs</h1>
-            <p style={{ color: 'var(--text-secondary)' }}>{users.length} utilisateur{users.length > 1 ? 's' : ''}</p>
+            <p style={{ color: 'var(--text-secondary)' }}>{total} utilisateur{total > 1 ? 's' : ''}</p>
           </div>
         </div>
 
@@ -204,6 +211,35 @@ export default function AdminUsers() {
                 ))}
               </tbody>
             </table>
+          </div>
+          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '16px 0', flexWrap: 'wrap', gap: '12px' }}>
+            <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+              <span style={{ fontSize: 13, color: 'var(--text-muted)' }}>Afficher</span>
+              <select value={limit} onChange={e => { setLimit(Number(e.target.value)); setPage(1); }}
+                style={{ padding: '6px 10px', borderRadius: 8, border: '1px solid var(--border)', background: 'var(--bg-card)', color: 'var(--text)', fontSize: 13, cursor: 'pointer' }}>
+                <option value={10}>10</option>
+                <option value={50}>50</option>
+                <option value={100}>100</option>
+              </select>
+              <span style={{ fontSize: 13, color: 'var(--text-muted)' }}>{total} utilisateur{total > 1 ? 's' : ''}</span>
+            </div>
+            <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
+              <button onClick={() => setPage(p => Math.max(1, p - 1))} disabled={page <= 1}
+                style={{ padding: '6px 14px', borderRadius: 8, border: '1px solid var(--border)', background: 'var(--bg-card)', color: 'var(--text)', cursor: page <= 1 ? 'not-allowed' : 'pointer', opacity: page <= 1 ? 0.4 : 1, fontSize: 13 }}>← Précedent</button>
+              {Array.from({ length: Math.min(totalPages, 10) }, (_, i) => {
+                const start = Math.max(1, page - 5);
+                const p = start + i;
+                if (p > totalPages) return null;
+                return (
+                  <button key={p} onClick={() => setPage(p)}
+                    style={{ width: 32, height: 32, borderRadius: 8, border: p === page ? 'none' : '1px solid var(--border)', background: p === page ? '#3b82f6' : 'var(--bg-card)', color: p === page ? '#fff' : 'var(--text)', cursor: 'pointer', fontWeight: p === page ? 700 : 400, fontSize: 13 }}>
+                    {p}
+                  </button>
+                );
+              })}
+              <button onClick={() => setPage(p => Math.min(totalPages, p + 1))} disabled={page >= totalPages}
+                style={{ padding: '6px 14px', borderRadius: 8, border: '1px solid var(--border)', background: 'var(--bg-card)', color: 'var(--text)', cursor: page >= totalPages ? 'not-allowed' : 'pointer', opacity: page >= totalPages ? 0.4 : 1, fontSize: 13 }}>Suivant →</button>
+            </div>
           </div>
         )}
       </div>

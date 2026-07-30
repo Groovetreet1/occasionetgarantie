@@ -418,8 +418,13 @@ router.get('/products', authenticate, adminOnly, async (req, res) => {
 
 router.get('/users', authenticate, adminOnly, async (req, res) => {
   try {
-    const [rows] = await pool.query('SELECT id, full_name, email, phone, role, phone_verified, created_at, store_name, premium, credit_balance, terms_accepted, suspended, suspension_reason FROM users ORDER BY id ASC');
-    res.json(rows);
+    const page = Math.max(1, parseInt(req.query.page) || 1);
+    const limit = Math.min(100, Math.max(1, parseInt(req.query.limit) || 50));
+    const offset = (page - 1) * limit;
+    const [countRows] = await pool.query('SELECT COUNT(*) as total FROM users');
+    const total = countRows[0].total;
+    const [rows] = await pool.query('SELECT id, full_name, email, phone, role, phone_verified, created_at, store_name, premium, credit_balance, terms_accepted, suspended, suspension_reason FROM users ORDER BY id ASC LIMIT ? OFFSET ?', [limit, offset]);
+    res.json({ users: rows, total, page, limit, totalPages: Math.ceil(total / limit) });
   } catch (err) {
     res.status(500).json({ message: 'Erreur serveur.' });
   }
