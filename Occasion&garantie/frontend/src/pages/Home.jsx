@@ -39,8 +39,6 @@ export default function Home() {
   const [storeLoad, setStoreLoad] = useState(true);
   const [brands, setBrands] = useState([]);
 
-  const toLogoUrl = (brand) => `https://cdn.simpleicons.org/${brand.toLowerCase().replace(/[^a-z0-9]/g, '')}`;
-
   useEffect(() => { document.title = 'Occasion & Garantie - Achetez et vendez des produits électroniques d\'occasion au Maroc'; }, []);
 
   useEffect(() => {
@@ -100,20 +98,20 @@ export default function Home() {
               <button type="submit" className="avito-search-btn">Rechercher</button>
             </form>
             {brands.length > 0 && (
-              <div style={{ marginTop: 28, position: 'relative', overflow: 'hidden', maskImage: 'linear-gradient(to right, transparent, black 40px, black calc(100% - 40px), transparent)', WebkitMaskImage: 'linear-gradient(to right, transparent, black 40px, black calc(100% - 40px), transparent)' }}>
-                <div className="brands-scroll" style={{ display: 'flex', gap: 20, width: 'max-content' }}>
-                  {brands.concat(brands).map((brand, i) => (
+              <div className="brands-scroll-wrapper" style={{ marginTop: 28 }}>
+                <div className="brands-scroll-track">
+                  {brands.concat(brands).concat(brands).map((brand, i) => (
                     <Link key={i} to={`/products?brand=${encodeURIComponent(brand)}`}
                       style={{ flexShrink: 0, textDecoration: 'none', display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 6, transition: 'transform 0.2s' }}
                       onMouseEnter={e => e.currentTarget.style.transform = 'scale(1.1)'}
                       onMouseLeave={e => e.currentTarget.style.transform = 'scale(1)'}>
                       <div style={{ width: 56, height: 56, borderRadius: '50%', background: '#fff', border: '2px solid rgba(217,119,6,0.2)', display: 'flex', alignItems: 'center', justifyContent: 'center', position: 'relative', overflow: 'hidden' }}>
                         <span style={{ position: 'absolute', fontSize: 18, fontWeight: 800, color: '#d97706' }}>{brand.charAt(0).toUpperCase()}</span>
-                        <img src={toLogoUrl(brand)} alt={brand}
+                        <img src={`https://cdn.simpleicons.org/${brand.toLowerCase().replace(/[^a-z0-9]/g, '')}`} alt={brand}
                           style={{ width: '70%', height: '70%', objectFit: 'contain', position: 'relative', zIndex: 1 }}
                           onError={e => { e.target.style.display = 'none'; }} />
                       </div>
-                      <span style={{ fontSize: 11, color: 'var(--text-muted)', whiteSpace: 'nowrap', fontWeight: 500 }}>{brand.charAt(0).toUpperCase() + brand.slice(1).toLowerCase()}</span>
+                      <span style={{ fontSize: 11, color: 'var(--text-muted)', whiteSpace: 'nowrap', fontWeight: 500 }}>{brand.charAt(0).toUpperCase() + brand.slice(1)}</span>
                     </Link>
                   ))}
                 </div>

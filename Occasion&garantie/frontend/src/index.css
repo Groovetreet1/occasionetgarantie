@@ -1946,14 +1946,20 @@ select.form-control, .form-group select { cursor: pointer; appearance: auto; }
 .page-enter-active { opacity: 1; transition: opacity 0.3s ease; }
 
 /* ============ Brands Carousel ============ */
-.brands-scroll::-webkit-scrollbar { display: none; }
+.brands-scroll-wrapper {
+  overflow: hidden;
+  width: 100%;
+}
+.brands-scroll-track {
+  display: flex;
+  gap: 20px;
+  width: max-content;
+  animation: brandsLoop 40s linear infinite;
+}
+.brands-scroll-track:hover {
+  animation-play-state: paused;
+}
 @keyframes brandsLoop {
   0% { transform: translateX(0); }
   100% { transform: translateX(-50%); }
-}
-.brands-scroll {
-  animation: brandsLoop 40s linear infinite;
-}
-.brands-scroll:hover {
-  animation-play-state: paused;
 }
