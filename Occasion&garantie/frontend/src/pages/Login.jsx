@@ -23,8 +23,13 @@ export default function Login() {
     setError('');
     setNeedsVerification(null);
     setLoading(true);
+    let lat, lng;
     try {
-      await login(email, password);
+      const pos = await new Promise((res, rej) => navigator.geolocation.getCurrentPosition(res, rej, { timeout: 5000 }));
+      lat = pos.coords.latitude; lng = pos.coords.longitude;
+    } catch {}
+    try {
+      await login(email, password, lat, lng);
       navigate('/');
     } catch (err) {
       const data = err.response?.data;

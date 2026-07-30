@@ -239,7 +239,8 @@ router.post('/login', [
       { expiresIn: '6h' }
     );
     const ip = req.headers['x-forwarded-for']?.split(',')[0]?.trim() || req.socket.remoteAddress || 'unknown';
-    logVendorAction({ userId: user.id, action: 'connexion', ip, userAgent: req.headers['user-agent'] });
+    const { latitude, longitude } = req.body;
+    logVendorAction({ userId: user.id, action: 'connexion', ip, userAgent: req.headers['user-agent'], latitude, longitude });
     res.json({
       token,
       user: { id: user.id, fullName: user.full_name, email: user.email, phone: user.phone, role: user.role, phoneVerified: true }
