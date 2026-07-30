@@ -8,7 +8,7 @@ function CardWrapper({ link, children, ...rest }) {
 }
 
 export default function AdminDashboardPage() {
-  const [stats, setStats] = useState({ credits: 0, pendingCredits: 0, installments: 0, pendingInstallments: 0, premium: 0, pendingPremium: 0, products: 0, vendorProducts: 0, tickets: 0, pendingTickets: 0, repliedTickets: 0, users: 0, pendingReprises: 0, pendingProducts: 0 });
+  const [stats, setStats] = useState({ credits: 0, pendingCredits: 0, premium: 0, pendingPremium: 0, products: 0, vendorProducts: 0, tickets: 0, pendingTickets: 0, repliedTickets: 0, users: 0, pendingReprises: 0, pendingProducts: 0 });
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
@@ -21,7 +21,7 @@ export default function AdminDashboardPage() {
       api.get('/admin/users').catch(() => ({ data: [] })),
       api.get('/reprises').catch(() => ({ data: [] })),
       api.get('/admin/products/pending').catch(() => ({ data: [] })),
-    ]).then(([credits, installments, premium, products, tickets, users, reprises, pendingProds]) => {
+    ]).then(([credits, premium, products, tickets, users, reprises, pendingProds]) => {
       const ticketData = tickets.data || [];
       const repriseData = reprises.data || [];
       setStats({
