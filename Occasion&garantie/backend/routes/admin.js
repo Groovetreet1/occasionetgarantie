@@ -709,8 +709,14 @@ router.post('/seed', authenticate, adminOnly, async (req, res) => {
     let created = 0;
     for (const p of seedProducts) {
       const { name, brand, category_id, state, warranty, stock, slug, price, description, image } = p;
-      const [existing] = await pool.query('SELECT id FROM products WHERE slug = ?', [slug]);
-      if (existing.length > 0) continue;
+      const [existing] = await pool.query('SELECT id, image FROM products WHERE slug = ?', [slug]);
+      if (existing.length > 0) {
+        if (!existing[0].image && image) {
+          await pool.query('UPDATE products SET image = ? WHERE id = ?', [image, existing[0].id]);
+          console.log('  Image added:', name);
+        }
+        continue;
+      }
       await pool.query(
         `INSERT INTO products (name, slug, description, price, category_id, seller_id, brand, state, warranty, stock, featured, specs, status, ville, approved, product_type, active, image)
          VALUES (?, ?, ?, ?, ?, 1, ?, ?, ?, ?, 1, ?, 'disponible', 'Casablanca', 1, 'store', 1, ?)`,

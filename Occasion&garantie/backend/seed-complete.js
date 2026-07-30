@@ -72,9 +72,15 @@ async function seed() {
       let count = 0;
       for (const p of productsData) {
           const { name, brand, category_id, state, warranty, stock, slug, price, description, image } = p;
-        try {
-          const [existing] = await db.query('SELECT id FROM products WHERE slug = ?', [slug]);
-          if (existing.length > 0) { console.log('  Exists:', name); continue; }
+          try {
+            const [existing] = await db.query('SELECT id, image FROM products WHERE slug = ?', [slug]);
+            if (existing.length > 0) {
+              if (!existing[0].image && image) {
+                await db.query('UPDATE products SET image = ? WHERE id = ?', [image, existing[0].id]);
+                console.log('  Image added:', name);
+              } else { console.log('  Exists:', name); }
+              continue;
+            }
           await db.query(
             `INSERT INTO products (name, slug, description, price, category_id, seller_id, brand, state, warranty, stock, featured, specs, status, ville, approved, product_type, active, image)
               VALUES (?, ?, ?, ?, ?, 1, ?, ?, ?, ?, 1, ?, 'disponible', 'Casablanca', 1, 'store', 1, ?)`,
@@ -114,8 +120,15 @@ async function seed() {
     }
     let count = 0;
     for (const p of productsData) {
-      if (data.products.find(x => x.slug === p.slug)) { console.log('  Exists:', p.name); continue; }
       const { name, brand, category_id, state, warranty, stock, slug, price, description, image } = p;
+      const existingMock = data.products.find(x => x.slug === slug);
+      if (existingMock) {
+        if (!existingMock.image && image) {
+          existingMock.image = image;
+          console.log('  Image added:', name);
+        } else { console.log('  Exists:', name); }
+        continue;
+      }
       const id = data.nextId.products++;
       data.products.push({
         id, name, slug, description, price, category_id, seller_id: 1, brand, state, warranty, stock,
