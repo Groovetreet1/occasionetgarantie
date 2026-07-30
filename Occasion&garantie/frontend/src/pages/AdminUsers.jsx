@@ -1,6 +1,6 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useState, useRef } from 'react';
 import { Link } from 'react-router-dom';
-import { FiTrash2, FiArrowLeft, FiUsers as FiUsersIcon, FiShield, FiEdit3, FiSave, FiX, FiCheck, FiLock, FiUnlock } from 'react-icons/fi';
+import { FiTrash2, FiArrowLeft, FiUsers as FiUsersIcon, FiShield, FiEdit3, FiSave, FiX, FiCheck, FiLock, FiUnlock, FiMoreVertical } from 'react-icons/fi';
 import api from '../api/axios';
 import ConfirmModal from '../components/ConfirmModal';
 
@@ -16,6 +16,8 @@ export default function AdminUsers() {
   const [suspendModal, setSuspendModal] = useState(null);
   const [suspendReason, setSuspendReason] = useState('');
   const [suspendLoading, setSuspendLoading] = useState(false);
+  const [openMenu, setOpenMenu] = useState(null);
+  const menuRef = useRef(null);
 
   useEffect(() => {
     api.get('/admin/users')
@@ -79,6 +81,12 @@ export default function AdminUsers() {
       alert(err.response?.data?.message || 'Erreur');
     }
   };
+
+  useEffect(() => {
+    const handler = (e) => { if (menuRef.current && !menuRef.current.contains(e.target)) setOpenMenu(null); };
+    document.addEventListener('mousedown', handler);
+    return () => document.removeEventListener('mousedown', handler);
+  }, []);
 
   const formatDate = (d) => d ? new Date(d).toLocaleDateString('fr-FR', { day: 'numeric', month: 'short', year: 'numeric' }) : '-';
 
@@ -145,32 +153,52 @@ export default function AdminUsers() {
                       )}
                     </td>
                     <td style={{ padding: '10px 6px', fontSize: '11px', color: 'var(--text-secondary)' }}>{formatDate(u.created_at)}</td>
-                    <td style={{ padding: '10px 6px' }}>
-                      {u.role === 'seller' && (
-                        <button onClick={() => { setStoreModal(u); setNewStoreName(u.store_name || ''); }}
-                          className="btn" style={{ padding: '5px 10px', fontSize: '11px', background: 'rgba(59,130,246,0.15)', color: '#3b82f6', border: 'none', marginRight: 4 }}>
-                          <FiEdit3 size={12} /> Store
-                        </button>
+                    <td style={{ padding: '10px 6px', position: 'relative' }}>
+                      {u.id === 1 ? (
+                        <span style={{ color: 'var(--text-muted)', fontSize: '11px' }}>Super admin</span>
+                      ) : (
+                        <>
+                          <button onClick={() => setOpenMenu(openMenu === u.id ? null : u.id)}
+                            className="btn" style={{ padding: '6px 10px', fontSize: '11px', background: 'rgba(100,116,139,0.1)', color: 'var(--text-muted)', border: 'none', cursor: 'pointer', borderRadius: 8 }}>
+                            <FiMoreVertical size={16} />
+                          </button>
+                          {openMenu === u.id && (
+                            <div ref={menuRef} style={{ position: 'absolute', right: 0, top: '100%', background: 'var(--bg-card)', border: '1px solid var(--border)', borderRadius: 12, boxShadow: '0 8px 32px rgba(0,0,0,0.18)', zIndex: 999, minWidth: 160, padding: 6, marginTop: 4 }}>
+                              {u.role === 'seller' && (
+                                <button onClick={() => { setOpenMenu(null); setStoreModal(u); setNewStoreName(u.store_name || ''); }}
+                                  style={{ display: 'flex', alignItems: 'center', gap: 8, width: '100%', padding: '8px 12px', fontSize: '12px', background: 'none', border: 'none', color: '#3b82f6', cursor: 'pointer', borderRadius: 8, transition: 'background 0.15s' }}
+                                  onMouseEnter={e => e.currentTarget.style.background = 'rgba(59,130,246,0.08)'}
+                                  onMouseLeave={e => e.currentTarget.style.background = 'none'}>
+                                  <FiEdit3 size={14} /> Changer Store
+                                </button>
+                              )}
+                              {!u.suspended && (
+                                <button onClick={() => { setOpenMenu(null); setSuspendModal(u); }}
+                                  style={{ display: 'flex', alignItems: 'center', gap: 8, width: '100%', padding: '8px 12px', fontSize: '12px', background: 'none', border: 'none', color: '#d97706', cursor: 'pointer', borderRadius: 8 }}
+                                  onMouseEnter={e => e.currentTarget.style.background = 'rgba(245,158,11,0.08)'}
+                                  onMouseLeave={e => e.currentTarget.style.background = 'none'}>
+                                  <FiLock size={14} /> Suspendre
+                                </button>
+                              )}
+                              {u.suspended && (
+                                <button onClick={() => { setOpenMenu(null); handleUnsuspend(u); }}
+                                  style={{ display: 'flex', alignItems: 'center', gap: 8, width: '100%', padding: '8px 12px', fontSize: '12px', background: 'none', border: 'none', color: '#059669', cursor: 'pointer', borderRadius: 8 }}
+                                  onMouseEnter={e => e.currentTarget.style.background = 'rgba(5,150,105,0.08)'}
+                                  onMouseLeave={e => e.currentTarget.style.background = 'none'}>
+                                  <FiUnlock size={14} /> Debloquer
+                                </button>
+                              )}
+                              <div style={{ height: 1, background: 'var(--border)', margin: '4px 6px' }} />
+                              <button onClick={() => { setOpenMenu(null); setDeleteTarget({ id: u.id, name: u.full_name }); }} disabled={deleting === u.id}
+                                style={{ display: 'flex', alignItems: 'center', gap: 8, width: '100%', padding: '8px 12px', fontSize: '12px', background: 'none', border: 'none', color: 'var(--error)', cursor: 'pointer', borderRadius: 8 }}
+                                onMouseEnter={e => e.currentTarget.style.background = 'rgba(239,68,68,0.08)'}
+                                onMouseLeave={e => e.currentTarget.style.background = 'none'}>
+                                <FiTrash2 size={14} /> Supprimer
+                              </button>
+                            </div>
+                          )}
+                        </>
                       )}
-                      {u.id !== 1 && !u.suspended && (
-                        <button onClick={() => setSuspendModal(u)}
-                          className="btn" style={{ padding: '5px 10px', fontSize: '11px', background: 'rgba(245,158,11,0.15)', color: '#d97706', border: 'none', marginRight: 4 }}>
-                          <FiLock size={12} /> Suspendre
-                        </button>
-                      )}
-                      {u.id !== 1 && u.suspended && (
-                        <button onClick={() => handleUnsuspend(u)}
-                          className="btn" style={{ padding: '5px 10px', fontSize: '11px', background: 'rgba(5,150,105,0.15)', color: '#059669', border: 'none', marginRight: 4 }}>
-                          <FiUnlock size={12} /> Debloquer
-                        </button>
-                      )}
-                      {u.id !== 1 && (
-                        <button onClick={() => setDeleteTarget({ id: u.id, name: u.full_name })} disabled={deleting === u.id}
-                          className="btn" style={{ padding: '5px 10px', fontSize: '11px', background: 'rgba(239,68,68,0.15)', color: 'var(--error)', border: 'none' }}>
-                          {deleting === u.id ? '...' : <><FiTrash2 size={12} /> Supprimer</>}
-                        </button>
-                      )}
-                      {u.id === 1 && <span style={{ color: 'var(--text-muted)', fontSize: '11px' }}>Super admin</span>}
                     </td>
                   </tr>
                 ))}
