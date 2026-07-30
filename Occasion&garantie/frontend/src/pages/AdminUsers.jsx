@@ -104,7 +104,7 @@ export default function AdminUsers() {
           <div>
             <Link to="/admin" className="btn btn-ghost" style={{ marginBottom: '8px' }}><FiArrowLeft /> Dashboard</Link>
             <h1 style={{ fontSize: '28px', fontWeight: 800 }}>Gestion des Utilisateurs</h1>
-            <p style={{ color: 'var(--text-secondary)' }}>{total} utilisateur{total > 1 ? 's' : ''}</p>
+            
           </div>
         </div>
 
@@ -141,11 +141,11 @@ export default function AdminUsers() {
                     <td style={{ padding: '10px 6px' }}>{u.phone || '-'}</td>
                     <td style={{ padding: '10px 6px' }}>
                       {u.role === 'admin' ? (
-                        <span style={{ color: '#dc2626', display: 'flex', alignItems: 'center', gap: 4 }}><FiShield size={13} /> Admin</span>
+                        <span style={{ background: '#dc2626', color: '#fff', padding: '2px 10px', borderRadius: 6, display: 'inline-flex', alignItems: 'center', gap: 4, fontSize: 12, fontWeight: 600 }}><FiShield size={12} /> Admin</span>
                       ) : u.role === 'seller' ? (
-                        <span style={{ color: '#059669', fontWeight: 600 }}>Vendeur</span>
+                        <span style={{ background: '#059669', color: '#fff', padding: '2px 10px', borderRadius: 6, fontSize: 12, fontWeight: 600 }}>Vendeur</span>
                       ) : (
-                        <span style={{ color: 'var(--text-muted)' }}>Client</span>
+                        <span style={{ background: '#6b7280', color: '#fff', padding: '2px 10px', borderRadius: 6, fontSize: 12, fontWeight: 600 }}>Client</span>
                       )}
                     </td>
                     <td style={{ padding: '10px 6px', fontWeight: 700 }}>{Number(u.credit_balance || 0).toLocaleString()}</td>
