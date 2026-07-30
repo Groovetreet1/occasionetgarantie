@@ -67,10 +67,10 @@ async function resolveIp(ip, force) {
     return result;
   }
 
-  const json2 = await fetchJson(`http://ip-api.com/json/${ip}?fields=status,isp,org,country,regionName,city,lat,lon`);
+  const json2 = await fetchJson(`http://ip-api.com/json/${ip}?fields=status,isp,org,as,country,regionName,city,lat,lon`);
   if (json2 && json2.status === 'success') {
-    const org = (json2.org || json2.isp || '').toLowerCase();
-    const isDatacenter = !!(org.match(/aws|amazon|google cloud|gcp|azure|microsoft|digitalocean|linode|vultr|hetzner|ovh|scaleway|ionos|netcup|rackspace|softlayer|oracle cloud|ibm cloud|upcloud|kamatera|hostinger|contabo|googledc/));
+    const org = (json2.org || json2.isp || json2.as || '').toLowerCase();
+    const isDatacenter = !!(org.match(/aws|amazon|google cloud|gcp|azure|microsoft|digitalocean|linode|vultr|hetzner|ovh|scaleway|ionos|netcup|rackspace|softlayer|oracle cloud|ibm cloud|upcloud|kamatera|hostinger|contabo|googledc|datacenter|cloud|hosting|server|colo|dedicated/));
     const result = {
       isp: json2.isp || json2.org || 'Inconnu',
       city: json2.city || null,
@@ -78,6 +78,24 @@ async function resolveIp(ip, force) {
       country: json2.country || null,
       latitude: json2.lat || null,
       longitude: json2.lon || null,
+      isVpn: false,
+      isDatacenter,
+    };
+    CACHE[ip] = result;
+    return result;
+  }
+
+  const json3 = await fetchJson(`https://ipinfo.io/${ip}/json`);
+  if (json3 && json3.ip) {
+    const org = (json3.org || '').toLowerCase();
+    const isDatacenter = !!(org.match(/aws|amazon|google|gcp|azure|microsoft|digitalocean|linode|vultr|hetzner|ovh|scaleway|hostinger|contabo|datacenter|cloud|hosting|server/));
+    const result = {
+      isp: json3.org || 'Inconnu',
+      city: json3.city || null,
+      region: json3.region || null,
+      country: json3.country || null,
+      latitude: json3.loc ? parseFloat(json3.loc.split(',')[0]) : null,
+      longitude: json3.loc ? parseFloat(json3.loc.split(',')[1]) : null,
       isVpn: false,
       isDatacenter,
     };
