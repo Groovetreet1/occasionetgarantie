@@ -4,6 +4,7 @@ import { FiMessageCircle, FiSend, FiArrowLeft, FiUser, FiStar, FiTrash2, FiShopp
 import { BsWhatsapp } from 'react-icons/bs';
 import api from '../api/axios';
 import { useAuth } from '../context/AuthContext';
+import { toWhatsAppNumber } from '../utils/media';
 
 export default function Messenger() {
   const { id } = useParams();
@@ -235,7 +236,7 @@ export default function Messenger() {
                 </div>
                 {otherPhone && (
                   <a
-                    href={`https://wa.me/${otherPhone.replace(/^0+/, '')}?text=${waMsg}`}
+                    href={`https://wa.me/${toWhatsAppNumber(otherPhone)}?text=${waMsg}`}
                     target="_blank"
                     rel="noopener noreferrer"
                     className="messenger-wa-btn"

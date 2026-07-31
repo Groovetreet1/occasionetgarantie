@@ -4,6 +4,7 @@ import { Link } from 'react-router-dom';
 import { FiArrowLeft, FiSmartphone, FiClock, FiRefreshCw, FiCheck, FiX, FiPhone, FiMessageCircle, FiDollarSign, FiTrash2 } from 'react-icons/fi';
 import ConfirmModal from '../components/ConfirmModal';
 import api from '../api/axios';
+import { toWhatsAppNumber } from '../utils/media';
 
 const API_BASE = import.meta.env.VITE_API_URL || '';
 
@@ -231,7 +232,7 @@ export default function RepriseList() {
                         }}>
                           <FiPhone size={12} /> Appeler
                         </a>
-                        <a href={`https://wa.me/${r.phone.replace(/^0+/, '')}`} target="_blank" rel="noopener noreferrer"
+                        <a href={`https://wa.me/${toWhatsAppNumber(r.phone)}`} target="_blank" rel="noopener noreferrer"
                           className="btn btn-primary" style={{
                             fontSize: 11, padding: '5px 12px', background: '#25D366', textDecoration: 'none',
                           }}>

@@ -5,6 +5,7 @@ import { BsWhatsapp } from 'react-icons/bs';
 import api from '../api/axios';
 import { useAuth } from '../context/AuthContext';
 import SellerRating from '../components/SellerRating';
+import { toWhatsAppNumber } from '../utils/media';
 
 const stateLabels = {
   neuf: 'Neuf',
@@ -160,7 +161,7 @@ export default function ProductDetail() {
 
   const formatPrice = (p) => new Intl.NumberFormat('fr-FR', { style: 'currency', currency: 'MAD' }).format(p).replace('MAD', '').trim() + ' DH';  const API_BASE = import.meta.env.VITE_API_URL || '';
   const waMsg = encodeURIComponent(`Bonjour ! Je suis intéresse(e) par : ${product.name} (${formatPrice(product.price)})`);
-  const sellerPhone = product.seller_phone ? product.seller_phone.replace(/^0+/, '') : null;
+  const sellerPhone = toWhatsAppNumber(product.seller_phone);
   const waUrl = sellerPhone ? `https://wa.me/${sellerPhone}?text=${waMsg}` : null;
   let specs = {};
   try { specs = typeof product.specs === 'string' ? JSON.parse(product.specs) : (product.specs || {}); } catch (e) { specs = {}; }
