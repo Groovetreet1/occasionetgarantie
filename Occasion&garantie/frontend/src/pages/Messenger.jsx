@@ -16,6 +16,7 @@ export default function Messenger() {
   const [loading, setLoading] = useState(true);
   const [showMobileList, setShowMobileList] = useState(true);
   const [typingName, setTypingName] = useState('');
+  const [expandedMsgs, setExpandedMsgs] = useState({});
   const messagesEndRef = useRef(null);
   const messagesContainerRef = useRef(null);
   const inputRef = useRef(null);
@@ -226,9 +227,25 @@ export default function Messenger() {
                   </div>
                 ) : messages.map((msg) => {
                   const isMine = msg.sender_id === user.id;
+                  const isExpanded = !!expandedMsgs[msg.id];
+                  const isLong = msg.text.length > 20;
+                  const shownText = isLong && !isExpanded ? msg.text.slice(0, 20) + '…' : msg.text;
                   return (
                     <div key={msg.id} className={`messenger-msg ${isMine ? 'mine' : 'theirs'}`}>
-                      <div className="messenger-msg-text">{msg.text}</div>
+                      <div className="messenger-msg-text">{shownText}</div>
+                      {isLong && (
+                        <button
+                          onClick={() => setExpandedMsgs(s => ({ ...s, [msg.id]: !s[msg.id] }))}
+                          style={{
+                            background: 'none', border: 'none', cursor: 'pointer', padding: '2px 0 0',
+                            fontSize: '11px', fontWeight: 600, fontFamily: 'var(--font)',
+                            textDecoration: 'underline',
+                            color: isMine ? 'rgba(255,255,255,0.85)' : 'var(--primary)',
+                          }}
+                        >
+                          {isExpanded ? 'Afficher moins' : 'Afficher la suite'}
+                        </button>
+                      )}
                       <div className="messenger-msg-time">{new Date(msg.created_at).toLocaleTimeString('fr-FR', { hour: '2-digit', minute: '2-digit' })}</div>
                     </div>
                   );
