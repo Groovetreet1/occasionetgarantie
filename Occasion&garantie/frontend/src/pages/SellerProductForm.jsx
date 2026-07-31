@@ -135,6 +135,10 @@ export default function SellerProductForm() {
       setError('Le nom et le prix sont requis.');
       return;
     }
+    if (form.description && form.description.length > 150) {
+      setError('La description est limitée à 150 caractères maximum.');
+      return;
+    }
     setSaving(true);
     try {
       let image = existingImages[0] || null;
@@ -240,8 +244,8 @@ export default function SellerProductForm() {
               <div className="form-group">
                 <label>Description</label>
                 <textarea name="description" value={form.description} onChange={handleChange} className="form-control form-textarea"
-                  rows={5} placeholder="Décrivez l'état du produit..." />
-                <small className="text-secondary">{form.description.length} caractères</small>
+                  rows={5} maxLength={150} placeholder="Décrivez l'état du produit..." />
+                <small className="text-secondary">{form.description.length}/150 caractères</small>
               </div>
             </div>
 

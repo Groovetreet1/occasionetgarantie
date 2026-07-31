@@ -115,6 +115,9 @@ export default function AdminProductForm() {
     if (!form.description || form.description.length < 10) {
       return alert('Veuillez entrer une description complète (min. 10 caractères).');
     }
+    if (form.description.length > 150) {
+      return alert('La description est limitée à 150 caractères maximum.');
+    }
     const emptySpecs = Object.entries(form.specs).filter(([k, v]) => !v && k !== '').map(([k]) => k);
     if (emptySpecs.filter(k => ['Ecran','Processeur','RAM','Stockage'].includes(k)).length > 0) {
       return alert('Veuillez remplir les specs essentielles : Écran, Processeur, RAM, Stockage.');
@@ -168,7 +171,8 @@ export default function AdminProductForm() {
             </div>
             <div className="form-group" style={{ gridColumn: 'span 2' }}>
               <label>Description</label>
-              <textarea name="description" value={form.description} onChange={handleChange} rows={3} style={{ width: '100%', padding: '14px 16px', background: 'var(--bg-secondary)', border: '1px solid var(--border)', borderRadius: 'var(--radius)', color: 'var(--text-primary)', fontFamily: 'inherit', fontSize: '15px', resize: 'vertical' }} />
+              <textarea name="description" value={form.description} onChange={handleChange} rows={3} maxLength={150} style={{ width: '100%', padding: '14px 16px', background: 'var(--bg-secondary)', border: '1px solid var(--border)', borderRadius: 'var(--radius)', color: 'var(--text-primary)', fontFamily: 'inherit', fontSize: '15px', resize: 'vertical' }} />
+              <small className="text-secondary">{form.description.length}/150 caractères</small>
             </div>
             <div className="form-group">
               <label>Prix (DH)</label>

@@ -114,7 +114,8 @@ export default function SellerRating({ sellerId, currentUserId }) {
                     </button>
                   ))}
                 </div>
-                <textarea value={myComment} onChange={e => setMyComment(e.target.value)} placeholder="Votre commentaire (optionnel)" rows={2} style={{ width: '100%', padding: '10px', borderRadius: '8px', border: '1px solid var(--border)', background: 'var(--bg-card)', color: 'var(--text-primary)', fontFamily: 'inherit', fontSize: '13px', resize: 'vertical', marginBottom: '10px', boxSizing: 'border-box' }} />
+                <textarea value={myComment} onChange={e => setMyComment(e.target.value)} placeholder="Votre commentaire (optionnel)" rows={2} maxLength={150} style={{ width: '100%', padding: '10px', borderRadius: '8px', border: '1px solid var(--border)', background: 'var(--bg-card)', color: 'var(--text-primary)', fontFamily: 'inherit', fontSize: '13px', resize: 'vertical', marginBottom: '10px', boxSizing: 'border-box' }} />
+                <div style={{ fontSize: '11px', color: 'var(--text-muted)', marginBottom: '8px' }}>{myComment.length}/150 caractères</div>
                 <div style={{ display: 'flex', gap: '8px' }}>
                   <button type="submit" className="btn btn-primary" style={{ padding: '8px 20px', fontSize: '13px' }} disabled={submitting || myRating === 0}>
                     {submitting ? '...' : editId ? 'Modifier' : 'Publier'}

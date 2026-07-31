@@ -28,6 +28,7 @@ router.post('/', authenticate, async (req, res) => {
     const { seller_id, rating, comment } = req.body;
     if (!seller_id || !rating) return res.status(400).json({ message: 'seller_id et rating requis.' });
     if (rating < 1 || rating > 5) return res.status(400).json({ message: 'Rating must be 1-5.' });
+    if (comment && comment.length > 150) return res.status(400).json({ message: 'Commentaire limite a 150 caracteres maximum.' });
     if (req.user.id === seller_id) return res.status(400).json({ message: 'Vous ne pouvez pas vous noter vous-meme.' });
 
     const [sellers] = await pool.query('SELECT id, role FROM users WHERE id = ?', [seller_id]);
@@ -66,6 +67,7 @@ router.put('/:id', authenticate, async (req, res) => {
     const { rating, comment } = req.body;
     if (!rating) return res.status(400).json({ message: 'Rating requis.' });
     if (rating < 1 || rating > 5) return res.status(400).json({ message: 'Rating must be 1-5.' });
+    if (comment && comment.length > 150) return res.status(400).json({ message: 'Commentaire limite a 150 caracteres maximum.' });
 
     const [rows] = await pool.query('SELECT * FROM seller_ratings WHERE id = ?', [id]);
     if (rows.length === 0) return res.status(404).json({ message: 'Avis introuvable.' });

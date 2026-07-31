@@ -154,6 +154,7 @@ router.post('/', authenticate, async (req, res) => {
 
     const catError = await validateCategory(category_id);
     if (catError) return res.status(400).json({ message: catError });
+    if (description && description.length > 150) return res.status(400).json({ message: 'Description limitee a 150 caracteres maximum.' });
 
     // Credit deduction for sellers > 3 months (5% of price)
     if (req.user.role === 'seller' && price) {
@@ -218,6 +219,7 @@ router.put('/:id', authenticate, async (req, res) => {
       const catError = await validateCategory(category_id);
       if (catError) return res.status(400).json({ message: catError });
     }
+    if (description && description.length > 150) return res.status(400).json({ message: 'Description limitee a 150 caracteres maximum.' });
     const ptype = req.user.role === 'admin' && product_type === 'store' ? 'store' : 'vendor';
     await pool.query(
       `UPDATE products SET name=?, slug=?, description=?, price=?, old_price=?, category_id=?, brand=?, state=?, warranty=?, stock=?, featured=?, image=?, gallery=?, specs=?, status=?, ville=?, product_type=? WHERE id = ?`,
