@@ -294,11 +294,11 @@ export default function ProductDetail() {
 
               <p className="product-detail-desc">{product.description}</p>
 
-              {specs && Object.keys(specs).length > 0 && (
+              {specs && Object.keys(specs).length > 0 && Object.entries(specs).some(([, v]) => v !== null && v !== undefined && String(v).trim() !== '') && (
                 <div className="product-detail-specs">
                   <h3>Fiche technique</h3>
                   <div className="product-detail-specs-grid">
-                    {Object.entries(specs).map(([key, val]) => {
+                    {Object.entries(specs).filter(([, val]) => val !== null && val !== undefined && String(val).trim() !== '').map(([key, val]) => {
                       const Icon = specIcons[key] || FiCpu;
                       return (
                         <div key={key} style={{
