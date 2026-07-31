@@ -158,6 +158,30 @@ export default function ProductDetail() {
   const prevImage = () => setLightboxIndex((i) => (i - 1 + allImages.length) % allImages.length);
   const nextImage = () => setLightboxIndex((i) => (i + 1) % allImages.length);
 
+  const similarBlock = similar.length > 0 ? (
+    <div style={{ marginTop: '24px', border: '1px solid var(--border)', borderRadius: 'var(--radius)', padding: '16px', background: 'var(--bg-card)' }}>
+      <h3 style={{ fontSize: '15px', fontWeight: 700, marginBottom: '12px', display: 'flex', alignItems: 'center', gap: 6 }}>
+        <FiGrid size={16} style={{ color: 'var(--primary)' }} /> Produits similaires
+      </h3>
+      <div style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>
+        {similar.map(p => (
+          <Link key={p.id} to={`/products/${p.slug}`} style={{ display: 'flex', alignItems: 'center', gap: '12px', padding: '8px', borderRadius: 10, background: 'var(--bg-secondary)', textDecoration: 'none', color: 'var(--text)', border: '1px solid transparent', transition: 'all .2s' }} onMouseOver={(e) => e.currentTarget.style.borderColor = 'var(--primary)'} onMouseOut={(e) => e.currentTarget.style.borderColor = 'transparent'}>
+            <div style={{ width: 56, height: 56, borderRadius: 8, overflow: 'hidden', flexShrink: 0, background: '#fff', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+              {p.image ? <img src={p.image.startsWith('http') ? p.image : `${API_BASE}/uploads/${p.image}`} alt={p.name} style={{ width: '100%', height: '100%', objectFit: 'contain' }} /> : <FiShoppingBag size={22} style={{ opacity: 0.2 }} />}
+            </div>
+            <div style={{ minWidth: 0 }}>
+              <div style={{ fontSize: 13, fontWeight: 600, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{p.name}</div>
+              <div style={{ fontSize: 13, fontWeight: 700, color: 'var(--primary)', marginTop: 2 }}>
+                {formatPrice(p.price)}
+                {p.old_price && <span style={{ fontSize: 11, fontWeight: 500, color: 'var(--text-muted)', textDecoration: 'line-through', marginLeft: 6 }}>{formatPrice(p.old_price)}</span>}
+              </div>
+            </div>
+          </Link>
+        ))}
+      </div>
+    </div>
+  ) : null;
+
   return (
     <>
       <section className="product-detail-section">
@@ -185,29 +209,7 @@ export default function ProductDetail() {
                 </div>
               )}
 
-              {similar.length > 0 && (
-                <div style={{ marginTop: '24px', border: '1px solid var(--border)', borderRadius: 'var(--radius)', padding: '16px', background: 'var(--bg-card)' }}>
-                  <h3 style={{ fontSize: '15px', fontWeight: 700, marginBottom: '12px', display: 'flex', alignItems: 'center', gap: 6 }}>
-                    <FiGrid size={16} style={{ color: 'var(--primary)' }} /> Produits similaires
-                  </h3>
-                  <div style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>
-                    {similar.map(p => (
-                      <Link key={p.id} to={`/products/${p.slug}`} style={{ display: 'flex', alignItems: 'center', gap: '12px', padding: '8px', borderRadius: 10, background: 'var(--bg-secondary)', textDecoration: 'none', color: 'var(--text)', border: '1px solid transparent', transition: 'all .2s' }} onMouseOver={(e) => e.currentTarget.style.borderColor = 'var(--primary)'} onMouseOut={(e) => e.currentTarget.style.borderColor = 'transparent'}>
-                        <div style={{ width: 56, height: 56, borderRadius: 8, overflow: 'hidden', flexShrink: 0, background: '#fff', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-                          {p.image ? <img src={p.image.startsWith('http') ? p.image : `${API_BASE}/uploads/${p.image}`} alt={p.name} style={{ width: '100%', height: '100%', objectFit: 'contain' }} /> : <FiShoppingBag size={22} style={{ opacity: 0.2 }} />}
-                        </div>
-                        <div style={{ minWidth: 0 }}>
-                          <div style={{ fontSize: 13, fontWeight: 600, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{p.name}</div>
-                          <div style={{ fontSize: 13, fontWeight: 700, color: 'var(--primary)', marginTop: 2 }}>
-                            {formatPrice(p.price)}
-                            {p.old_price && <span style={{ fontSize: 11, fontWeight: 500, color: 'var(--text-muted)', textDecoration: 'line-through', marginLeft: 6 }}>{formatPrice(p.old_price)}</span>}
-                          </div>
-                        </div>
-                      </Link>
-                    ))}
-                  </div>
-                </div>
-              )}
+              <div className="similar-desktop">{similarBlock}</div>
             </div>
 
             <div>
@@ -444,6 +446,7 @@ export default function ProductDetail() {
         </div>
         <div className="container" style={{ paddingBottom: '40px' }}>
           {product.seller_id && <SellerRating sellerId={product.seller_id} currentUserId={user?.id} />}
+          <div className="similar-mobile">{similarBlock}</div>
         </div>
       </section>
 

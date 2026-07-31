@@ -695,7 +695,10 @@ input, textarea, select, button { font-family: inherit; }
 .product-detail-whatsapp:hover { transform: translateY(-2px); box-shadow: 0 8px 25px var(--primary-glow); }
 .product-detail-response { text-align: center; color: var(--text-muted); font-size: 13px; margin-top: 8px; }
 
+.similar-mobile { display: none; }
 @media (max-width: 768px) {
+  .similar-desktop { display: none; }
+  .similar-mobile { display: block; }
   .product-detail-grid { grid-template-columns: 1fr; gap: 28px; }
   .product-detail-name { font-size: 22px; }
   .product-detail-price .price-current { font-size: 26px; }
