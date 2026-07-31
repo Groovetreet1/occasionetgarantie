@@ -27,8 +27,16 @@ function SkeletonGrid({ count = 4 }) {
 
 const formatPrice = (p) => new Intl.NumberFormat('fr-FR', { style: 'currency', currency: 'MAD' }).format(p).replace('MAD', '').trim() + ' DH';
 
+const BRAND_LOGO_FALLBACKS = {
+  infinix: 'https://commons.wikimedia.org/wiki/Special:FilePath/Infinix_logo.svg',
+  poco: 'https://commons.wikimedia.org/wiki/Special:FilePath/POCO_logo.svg',
+};
+
 function BrandCircle({ brand }) {
   const [hasError, setHasError] = useState(false);
+  const slug = brand.toLowerCase().replace(/[^a-z0-9]/g, '');
+  const fallback = BRAND_LOGO_FALLBACKS[slug];
+  const src = fallback ? fallback : `https://cdn.simpleicons.org/${slug}`;
   return (
     <Link to={`/products?brand=${encodeURIComponent(brand)}`}
       style={{ flexShrink: 0, textDecoration: 'none', display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 6, transition: 'transform 0.2s' }}
@@ -36,7 +44,7 @@ function BrandCircle({ brand }) {
       onMouseLeave={e => e.currentTarget.style.transform = 'scale(1)'}>
       <div style={{ width: 56, height: 56, borderRadius: '50%', background: '#fff', border: '2px solid rgba(217,119,6,0.2)', display: 'flex', alignItems: 'center', justifyContent: 'center', overflow: 'hidden', fontSize: 18, fontWeight: 800, color: '#d97706' }}>
         {hasError ? brand.charAt(0).toUpperCase() : (
-          <img src={`https://cdn.simpleicons.org/${brand.toLowerCase().replace(/[^a-z0-9]/g, '')}`} alt={brand}
+          <img src={src} alt={brand}
             style={{ width: '70%', height: '70%', objectFit: 'contain' }}
             onError={() => setHasError(true)} />
         )}
