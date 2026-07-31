@@ -1,6 +1,6 @@
 import { useParams, Link, useNavigate } from 'react-router-dom';
 import { useEffect, useState, useRef } from 'react';
-import { FiArrowLeft, FiShoppingBag, FiShield, FiCheck, FiMonitor, FiCpu, FiHardDrive, FiBattery, FiCamera, FiDroplet, FiX, FiChevronLeft, FiChevronRight, FiUser, FiMessageCircle, FiStar, FiSmartphone, FiMapPin } from 'react-icons/fi';
+import { FiArrowLeft, FiShoppingBag, FiShield, FiCheck, FiMonitor, FiCpu, FiHardDrive, FiBattery, FiCamera, FiDroplet, FiX, FiChevronLeft, FiChevronRight, FiUser, FiMessageCircle, FiStar, FiSmartphone, FiMapPin, FiLock } from 'react-icons/fi';
 import { BsWhatsapp } from 'react-icons/bs';
 import api from '../api/axios';
 import { useAuth } from '../context/AuthContext';
@@ -326,40 +326,70 @@ export default function ProductDetail() {
                 </div>
               )}
 
-              {waUrl && (
-                <a
-                  href={waUrl}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="btn"
+              {!user && (
+                <div
                   style={{
-                    width: '100%', marginTop: '24px', background: '#25D366', color: 'white',
-                    fontSize: '18px', padding: '16px 36px', justifyContent: 'center',
-                    boxShadow: '0 4px 16px rgba(37,211,102,0.35)',
+                    width: '100%', marginTop: '24px', textAlign: 'center',
+                    background: 'var(--bg-card)', border: '1px solid var(--border)',
+                    borderRadius: 'var(--radius)', padding: '24px 20px',
                   }}
-                  onMouseOver={(e) => e.currentTarget.style.background = '#1da851'}
-                  onMouseOut={(e) => e.currentTarget.style.background = '#25D366'}
                 >
-                  <BsWhatsapp size={22} /> Contacter le vendeur
-                </a>
+                  <FiLock size={28} style={{ color: 'var(--primary)', opacity: 0.9 }} />
+                  <div style={{ fontSize: '15px', fontWeight: 700, marginTop: '10px' }}>
+                    Connectez-vous pour contacter le vendeur
+                  </div>
+                  <p style={{ fontSize: '13px', color: 'var(--text-muted)', margin: '6px auto 16px', maxWidth: '280px' }}>
+                    Creez un compte gratuit pour voir les coordonnees du vendeur et lui envoyer un message.
+                  </p>
+                  <div style={{ display: 'flex', gap: '8px', justifyContent: 'center', flexWrap: 'wrap' }}>
+                    <Link to="/login" className="btn btn-primary" style={{ padding: '10px 24px', fontSize: '14px' }}>
+                      Se connecter
+                    </Link>
+                    <Link to="/signup" className="btn" style={{ padding: '10px 24px', fontSize: '14px' }}>
+                      Creer un compte
+                    </Link>
+                  </div>
+                </div>
               )}
 
-              {product.seller_id && (
-                <button
-                  onClick={handleStartChat}
-                  className="btn"
-                  style={{
-                    width: '100%', marginTop: '12px',
-                    background: 'var(--gradient)', color: 'white',
-                    fontSize: '16px', padding: '14px 36px', justifyContent: 'center',
-                    border: 'none', cursor: 'pointer', fontFamily: 'var(--font)',
-                    boxShadow: 'var(--shadow-glow)',
-                  }}
-                  onMouseOver={(e) => e.currentTarget.style.background = 'var(--gradient-hover)'}
-                  onMouseOut={(e) => e.currentTarget.style.background = 'var(--gradient)'}
-                >
-                  <FiMessageCircle size={20} /> Envoyer un message
-                </button>
+              {user && user.id !== product.seller_id && (
+                <>
+                  {waUrl && (
+                    <a
+                      href={waUrl}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="btn"
+                      style={{
+                        width: '100%', marginTop: '24px', background: '#25D366', color: 'white',
+                        fontSize: '18px', padding: '16px 36px', justifyContent: 'center',
+                        boxShadow: '0 4px 16px rgba(37,211,102,0.35)',
+                      }}
+                      onMouseOver={(e) => e.currentTarget.style.background = '#1da851'}
+                      onMouseOut={(e) => e.currentTarget.style.background = '#25D366'}
+                    >
+                      <BsWhatsapp size={22} /> Contacter le vendeur
+                    </a>
+                  )}
+
+                  {product.seller_id && (
+                    <button
+                      onClick={handleStartChat}
+                      className="btn"
+                      style={{
+                        width: '100%', marginTop: '12px',
+                        background: 'var(--gradient)', color: 'white',
+                        fontSize: '16px', padding: '14px 36px', justifyContent: 'center',
+                        border: 'none', cursor: 'pointer', fontFamily: 'var(--font)',
+                        boxShadow: 'var(--shadow-glow)',
+                      }}
+                      onMouseOver={(e) => e.currentTarget.style.background = 'var(--gradient-hover)'}
+                      onMouseOut={(e) => e.currentTarget.style.background = 'var(--gradient)'}
+                    >
+                      <FiMessageCircle size={20} /> Envoyer un message
+                    </button>
+                  )}
+                </>
               )}
             </div>
           </div>

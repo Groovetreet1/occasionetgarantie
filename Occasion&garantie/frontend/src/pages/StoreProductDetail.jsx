@@ -1,13 +1,15 @@
 import { useParams, Link } from 'react-router-dom';
 import { useEffect, useState } from 'react';
-import { FiArrowLeft, FiShoppingBag, FiCheck, FiMonitor, FiCpu, FiHardDrive, FiBattery, FiCamera, FiDroplet, FiX, FiChevronLeft, FiChevronRight, FiSend, FiCheckCircle, FiShield } from 'react-icons/fi';
+import { FiArrowLeft, FiShoppingBag, FiCheck, FiMonitor, FiCpu, FiHardDrive, FiBattery, FiCamera, FiDroplet, FiX, FiChevronLeft, FiChevronRight, FiSend, FiCheckCircle, FiShield, FiLock } from 'react-icons/fi';
 import api from '../api/axios';
+import { useAuth } from '../context/AuthContext';
 
 const stateLabels = { neuf: 'Neuf', comme_neuf: 'Comme neuf', tres_bon: 'Très bon état', bon: 'Bon état', acceptable: 'État acceptable' };
 const specIcons = { Ecran: FiMonitor, Processeur: FiCpu, RAM: FiHardDrive, Stockage: FiHardDrive, Batterie: FiBattery, Appareil: FiCamera, Couleur: FiDroplet, GPU: FiMonitor, OS: FiMonitor };
 
 export default function StoreProductDetail() {
   const { slug } = useParams();
+  const { user } = useAuth();
   const [product, setProduct] = useState(null);
   const [loading, setLoading] = useState(true);
   const [lightboxIndex, setLightboxIndex] = useState(0);
@@ -103,7 +105,31 @@ export default function StoreProductDetail() {
             <div style={{ marginTop: 24, borderTop: '1px solid var(--border)', paddingTop: 20 }}>
               <h3 style={{ fontSize: 16, fontWeight: 700, marginBottom: 4 }}>Vous etes interesse ?</h3>
               <p style={{ fontSize: 13, color: 'var(--text-secondary)', marginBottom: 16 }}>Laissez vos coordonnees, nous vous contacterons.</p>
-              {done ? (
+              {!user ? (
+                <div
+                  style={{
+                    width: '100%', marginTop: 24, textAlign: 'center',
+                    background: 'var(--bg-card)', border: '1px solid var(--border)',
+                    borderRadius: 'var(--radius)', padding: '24px 20px',
+                  }}
+                >
+                  <FiLock size={28} style={{ color: 'var(--primary)', opacity: 0.9 }} />
+                  <div style={{ fontSize: '15px', fontWeight: 700, marginTop: '10px' }}>
+                    Connectez-vous pour etre contacte
+                  </div>
+                  <p style={{ fontSize: '13px', color: 'var(--text-muted)', margin: '6px auto 16px', maxWidth: '280px' }}>
+                    Creez un compte gratuit pour nous envoyer votre demande.
+                  </p>
+                  <div style={{ display: 'flex', gap: '8px', justifyContent: 'center', flexWrap: 'wrap' }}>
+                    <Link to="/login" className="btn btn-primary" style={{ padding: '10px 24px', fontSize: '14px' }}>
+                      Se connecter
+                    </Link>
+                    <Link to="/signup" className="btn" style={{ padding: '10px 24px', fontSize: '14px' }}>
+                      Creer un compte
+                    </Link>
+                  </div>
+                </div>
+              ) : done ? (
                 <div style={{ textAlign: 'center', padding: 24, background: 'rgba(16,185,129,0.1)', borderRadius: 12 }}>
                   <FiCheckCircle size={40} style={{ color: '#10b981', marginBottom: 8 }} />
                   <div style={{ fontSize: 14, color: '#10b981', fontWeight: 600 }}>Message envoye ! Nous vous contacterons dans les plus brefs delais.</div>
