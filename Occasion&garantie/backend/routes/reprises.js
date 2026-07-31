@@ -172,11 +172,17 @@ router.post('/estimate', (req, res) => {
       const basePrice = originalPrice || referencePrice;
       const priceSource = originalPrice ? 'original' : referenceSource;
 
-      // 3) Steep depreciation for the Moroccan used market (not applied for brand new)
+      // 3) Depreciation depends on the device segment: premium phones keep their value,
+      //    budget phones drop steeply (Moroccan used market).
       const currentYear = new Date().getFullYear();
       const age = Math.max(1, currentYear - (parseInt(year, 10) || currentYear));
-      const MOROCCO_AGE_FACTOR = [1, 0.7, 0.58, 0.47, 0.38, 0.31, 0.25, 0.2, 0.16, 0.13, 0.11, 0.1];
-      const ageFactor = isNew ? 1 : MOROCCO_AGE_FACTOR[Math.min(age, MOROCCO_AGE_FACTOR.length - 1)];
+      const segment = basePrice >= 6000 ? 'premium' : basePrice >= 2500 ? 'mid' : 'budget';
+      const AGE_FACTORS = {
+        premium: [1, 0.88, 0.8, 0.73, 0.67, 0.6, 0.54, 0.48, 0.42, 0.37, 0.33, 0.3],
+        mid: [1, 0.78, 0.65, 0.55, 0.46, 0.4, 0.35, 0.3, 0.26, 0.22, 0.19, 0.16],
+        budget: [1, 0.7, 0.58, 0.47, 0.38, 0.31, 0.25, 0.2, 0.16, 0.13, 0.11, 0.1],
+      };
+      const ageFactor = isNew ? 1 : AGE_FACTORS[segment][Math.min(age, AGE_FACTORS[segment].length - 1)];
       const ageYears = isNew ? 0 : age;
 
       // 4) Brand demand factor (only lowers used value, never below its real base for new)
@@ -206,6 +212,7 @@ router.post('/estimate', (req, res) => {
         reference_price: Math.round(basePrice),
         reference_source: priceSource,
         kind: isNew ? 'neuf' : 'occasion',
+        segment,
         age_years: ageYears,
         condition: conditionState,
         condition_label: conditionLabel,

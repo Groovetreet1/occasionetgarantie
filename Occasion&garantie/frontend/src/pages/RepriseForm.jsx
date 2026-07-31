@@ -228,6 +228,10 @@ export default function RepriseForm() {
                   <strong>{estimate.kind === 'neuf' ? 'Neuf (plein prix)' : 'Occasion'}{estimate.kind !== 'neuf' ? ` - ${estimate.condition_label}` : ''}</strong>
                 </div>
                 <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: 13 }}>
+                  <span style={{ color: 'var(--text-secondary)' }}>Gamme du telephone</span>
+                  <strong>{estimate.segment === 'premium' ? 'Haut de gamme' : estimate.segment === 'mid' ? 'Milieu de gamme' : 'Entree de gamme'}</strong>
+                </div>
+                <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: 13 }}>
                   <span style={{ color: 'var(--text-secondary)' }}>Demande pour la marque {brand}</span>
                   <strong>{estimate.factors.brand >= 1 ? `+${Math.round((estimate.factors.brand - 1) * 100)}%` : `-${Math.round((1 - estimate.factors.brand) * 100)}%`}</strong>
                 </div>
