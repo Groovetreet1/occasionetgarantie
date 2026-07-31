@@ -117,8 +117,9 @@ router.post('/estimate', (req, res) => {
   uploadFields(req, res, async (err) => {
     if (err) return res.status(400).json({ message: err.message });
     try {
-      const { brand, model, year } = req.body;
+      const { brand, model, year, kind } = req.body;
       if (!brand || !model) return res.status(400).json({ message: 'Marque et modele requis.' });
+      const isNew = kind === 'neuf';
 
       // 1) Analyze condition with Hugging Face (from the uploaded photos)
       const front = req.files?.front?.[0] || req.files?.back?.[0] || req.files?.side?.[0] || req.files?.screen?.[0];
@@ -166,11 +167,12 @@ router.post('/estimate', (req, res) => {
 
       if (!referencePrice) referencePrice = 4500;
 
-      // 3) Depreciation by age
+      // 3) Depreciation by age (not applied for brand new devices)
       const currentYear = new Date().getFullYear();
       const age = Math.max(1, currentYear - (parseInt(year, 10) || currentYear));
       const AGE_FACTOR = [1, 0.85, 0.72, 0.6, 0.5, 0.42, 0.35, 0.3, 0.26, 0.22, 0.18, 0.15];
-      const ageFactor = AGE_FACTOR[Math.min(age, AGE_FACTOR.length - 1)];
+      const ageFactor = isNew ? 1 : AGE_FACTOR[Math.min(age, AGE_FACTOR.length - 1)];
+      const ageYears = isNew ? 0 : age;
 
       // 4) Brand demand factor
       const BRAND_FACTOR = {
@@ -180,12 +182,15 @@ router.post('/estimate', (req, res) => {
       };
       const brandFactor = BRAND_FACTOR[String(brand).toLowerCase()] ?? 0.9;
 
-      // 5) Condition factor (from HF, or default)
-      const conditionFactor = condition ? condition.factor : 0.83;
-      const conditionState = condition ? condition.state : 'tres_bon';
-      const conditionLabel = condition ? condition.label : 'Etat estime par defaut';
+      // 5) Condition factor (from HF, or default) - full price for brand new
+      const conditionFactor = isNew ? 1 : (condition ? condition.factor : 0.83);
+      const conditionState = isNew ? 'neuf' : (condition ? condition.state : 'tres_bon');
+      const conditionLabel = isNew ? 'Telephone neuf (plein prix)' : (condition ? condition.label : 'Etat estime par defaut');
 
-      let estimate = referencePrice * ageFactor * conditionFactor * brandFactor;
+      // 6) New vs used market factor
+      const kindFactor = isNew ? 1 : 0.75;
+
+      let estimate = referencePrice * ageFactor * conditionFactor * brandFactor * kindFactor;
       estimate = Math.round(estimate / 50) * 50;
       const rangeMin = Math.round((estimate * 0.88) / 50) * 50;
       const rangeMax = Math.round((estimate * 1.12) / 50) * 50;
@@ -196,13 +201,16 @@ router.post('/estimate', (req, res) => {
         range_max: rangeMax,
         reference_price: Math.round(referencePrice),
         reference_source: referenceSource,
-        age_years: age,
+        kind: isNew ? 'neuf' : 'occasion',
+        age_years: ageYears,
         condition: conditionState,
         condition_label: conditionLabel,
         condition_score: condition ? condition.score : null,
-        condition_source: condition ? 'huggingface' : 'default',
-        factors: { age: ageFactor, state: conditionFactor, brand: brandFactor },
-        message: 'Estimation indicative basee sur l analyse des photos et les prix du marche.',
+        condition_source: isNew ? 'neuf' : (condition ? 'huggingface' : 'default'),
+        factors: { age: ageFactor, state: conditionFactor, brand: brandFactor, kind: kindFactor },
+        message: isNew
+          ? 'Estimation du prix de ce telephone neuf.'
+          : 'Estimation du prix de marche de ce telephone d occasion, basee sur l analyse des photos.',
       });
     } catch (e) {
       console.error('Estimate error:', e.message);

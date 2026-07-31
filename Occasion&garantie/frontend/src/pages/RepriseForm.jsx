@@ -23,6 +23,7 @@ export default function RepriseForm() {
   const [done, setDone] = useState(false);
   const [estimating, setEstimating] = useState(false);
   const [estimate, setEstimate] = useState(null);
+  const [kind, setKind] = useState('occasion');
   const fileRef = useRef(null);
 
   const handlePhoto = (e) => {
@@ -42,6 +43,7 @@ export default function RepriseForm() {
       const fd = new FormData();
       fd.append('brand', brand);
       fd.append('model', model);
+      fd.append('kind', kind);
       for (const [key, file] of Object.entries(photos)) fd.append(key, file);
       const { data } = await api.post('/reprises/estimate', fd, { headers: { 'Content-Type': 'multipart/form-data' } });
       setEstimate(data);
@@ -105,6 +107,28 @@ export default function RepriseForm() {
             style={{ padding: '12px 16px', borderRadius: 10, border: '1px solid var(--border)', background: 'var(--bg-card)', color: 'var(--text)', fontSize: 14, fontFamily: 'var(--font)' }} />
           <input type="text" placeholder="IMEI (optionnel, 15 chiffres)" value={imei} onChange={e => setImei(e.target.value.replace(/\D/g, '').slice(0, 15))}
             style={{ padding: '12px 16px', borderRadius: 10, border: '1px solid var(--border)', background: 'var(--bg-card)', color: 'var(--text)', fontSize: 14, fontFamily: 'var(--font)' }} />
+
+          <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
+            <label style={{ fontSize: 13, fontWeight: 600 }}>Votre telephone est-il neuf ou d'occasion ?</label>
+            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 8 }}>
+              <button type="button" onClick={() => setKind('neuf')}
+                style={{
+                  padding: '12px 8px', borderRadius: 10, cursor: 'pointer', fontFamily: 'var(--font)', fontSize: 14, fontWeight: 600,
+                  border: kind === 'neuf' ? '2px solid var(--primary)' : '1px solid var(--border)',
+                  background: kind === 'neuf' ? 'rgba(99,102,241,0.1)' : 'var(--bg-card)', color: 'var(--text)',
+                }}>
+                Neuf
+              </button>
+              <button type="button" onClick={() => setKind('occasion')}
+                style={{
+                  padding: '12px 8px', borderRadius: 10, cursor: 'pointer', fontFamily: 'var(--font)', fontSize: 14, fontWeight: 600,
+                  border: kind === 'occasion' ? '2px solid var(--primary)' : '1px solid var(--border)',
+                  background: kind === 'occasion' ? 'rgba(99,102,241,0.1)' : 'var(--bg-card)', color: 'var(--text)',
+                }}>
+                Occasion
+              </button>
+            </div>
+          </div>
 
           <div style={{ marginTop: 20 }}>
             <h3 style={{ fontSize: 16, fontWeight: 700, marginBottom: 12 }}>Photos guidees</h3>
@@ -181,8 +205,8 @@ export default function RepriseForm() {
                   <strong style={{ color: 'var(--error)' }}>-{Math.round((1 - estimate.factors.age) * 100)}%</strong>
                 </div>
                 <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: 13 }}>
-                  <span style={{ color: 'var(--text-secondary)' }}>Etat detecte par l'IA</span>
-                  <strong>{estimate.condition_label}</strong>
+                  <span style={{ color: 'var(--text-secondary)' }}>Type / etat</span>
+                  <strong>{estimate.kind === 'neuf' ? 'Neuf (plein prix)' : 'Occasion'}{estimate.kind !== 'neuf' ? ` - ${estimate.condition_label}` : ''}</strong>
                 </div>
                 <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: 13 }}>
                   <span style={{ color: 'var(--text-secondary)' }}>Demande pour la marque {brand}</span>
