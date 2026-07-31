@@ -109,6 +109,7 @@ export default function Messenger() {
   };
 
   const handleInputChange = (e) => {
+    if (e.target.value.length > 100) return;
     setText(e.target.value);
     clearTimeout(typingDebounceRef.current);
     typingDebounceRef.current = setTimeout(sendTyping, 300);
@@ -268,12 +269,14 @@ export default function Messenger() {
                   onChange={handleInputChange}
                   onKeyDown={handleKeyDown}
                   disabled={sending}
+                  maxLength={100}
                   className="messenger-input"
                 />
                 <button onClick={handleSend} disabled={!text.trim() || sending} className="messenger-send-btn">
                   <FiSend size={18} />
                 </button>
               </div>
+              <div style={{ textAlign: 'right', padding: '2px 20px 8px', fontSize: 11, color: 'var(--text-muted)' }}>{text.length}/100</div>
             </>
           )}
         </div>

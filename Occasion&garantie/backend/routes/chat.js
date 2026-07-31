@@ -163,6 +163,7 @@ router.post('/conversations/:id/messages', authenticate, async (req, res) => {
   try {
     const { text } = req.body;
     if (!text || !text.trim()) return res.status(400).json({ message: 'Message requis.' });
+    if (text.trim().length > 100) return res.status(400).json({ message: 'Le message ne doit pas dépasser 100 caractères.' });
 
     const [convs] = await pool.query(
       'SELECT * FROM conversations WHERE id = ? AND (buyer_id = ? OR seller_id = ?)',
