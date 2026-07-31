@@ -1615,11 +1615,13 @@ select.form-control, .form-group select { cursor: pointer; appearance: auto; }
 /* ============ Messenger ============ */
 .messenger-page {
   min-height: calc(100vh - var(--nav-height));
+  min-height: calc(100dvh - var(--nav-height));
   padding-top: var(--nav-height);
   background: var(--bg);
 }
 .messenger-container {
   display: flex; height: calc(100vh - var(--nav-height));
+  height: calc(100dvh - var(--nav-height));
   max-width: 1200px; margin: 0 auto;
   border-left: 1px solid var(--border);
   border-right: 1px solid var(--border);

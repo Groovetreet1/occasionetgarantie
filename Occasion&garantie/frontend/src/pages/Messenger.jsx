@@ -117,13 +117,14 @@ export default function Messenger() {
   const handleSend = async () => {
     if (!text.trim() || !activeConv || sending) return;
     setSending(true);
+    const wasNearBottom = isNearBottom();
     const msgText = text.trim();
     setText('');
     try {
       const { data } = await api.post(`/chat/conversations/${activeConv}/messages`, { text: msgText });
       prevMsgCountRef.current++;
       setMessages((prev) => [...prev, data]);
-      setTimeout(scrollToBottom, 100);
+      if (wasNearBottom) setTimeout(scrollToBottom, 100);
       loadConversations();
       setTimeout(() => inputRef.current?.focus(), 100);
     } catch (err) {
