@@ -27,7 +27,7 @@ export default function About() {
     if (!cfMsg.trim()) return;
     setCfLoading(true);
     try {
-      await api.post('/contact', { message: cfMsg });
+      await api.post('/contact', { message: cfMsg, name: (user?.fullName || user?.full_name || ''), email: user?.email });
       setCfDone(true);
       setCfMsg('');
     } catch (err) {
