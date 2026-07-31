@@ -17,6 +17,7 @@ export default function Messenger() {
   const [showMobileList, setShowMobileList] = useState(true);
   const [typingName, setTypingName] = useState('');
   const [expandedMsgs, setExpandedMsgs] = useState({});
+  const [deleteTarget, setDeleteTarget] = useState(null);
   const justOpenedRef = useRef(false);
   const messagesEndRef = useRef(null);
   const messagesContainerRef = useRef(null);
@@ -140,9 +141,7 @@ export default function Messenger() {
     if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); handleSend(); }
   };
 
-  const handleDeleteConv = async (convId, e) => {
-    e.stopPropagation();
-    if (!window.confirm('Supprimer cette conversation définitivement ?')) return;
+  const handleDeleteConv = async (convId) => {
     try {
       await api.delete(`/chat/conversations/${convId}`);
       setConversations((prev) => prev.filter(c => c.id !== convId));
@@ -151,7 +150,9 @@ export default function Messenger() {
         setMessages([]);
         setShowMobileList(true);
       }
+      setDeleteTarget(null);
     } catch (err) {
+      setDeleteTarget(null);
       alert(err.response?.data?.message || 'Erreur');
     }
   };
@@ -180,7 +181,6 @@ export default function Messenger() {
               </div>
             ) : conversations.map((c) => {
               const isActive = Number(activeConv) === c.id;
-              const lastMsg = c.last_message || 'Aucun message';
               const lastTime = c.last_message_at ? new Date(c.last_message_at).toLocaleDateString('fr-FR', { day: 'numeric', month: 'short' }) : '';
               const convOtherName = user && c.seller_id === user.id ? c.buyer_name : c.seller_name;
               return (
@@ -191,20 +191,19 @@ export default function Messenger() {
                 >
                   <div className="messenger-conv-avatar"><FiUser size={18} /></div>
                   <div className="messenger-conv-info">
-                    <div className="messenger-conv-name">
-                      {convOtherName}
-                      {c.product_name && <span className="messenger-conv-product"><FiShoppingBag size={10} /> {c.product_name}</span>}
-                    </div>
-                    <div className="messenger-conv-last">{lastMsg}</div>
+                    <div className="messenger-conv-name">{convOtherName}</div>
+                    {c.product_name && <div className="messenger-conv-product"><FiShoppingBag size={11} /> {c.product_name}</div>}
                   </div>
-                  <button
-                    className="messenger-conv-delete"
-                    onClick={(e) => handleDeleteConv(c.id, e)}
-                    title="Supprimer la conversation"
-                  >
-                    <FiTrash2 size={15} />
-                  </button>
-                  {lastTime && <div className="messenger-conv-time">{lastTime}</div>}
+                  <div className="messenger-conv-side">
+                    {lastTime && <div className="messenger-conv-time">{lastTime}</div>}
+                    <button
+                      className="messenger-conv-delete"
+                      onClick={(e) => { e.stopPropagation(); setDeleteTarget(c.id); }}
+                      title="Supprimer la conversation"
+                    >
+                      <FiTrash2 size={15} />
+                    </button>
+                  </div>
                 </div>
               );
             })}
@@ -306,6 +305,22 @@ export default function Messenger() {
           )}
         </div>
       </div>
+
+      {deleteTarget && (
+        <div className="messenger-confirm-overlay" onClick={() => setDeleteTarget(null)}>
+          <div className="messenger-confirm" onClick={(e) => e.stopPropagation()}>
+            <div className="messenger-confirm-icon"><FiTrash2 size={26} /></div>
+            <h3>Supprimer la conversation ?</h3>
+            <p>Cette conversation et tous ses messages seront supprimés définitivement. Cette action est irréversible.</p>
+            <div className="messenger-confirm-actions">
+              <button className="btn" onClick={() => setDeleteTarget(null)}>Annuler</button>
+              <button className="messenger-confirm-delete-btn" onClick={() => handleDeleteConv(deleteTarget)}>
+                <FiTrash2 size={15} /> Supprimer
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </section>
   );
 }
