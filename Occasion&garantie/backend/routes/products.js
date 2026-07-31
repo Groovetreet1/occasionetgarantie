@@ -117,6 +117,31 @@ router.get('/id/:id', authenticate, async (req, res) => {
   }
 });
 
+router.get('/cities', async (req, res) => {
+  try {
+    const [rows] = await pool.query('SELECT DISTINCT ville FROM products WHERE ville IS NOT NULL AND ville != "" AND active = TRUE AND status = "disponible" ORDER BY ville');
+    res.json(rows.map(r => r.ville));
+  } catch (err) {
+    res.json([]);
+  }
+});
+
+router.get('/brands/list', async (req, res) => {
+  try {
+    const [rows] = await pool.query("SELECT DISTINCT TRIM(brand) as brand FROM products WHERE brand IS NOT NULL AND brand != '' AND active = TRUE AND status = 'disponible' AND approved = TRUE");
+    const seen = new Set();
+    const brands = rows.map(r => r.brand).filter(Boolean).map(b => b.trim()).filter(b => {
+      const lower = b.toLowerCase();
+      if (seen.has(lower)) return false;
+      seen.add(lower);
+      return true;
+    }).sort();
+    res.json(brands);
+  } catch (err) {
+    res.json([]);
+  }
+});
+
 // Public: single product by slug (show any status)
 router.get('/:slug', async (req, res) => {
   try {
@@ -300,31 +325,6 @@ router.delete('/:id', authenticate, async (req, res) => {
     res.json({ message: 'Produit supprimé.' });
   } catch (err) {
     res.status(500).json({ message: 'Erreur serveur.' });
-  }
-});
-
-router.get('/cities', async (req, res) => {
-  try {
-    const [rows] = await pool.query('SELECT DISTINCT ville FROM products WHERE ville IS NOT NULL AND ville != "" AND active = TRUE AND status = "disponible" ORDER BY ville');
-    res.json(rows.map(r => r.ville));
-  } catch (err) {
-    res.json([]);
-  }
-});
-
-router.get('/brands/list', async (req, res) => {
-  try {
-    const [rows] = await pool.query("SELECT DISTINCT TRIM(brand) as brand FROM products WHERE brand IS NOT NULL AND brand != '' AND active = TRUE AND status = 'disponible' AND approved = TRUE");
-    const seen = new Set();
-    const brands = rows.map(r => r.brand).filter(Boolean).map(b => b.trim()).filter(b => {
-      const lower = b.toLowerCase();
-      if (seen.has(lower)) return false;
-      seen.add(lower);
-      return true;
-    }).sort();
-    res.json(brands);
-  } catch (err) {
-    res.json([]);
   }
 });
 
