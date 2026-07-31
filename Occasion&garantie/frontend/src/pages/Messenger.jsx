@@ -17,6 +17,7 @@ export default function Messenger() {
   const [showMobileList, setShowMobileList] = useState(true);
   const [typingName, setTypingName] = useState('');
   const [expandedMsgs, setExpandedMsgs] = useState({});
+  const justOpenedRef = useRef(false);
   const messagesEndRef = useRef(null);
   const messagesContainerRef = useRef(null);
   const inputRef = useRef(null);
@@ -25,9 +26,9 @@ export default function Messenger() {
   const prevMsgCountRef = useRef(0);
 
   const scrollToBottom = (smooth = true) => {
-    setTimeout(() => {
-      messagesEndRef.current?.scrollIntoView({ behavior: smooth ? 'smooth' : 'instant' });
-    }, 50);
+    const el = messagesContainerRef.current;
+    if (!el) return;
+    el.scrollTo({ top: el.scrollHeight, behavior: smooth ? 'smooth' : 'auto' });
   };
 
   const isNearBottom = () => {
@@ -50,6 +51,7 @@ export default function Messenger() {
 
   useEffect(() => {
     if (activeConv) {
+      justOpenedRef.current = true;
       loadMessages();
       checkTyping();
       clearInterval(pollRef.current);
@@ -63,9 +65,9 @@ export default function Messenger() {
   }, [activeConv]);
 
   useEffect(() => {
-    if (messages.length === 0) return;
-    if (messages.length > prevMsgCountRef.current) {
-      if (isNearBottom()) scrollToBottom(true);
+    if (justOpenedRef.current && messages.length > 0) {
+      justOpenedRef.current = false;
+      scrollToBottom(false);
     }
     prevMsgCountRef.current = messages.length;
   }, [messages]);
