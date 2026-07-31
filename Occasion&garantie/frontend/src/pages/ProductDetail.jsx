@@ -245,11 +245,12 @@ export default function ProductDetail() {
                 {user && user.id !== product.seller_id && (
                   <button
                     onClick={() => { setShowNegotiate(true); setNegDone(false); setNegError(''); }}
-                    className="btn"
+                    className="btn negotiate-btn"
                     style={{
-                      background: 'transparent', border: '1.5px solid var(--primary)', color: 'var(--primary)',
+                      background: 'var(--gradient)', border: 'none', color: '#fff',
                       fontSize: '13px', padding: '8px 14px', borderRadius: 10, cursor: 'pointer',
-                      fontFamily: 'var(--font)', fontWeight: 600, whiteSpace: 'nowrap',
+                      fontFamily: 'var(--font)', fontWeight: 700, whiteSpace: 'nowrap',
+                      boxShadow: '0 4px 14px var(--primary-glow)',
                     }}
                   >
                     <FiMessageCircle size={14} style={{ marginRight: 4, verticalAlign: 'middle' }} /> Négocier le prix
