@@ -109,7 +109,7 @@ export default function Products() {
               <Link to="/boutique" style={{ fontSize: 13, color: '#d97706', fontWeight: 600, textDecoration: 'none' }}>Voir tout <FiArrowRight size={14} style={{ verticalAlign: 'middle' }} /></Link>
             </div>
             <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(160px, 1fr))', gap: 12 }}>
-              {storeProducts.slice(0, 4).map(p => (
+              {storeProducts.slice(0, 6).map(p => (
                 <Link key={p.id} to={`/boutique/${p.slug}`} style={{ textDecoration: 'none', background: 'var(--bg-card)', borderRadius: 'var(--radius)', overflow: 'hidden', border: '1px solid var(--border)', transition: 'transform 0.2s', display: 'block' }}
                   onMouseEnter={e => e.currentTarget.style.transform = 'translateY(-2px)'}
                   onMouseLeave={e => e.currentTarget.style.transform = 'none'}>
