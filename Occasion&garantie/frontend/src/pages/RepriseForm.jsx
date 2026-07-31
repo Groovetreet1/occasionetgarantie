@@ -24,7 +24,13 @@ export default function RepriseForm() {
   const [estimating, setEstimating] = useState(false);
   const [estimate, setEstimate] = useState(null);
   const [kind, setKind] = useState('occasion');
+  const [originalPrice, setOriginalPrice] = useState('');
+  const [year, setYear] = useState(new Date().getFullYear());
   const fileRef = useRef(null);
+
+  const years = [];
+  const curYear = new Date().getFullYear();
+  for (let y = curYear; y >= curYear - 10; y--) years.push(y);
 
   const handlePhoto = (e) => {
     const file = e.target.files[0];
@@ -44,6 +50,8 @@ export default function RepriseForm() {
       fd.append('brand', brand);
       fd.append('model', model);
       fd.append('kind', kind);
+      fd.append('year', year);
+      if (originalPrice) fd.append('original_price', originalPrice);
       for (const [key, file] of Object.entries(photos)) fd.append(key, file);
       const { data } = await api.post('/reprises/estimate', fd, { headers: { 'Content-Type': 'multipart/form-data' } });
       setEstimate(data);
@@ -130,6 +138,17 @@ export default function RepriseForm() {
             </div>
           </div>
 
+          <input type="number" placeholder="Prix d'achat neuf en DH (optionnel, ex: 2000)" value={originalPrice} onChange={e => setOriginalPrice(e.target.value.replace(/[^\d]/g, '').slice(0, 6))}
+            style={{ padding: '12px 16px', borderRadius: 10, border: '1px solid var(--border)', background: 'var(--bg-card)', color: 'var(--text)', fontSize: 14, fontFamily: 'var(--font)' }} />
+
+          <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
+            <label style={{ fontSize: 13, fontWeight: 600 }}>Annee d'achat</label>
+            <select value={year} onChange={e => setYear(Number(e.target.value))}
+              style={{ padding: '12px 16px', borderRadius: 10, border: '1px solid var(--border)', background: 'var(--bg-card)', color: 'var(--text)', fontSize: 14, fontFamily: 'var(--font)' }}>
+              {years.map(y => <option key={y} value={y}>{y}</option>)}
+            </select>
+          </div>
+
           <div style={{ marginTop: 20 }}>
             <h3 style={{ fontSize: 16, fontWeight: 700, marginBottom: 12 }}>Photos guidees</h3>
             <div style={{ display: 'flex', gap: 8, marginBottom: 16 }}>
@@ -197,7 +216,7 @@ export default function RepriseForm() {
               </div>
               <div style={{ padding: '16px', display: 'flex', flexDirection: 'column', gap: 8 }}>
                 <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: 13 }}>
-                  <span style={{ color: 'var(--text-secondary)' }}>Prix de reference (marche actuel)</span>
+                  <span style={{ color: 'var(--text-secondary)' }}>{estimate.reference_source === 'original' ? "Prix d'achat neuf" : 'Prix de reference (marche)'}</span>
                   <strong>{formatPrice(estimate.reference_price)}</strong>
                 </div>
                 <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: 13 }}>

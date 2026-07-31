@@ -117,9 +117,10 @@ router.post('/estimate', (req, res) => {
   uploadFields(req, res, async (err) => {
     if (err) return res.status(400).json({ message: err.message });
     try {
-      const { brand, model, year, kind } = req.body;
+      const { brand, model, year, kind, original_price } = req.body;
       if (!brand || !model) return res.status(400).json({ message: 'Marque et modele requis.' });
       const isNew = kind === 'neuf';
+      const originalPrice = parseFloat(original_price) > 0 ? parseFloat(original_price) : null;
 
       // 1) Analyze condition with Hugging Face (from the uploaded photos)
       const front = req.files?.front?.[0] || req.files?.back?.[0] || req.files?.side?.[0] || req.files?.screen?.[0];
@@ -167,14 +168,18 @@ router.post('/estimate', (req, res) => {
 
       if (!referencePrice) referencePrice = 4500;
 
-      // 3) Depreciation by age (not applied for brand new devices)
+      // Base price: original purchase price if provided, otherwise market reference
+      const basePrice = originalPrice || referencePrice;
+      const priceSource = originalPrice ? 'original' : referenceSource;
+
+      // 3) Steep depreciation for the Moroccan used market (not applied for brand new)
       const currentYear = new Date().getFullYear();
       const age = Math.max(1, currentYear - (parseInt(year, 10) || currentYear));
-      const AGE_FACTOR = [1, 0.85, 0.72, 0.6, 0.5, 0.42, 0.35, 0.3, 0.26, 0.22, 0.18, 0.15];
-      const ageFactor = isNew ? 1 : AGE_FACTOR[Math.min(age, AGE_FACTOR.length - 1)];
+      const MOROCCO_AGE_FACTOR = [1, 0.7, 0.58, 0.47, 0.38, 0.31, 0.25, 0.2, 0.16, 0.13, 0.11, 0.1];
+      const ageFactor = isNew ? 1 : MOROCCO_AGE_FACTOR[Math.min(age, MOROCCO_AGE_FACTOR.length - 1)];
       const ageYears = isNew ? 0 : age;
 
-      // 4) Brand demand factor
+      // 4) Brand demand factor (only lowers used value, never below its real base for new)
       const BRAND_FACTOR = {
         apple: 1.15, samsung: 1.0, google: 0.98, pixel: 0.98, oneplus: 0.95,
         xiaomi: 0.85, redmi: 0.85, poco: 0.85, oppo: 0.82, realme: 0.82, vivo: 0.82,
@@ -187,11 +192,10 @@ router.post('/estimate', (req, res) => {
       const conditionState = isNew ? 'neuf' : (condition ? condition.state : 'tres_bon');
       const conditionLabel = isNew ? 'Telephone neuf (plein prix)' : (condition ? condition.label : 'Etat estime par defaut');
 
-      // 6) New vs used market factor
-      const kindFactor = isNew ? 1 : 0.75;
-
-      let estimate = referencePrice * ageFactor * conditionFactor * brandFactor * kindFactor;
-      estimate = Math.round(estimate / 50) * 50;
+      // 6) Final calculation: new keeps its base price, used depreciates steeply
+      const estimateRaw = isNew ? basePrice : basePrice * ageFactor * conditionFactor * brandFactor;
+      let estimate = Math.round(estimateRaw / 50) * 50;
+      estimate = Math.max(100, estimate);
       const rangeMin = Math.round((estimate * 0.88) / 50) * 50;
       const rangeMax = Math.round((estimate * 1.12) / 50) * 50;
 
@@ -199,18 +203,18 @@ router.post('/estimate', (req, res) => {
         estimated_price: estimate,
         range_min: rangeMin,
         range_max: rangeMax,
-        reference_price: Math.round(referencePrice),
-        reference_source: referenceSource,
+        reference_price: Math.round(basePrice),
+        reference_source: priceSource,
         kind: isNew ? 'neuf' : 'occasion',
         age_years: ageYears,
         condition: conditionState,
         condition_label: conditionLabel,
         condition_score: condition ? condition.score : null,
         condition_source: isNew ? 'neuf' : (condition ? 'huggingface' : 'default'),
-        factors: { age: ageFactor, state: conditionFactor, brand: brandFactor, kind: kindFactor },
+        factors: { age: ageFactor, state: conditionFactor, brand: brandFactor, kind: 1 },
         message: isNew
           ? 'Estimation du prix de ce telephone neuf.'
-          : 'Estimation du prix de marche de ce telephone d occasion, basee sur l analyse des photos.',
+          : 'Estimation du prix de marche d occasion au Maroc, basee sur l analyse des photos.',
       });
     } catch (e) {
       console.error('Estimate error:', e.message);
