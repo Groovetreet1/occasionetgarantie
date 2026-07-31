@@ -278,12 +278,17 @@ export default function ProductDetail() {
                       Reprise soumise ! Le vendeur va vous contacter.
                     </div>
                   ) : !showReprise ? (
-                    <button onClick={() => setShowReprise(true)} className="btn" style={{
-                      width: '100%', background: 'transparent', border: '2px dashed var(--primary)', color: 'var(--primary)',
-                      fontSize: '14px', padding: '12px', justifyContent: 'center', borderRadius: 10, cursor: 'pointer', fontFamily: 'var(--font)',
-                    }}>
-                      <FiSmartphone size={18} /> Proposer une reprise pour mon telephone
-                    </button>
+                    <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
+                      <button onClick={() => setShowReprise(true)} className="btn" style={{
+                        width: '100%', background: 'transparent', border: '2px dashed var(--primary)', color: 'var(--primary)',
+                        fontSize: '14px', padding: '12px', justifyContent: 'center', borderRadius: 10, cursor: 'pointer', fontFamily: 'var(--font)',
+                      }}>
+                        <FiSmartphone size={18} /> Proposer une reprise pour mon telephone
+                      </button>
+                      <Link to="/reprise" style={{ width: '100%', textAlign: 'center', fontSize: '13px', fontWeight: 600, color: 'var(--text-muted)', textDecoration: 'underline' }}>
+                        Estimer la valeur de mon appareil sur le marche
+                      </Link>
+                    </div>
                   ) : (
                     <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
                       <div style={{ fontSize: 14, fontWeight: 700, display: 'flex', alignItems: 'center', gap: 6 }}>
