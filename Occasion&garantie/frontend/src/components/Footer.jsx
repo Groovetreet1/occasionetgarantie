@@ -20,6 +20,12 @@ export default function Footer() {
             <h4>Navigation</h4>
             <Link to="/">Accueil</Link>
             <Link to="/products">Produits</Link>
+            <Link to="/boutique">Boutique officielle</Link>
+            <Link to="/products?category=Smartphones">Smartphones</Link>
+            <Link to="/products?category=Tablettes">Tablettes</Link>
+            <Link to="/products?category=Ordinateurs">Ordinateurs</Link>
+            <Link to="/products?category=Accessoires">Accessoires</Link>
+            <Link to="/products?category=Gaming">Gaming</Link>
             <Link to="/about">À propos</Link>
           </div>
           <div className="footer-col">
