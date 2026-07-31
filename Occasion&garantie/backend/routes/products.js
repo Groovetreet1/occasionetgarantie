@@ -156,19 +156,19 @@ router.post('/', authenticate, async (req, res) => {
     if (catError) return res.status(400).json({ message: catError });
     if (description && description.length > 150) return res.status(400).json({ message: 'Description limitee a 150 caracteres maximum.' });
 
-    // Credit deduction for sellers > 3 months (5% of price)
-    if (req.user.role === 'seller' && price) {
+    // Commission fixe de 2 DH (20 credits) pour les vendeurs > 3 mois
+    if (req.user.role === 'seller') {
       try {
         const [sellers] = await pool.query('SELECT created_at, credit_balance FROM users WHERE id = ?', [sellerId]);
         if (sellers.length > 0) {
           const monthsSinceCreation = (Date.now() - new Date(sellers[0].created_at).getTime()) / (1000 * 60 * 60 * 24 * 30.44);
           if (monthsSinceCreation > 3) {
-            const creditCost = Math.ceil(Number(price) * 0.05 * 10);
+            const creditCost = 20;
             if (sellers[0].credit_balance < creditCost) {
-              return res.status(400).json({ message: `Credits insuffisants. Besoin de ${creditCost} credits (5% du prix). Ajoutez des credits depuis votre tableau de bord.` });
+              return res.status(400).json({ message: `Credits insuffisants. Besoin de ${creditCost} credits (2 DH) pour publier une annonce. Ajoutez des credits depuis votre tableau de bord.` });
             }
             await pool.query('UPDATE users SET credit_balance = credit_balance - ? WHERE id = ?', [creditCost, sellerId]);
-            await pool.query('INSERT INTO credit_transactions (user_id, type, amount, description) VALUES (?, ?, ?, ?)', [sellerId, 'deduction', -creditCost, `Deduction 5% sur "${name}" (${price} DH)`]);
+            await pool.query('INSERT INTO credit_transactions (user_id, type, amount, description) VALUES (?, ?, ?, ?)', [sellerId, 'deduction', -creditCost, `Commission 2 DH sur "${name}"`]);
           }
         }
       } catch (e) {

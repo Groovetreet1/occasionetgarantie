@@ -176,7 +176,7 @@ export default function SellerDashboard() {
             <div>
               <div style={{ fontSize: 12, color: 'var(--text-muted)', marginBottom: 2 }}>Solde credits</div>
               <div style={{ fontSize: 22, fontWeight: 700, color: 'var(--primary)' }}>{creditBalance} <span style={{ fontSize: 13, fontWeight: 400, color: 'var(--text-secondary)' }}>crédits</span></div>
-              <div style={{ fontSize: 11, color: 'var(--text-muted)' }}>1 credit = 0.10 DH — 5% du prix déduit par annonce</div>
+              <div style={{ fontSize: 11, color: 'var(--text-muted)' }}>1 credit = 0.10 DH — 2 DH (20 credits) par annonce</div>
             </div>
             <button className="btn btn-primary" onClick={() => setShowBuyCredits(true)} style={{ whiteSpace: 'nowrap' }}>
               <FiCreditCard size={16} /> Acheter des credits
@@ -264,7 +264,7 @@ export default function SellerDashboard() {
             <div style={{ position: 'fixed', inset: 0, background: 'rgba(0,0,0,0.5)', zIndex: 1000, display: 'flex', alignItems: 'center', justifyContent: 'center', padding: 16 }} onClick={() => setShowBuyCredits(false)}>
               <div style={{ background: 'var(--bg-card)', borderRadius: 16, padding: 24, maxWidth: 400, width: '100%', boxShadow: '0 20px 60px rgba(0,0,0,0.3)' }} onClick={(e) => e.stopPropagation()}>
                 <h3 style={{ fontSize: 18, marginBottom: 8 }}>Acheter des credits</h3>
-                <p style={{ fontSize: 13, color: 'var(--text-secondary)', marginBottom: 16 }}>1000 credits = 100 DH. Le credit est deduit automatiquement (5% du prix) a chaque creation d'annonce apres la periode gratuite de 3 mois.</p>
+                <p style={{ fontSize: 13, color: 'var(--text-secondary)', marginBottom: 16 }}>1000 credits = 100 DH. Une commission fixe de 2 DH (20 credits) est deduite automatiquement a chaque creation d'annonce apres la periode gratuite de 3 mois.</p>
                 <div className="form-group">
                   <label>Montant (DH)</label>
                   <div style={{ display: 'flex', gap: 8 }}>
