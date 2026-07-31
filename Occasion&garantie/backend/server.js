@@ -109,6 +109,22 @@ const { ensureTables } = require('./services/tracker');
     console.log('installments table check skipped:', e.message);
   }
   try {
+    await pool.query(`CREATE TABLE IF NOT EXISTS negotiations (
+      id INT AUTO_INCREMENT PRIMARY KEY,
+      product_id INT NOT NULL,
+      buyer_id INT NOT NULL,
+      seller_id INT NOT NULL,
+      offered_price DECIMAL(10,2) NOT NULL,
+      message VARCHAR(500),
+      status VARCHAR(20) DEFAULT 'en_attente',
+      created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+      updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
+    )`);
+    console.log('negotiations table ready');
+  } catch (e) {
+    console.log('negotiations table check skipped:', e.message);
+  }
+  try {
     await pool.query("UPDATE users SET email = 'contact@contact.occasionetgarantie.store' WHERE email = 'admin@og.fr'");
     console.log('Admin email migrated');
   } catch {}
@@ -166,6 +182,7 @@ const { ensureTables } = require('./services/tracker');
   app.use('/api/ratings', require('./routes/ratings'));
   app.use('/api/public', require('./routes/public'));
   app.use('/api/reprises', require('./routes/reprises'));
+  app.use('/api/negotiations', require('./routes/negotiations'));
   app.use('/api/notifications', require('./routes/notifications'));
   app.use('/api/store', require('./routes/store'));
 

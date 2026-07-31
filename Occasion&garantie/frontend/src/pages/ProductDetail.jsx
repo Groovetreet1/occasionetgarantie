@@ -39,6 +39,12 @@ export default function ProductDetail() {
   const [repDone, setRepDone] = useState(false);
   const [vendorReprises, setVendorReprises] = useState([]);
   const [similar, setSimilar] = useState([]);
+  const [showNegotiate, setShowNegotiate] = useState(false);
+  const [offerPrice, setOfferPrice] = useState('');
+  const [offerMessage, setOfferMessage] = useState('');
+  const [negotiating, setNegotiating] = useState(false);
+  const [negDone, setNegDone] = useState(false);
+  const [negError, setNegError] = useState('');
   const repFileRef = useRef(null);
 
   useEffect(() => {
@@ -137,8 +143,22 @@ export default function ProductDetail() {
     setSubmittingRep(false);
   };
 
-  const formatPrice = (p) => new Intl.NumberFormat('fr-FR', { style: 'currency', currency: 'MAD' }).format(p).replace('MAD', '').trim() + ' DH';
-  const API_BASE = import.meta.env.VITE_API_URL || '';
+  const submitNegotiate = async () => {
+    if (!user) { navigate('/login'); return; }
+    const price = parseFloat(offerPrice);
+    if (!price || price <= 0) { setNegError('Entrez un prix valide.'); return; }
+    setNegError('');
+    setNegotiating(true);
+    try {
+      await api.post('/negotiations', { product_id: product.id, offered_price: price, message: offerMessage.trim() || null });
+      setNegDone(true);
+    } catch (e) {
+      setNegError(e?.response?.data?.message || "Erreur lors de l'envoi");
+    }
+    setNegotiating(false);
+  };
+
+  const formatPrice = (p) => new Intl.NumberFormat('fr-FR', { style: 'currency', currency: 'MAD' }).format(p).replace('MAD', '').trim() + ' DH';  const API_BASE = import.meta.env.VITE_API_URL || '';
   const waMsg = encodeURIComponent(`Bonjour ! Je suis intéresse(e) par : ${product.name} (${formatPrice(product.price)})`);
   const sellerPhone = product.seller_phone ? product.seller_phone.replace(/^0+/, '') : null;
   const waUrl = sellerPhone ? `https://wa.me/${sellerPhone}?text=${waMsg}` : null;
@@ -222,7 +242,47 @@ export default function ProductDetail() {
               <div className="product-detail-price">
                 <span className="price-current">{formatPrice(product.price)}</span>
                 {product.old_price && <span className="price-old">{formatPrice(product.old_price)}</span>}
+                {user && user.id !== product.seller_id && (
+                  <button
+                    onClick={() => { setShowNegotiate(true); setNegDone(false); setNegError(''); }}
+                    className="btn"
+                    style={{
+                      background: 'transparent', border: '1.5px solid var(--primary)', color: 'var(--primary)',
+                      fontSize: '13px', padding: '8px 14px', borderRadius: 10, cursor: 'pointer',
+                      fontFamily: 'var(--font)', fontWeight: 600, whiteSpace: 'nowrap',
+                    }}
+                  >
+                    <FiMessageCircle size={14} style={{ marginRight: 4, verticalAlign: 'middle' }} /> Négocier le prix
+                  </button>
+                )}
               </div>
+
+              {showNegotiate && (
+                <div style={{ margin: '12px 0', padding: '16px', border: '1px solid var(--border)', borderRadius: 12, background: 'var(--bg-card)' }}>
+                  {negDone ? (
+                    <div style={{ textAlign: 'center', padding: '12px', background: 'rgba(16,185,129,0.1)', borderRadius: 10, fontSize: 14, color: '#10b981', fontWeight: 600 }}>
+                      Offre envoyée ! Le vendeur va vous répondre.
+                    </div>
+                  ) : (
+                    <>
+                      <div style={{ fontSize: 14, fontWeight: 700, marginBottom: 10, display: 'flex', alignItems: 'center', gap: 6 }}>
+                        <FiMessageCircle size={16} /> Proposer un prix
+                      </div>
+                      <input type="number" min="0" placeholder={`Votre prix (actuel : ${product.price} DH)`} value={offerPrice} onChange={e => setOfferPrice(e.target.value)}
+                        style={{ width: '100%', padding: '10px 14px', borderRadius: 8, border: '1px solid var(--border)', background: 'var(--bg-secondary)', color: 'var(--text)', fontSize: 13, fontFamily: 'var(--font)', marginBottom: 8, boxSizing: 'border-box' }} />
+                      <textarea placeholder="Message (optionnel)" value={offerMessage} onChange={e => setOfferMessage(e.target.value)} rows={2} maxLength={500}
+                        style={{ width: '100%', padding: '10px 14px', borderRadius: 8, border: '1px solid var(--border)', background: 'var(--bg-secondary)', color: 'var(--text)', fontSize: 13, fontFamily: 'var(--font)', resize: 'vertical', marginBottom: 8, boxSizing: 'border-box' }} />
+                      {negError && <div style={{ fontSize: 12, color: '#ef4444', marginBottom: 8 }}>{negError}</div>}
+                      <div style={{ display: 'flex', gap: 6 }}>
+                        <button onClick={submitNegotiate} disabled={negotiating} className="btn btn-primary" style={{ fontSize: 13, padding: '10px 18px' }}>
+                          {negotiating ? 'Envoi...' : 'Envoyer l\'offre'}
+                        </button>
+                        <button onClick={() => { setShowNegotiate(false); setOfferPrice(''); setOfferMessage(''); setNegError(''); }} className="btn btn-ghost" style={{ fontSize: 13, padding: '10px 18px' }}>Annuler</button>
+                      </div>
+                    </>
+                  )}
+                </div>
+              )}
 
               <div className="product-detail-tags">
                 <span className="product-detail-tag state">{stateLabels[product.state] || product.state}</span>

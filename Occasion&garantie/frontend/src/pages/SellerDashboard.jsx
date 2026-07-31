@@ -1,7 +1,7 @@
 import { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
-import { FiPlus, FiEdit2, FiTrash2, FiPackage, FiCheckCircle, FiPercent, FiCreditCard, FiDollarSign, FiX, FiCopy, FiCheck, FiUpload, FiLock, FiStar, FiSmartphone, FiArrowRight, FiClock, FiAlertCircle, FiEye, FiInfo } from 'react-icons/fi';
+import { FiPlus, FiEdit2, FiTrash2, FiPackage, FiCheckCircle, FiPercent, FiCreditCard, FiDollarSign, FiX, FiCopy, FiCheck, FiUpload, FiLock, FiStar, FiSmartphone, FiArrowRight, FiClock, FiAlertCircle, FiEye, FiInfo, FiMessageCircle } from 'react-icons/fi';
 import api from '../api/axios';
 import { useAuth } from '../context/AuthContext';
 import SellerNav from '../components/SellerNav';
@@ -39,6 +39,7 @@ export default function SellerDashboard() {
   const [copiedField, setCopiedField] = useState(null);
   const [sellerRatings, setSellerRatings] = useState(null);
   const [pendingReprises, setPendingReprises] = useState([]);
+  const [negotiations, setNegotiations] = useState([]);
   const [rejectedPopup, setRejectedPopup] = useState(null);
   const [deleteTarget, setDeleteTarget] = useState(null);
   const [deleteRejectedTarget, setDeleteRejectedTarget] = useState(null);
@@ -51,16 +52,27 @@ export default function SellerDashboard() {
       api.get('/auth/my-credits'),
       api.get('/ratings/my'),
       api.get('/reprises'),
+      api.get('/negotiations/vendor'),
     ]).then((results) => {
-      const [p, pr, c, cr, r, reps] = results;
+      const [p, pr, c, cr, r, reps, negs] = results;
       if (p.status === 'fulfilled') { setProfile(p.value.data); setStoreName(p.value.data.store_name || ''); }
       if (reps.status === 'fulfilled') setPendingReprises(reps.value.data.filter(x => x.status === 'en_attente' || x.status === 'estime'));
       if (pr.status === 'fulfilled') setProducts(pr.value.data);
       if (c.status === 'fulfilled') setCommissions(c.value.data);
       if (cr.status === 'fulfilled') setCreditBalance(cr.value.data.credit_balance);
       if (r.status === 'fulfilled' && r.value?.data) setSellerRatings(r.value.data);
+      if (negs.status === 'fulfilled') setNegotiations(negs.value.data);
     }).finally(() => setLoading(false));
   }, [user?.id]);
+
+  const handleNegotiation = async (id, status) => {
+    try {
+      await api.put(`/negotiations/${id}`, { status });
+      setNegotiations(prev => prev.map(n => n.id === id ? { ...n, status } : n));
+    } catch (err) {
+      alert(err.response?.data?.message || 'Erreur');
+    }
+  };
 
   const handleBuyCredits = async () => {
     setBuyLoading(true);
@@ -326,9 +338,43 @@ export default function SellerDashboard() {
             </div>
           )}
 
+          {negotiations.filter(n => n.status === 'en_attente').length > 0 && (
+            <div style={{ background: 'var(--bg-card)', border: '1px solid var(--border)', borderRadius: 'var(--radius-lg)', padding: 16, marginTop: 16 }}>
+              <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 12 }}>
+                <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+                  <FiMessageCircle size={18} style={{ color: 'var(--primary)' }} />
+                  <span style={{ fontWeight: 700, fontSize: 15 }}>Négociations de prix ({negotiations.filter(n => n.status === 'en_attente').length})</span>
+                </div>
+              </div>
+              <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
+                {negotiations.filter(n => n.status === 'en_attente').slice(0, 5).map(n => (
+                  <div key={n.id} style={{
+                    display: 'flex', alignItems: 'center', gap: 10, padding: '10px 12px',
+                    background: 'var(--bg-secondary)', borderRadius: 10, fontSize: 13, flexWrap: 'wrap',
+                  }}>
+                    <div style={{ flex: 1, minWidth: 180 }}>
+                      <div style={{ fontWeight: 600 }}>{n.product_name}</div>
+                      <div style={{ fontSize: 11, color: 'var(--text-muted)' }}>
+                        {n.buyer_name} — propose <strong style={{ color: 'var(--primary)' }}>{Number(n.offered_price)} DH</strong>
+                        {n.message && ` — "${n.message}"`}
+                      </div>
+                    </div>
+                    <div style={{ display: 'flex', gap: 6 }}>
+                      <button onClick={() => handleNegotiation(n.id, 'acceptee')} className="btn" style={{ fontSize: 12, padding: '6px 12px', background: '#10b981', color: '#fff', border: 'none' }}>
+                        <FiCheck size={13} style={{ verticalAlign: 'middle', marginRight: 3 }} /> Accepter
+                      </button>
+                      <button onClick={() => handleNegotiation(n.id, 'refusee')} className="btn" style={{ fontSize: 12, padding: '6px 12px', background: 'transparent', color: '#ef4444', border: '1.5px solid #ef4444' }}>
+                        <FiX size={13} style={{ verticalAlign: 'middle', marginRight: 3 }} /> Refuser
+                      </button>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </div>
+          )}
+
           <div className="dashboard-products">
-          <h3>Mes annonces ({products.length})</h3>
-          {products.length === 0 ? (
+          <h3>Mes annonces ({products.length})</h3>          {products.length === 0 ? (
             <div className="empty-state">
               <FiPackage size={48} />
               <p>Vous n'avez aucune annonce. Créez votre premier produit !</p>
