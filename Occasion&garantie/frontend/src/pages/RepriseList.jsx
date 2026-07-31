@@ -1,4 +1,5 @@
 import { useEffect, useState } from 'react';
+import { motion, AnimatePresence } from 'framer-motion';
 import { Link } from 'react-router-dom';
 import { FiArrowLeft, FiSmartphone, FiClock, FiRefreshCw, FiCheck, FiX, FiPhone, FiMessageCircle, FiDollarSign, FiTrash2 } from 'react-icons/fi';
 import ConfirmModal from '../components/ConfirmModal';
@@ -253,34 +254,42 @@ export default function RepriseList() {
         )}
       </div>
 
-      {refuseTarget && (
-        <div style={{ position: 'fixed', inset: 0, background: 'rgba(0,0,0,0.5)', zIndex: 99999, display: 'flex', alignItems: 'center', justifyContent: 'center', padding: 16 }}
-          onClick={() => setRefuseTarget(null)}>
-          <div onClick={e => e.stopPropagation()} style={{
-            background: 'var(--bg-card)', borderRadius: 20, padding: 28, maxWidth: 380, width: '100%',
-            boxShadow: '0 25px 80px rgba(0,0,0,0.35)',
-          }}>
-            <div style={{ width: 56, height: 56, borderRadius: '50%', background: 'rgba(239,68,68,0.1)', display: 'flex', alignItems: 'center', justifyContent: 'center', margin: '0 auto 16px' }}>
-              <FiX size={26} color="#ef4444" />
-            </div>
-            <h3 style={{ fontSize: 18, fontWeight: 700, textAlign: 'center', marginBottom: 8 }}>Refuser la reprise</h3>
-            <p style={{ fontSize: 14, color: 'var(--text-secondary)', textAlign: 'center', marginBottom: 20, lineHeight: 1.5 }}>
-              Vous pouvez ajouter une raison optionnelle.
-            </p>
-            <textarea value={refuseReason} onChange={e => setRefuseReason(e.target.value)} placeholder="Raison du refus..."
-              style={{ width: '100%', minHeight: 80, padding: 12, borderRadius: 10, border: '1px solid var(--border)', background: 'var(--bg-card)', color: 'var(--text)', fontSize: 14, resize: 'vertical', fontFamily: 'var(--font)', marginBottom: 16 }} />
-            <div style={{ display: 'flex', gap: 10 }}>
-              <button onClick={() => setRefuseTarget(null)} className="btn btn-outline" style={{ flex: 1, justifyContent: 'center', padding: '10px 0' }}>
-                Annuler
-              </button>
-              <button onClick={() => { update(refuseTarget, { status: 'refuse', vendor_notes: refuseReason || null }); setRefuseTarget(null); }}
-                className="form-submit" style={{ flex: 1, justifyContent: 'center', padding: '10px 0', background: '#ef4444', borderColor: '#ef4444' }}>
-                <FiX size={14} /> Refuser
-              </button>
-            </div>
-          </div>
-        </div>
-      )}
+      <AnimatePresence>
+        {refuseTarget && (
+          <motion.div
+            initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}
+            style={{ position: 'fixed', inset: 0, background: 'rgba(0,0,0,0.5)', zIndex: 99999, display: 'flex', alignItems: 'center', justifyContent: 'center', padding: 16 }}
+            onClick={() => setRefuseTarget(null)}>
+            <motion.div
+              initial={{ opacity: 0, scale: 0.9, y: 10 }} animate={{ opacity: 1, scale: 1, y: 0 }} exit={{ opacity: 0, scale: 0.9, y: 10 }}
+              transition={{ type: 'spring', stiffness: 300, damping: 25 }}
+              onClick={e => e.stopPropagation()}
+              style={{
+                background: 'var(--bg-card)', borderRadius: 20, padding: 32, maxWidth: 380, width: '100%',
+                boxShadow: '0 25px 80px rgba(0,0,0,0.35)', textAlign: 'center',
+              }}>
+              <div style={{ width: 56, height: 56, borderRadius: '50%', background: 'rgba(239,68,68,0.1)', display: 'flex', alignItems: 'center', justifyContent: 'center', margin: '0 auto 16px' }}>
+                <FiX size={26} color="#ef4444" />
+              </div>
+              <h3 style={{ fontSize: 18, fontWeight: 700, marginBottom: 8 }}>Refuser la reprise</h3>
+              <p style={{ fontSize: 14, color: 'var(--text-secondary)', marginBottom: 20, lineHeight: 1.5 }}>
+                Vous pouvez ajouter une raison optionnelle.
+              </p>
+              <textarea value={refuseReason} onChange={e => setRefuseReason(e.target.value)} placeholder="Raison du refus..."
+                style={{ width: '100%', minHeight: 80, padding: 12, borderRadius: 10, border: '1px solid var(--border)', background: 'var(--bg-card)', color: 'var(--text)', fontSize: 14, resize: 'vertical', fontFamily: 'var(--font)', marginBottom: 20, textAlign: 'left', boxSizing: 'border-box' }} />
+              <div style={{ display: 'flex', gap: 10 }}>
+                <button onClick={() => setRefuseTarget(null)} className="btn btn-outline" style={{ flex: 1, justifyContent: 'center', padding: '10px 0' }}>
+                  Annuler
+                </button>
+                <button onClick={() => { update(refuseTarget, { status: 'refuse', vendor_notes: refuseReason || null }); setRefuseTarget(null); }}
+                  className="form-submit" style={{ flex: 1, justifyContent: 'center', padding: '10px 0', background: '#ef4444', borderColor: '#ef4444' }}>
+                  <FiX size={14} /> Refuser
+                </button>
+              </div>
+            </motion.div>
+          </motion.div>
+        )}
+      </AnimatePresence>
 
       {lightbox && (
         <div onClick={() => setLightbox(null)} style={{
