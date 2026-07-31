@@ -1,14 +1,52 @@
+import { useState } from 'react';
 import { Link } from 'react-router-dom';
-import { FiMapPin, FiPhone, FiMail, FiClock } from 'react-icons/fi';
+import { FiMapPin, FiPhone, FiMail, FiClock, FiShield, FiTruck, FiRefreshCw, FiSend, FiCheck } from 'react-icons/fi';
 import { BsInstagram, BsTiktok, BsWhatsapp } from 'react-icons/bs';
 
 export default function Footer() {
+  const [email, setEmail] = useState('');
+  const [subscribed, setSubscribed] = useState(false);
+
+  const handleSubscribe = (e) => {
+    e.preventDefault();
+    if (!email.trim()) return;
+    setSubscribed(true);
+  };
+
   return (
     <footer className="footer">
       <div className="container">
+        <div className="footer-newsletter">
+          <div className="footer-newsletter-text">
+            <h4>{subscribed ? 'Merci !' : 'Restez informé'}</h4>
+            <p>
+              {subscribed
+                ? 'Vous êtes bien inscrit à la newsletter.'
+                : 'Nouveautés, promos et bonnes affaires, directement dans votre boîte mail.'}
+            </p>
+          </div>
+          {subscribed ? (
+            <span className="footer-newsletter-ok"><FiCheck /> Inscrit !</span>
+          ) : (
+            <form className="footer-newsletter-form" onSubmit={handleSubscribe}>
+              <input
+                type="email"
+                required
+                placeholder="Votre adresse email"
+                value={email}
+                onChange={(e) => setEmail(e.target.value)}
+              />
+              <button type="submit" title="S'abonner"><FiSend /></button>
+            </form>
+          )}
+        </div>
+
         <div className="footer-grid">
           <div className="footer-brand">
-            <h3>Occasion & Garantie</h3>
+            <div className="footer-logo">
+              <span className="footer-logo-badge">O&amp;G</span>
+              <h3>Occasion &amp; Garantie</h3>
+            </div>
             <p>Des produits d&rsquo;exception à prix réduits. Achetez et vendez en toute confiance.</p>
             <div className="footer-social">
               <a href="https://instagram.com" target="_blank" rel="noopener noreferrer" title="Instagram"><BsInstagram /></a>
@@ -16,42 +54,47 @@ export default function Footer() {
               <a href="https://wa.me/212669017295" target="_blank" rel="noopener noreferrer" title="WhatsApp"><BsWhatsapp /></a>
             </div>
           </div>
+
           <div className="footer-col">
             <h4>Navigation</h4>
             <Link to="/">Accueil</Link>
-            <Link to="/products">Produits</Link>
+            <Link to="/products">Tous les produits</Link>
             <Link to="/boutique">Boutique officielle</Link>
+            <Link to="/about">À propos</Link>
+            <Link to="/login">Mon compte</Link>
+          </div>
+
+          <div className="footer-col">
+            <h4>Catégories</h4>
             <Link to="/products?category=Smartphones">Smartphones</Link>
             <Link to="/products?category=Tablettes">Tablettes</Link>
             <Link to="/products?category=Ordinateurs">Ordinateurs</Link>
             <Link to="/products?category=Accessoires">Accessoires</Link>
             <Link to="/products?category=Gaming">Gaming</Link>
-            <Link to="/about">À propos</Link>
           </div>
-          <div className="footer-col">
-            <h4>Compte</h4>
-            <Link to="/login">Connexion</Link>
-            <Link to="/signup">Inscription</Link>
-          </div>
+
           <div className="footer-col">
             <h4>Contact</h4>
-            <a href="mailto:contact@contact.occasionetgarantie.store" style={{ display: 'flex', alignItems: 'center', gap: 6, wordBreak: 'break-all' }}><FiMail size={12} /> contact@contact.occasionetgarantie.store</a>
-            <a href="tel:+212669017295" style={{ display: 'flex', alignItems: 'center', gap: 6 }}><FiPhone size={12} /> +212 669-017295</a>
-            <p style={{ color: 'var(--text-secondary)', fontSize: '13px', marginTop: '6px', display: 'flex', alignItems: 'center', gap: '4px' }}>
-              <FiMapPin size={12} /> Casablanca, Maroc
-            </p>
-            <p style={{ color: 'var(--text-secondary)', fontSize: '13px', display: 'flex', alignItems: 'center', gap: '4px' }}>
-              <FiClock size={12} /> Lun-Sam 9h-19h
-            </p>
+            <a className="footer-contact" href="mailto:contact@contact.occasionetgarantie.store"><FiMail size={13} /> contact@contact.occasionetgarantie.store</a>
+            <a className="footer-contact" href="tel:+212669017295"><FiPhone size={13} /> +212 669-017295</a>
+            <span className="footer-contact"><FiMapPin size={13} /> Casablanca, Maroc</span>
+            <span className="footer-contact"><FiClock size={13} /> Lun-Sam, 9h &ndash; 19h</span>
           </div>
         </div>
+
+        <div className="footer-trust">
+          <span><FiShield /> Paiement sécurisé</span>
+          <span><FiTruck /> Livraison rapide</span>
+          <span><FiRefreshCw /> Garantie vérifiée</span>
+        </div>
+
         <div className="footer-bottom">
+          <p>&copy; {new Date().getFullYear()} Occasion &amp; Garantie. Tous droits réservés.</p>
           <div className="footer-bottom-links">
-            <Link to="/privacy">Politique de confidentialité</Link>
+            <Link to="/privacy">Confidentialité</Link>
             <Link to="/legal">Mentions légales</Link>
             <Link to="/about">À propos</Link>
           </div>
-          <p>&copy; {new Date().getFullYear()} Occasion & Garantie. Tous droits réservés.</p>
         </div>
       </div>
     </footer>
