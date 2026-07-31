@@ -1,46 +1,11 @@
-import { useState } from 'react';
 import { Link } from 'react-router-dom';
-import { FiMapPin, FiPhone, FiMail, FiClock, FiShield, FiTruck, FiRefreshCw, FiSend, FiCheck } from 'react-icons/fi';
+import { FiMapPin, FiPhone, FiMail, FiClock } from 'react-icons/fi';
 import { BsInstagram, BsTiktok, BsWhatsapp } from 'react-icons/bs';
 
 export default function Footer() {
-  const [email, setEmail] = useState('');
-  const [subscribed, setSubscribed] = useState(false);
-
-  const handleSubscribe = (e) => {
-    e.preventDefault();
-    if (!email.trim()) return;
-    setSubscribed(true);
-  };
-
   return (
     <footer className="footer">
       <div className="container">
-        <div className="footer-newsletter">
-          <div className="footer-newsletter-text">
-            <h4>{subscribed ? 'Merci !' : 'Restez informé'}</h4>
-            <p>
-              {subscribed
-                ? 'Vous êtes bien inscrit à la newsletter.'
-                : 'Nouveautés, promos et bonnes affaires, directement dans votre boîte mail.'}
-            </p>
-          </div>
-          {subscribed ? (
-            <span className="footer-newsletter-ok"><FiCheck /> Inscrit !</span>
-          ) : (
-            <form className="footer-newsletter-form" onSubmit={handleSubscribe}>
-              <input
-                type="email"
-                required
-                placeholder="Votre adresse email"
-                value={email}
-                onChange={(e) => setEmail(e.target.value)}
-              />
-              <button type="submit" title="S'abonner"><FiSend /></button>
-            </form>
-          )}
-        </div>
-
         <div className="footer-grid">
           <div className="footer-brand">
             <div className="footer-logo">
@@ -80,12 +45,6 @@ export default function Footer() {
             <span className="footer-contact"><FiMapPin size={13} /> Casablanca, Maroc</span>
             <span className="footer-contact"><FiClock size={13} /> Lun-Sam, 9h &ndash; 19h</span>
           </div>
-        </div>
-
-        <div className="footer-trust">
-          <span><FiShield /> Paiement sécurisé</span>
-          <span><FiTruck /> Livraison rapide</span>
-          <span><FiRefreshCw /> Garantie vérifiée</span>
         </div>
 
         <div className="footer-bottom">
