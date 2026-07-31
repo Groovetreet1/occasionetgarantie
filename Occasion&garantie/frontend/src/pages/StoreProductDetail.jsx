@@ -1,6 +1,6 @@
 import { useParams, Link } from 'react-router-dom';
 import { useEffect, useState } from 'react';
-import { FiArrowLeft, FiShoppingBag, FiCheck, FiMonitor, FiCpu, FiHardDrive, FiBattery, FiCamera, FiDroplet, FiX, FiChevronLeft, FiChevronRight, FiSend, FiCheckCircle, FiShield, FiLock } from 'react-icons/fi';
+import { FiArrowLeft, FiShoppingBag, FiCheck, FiMonitor, FiCpu, FiHardDrive, FiBattery, FiCamera, FiDroplet, FiX, FiChevronLeft, FiChevronRight, FiSend, FiCheckCircle, FiShield, FiLock, FiGrid } from 'react-icons/fi';
 import api from '../api/axios';
 import { useAuth } from '../context/AuthContext';
 
@@ -19,8 +19,22 @@ export default function StoreProductDetail() {
   const [formMsg, setFormMsg] = useState('');
   const [submitting, setSubmitting] = useState(false);
   const [done, setDone] = useState(false);
+  const [similar, setSimilar] = useState([]);
 
   useEffect(() => { window.scrollTo(0, 0); setLoading(true); api.get(`/store/products/${slug}`).then(r => setProduct(r.data)).catch(() => {}).finally(() => setLoading(false)); }, [slug]);
+
+  useEffect(() => {
+    if (!product) return;
+    let cancelled = false;
+    api.get('/store/products', { params: { category: product.category_name, limit: 6 } })
+      .then(res => {
+        if (cancelled) return;
+        const list = (res.data.products || []).filter(p => String(p.id) !== String(product.id)).slice(0, 4);
+        setSimilar(list);
+      })
+      .catch(() => {});
+    return () => { cancelled = true; };
+  }, [product]);
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -69,6 +83,30 @@ export default function StoreProductDetail() {
                     <img src={img.startsWith('http') ? img : `${API_BASE}/uploads/${img}`} alt="" style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
                   </div>
                 ))}
+              </div>
+            )}
+
+            {similar.length > 0 && (
+              <div style={{ marginTop: 24, border: '1px solid var(--border)', borderRadius: 'var(--radius)', padding: 16, background: 'var(--bg-card)' }}>
+                <h3 style={{ fontSize: 15, fontWeight: 700, marginBottom: 12, display: 'flex', alignItems: 'center', gap: 6 }}>
+                  <FiGrid size={16} style={{ color: 'var(--primary)' }} /> Produits similaires
+                </h3>
+                <div style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
+                  {similar.map(p => (
+                    <Link key={p.id} to={`/boutique/${p.slug}`} style={{ display: 'flex', alignItems: 'center', gap: 12, padding: 8, borderRadius: 10, background: 'var(--bg-secondary)', textDecoration: 'none', color: 'var(--text)', border: '1px solid transparent', transition: 'all .2s' }} onMouseOver={(e) => e.currentTarget.style.borderColor = 'var(--primary)'} onMouseOut={(e) => e.currentTarget.style.borderColor = 'transparent'}>
+                      <div style={{ width: 56, height: 56, borderRadius: 8, overflow: 'hidden', flexShrink: 0, background: '#fff', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                        {p.image ? <img src={p.image.startsWith('http') ? p.image : `${API_BASE}/uploads/${p.image}`} alt={p.name} style={{ width: '100%', height: '100%', objectFit: 'contain' }} /> : <FiShoppingBag size={22} style={{ opacity: 0.2 }} />}
+                      </div>
+                      <div style={{ minWidth: 0 }}>
+                        <div style={{ fontSize: 13, fontWeight: 600, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{p.name}</div>
+                        <div style={{ fontSize: 13, fontWeight: 700, color: 'var(--primary)', marginTop: 2 }}>
+                          {formatPrice(p.price)}
+                          {p.old_price && <span style={{ fontSize: 11, fontWeight: 500, color: 'var(--text-muted)', textDecoration: 'line-through', marginLeft: 6 }}>{formatPrice(p.old_price)}</span>}
+                        </div>
+                      </div>
+                    </Link>
+                  ))}
+                </div>
               </div>
             )}
           </div>
