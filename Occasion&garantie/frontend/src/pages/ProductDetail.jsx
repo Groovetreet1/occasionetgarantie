@@ -201,9 +201,12 @@ export default function ProductDetail() {
               </div>
               {allImages.length > 1 && (
                 <div className="product-detail-thumbs">
-                  {allImages.map((img, i) => (
+                  {allImages.slice(0, 3).map((img, i) => (
                     <div key={i} onClick={() => openLightbox(i)} className={`product-detail-thumb${i === 0 ? ' active' : ''}`}>
                       <img src={img.startsWith('http') ? img : `${API_BASE}/uploads/${img}`} alt="" style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
+                      {allImages.length > 3 && i === 2 && (
+                        <div className="product-detail-thumb-more">+{allImages.length - 3}</div>
+                      )}
                     </div>
                   ))}
                 </div>
