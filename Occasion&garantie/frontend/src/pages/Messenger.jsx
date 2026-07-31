@@ -140,6 +140,22 @@ export default function Messenger() {
     if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); handleSend(); }
   };
 
+  const handleDeleteConv = async (convId, e) => {
+    e.stopPropagation();
+    if (!window.confirm('Supprimer cette conversation définitivement ?')) return;
+    try {
+      await api.delete(`/chat/conversations/${convId}`);
+      setConversations((prev) => prev.filter(c => c.id !== convId));
+      if (Number(activeConv) === convId) {
+        setActiveConv(null);
+        setMessages([]);
+        setShowMobileList(true);
+      }
+    } catch (err) {
+      alert(err.response?.data?.message || 'Erreur');
+    }
+  };
+
   const conv = conversations.find(c => c.id === Number(activeConv));
   const isSeller = conv && user && conv.seller_id === user.id;
   const otherName = conv ? (isSeller ? conv.buyer_name : conv.seller_name) : '';
@@ -181,6 +197,13 @@ export default function Messenger() {
                     </div>
                     <div className="messenger-conv-last">{lastMsg}</div>
                   </div>
+                  <button
+                    className="messenger-conv-delete"
+                    onClick={(e) => handleDeleteConv(c.id, e)}
+                    title="Supprimer la conversation"
+                  >
+                    <FiTrash2 size={15} />
+                  </button>
                   {lastTime && <div className="messenger-conv-time">{lastTime}</div>}
                 </div>
               );

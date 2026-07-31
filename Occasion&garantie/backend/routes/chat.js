@@ -121,6 +121,23 @@ router.get('/conversations/:id/messages', authenticate, async (req, res) => {
   }
 });
 
+router.delete('/conversations/:id', authenticate, async (req, res) => {
+  try {
+    const [convs] = await pool.query(
+      'SELECT * FROM conversations WHERE id = ? AND (buyer_id = ? OR seller_id = ?)',
+      [req.params.id, req.user.id, req.user.id]
+    );
+    if (convs.length === 0) return res.status(403).json({ message: 'Acces refuse.' });
+
+    await pool.query('DELETE FROM messages WHERE conversation_id = ?', [req.params.id]);
+    await pool.query('DELETE FROM conversations WHERE id = ?', [req.params.id]);
+    res.json({ message: 'Conversation supprimée.' });
+  } catch (err) {
+    console.error('DELETE /conversations/:id:', err.message);
+    res.status(500).json({ message: 'Erreur serveur.' });
+  }
+});
+
 const typing = {};
 
 router.post('/conversations/:id/typing', authenticate, async (req, res) => {
