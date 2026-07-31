@@ -65,7 +65,7 @@ export default function Messenger() {
   useEffect(() => {
     if (messages.length === 0) return;
     if (messages.length > prevMsgCountRef.current) {
-      scrollToBottom(true);
+      if (isNearBottom()) scrollToBottom(true);
     }
     prevMsgCountRef.current = messages.length;
   }, [messages]);
