@@ -3,6 +3,7 @@ const router = express.Router();
 const pool = require('../config/db');
 const { authenticate } = require('../middleware/auth');
 const { uploadBuffer } = require('../services/uploader');
+const { analyzeCondition } = require('../services/huggingface');
 const multer = require('multer');
 const path = require('path');
 const fs = require('fs');
@@ -54,7 +55,7 @@ router.post('/', authenticate, (req, res) => {
     (async () => {
       try {
         await ensureTable();
-        const { brand, model, imei, product_id, client_notes } = req.body;
+        const { brand, model, imei, product_id, client_notes, estimated_price } = req.body;
         if (!brand || !model) return res.status(400).json({ message: 'Marque et modele requis.' });
 
         const photos = {};
@@ -79,8 +80,8 @@ router.post('/', authenticate, (req, res) => {
         }
 
         const [result] = await pool.query(
-          'INSERT INTO reprises (user_id, product_id, brand, model, imei, photos, client_notes) VALUES (?, ?, ?, ?, ?, ?, ?)',
-          [req.user.id, product_id || null, brand, model, imei || null, Object.keys(photos).length ? JSON.stringify(photos) : null, client_notes || null]
+          'INSERT INTO reprises (user_id, product_id, brand, model, imei, photos, client_notes, estimated_price) VALUES (?, ?, ?, ?, ?, ?, ?, ?)',
+          [req.user.id, product_id || null, brand, model, imei || null, Object.keys(photos).length ? JSON.stringify(photos) : null, client_notes || null, estimated_price ? Number(estimated_price) : null]
         );
 
         res.status(201).json({ id: result.insertId, message: 'Reprise soumise avec succes.' });
@@ -111,90 +112,107 @@ router.post('/', authenticate, (req, res) => {
   });
 });
 
-// Public: simulate market value of a device (no auth required)
-router.post('/estimate', async (req, res) => {
-  try {
-    const { type, brand, model, year, state, storage } = req.body;
-    if (!type || !brand || !model) return res.status(400).json({ message: 'Type, marque et modele requis.' });
-
-    const CATEGORY = { smartphone: 1, tablette: 2, ordinateur: 3 };
-    const categoryId = CATEGORY[type];
-    if (!categoryId) return res.status(400).json({ message: 'Type invalide.' });
-
-    // 3-tier reference price lookup: model match -> brand match -> category average
-    let referencePrice = null;
-    let referenceSource = 'heuristic';
+// Public: simulate market value of a device using Hugging Face vision analysis
+router.post('/estimate', (req, res) => {
+  uploadFields(req, res, async (err) => {
+    if (err) return res.status(400).json({ message: err.message });
     try {
-      let prices = [];
-      const [rows] = await pool.query(
-        `SELECT price FROM products WHERE active = TRUE AND status = 'disponible' AND approved = TRUE AND product_type = 'store' AND category_id = ? AND brand LIKE ? AND name LIKE ? ORDER BY price ASC`,
-        [categoryId, `%${brand}%`, `%${model}%`]
-      );
-      prices = rows.map(r => Number(r.price)).filter(p => p > 0);
-      if (prices.length === 0) {
-        const [rows2] = await pool.query(
-          `SELECT price FROM products WHERE active = TRUE AND status = 'disponible' AND approved = TRUE AND product_type = 'store' AND category_id = ? AND brand LIKE ? ORDER BY price ASC`,
-          [categoryId, `%${brand}%`]
-        );
-        prices = rows2.map(r => Number(r.price)).filter(p => p > 0);
-      }
-      if (prices.length === 0) {
-        const [rows3] = await pool.query(
-          `SELECT price FROM products WHERE active = TRUE AND status = 'disponible' AND approved = TRUE AND product_type = 'store' AND category_id = ? ORDER BY price ASC`,
-          [categoryId]
-        );
-        prices = rows3.map(r => Number(r.price)).filter(p => p > 0);
-      }
-      if (prices.length > 0) {
-        prices.sort((a, b) => a - b);
-        const mid = Math.floor(prices.length / 2);
-        referencePrice = prices.length % 2 ? prices[mid] : (prices[mid - 1] + prices[mid]) / 2;
-        referenceSource = 'catalog';
-      }
-    } catch (e) { referencePrice = null; }
+      const { brand, model, year } = req.body;
+      if (!brand || !model) return res.status(400).json({ message: 'Marque et modele requis.' });
 
-    if (!referencePrice) {
-      const BASE = { smartphone: 4500, tablette: 5000, ordinateur: 9000 };
-      referencePrice = BASE[type] || 4500;
+      // 1) Analyze condition with Hugging Face (from the uploaded photos)
+      const front = req.files?.front?.[0] || req.files?.back?.[0] || req.files?.side?.[0] || req.files?.screen?.[0];
+      let condition = null;
+      if (front) {
+        try {
+          const buf = fs.readFileSync(front.path);
+          const resized = await sharp(buf).resize(512, 512, { fit: 'inside', withoutEnlargement: true }).jpeg({ quality: 80 }).toBuffer();
+          condition = await analyzeCondition(resized);
+        } catch (hfErr) {
+          console.error('Estimate analysis error:', hfErr.message);
+        }
+      }
+
+      // 2) Reference price: model match -> brand match -> category average (smartphones)
+      let referencePrice = null;
+      let referenceSource = 'heuristic';
+      try {
+        let prices = [];
+        const [rows] = await pool.query(
+          `SELECT price FROM products WHERE active = TRUE AND status = 'disponible' AND approved = TRUE AND product_type = 'store' AND category_id = 1 AND brand LIKE ? AND name LIKE ? ORDER BY price ASC`,
+          [`%${brand}%`, `%${model}%`]
+        );
+        prices = rows.map(r => Number(r.price)).filter(p => p > 0);
+        if (prices.length === 0) {
+          const [rows2] = await pool.query(
+            `SELECT price FROM products WHERE active = TRUE AND status = 'disponible' AND approved = TRUE AND product_type = 'store' AND category_id = 1 AND brand LIKE ? ORDER BY price ASC`,
+            [`%${brand}%`]
+          );
+          prices = rows2.map(r => Number(r.price)).filter(p => p > 0);
+        }
+        if (prices.length === 0) {
+          const [rows3] = await pool.query(
+            `SELECT price FROM products WHERE active = TRUE AND status = 'disponible' AND approved = TRUE AND product_type = 'store' AND category_id = 1 ORDER BY price ASC`
+          );
+          prices = rows3.map(r => Number(r.price)).filter(p => p > 0);
+        }
+        if (prices.length > 0) {
+          prices.sort((a, b) => a - b);
+          const mid = Math.floor(prices.length / 2);
+          referencePrice = prices.length % 2 ? prices[mid] : (prices[mid - 1] + prices[mid]) / 2;
+          referenceSource = 'catalog';
+        }
+      } catch (e) { referencePrice = null; }
+
+      if (!referencePrice) referencePrice = 4500;
+
+      // 3) Depreciation by age
+      const currentYear = new Date().getFullYear();
+      const age = Math.max(1, currentYear - (parseInt(year, 10) || currentYear));
+      const AGE_FACTOR = [1, 0.85, 0.72, 0.6, 0.5, 0.42, 0.35, 0.3, 0.26, 0.22, 0.18, 0.15];
+      const ageFactor = AGE_FACTOR[Math.min(age, AGE_FACTOR.length - 1)];
+
+      // 4) Brand demand factor
+      const BRAND_FACTOR = {
+        apple: 1.15, samsung: 1.0, google: 0.98, pixel: 0.98, oneplus: 0.95,
+        xiaomi: 0.85, redmi: 0.85, poco: 0.85, oppo: 0.82, realme: 0.82, vivo: 0.82,
+        huawei: 0.88, honor: 0.85, sony: 0.9, motorola: 0.8, nokia: 0.75, lg: 0.8,
+      };
+      const brandFactor = BRAND_FACTOR[String(brand).toLowerCase()] ?? 0.9;
+
+      // 5) Condition factor (from HF, or default)
+      const conditionFactor = condition ? condition.factor : 0.83;
+      const conditionState = condition ? condition.state : 'tres_bon';
+      const conditionLabel = condition ? condition.label : 'Etat estime par defaut';
+
+      let estimate = referencePrice * ageFactor * conditionFactor * brandFactor;
+      estimate = Math.round(estimate / 50) * 50;
+      const rangeMin = Math.round((estimate * 0.88) / 50) * 50;
+      const rangeMax = Math.round((estimate * 1.12) / 50) * 50;
+
+      res.json({
+        estimated_price: estimate,
+        range_min: rangeMin,
+        range_max: rangeMax,
+        reference_price: Math.round(referencePrice),
+        reference_source: referenceSource,
+        age_years: age,
+        condition: conditionState,
+        condition_label: conditionLabel,
+        condition_score: condition ? condition.score : null,
+        condition_source: condition ? 'huggingface' : 'default',
+        factors: { age: ageFactor, state: conditionFactor, brand: brandFactor },
+        message: 'Estimation indicative basee sur l analyse des photos et les prix du marche.',
+      });
+    } catch (e) {
+      console.error('Estimate error:', e.message);
+      if (!res.headersSent) res.status(500).json({ message: 'Erreur serveur.' });
+    } finally {
+      for (const key of Object.keys(req.files || {})) {
+        for (const f of req.files[key] || []) { try { fs.unlinkSync(f.path); } catch {} }
+      }
     }
-
-    const currentYear = new Date().getFullYear();
-    const age = Math.max(0, currentYear - (parseInt(year, 10) || currentYear));
-    const AGE_FACTOR = [1, 0.85, 0.72, 0.6, 0.5, 0.42, 0.35, 0.3, 0.26, 0.22, 0.18, 0.15];
-    const ageFactor = AGE_FACTOR[Math.min(age, AGE_FACTOR.length - 1)];
-
-    const STATE_FACTOR = { neuf: 1, comme_neuf: 0.93, tres_bon: 0.83, bon: 0.7, acceptable: 0.55 };
-    const stateFactor = STATE_FACTOR[state] ?? 0.7;
-
-    const BRAND_FACTOR = {
-      apple: 1.15, samsung: 1.0, google: 0.98, pixel: 0.98, oneplus: 0.95,
-      xiaomi: 0.85, redmi: 0.85, poco: 0.85, oppo: 0.82, realme: 0.82, vivo: 0.82,
-      huawei: 0.88, honor: 0.85, sony: 0.9, motorola: 0.8, nokia: 0.75, lg: 0.8,
-      asus: 0.9, hp: 0.9, dell: 0.9, lenovo: 0.88, acer: 0.85, msi: 0.92,
-    };
-    const brandFactor = BRAND_FACTOR[String(brand).toLowerCase()] ?? 0.9;
-
-    const TYPE_FACTOR = { smartphone: 1.0, tablette: 1.05, ordinateur: 0.95 };
-    const typeFactor = TYPE_FACTOR[type] ?? 1.0;
-
-    let estimate = referencePrice * ageFactor * stateFactor * brandFactor * typeFactor;
-    estimate = Math.round(estimate / 50) * 50;
-    const rangeMin = Math.round((estimate * 0.88) / 50) * 50;
-    const rangeMax = Math.round((estimate * 1.12) / 50) * 50;
-
-    res.json({
-      estimated_price: estimate,
-      range_min: rangeMin,
-      range_max: rangeMax,
-      reference_price: Math.round(referencePrice),
-      reference_source: referenceSource,
-      age_years: age,
-      factors: { age: ageFactor, state: stateFactor, brand: brandFactor, type: typeFactor },
-      message: 'Estimation indicative basee sur les prix du marche actuels.',
-    });
-  } catch (err) {
-    res.status(500).json({ message: 'Erreur serveur.' });
-  }
+  });
 });
 
 router.get('/', authenticate, async (req, res) => {
