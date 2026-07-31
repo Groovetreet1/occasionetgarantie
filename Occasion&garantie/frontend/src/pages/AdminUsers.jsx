@@ -188,7 +188,7 @@ export default function AdminUsers() {
                                   <FiLock size={14} /> Suspendre
                                 </button>
                               )}
-                              {u.suspended && (
+                              {!!u.suspended && (
                                 <button onClick={() => { setOpenMenu(null); handleUnsuspend(u); }}
                                   style={{ display: 'flex', alignItems: 'center', gap: 8, width: '100%', padding: '8px 12px', fontSize: '12px', background: 'none', border: 'none', color: '#059669', cursor: 'pointer', borderRadius: 8 }}
                                   onMouseEnter={e => e.currentTarget.style.background = 'rgba(5,150,105,0.08)'}
