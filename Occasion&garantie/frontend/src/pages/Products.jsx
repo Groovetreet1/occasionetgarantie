@@ -23,19 +23,25 @@ export default function Products() {
   const [showFilters, setShowFilters] = useState(false);
   const [category, setCategory] = useState(searchParams.get('category') || 'Tous');
   const [stateFilter, setStateFilter] = useState('Tous');
+  const [ville, setVille] = useState(searchParams.get('ville') || '');
   const [priceMin, setPriceMin] = useState('');
   const [priceMax, setPriceMax] = useState('');
   const [visibleCount, setVisibleCount] = useState(12);
   const [storeProducts, setStoreProducts] = useState([]);
   const [storeLoad, setStoreLoad] = useState(true);
+  const [cities, setCities] = useState([]);
 
   useEffect(() => { document.title = 'Tous les produits - Occasion & Garantie'; }, []);
 
   useEffect(() => {
     const catParam = searchParams.get('category');
     if (catParam) setCategory(catParam);
+    const searchParam = searchParams.get('search');
     const brandParam = searchParams.get('brand');
     if (brandParam) setSearch(brandParam);
+    else if (searchParam) setSearch(searchParam);
+    const villeParam = searchParams.get('ville');
+    if (villeParam) setVille(villeParam);
   }, [searchParams]);
 
   useEffect(() => {
@@ -46,13 +52,15 @@ export default function Products() {
       if (brandParam && search === brandParam) params.set('brand', brandParam);
       else params.set('search', search);
     }
+    if (ville) params.set('ville', ville);
     api.get(`/products${params.toString() ? `?${params}` : ''}`)
       .then(res => setAllProducts(res.data.products || res.data))
       .catch(() => {})
       .finally(() => setLoading(false));
-  }, [search, searchParams]);
+  }, [search, searchParams, ville]);
 
   useEffect(() => {
+    api.get('/products/cities').then(res => { if (res.data.length) setCities(res.data); }).catch(() => {});
     api.get('/store/products/featured').then(r => setStoreProducts(r.data)).catch(() => {}).finally(() => setStoreLoad(false));
   }, []);
 
@@ -64,8 +72,8 @@ export default function Products() {
     return true;
   });
 
-  const hasFilters = category !== 'Tous' || stateFilter !== 'Tous' || priceMin || priceMax;
-  const resetFilters = () => { setCategory('Tous'); setStateFilter('Tous'); setPriceMin(''); setPriceMax(''); };
+  const hasFilters = category !== 'Tous' || stateFilter !== 'Tous' || ville || priceMin || priceMax;
+  const resetFilters = () => { setCategory('Tous'); setStateFilter('Tous'); setVille(''); setPriceMin(''); setPriceMax(''); };
   const showMore = () => setVisibleCount(prev => prev + 12);
   const displayed = filtered.slice(0, visibleCount);
   const hasMore = visibleCount < filtered.length;
@@ -75,6 +83,7 @@ export default function Products() {
     setLoading(true);
     const params = new URLSearchParams();
     if (search) params.set('search', search);
+    if (ville) params.set('ville', ville);
     api.get(`/products${params.toString() ? `?${params}` : ''}`)
       .then(res => setAllProducts(res.data.products || res.data))
       .catch(() => {})
@@ -136,7 +145,7 @@ export default function Products() {
 
         <div className="products-toolbar">
           <button className={`btn ${hasFilters ? 'btn-primary' : 'btn-outline'}`} onClick={() => setShowFilters(o => !o)}>
-            <FiSliders size={14} /> Filtres{hasFilters ? ` (${[category !== 'Tous', stateFilter !== 'Tous', !!priceMin || !!priceMax].filter(Boolean).length})` : ''}
+            <FiSliders size={14} /> Filtres{hasFilters ? ` (${[category !== 'Tous', stateFilter !== 'Tous', !!ville, !!priceMin || !!priceMax].filter(Boolean).length})` : ''}
           </button>
           {hasFilters && (
             <button className="btn-filter-reset" onClick={resetFilters}>Réinitialiser</button>
@@ -165,6 +174,15 @@ export default function Products() {
                   <button className={`filter-chip${stateFilter === 'Tous' ? ' active' : ''}`} onClick={() => setStateFilter('Tous')}>Tous</button>
                   {Object.entries(STATE_LABELS).map(([val, label]) => (
                     <button key={val} className={`filter-chip${stateFilter === val ? ' active' : ''}`} onClick={() => setStateFilter(val)}>{label}</button>
+                  ))}
+                </div>
+              </div>
+              <div className="filter-group">
+                <label className="filter-label">Ville</label>
+                <div className="filter-chips">
+                  <button className={`filter-chip${ville === '' ? ' active' : ''}`} onClick={() => setVille('')}>Toutes les villes</button>
+                  {cities.map(c => (
+                    <button key={c} className={`filter-chip${ville === c ? ' active' : ''}`} onClick={() => setVille(c)}>{c}</button>
                   ))}
                 </div>
               </div>
