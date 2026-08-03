@@ -422,7 +422,9 @@ export default function Messenger() {
                   <div style={{ textAlign: 'center', color: 'var(--text-muted)', padding: '40px', fontSize: '14px' }}>
                     Aucun message. Envoyez le premier message !
                   </div>
-                ) : messages.map((msg) => {
+                ) : (<>
+                  <div className="messenger-messages-spacer" />
+                  {messages.map((msg) => {
                   const isMine = msg.sender_id === user.id;
                   if (msg.audio) {
                     return (
@@ -489,6 +491,7 @@ export default function Messenger() {
                   </div>
                 )}
                 <div ref={messagesEndRef} />
+                </>)}
               </div>
 
               <div className="messenger-input-bar">
