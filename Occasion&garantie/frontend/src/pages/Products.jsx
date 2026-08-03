@@ -4,7 +4,7 @@ import { FiSearch, FiSliders, FiPackage, FiX, FiArrowRight, FiShield, FiShopping
 
 import { motion } from 'framer-motion';
 import api from '../api/axios';
-import ProductCard from '../components/ProductCard';
+import HomeProductCard from '../components/HomeProductCard';
 
 const STATE_LABELS = {
   neuf: 'Neuf', comme_neuf: 'Comme neuf', tres_bon: 'Très bon état',
@@ -203,7 +203,7 @@ export default function Products() {
         ) : filtered.length > 0 ? (
           <>
             <div className="product-grid-modern">
-              {displayed.map((p, i) => <ProductCard key={p.id} product={p} index={i} />)}
+              {displayed.map((p, i) => <HomeProductCard key={p.id} product={p} index={i} />)}
             </div>
             {hasMore && (
               <div className="products-load-more">

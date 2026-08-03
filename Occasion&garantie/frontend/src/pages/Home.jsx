@@ -1,5 +1,5 @@
 import { Link, useNavigate } from 'react-router-dom';
-import { useEffect, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { motion } from 'framer-motion';
 import { FiSmartphone, FiArrowRight, FiShoppingBag, FiSearch, FiMapPin } from 'react-icons/fi';
 import { TbShieldCheck, TbClockHour5 } from 'react-icons/tb';
@@ -66,6 +66,10 @@ export default function Home() {
   const [storeProducts, setStoreProducts] = useState([]);
   const [storeLoad, setStoreLoad] = useState(true);
   const [brands, setBrands] = useState([]);
+  const [suggestions, setSuggestions] = useState([]);
+  const [suggestOpen, setSuggestOpen] = useState(false);
+  const [suggestLoading, setSuggestLoading] = useState(false);
+  const searchWrapRef = useRef(null);
 
   useEffect(() => { document.title = 'Occasion & Garantie - Achetez et vendez des produits électroniques d\'occasion au Maroc'; }, []);
 
@@ -85,12 +89,34 @@ export default function Home() {
     api.get('/store/products/featured').then(r => setStoreProducts(r.data)).catch(() => {}).finally(() => setStoreLoad(false));
   }, []);
 
+  useEffect(() => {
+    const handleClickOutside = (e) => {
+      if (searchWrapRef.current && !searchWrapRef.current.contains(e.target)) setSuggestOpen(false);
+    };
+    document.addEventListener('mousedown', handleClickOutside);
+    return () => document.removeEventListener('mousedown', handleClickOutside);
+  }, []);
+
+  const trimmed = searchTerm.trim();
+  useEffect(() => {
+    if (trimmed.length < 2) { setSuggestions([]); setSuggestOpen(false); return; }
+    setSuggestLoading(true);
+    const t = setTimeout(() => {
+      api.get(`/products?search=${encodeURIComponent(trimmed)}&limit=6`)
+        .then(res => { setSuggestions(res.data.products || []); setSuggestOpen(true); })
+        .catch(() => {})
+        .finally(() => setSuggestLoading(false));
+    }, 300);
+    return () => clearTimeout(t);
+  }, [searchTerm]);
+
   const handleSearch = (e) => {
     e.preventDefault();
     let url = '/products?';
-    if (searchTerm.trim()) url += `search=${encodeURIComponent(searchTerm.trim())}&`;
+    if (trimmed) url += `search=${encodeURIComponent(trimmed)}&`;
     if (selectedCategory) url += `category=${selectedCategory}&`;
     if (selectedCity) url += `ville=${encodeURIComponent(selectedCity)}&`;
+    setSuggestOpen(false);
     navigate(url);
   };
 
@@ -103,9 +129,35 @@ export default function Home() {
           <div className="avito-hero-content">
             <h1>Occasion & Garantie</h1>
             <form onSubmit={handleSearch} className="avito-search-bar">
-              <div className="avito-search-input-wrap">
+              <div className="avito-search-input-wrap" ref={searchWrapRef}>
                 <FiSearch size={18} className="avito-search-icon" />
                 <input type="text" value={searchTerm} onChange={e => setSearchTerm(e.target.value)} placeholder="Que cherchez-vous ?" />
+                {suggestOpen && trimmed.length >= 2 && (
+                  <div className="avito-search-dropdown">
+                    {suggestLoading ? (
+                      <div className="avito-search-dropdown-loading"><div className="spinner spinner-sm" /></div>
+                    ) : suggestions.length > 0 ? (
+                      <>
+                        {suggestions.map(p => (
+                          <Link key={p.id} to={p.product_type === 'store' ? `/boutique/${p.slug}` : `/products/${p.slug}`} className="avito-search-item" onClick={() => setSuggestOpen(false)}>
+                            <div className="avito-search-item-img">
+                              {p.image ? <img src={p.image.startsWith('http') ? p.image : `${import.meta.env.VITE_API_URL || ''}/uploads/${p.image}`} alt={p.name} loading="lazy" /> : <FiShoppingBag size={18} style={{ opacity: 0.3 }} />}
+                            </div>
+                            <div className="avito-search-item-body">
+                              <span className="avito-search-item-name">{p.name}</span>
+                              <span className="avito-search-item-price">{formatPrice(p.price)}</span>
+                            </div>
+                          </Link>
+                        ))}
+                        <Link to={`/products?search=${encodeURIComponent(trimmed)}`} className="avito-search-all" onClick={() => setSuggestOpen(false)}>
+                          Voir tous les résultats <FiArrowRight size={14} />
+                        </Link>
+                      </>
+                    ) : (
+                      <div className="avito-search-empty">Aucun résultat pour « {trimmed} »</div>
+                    )}
+                  </div>
+                )}
               </div>
               <div className="avito-search-select">
                 <select value={selectedCategory} onChange={e => setSelectedCategory(e.target.value)}>
