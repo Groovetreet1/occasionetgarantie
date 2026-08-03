@@ -56,6 +56,26 @@ async function uploadBuffer(buffer, filename, folder = '') {
   return { url: filename, public_id: null };
 }
 
+async function uploadAudio(filePath, folder = 'chat') {
+  if (USE_CLOUDINARY) {
+    try {
+      const result = await cloudinary.uploader.upload(filePath, {
+        folder: `occasionetgarantie/${folder}`,
+        resource_type: 'video',
+        format: 'mp3',
+      });
+      try { fs.unlinkSync(filePath); } catch {}
+      console.log(`[Uploader] Cloudinary audio success: ${result.secure_url}`);
+      return { url: result.secure_url, public_id: result.public_id };
+    } catch (cloudErr) {
+      console.error(`[Uploader] Cloudinary audio failed, falling back to local: ${cloudErr.message}`);
+    }
+  }
+  const filename = path.basename(filePath);
+  console.log(`[Uploader] Local audio save: ${filename}`);
+  return { url: `chat/${filename}`, public_id: null };
+}
+
 async function destroy(publicId) {
   if (USE_CLOUDINARY && publicId) {
     try { await cloudinary.uploader.destroy(publicId); } catch {}

@@ -6,6 +6,7 @@ const fs = require('fs');
 const multer = require('multer');
 const { authenticate } = require('../middleware/auth');
 const emails = require('../emails');
+const { uploadAudio } = require('../services/uploader');
 
 const CHAT_AUDIO_DIR = path.join(__dirname, '..', 'uploads', 'chat');
 if (!fs.existsSync(CHAT_AUDIO_DIR)) fs.mkdirSync(CHAT_AUDIO_DIR, { recursive: true });
@@ -325,7 +326,8 @@ router.post('/conversations/:id/audio', authenticate, audioUpload.single('audio'
 
     delete typing[req.params.id];
 
-    const audioPath = 'chat/' + req.file.filename;
+    const { url: audioUrl } = await uploadAudio(req.file.path, 'chat');
+    const audioPath = audioUrl;
     const [result] = await pool.query(
       'INSERT INTO messages (conversation_id, sender_id, text, audio, duration) VALUES (?, ?, ?, ?, ?)',
       [req.params.id, req.user.id, '🎤 Message vocal', audioPath, dur]
