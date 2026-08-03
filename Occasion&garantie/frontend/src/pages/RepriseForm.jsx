@@ -12,6 +12,27 @@ const steps = [
 
 const formatPrice = (p) => new Intl.NumberFormat('fr-FR', { style: 'currency', currency: 'MAD' }).format(p).replace('MAD', '').trim() + ' DH';
 
+const BRANDS = [
+  { value: 'Apple', label: 'Apple (iPhone)' },
+  { value: 'Samsung', label: 'Samsung' },
+  { value: 'Xiaomi', label: 'Xiaomi' },
+  { value: 'Redmi', label: 'Redmi' },
+  { value: 'Poco', label: 'Poco' },
+  { value: 'Huawei', label: 'Huawei' },
+  { value: 'Honor', label: 'Honor' },
+  { value: 'Oppo', label: 'Oppo' },
+  { value: 'Realme', label: 'Realme' },
+  { value: 'Vivo', label: 'Vivo' },
+  { value: 'OnePlus', label: 'OnePlus' },
+  { value: 'Google', label: 'Google Pixel' },
+  { value: 'Motorola', label: 'Motorola' },
+  { value: 'Sony', label: 'Sony' },
+  { value: 'Nokia', label: 'Nokia' },
+  { value: 'Autre', label: 'Autre' },
+];
+
+const BATTERY_LEVELS = [100, 95, 90, 85, 80, 75, 70, 60, 50];
+
 export default function RepriseForm() {
   const navigate = useNavigate();
   const [brand, setBrand] = useState('');
@@ -26,6 +47,7 @@ export default function RepriseForm() {
   const [kind, setKind] = useState('occasion');
   const [originalPrice, setOriginalPrice] = useState('');
   const [year, setYear] = useState(new Date().getFullYear());
+  const [batteryHealth, setBatteryHealth] = useState(100);
   const fileRef = useRef(null);
 
   const years = [];
@@ -51,6 +73,7 @@ export default function RepriseForm() {
       fd.append('model', model);
       fd.append('kind', kind);
       fd.append('year', year);
+      if (batteryHealth) fd.append('battery_health', batteryHealth);
       if (originalPrice) fd.append('original_price', originalPrice);
       for (const [key, file] of Object.entries(photos)) fd.append(key, file);
       const { data } = await api.post('/reprises/estimate', fd, { headers: { 'Content-Type': 'multipart/form-data' } });
@@ -69,6 +92,7 @@ export default function RepriseForm() {
       fd.append('brand', brand);
       fd.append('model', model);
       if (imei) fd.append('imei', imei);
+      if (batteryHealth) fd.append('battery_health', batteryHealth);
       if (estimate?.estimated_price) fd.append('estimated_price', estimate.estimated_price);
       for (const [key, file] of Object.entries(photos)) {
         fd.append(key, file);
@@ -96,6 +120,7 @@ export default function RepriseForm() {
 
   const current = steps[currentStep];
   const allDone = Object.keys(photos).length === steps.length;
+  const isApple = brand.toLowerCase().includes('apple');
 
   return (
     <section className="page-section">
@@ -109,8 +134,35 @@ export default function RepriseForm() {
         </p>
 
         <div style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>
-          <input type="text" placeholder="Marque (ex: Samsung, iPhone)" value={brand} onChange={e => setBrand(e.target.value)}
-            style={{ padding: '12px 16px', borderRadius: 10, border: '1px solid var(--border)', background: 'var(--bg-card)', color: 'var(--text)', fontSize: 14, fontFamily: 'var(--font)' }} />
+          <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
+            <label style={{ fontSize: 13, fontWeight: 600 }}>Marque</label>
+            <select value={brand} onChange={e => { setBrand(e.target.value); if (!e.target.value.toLowerCase().includes('apple')) setBatteryHealth(100); }}
+              style={{ padding: '12px 16px', borderRadius: 10, border: '1px solid var(--border)', background: 'var(--bg-card)', color: 'var(--text)', fontSize: 14, fontFamily: 'var(--font)' }}>
+              <option value="">Choisissez une marque...</option>
+              {BRANDS.map(b => <option key={b.value} value={b.value}>{b.label}</option>)}
+            </select>
+          </div>
+
+          {isApple && (
+            <div style={{ display: 'flex', flexDirection: 'column', gap: 8, padding: 14, background: 'rgba(16,185,129,0.06)', borderRadius: 12, border: '1px solid rgba(16,185,129,0.2)' }}>
+              <label style={{ fontSize: 13, fontWeight: 700 }}>État de la batterie (Battery Health)</label>
+              <p style={{ fontSize: 12, color: 'var(--text-secondary)', margin: 0 }}>
+                Indiquez le pourcentage de sante de la batterie (reglages → Batterie → Sante). Cela permet d'estimer l'usure de votre iPhone.
+              </p>
+              <select value={batteryHealth} onChange={e => setBatteryHealth(Number(e.target.value))}
+                style={{ padding: '12px 16px', borderRadius: 10, border: '1px solid var(--border)', background: 'var(--bg-card)', color: 'var(--text)', fontSize: 14, fontFamily: 'var(--font)' }}>
+                <option value="">Choisissez l'etat de la batterie...</option>
+                {BATTERY_LEVELS.map(b => (
+                  <option key={b} value={b}>{b}% {b >= 95 ? '— excellente' : b >= 85 ? '— bonne' : b >= 75 ? '— correcte' : '— faible'}</option>
+                ))}
+              </select>
+              <div style={{ display: 'flex', alignItems: 'center', gap: 8, fontSize: 12, color: 'var(--text-secondary)' }}>
+                <FiZap size={13} style={{ color: '#10b981' }} />
+                Une batterie au-dessus de 85% maintient la valeur, en dessous elle la reduit.
+              </div>
+            </div>
+          )}
+
           <input type="text" placeholder="Modele (ex: Galaxy S23, iPhone 15)" value={model} onChange={e => setModel(e.target.value)}
             style={{ padding: '12px 16px', borderRadius: 10, border: '1px solid var(--border)', background: 'var(--bg-card)', color: 'var(--text)', fontSize: 14, fontFamily: 'var(--font)' }} />
           <input type="text" placeholder="IMEI (optionnel, 15 chiffres)" value={imei} onChange={e => setImei(e.target.value.replace(/\D/g, '').slice(0, 15))}

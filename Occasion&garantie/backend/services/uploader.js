@@ -62,7 +62,6 @@ async function uploadAudio(filePath, folder = 'chat') {
       const result = await cloudinary.uploader.upload(filePath, {
         folder: `occasionetgarantie/${folder}`,
         resource_type: 'video',
-        format: 'mp3',
       });
       try { fs.unlinkSync(filePath); } catch {}
       console.log(`[Uploader] Cloudinary audio success: ${result.secure_url}`);

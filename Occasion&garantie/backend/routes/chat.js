@@ -29,7 +29,7 @@ const audioUpload = multer({
       cb(null, `msg-${Date.now()}-${Math.random().toString(36).slice(2, 8)}${ext}`);
     },
   }),
-  limits: { fileSize: 2 * 1024 * 1024 },
+  limits: { fileSize: 12 * 1024 * 1024 },
   fileFilter: (req, file, cb) => {
     const ok = file.mimetype.startsWith('audio/') || /\.(webm|ogg|m4a|mp4|mp3|wav)$/i.test(file.originalname);
     if (ok) cb(null, true);
@@ -372,9 +372,9 @@ router.post('/conversations/:id/audio', authenticate, audioUpload.single('audio'
 
     res.status(201).json(msg);
   } catch (err) {
-    console.error('POST /conversations/:id/audio:', err.message);
+    console.error('POST /conversations/:id/audio:', err.message, err.stack);
     if (req.file) { try { fs.unlinkSync(req.file.path); } catch {} }
-    res.status(500).json({ message: 'Erreur serveur.' });
+    res.status(500).json({ message: 'Erreur serveur.', detail: err.message });
   }
 });
 

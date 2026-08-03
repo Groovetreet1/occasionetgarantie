@@ -44,7 +44,7 @@ async function ensureTable() {
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
   )`);
-  const cols = ['product_id INT DEFAULT NULL', 'imei VARCHAR(20) DEFAULT NULL', 'photos JSON DEFAULT NULL', 'client_notes TEXT DEFAULT NULL', `status ENUM('en_attente','estime','accepte','refuse','converti') DEFAULT 'en_attente'`, 'estimated_price DECIMAL(10,2) DEFAULT NULL', 'vendor_id INT DEFAULT NULL', 'vendor_notes TEXT DEFAULT NULL'];
+  const cols = ['product_id INT DEFAULT NULL', 'imei VARCHAR(20) DEFAULT NULL', 'photos JSON DEFAULT NULL', 'client_notes TEXT DEFAULT NULL', `status ENUM('en_attente','estime','accepte','refuse','converti') DEFAULT 'en_attente'`, 'estimated_price DECIMAL(10,2) DEFAULT NULL', 'vendor_id INT DEFAULT NULL', 'vendor_notes TEXT DEFAULT NULL', 'battery_health INT DEFAULT NULL'];
   for (const col of cols) { try { await pool.query(`ALTER TABLE reprises ADD COLUMN ${col}`); } catch {} }
 }
 
@@ -55,7 +55,7 @@ router.post('/', authenticate, (req, res) => {
     (async () => {
       try {
         await ensureTable();
-        const { brand, model, imei, product_id, client_notes, estimated_price } = req.body;
+        const { brand, model, imei, product_id, client_notes, estimated_price, battery_health } = req.body;
         if (!brand || !model) return res.status(400).json({ message: 'Marque et modele requis.' });
 
         const photos = {};
@@ -80,8 +80,8 @@ router.post('/', authenticate, (req, res) => {
         }
 
         const [result] = await pool.query(
-          'INSERT INTO reprises (user_id, product_id, brand, model, imei, photos, client_notes, estimated_price) VALUES (?, ?, ?, ?, ?, ?, ?, ?)',
-          [req.user.id, product_id || null, brand, model, imei || null, Object.keys(photos).length ? JSON.stringify(photos) : null, client_notes || null, estimated_price ? Number(estimated_price) : null]
+          'INSERT INTO reprises (user_id, product_id, brand, model, imei, photos, client_notes, estimated_price, battery_health) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)',
+          [req.user.id, product_id || null, brand, model, imei || null, Object.keys(photos).length ? JSON.stringify(photos) : null, client_notes || null, estimated_price ? Number(estimated_price) : null, batteryHealth ? Number(batteryHealth) : null]
         );
 
         res.status(201).json({ id: result.insertId, message: 'Reprise soumise avec succes.' });
@@ -117,7 +117,7 @@ router.post('/estimate', (req, res) => {
   uploadFields(req, res, async (err) => {
     if (err) return res.status(400).json({ message: err.message });
     try {
-      const { brand, model, year, kind, original_price } = req.body;
+      const { brand, model, year, kind, original_price, battery_health } = req.body;
       if (!brand || !model) return res.status(400).json({ message: 'Marque et modele requis.' });
       const isNew = kind === 'neuf';
       const originalPrice = parseFloat(original_price) > 0 ? parseFloat(original_price) : null;
@@ -198,8 +198,19 @@ router.post('/estimate', (req, res) => {
       const conditionState = isNew ? 'neuf' : (condition ? condition.state : 'tres_bon');
       const conditionLabel = isNew ? 'Telephone neuf (plein prix)' : (condition ? condition.label : 'Etat estime par defaut');
 
+      // 5b) Battery health factor (Apple devices): <85% degrades value, >=95% bonus
+      let batteryFactor = 1;
+      let batteryLabel = null;
+      if (!isNew && battery_health) {
+        const bh = Number(battery_health);
+        if (bh > 0 && bh <= 100) {
+          batteryFactor = bh >= 95 ? 1 : bh >= 85 ? 0.98 : bh >= 75 ? 0.93 : bh >= 60 ? 0.87 : 0.8;
+          batteryLabel = `${bh}%`;
+        }
+      }
+
       // 6) Final calculation: new keeps its base price, used depreciates steeply
-      const estimateRaw = isNew ? basePrice : basePrice * ageFactor * conditionFactor * brandFactor;
+      const estimateRaw = isNew ? basePrice : basePrice * ageFactor * conditionFactor * brandFactor * batteryFactor;
       let estimate = Math.round(estimateRaw / 50) * 50;
       estimate = Math.max(100, estimate);
       const rangeMin = Math.round((estimate * 0.88) / 50) * 50;
@@ -218,7 +229,7 @@ router.post('/estimate', (req, res) => {
         condition_label: conditionLabel,
         condition_score: condition ? condition.score : null,
         condition_source: isNew ? 'neuf' : (condition ? 'huggingface' : 'default'),
-        factors: { age: ageFactor, state: conditionFactor, brand: brandFactor, kind: 1 },
+        factors: { age: ageFactor, state: conditionFactor, brand: brandFactor, kind: 1, battery: batteryFactor },
         message: isNew
           ? 'Estimation du prix de ce telephone neuf.'
           : 'Estimation du prix de marche d occasion au Maroc, basee sur l analyse des photos.',
