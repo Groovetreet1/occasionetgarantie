@@ -1,8 +1,40 @@
 const express = require('express');
 const router = express.Router();
 const pool = require('../config/db');
+const path = require('path');
+const fs = require('fs');
+const multer = require('multer');
 const { authenticate } = require('../middleware/auth');
 const emails = require('../emails');
+
+const CHAT_AUDIO_DIR = path.join(__dirname, '..', 'uploads', 'chat');
+if (!fs.existsSync(CHAT_AUDIO_DIR)) fs.mkdirSync(CHAT_AUDIO_DIR, { recursive: true });
+
+const AUDIO_EXT = {
+  'audio/webm': '.webm',
+  'audio/ogg': '.ogg',
+  'audio/mp4': '.m4a',
+  'audio/x-m4a': '.m4a',
+  'audio/mpeg': '.mp3',
+  'audio/mp3': '.mp3',
+  'audio/wav': '.wav',
+};
+
+const audioUpload = multer({
+  storage: multer.diskStorage({
+    destination: (req, file, cb) => cb(null, CHAT_AUDIO_DIR),
+    filename: (req, file, cb) => {
+      const ext = AUDIO_EXT[file.mimetype] || '.webm';
+      cb(null, `msg-${Date.now()}-${Math.random().toString(36).slice(2, 8)}${ext}`);
+    },
+  }),
+  limits: { fileSize: 2 * 1024 * 1024 },
+  fileFilter: (req, file, cb) => {
+    const ok = file.mimetype.startsWith('audio/') || /\.(webm|ogg|m4a|mp4|mp3|wav)$/i.test(file.originalname);
+    if (ok) cb(null, true);
+    else cb(new Error('Format audio non supporte.'));
+  },
+});
 
 (async () => {
   try {
@@ -23,10 +55,14 @@ const emails = require('../emails');
       conversation_id INT NOT NULL,
       sender_id INT NOT NULL,
       text TEXT NOT NULL,
+      audio VARCHAR(500) DEFAULT NULL,
+      duration INT DEFAULT NULL,
       created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
       FOREIGN KEY (conversation_id) REFERENCES conversations(id) ON DELETE CASCADE,
       FOREIGN KEY (sender_id) REFERENCES users(id) ON DELETE CASCADE
     )`);
+    try { await pool.query('ALTER TABLE messages ADD COLUMN audio VARCHAR(500) DEFAULT NULL'); } catch (e) { if (e.errno !== 1060 && e.code !== 'ER_DUP_FIELDNAME') console.log('audio col:', e.message); }
+    try { await pool.query('ALTER TABLE messages ADD COLUMN duration INT DEFAULT NULL'); } catch (e) { if (e.errno !== 1060 && e.code !== 'ER_DUP_FIELDNAME') console.log('duration col:', e.message); }
     console.log('conversations + messages tables ready');
   } catch (e) {
     console.log('chat tables check skipped:', e.message);
@@ -229,6 +265,75 @@ router.post('/conversations/:id/messages', authenticate, async (req, res) => {
     res.status(201).json(msg);
   } catch (err) {
     console.error('POST /conversations/:id/messages:', err.message);
+    res.status(500).json({ message: 'Erreur serveur.' });
+  }
+});
+
+router.post('/conversations/:id/audio', authenticate, audioUpload.single('audio'), async (req, res) => {
+  try {
+    if (!req.file) return res.status(400).json({ message: 'Fichier audio requis.' });
+
+    const [convs] = await pool.query(
+      'SELECT * FROM conversations WHERE id = ? AND (buyer_id = ? OR seller_id = ?)',
+      [req.params.id, req.user.id, req.user.id]
+    );
+    if (convs.length === 0) {
+      try { fs.unlinkSync(req.file.path); } catch {}
+      return res.status(403).json({ message: 'Acces refuse.' });
+    }
+
+    const duration = parseInt(req.body.duration, 10);
+    const dur = Number.isFinite(duration) && duration > 0 ? Math.min(duration, 60) : null;
+
+    delete typing[req.params.id];
+
+    const audioPath = 'chat/' + req.file.filename;
+    const [result] = await pool.query(
+      'INSERT INTO messages (conversation_id, sender_id, text, audio, duration) VALUES (?, ?, ?, ?, ?)',
+      [req.params.id, req.user.id, '🎤 Message vocal', audioPath, dur]
+    );
+    const msg = {
+      id: result.insertId,
+      conversation_id: Number(req.params.id),
+      sender_id: req.user.id,
+      text: '🎤 Message vocal',
+      audio: audioPath,
+      duration: dur,
+      created_at: new Date().toISOString(),
+      sender_name: req.user.fullName || req.user.full_name,
+    };
+
+    try {
+      const conv = convs[0];
+      const recipientId = conv.buyer_id === req.user.id ? conv.seller_id : conv.buyer_id;
+      const [userRows] = await pool.query('SELECT admin_managed_id, full_name, store_name, email FROM users WHERE id = ?', [recipientId]);
+      if (userRows.length > 0 && userRows[0].admin_managed_id) {
+        const [adminRows] = await pool.query('SELECT email FROM users WHERE id = ?', [userRows[0].admin_managed_id]);
+        if (adminRows.length > 0) {
+          const sellerName = (userRows[0].store_name || userRows[0].full_name || 'Vendeur #' + recipientId).replace(/[<>]/g, '');
+          const safeEmail = String(userRows[0].email || '').replace(/[<>]/g, '');
+          const safeProduct = String(conv.product_name || 'N/A').replace(/[<>]/g, '');
+          await emails.send({
+            to: adminRows[0].email,
+            subject: 'Nouveau message vocal pour ' + sellerName,
+            html: '<div style="font-family:sans-serif;max-width:560px;margin:0 auto;padding:20px">' +
+              '<h2 style="color:#3b82f6;">Nouveau message vocal recu</h2>' +
+              '<div style="background:#f8fafc;padding:16px;border-radius:8px;margin:12px 0">' +
+              '<p><strong>Vendeur :</strong> ' + sellerName + ' (' + safeEmail + ')</p>' +
+              '<p><strong>Produit :</strong> ' + safeProduct + '</p>' +
+              '<p><strong>Type :</strong> Message vocal (à écouter dans la messagerie)</p>' +
+              '</div>' +
+              '<p><a href="https://www.occasionetgarantie.store/messenger/' + conv.id + '" style="display:inline-block;background:#3b82f6;color:#fff;padding:10px 20px;border-radius:8px;text-decoration:none">Voir la conversation</a></p>' +
+              '</div>'
+          });
+        }
+      }
+    } catch (e) { console.error('Managed vendor audio notification error:', e.message); }
+
+    res.status(201).json(msg);
+  } catch (err) {
+    console.error('POST /conversations/:id/audio:', err.message);
+    if (req.file) { try { fs.unlinkSync(req.file.path); } catch {} }
     res.status(500).json({ message: 'Erreur serveur.' });
   }
 });

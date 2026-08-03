@@ -1,10 +1,13 @@
 import { useEffect, useState, useRef, useCallback } from 'react';
 import { useParams, Link } from 'react-router-dom';
-import { FiMessageCircle, FiSend, FiArrowLeft, FiUser, FiStar, FiTrash2, FiShoppingBag } from 'react-icons/fi';
+import { FiMessageCircle, FiSend, FiArrowLeft, FiUser, FiStar, FiTrash2, FiShoppingBag, FiMic, FiX } from 'react-icons/fi';
 import { BsWhatsapp } from 'react-icons/bs';
 import api from '../api/axios';
 import { useAuth } from '../context/AuthContext';
 import { toWhatsAppNumber } from '../utils/media';
+
+const MAX_AUDIO_SECONDS = 60;
+const MEDIA_BASE = import.meta.env.VITE_API_URL || '';
 
 export default function Messenger() {
   const { id } = useParams();
@@ -19,6 +22,12 @@ export default function Messenger() {
   const [typingName, setTypingName] = useState('');
   const [expandedMsgs, setExpandedMsgs] = useState({});
   const [deleteTarget, setDeleteTarget] = useState(null);
+  const [recording, setRecording] = useState(false);
+  const [recTime, setRecTime] = useState(0);
+  const [recordedBlob, setRecordedBlob] = useState(null);
+  const [recordedUrl, setRecordedUrl] = useState('');
+  const [recordedDuration, setRecordedDuration] = useState(0);
+  const [sendingAudio, setSendingAudio] = useState(false);
   const justOpenedRef = useRef(false);
   const messagesEndRef = useRef(null);
   const messagesContainerRef = useRef(null);
@@ -26,6 +35,12 @@ export default function Messenger() {
   const pollRef = useRef(null);
   const typingDebounceRef = useRef(null);
   const prevMsgCountRef = useRef(0);
+  const mediaRecorderRef = useRef(null);
+  const mediaStreamRef = useRef(null);
+  const recordTimerRef = useRef(null);
+  const recChunksRef = useRef([]);
+
+  const audioSrc = (p) => p.startsWith('http') ? p : `${MEDIA_BASE}/uploads/${p}`;
 
   const scrollToBottom = (smooth = true) => {
     const el = messagesContainerRef.current;
@@ -142,6 +157,122 @@ export default function Messenger() {
     if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); handleSend(); }
   };
 
+  const cleanupRecorder = () => {
+    clearInterval(recordTimerRef.current);
+    recordTimerRef.current = null;
+    if (mediaStreamRef.current) {
+      mediaStreamRef.current.getTracks().forEach((t) => t.stop());
+      mediaStreamRef.current = null;
+    }
+    mediaRecorderRef.current = null;
+    recChunksRef.current = [];
+  };
+
+  const stopRecording = () => {
+    const rec = mediaRecorderRef.current;
+    if (rec && rec.state === 'recording') {
+      rec.stop();
+    } else {
+      cleanupRecorder();
+      setRecording(false);
+    }
+  };
+
+  const startRecording = async () => {
+    if (!activeConv) return;
+    if (!navigator.mediaDevices?.getUserMedia) {
+      alert('Votre navigateur ne supporte pas l\'enregistrement audio.');
+      return;
+    }
+    try {
+      const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+      const mimeType = [
+        'audio/webm;codecs=opus',
+        'audio/webm',
+        'audio/mp4',
+        'audio/ogg;codecs=opus',
+      ].find((t) => window.MediaRecorder && MediaRecorder.isTypeSupported(t));
+
+      const rec = new MediaRecorder(stream, mimeType ? { mimeType } : undefined);
+      recChunksRef.current = [];
+      rec.ondataavailable = (e) => { if (e.data && e.data.size > 0) recChunksRef.current.push(e.data); };
+      rec.onstop = () => {
+        const type = rec.mimeType || 'audio/webm';
+        const blob = new Blob(recChunksRef.current, { type });
+        setRecordedBlob(blob);
+        setRecordedUrl(URL.createObjectURL(blob));
+        setRecordedDuration(recTime);
+        cleanupRecorder();
+        setRecording(false);
+      };
+      mediaRecorderRef.current = rec;
+      mediaStreamRef.current = stream;
+      rec.start();
+      setRecording(true);
+      setRecTime(0);
+      setRecordedBlob(null);
+      setRecordedUrl('');
+      setRecordedDuration(0);
+      recordTimerRef.current = setInterval(() => {
+        setRecTime((t) => {
+          if (t + 1 >= MAX_AUDIO_SECONDS) {
+            stopRecording();
+            return MAX_AUDIO_SECONDS;
+          }
+          return t + 1;
+        });
+      }, 1000);
+    } catch (e) {
+      alert('Accès au micro refusé ou indisponible.');
+    }
+  };
+
+  const cancelRecording = () => {
+    const rec = mediaRecorderRef.current;
+    if (rec && rec.state === 'recording') {
+      rec.onstop = () => {
+        cleanupRecorder();
+        setRecording(false);
+      };
+      rec.stop();
+    } else {
+      cleanupRecorder();
+      setRecording(false);
+    }
+    setRecordedBlob(null);
+    setRecordedUrl('');
+    setRecordedDuration(0);
+    setRecTime(0);
+  };
+
+  const sendAudio = async () => {
+    if (!recordedBlob || !activeConv || sendingAudio) return;
+    setSendingAudio(true);
+    const wasNearBottom = isNearBottom();
+    const fd = new FormData();
+    const ext = recordedBlob.type.includes('mp4') ? 'm4a' : 'webm';
+    fd.append('audio', recordedBlob, `voix.${ext}`);
+    fd.append('duration', String(recordedDuration));
+    try {
+      const { data } = await api.post(`/chat/conversations/${activeConv}/audio`, fd, {
+        headers: { 'Content-Type': 'multipart/form-data' },
+      });
+      prevMsgCountRef.current++;
+      setMessages((prev) => [...prev, data]);
+      if (wasNearBottom) setTimeout(scrollToBottom, 100);
+      loadConversations();
+      if (recordedUrl) URL.revokeObjectURL(recordedUrl);
+      setRecordedBlob(null);
+      setRecordedUrl('');
+      setRecordedDuration(0);
+      setRecTime(0);
+    } catch (err) {
+      alert(err.response?.data?.message || 'Erreur lors de l\'envoi du message vocal');
+    } finally { setSendingAudio(false); }
+  };
+
+  useEffect(() => () => cleanupRecorder(), []);
+
   const handleDeleteConv = async (convId) => {
     try {
       await api.delete(`/chat/conversations/${convId}`);
@@ -254,6 +385,17 @@ export default function Messenger() {
                   </div>
                 ) : messages.map((msg) => {
                   const isMine = msg.sender_id === user.id;
+                  if (msg.audio) {
+                    return (
+                      <div key={msg.id} className={`messenger-msg ${isMine ? 'mine' : 'theirs'} messenger-msg-audio`}>
+                        <div className="messenger-audio-wrap">
+                          <audio controls preload="metadata" src={audioSrc(msg.audio)} style={{ width: '100%', maxWidth: 260, height: 40, display: 'block' }} />
+                          {msg.duration ? <div className="messenger-audio-dur">{msg.duration}s</div> : null}
+                        </div>
+                        <div className="messenger-msg-time">{new Date(msg.created_at).toLocaleTimeString('fr-FR', { hour: '2-digit', minute: '2-digit' })}</div>
+                      </div>
+                    );
+                  }
                   const isExpanded = !!expandedMsgs[msg.id];
                   const isLong = msg.text.length > 20;
                   const shownText = isLong && !isExpanded ? msg.text.slice(0, 20) + '…' : msg.text;
@@ -286,20 +428,50 @@ export default function Messenger() {
               </div>
 
               <div className="messenger-input-bar">
-                <input
-                  ref={inputRef}
-                  type="text"
-                  placeholder="Écrivez un message..."
-                  value={text}
-                  onChange={handleInputChange}
-                  onKeyDown={handleKeyDown}
-                  disabled={sending}
-                  maxLength={100}
-                  className="messenger-input"
-                />
-                <button onClick={handleSend} disabled={!text.trim() || sending} className="messenger-send-btn">
-                  <FiSend size={18} />
-                </button>
+                {recording ? (
+                  <div className="messenger-recording">
+                    <div className="messenger-rec-dot" />
+                    <span className="messenger-rec-timer">0:{String(recTime).padStart(2, '0')}</span>
+                    <span className="messenger-rec-hint">Enregistrement…</span>
+                    <button onClick={stopRecording} className="messenger-rec-stop" title="Arrêter et envoyer">
+                      <FiSend size={16} />
+                    </button>
+                    <button onClick={cancelRecording} className="messenger-rec-cancel" title="Annuler">
+                      <FiX size={16} />
+                    </button>
+                  </div>
+                ) : recordedBlob ? (
+                  <div className="messenger-recording">
+                    <audio controls src={recordedUrl} style={{ flex: 1, height: 40, minWidth: 0 }} />
+                    <span className="messenger-rec-timer">{recordedDuration}s</span>
+                    <button onClick={sendAudio} disabled={sendingAudio} className="messenger-rec-stop" title="Envoyer">
+                      <FiSend size={16} />
+                    </button>
+                    <button onClick={cancelRecording} className="messenger-rec-cancel" title="Supprimer">
+                      <FiX size={16} />
+                    </button>
+                  </div>
+                ) : (
+                  <>
+                    <input
+                      ref={inputRef}
+                      type="text"
+                      placeholder="Écrivez un message..."
+                      value={text}
+                      onChange={handleInputChange}
+                      onKeyDown={handleKeyDown}
+                      disabled={sending}
+                      maxLength={100}
+                      className="messenger-input"
+                    />
+                    <button onClick={startRecording} disabled={sending} className="messenger-mic-btn" title="Message vocal (max 60s)">
+                      <FiMic size={18} />
+                    </button>
+                    <button onClick={handleSend} disabled={!text.trim() || sending} className="messenger-send-btn">
+                      <FiSend size={18} />
+                    </button>
+                  </>
+                )}
               </div>
               <div style={{ textAlign: 'right', padding: '2px 20px 8px', fontSize: 11, color: 'var(--text-muted)' }}>{text.length}/100</div>
             </>
