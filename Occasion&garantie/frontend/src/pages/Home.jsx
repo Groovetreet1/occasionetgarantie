@@ -1,9 +1,10 @@
 import { Link, useNavigate } from 'react-router-dom';
 import { useEffect, useState } from 'react';
 import { motion } from 'framer-motion';
-import { FiSmartphone, FiShield, FiArrowRight, FiTrendingUp, FiShoppingBag, FiStar, FiSearch, FiMapPin } from 'react-icons/fi';
+import { FiSmartphone, FiArrowRight, FiShoppingBag, FiSearch, FiMapPin } from 'react-icons/fi';
+import { TbShieldCheck, TbClockHour5 } from 'react-icons/tb';
 import api from '../api/axios';
-import ProductCard from '../components/ProductCard';
+import HomeProductCard from '../components/HomeProductCard';
 import TrustBar from '../components/TrustBar';
 import NewsletterSection from '../components/NewsletterSection';
 import PromoPopup from '../components/PromoPopup';
@@ -140,12 +141,13 @@ export default function Home() {
       {storeProducts.length > 0 && (
         <motion.section className="section" variants={fadeUp} initial="hidden" whileInView="show" viewport={{ once: true }} style={{ background: 'rgba(245,158,11,0.03)', borderBottom: '1px solid rgba(245,158,11,0.1)' }}>
           <div className="container">
-            <div className="section-header">
-              <div>
-                <h2 className="section-title" style={{ display: 'flex', alignItems: 'center', gap: 8, color: '#d97706' }}>
-                  <FiShield style={{ color: '#d97706' }} /> Boutique Officielle
-                </h2>
-                <p className="section-subtitle">Produits vendus directement par Occasion & Garantie</p>
+            <div className="section-header home-section-header">
+              <div className="home-heading">
+                <span className="home-heading-icon home-heading-icon-store"><TbShieldCheck size={22} /></span>
+                <div>
+                  <h2 className="home-section-title home-section-title-store">Boutique Officielle</h2>
+                  <p className="home-section-subtitle">Produits vendus directement par Occasion & Garantie</p>
+                </div>
               </div>
               <Link to="/boutique" className="btn btn-secondary">Voir la boutique <FiArrowRight size={16} /></Link>
             </div>
@@ -171,16 +173,19 @@ export default function Home() {
 
       <motion.section className="section" variants={fadeUp} initial="hidden" whileInView="show" viewport={{ once: true }}>
         <div className="container">
-          <div className="section-header">
-            <div>
-              <h2 className="section-title">Dernieres annonces</h2>
-              <p className="section-subtitle">{products.length} telephones disponibles a la vente.</p>
+          <div className="section-header home-section-header">
+            <div className="home-heading">
+              <span className="home-heading-icon home-heading-icon-latest"><TbClockHour5 size={22} /></span>
+              <div>
+                <h2 className="home-section-title">Dernieres annonces</h2>
+                <p className="home-section-subtitle">{products.length} telephones disponibles a la vente.</p>
+              </div>
             </div>
             <Link to="/products" className="btn btn-secondary">Voir tout <FiArrowRight size={16} /></Link>
           </div>
           {loading ? <SkeletonGrid count={8} /> : products.length > 0 ? (
             <div className="products-grid">
-              {products.map((p, i) => <ProductCard key={p.id} product={p} index={i} />)}
+              {products.map((p, i) => <HomeProductCard key={p.id} product={p} index={i} />)}
             </div>
           ) : (
             <div className="empty-state"><FiSmartphone size={48} /><p>Aucune annonce pour le moment.</p></div>
