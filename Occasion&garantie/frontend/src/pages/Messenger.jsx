@@ -56,11 +56,15 @@ export default function Messenger() {
     const tryScroll = () => {
       attempts++;
       const el = messagesContainerRef.current;
-      if (!el) return;
-      el.scrollTop = el.scrollHeight;
-      const visible = el.offsetHeight > 0 && el.scrollHeight > 0;
-      const atBottom = el.scrollTop + el.clientHeight >= el.scrollHeight - 10;
-      if ((!visible || !atBottom) && attempts < 20) {
+      if (el) {
+        el.scrollTop = el.scrollHeight;
+        if (messagesEndRef.current) {
+          messagesEndRef.current.scrollIntoView({ block: 'end' });
+        }
+      }
+      const visible = el && el.offsetHeight > 0 && el.scrollHeight > 0;
+      const atBottom = el && el.scrollTop + el.clientHeight >= el.scrollHeight - 10;
+      if ((!visible || !atBottom) && attempts < 25) {
         setTimeout(tryScroll, 100);
       }
     };
