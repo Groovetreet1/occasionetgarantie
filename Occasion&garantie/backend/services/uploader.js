@@ -81,4 +81,4 @@ async function destroy(publicId) {
   }
 }
 
-module.exports = { upload, uploadBuffer, destroy, USE_CLOUDINARY };
+module.exports = { upload, uploadBuffer, uploadAudio, destroy, USE_CLOUDINARY };
