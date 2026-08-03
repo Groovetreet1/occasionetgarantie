@@ -573,6 +573,11 @@ input, textarea, select, button { font-family: inherit; }
   background: #f59e0b; color: white; padding: 3px 8px; border-radius: 6px;
   font-size: 10px; font-weight: 700; text-transform: uppercase;
 }
+.badge-store {
+  position: absolute; top: 10px; left: 10px; z-index: 2;
+  background: #d97706; color: white; padding: 3px 8px; border-radius: 6px;
+  font-size: 10px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.3px;
+}
 .product-sold-overlay {
   position: absolute; inset: 0; background: rgba(0,0,0,0.5); z-index: 2;
   display: flex; align-items: center; justify-content: center;
@@ -635,6 +640,7 @@ input, textarea, select, button { font-family: inherit; }
   .product-card-old { font-size: 10px; }
   .badge-discount { font-size: 8px; padding: 1px 5px; top: 4px; right: 4px; }
   .badge-pending { font-size: 8px; padding: 1px 5px; top: 4px; left: 4px; }
+  .badge-store { font-size: 8px; padding: 1px 5px; top: 4px; left: 4px; }
   .meta-chip { font-size: 8px; padding: 1px 5px; }
   .product-card-img-wrap { padding: 8px; }
   .product-card-cat { font-size: 8px; }

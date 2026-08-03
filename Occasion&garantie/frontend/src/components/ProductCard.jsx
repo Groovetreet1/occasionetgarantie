@@ -18,6 +18,8 @@ export default function ProductCard({ product, index = 0 }) {
     ? Math.round((1 - product.price / product.old_price) * 100) : 0;
   const isSold = product.status === 'vendu';
   const isPending = product.status === 'en_attente';
+  const isStore = product.product_type === 'store';
+  const detailLink = isStore ? `/boutique/${product.slug}` : `/products/${product.slug}`;
 
   return (
     <motion.div
@@ -26,11 +28,12 @@ export default function ProductCard({ product, index = 0 }) {
       viewport={{ once: true, margin: '-30px' }}
       transition={{ duration: 0.35, delay: index * 0.06 }}
     >
-      <Link to={`/products/${product.slug}`} className={`product-card ${isSold ? 'product-sold' : ''}`}>
+      <Link to={detailLink} className={`product-card ${isSold ? 'product-sold' : ''}`}>
         <div className="product-card-image">
           {discount > 0 && <span className="badge-discount">-{discount}%</span>}
           {isSold && <div className="product-sold-overlay">Vendu</div>}
           {isPending && <span className="badge-pending">Réservé</span>}
+          {isStore && <span className="badge-store">Boutique Officielle</span>}
           <div className="product-card-img-wrap">
             {imgUrl ? (
               <img src={imgUrl} alt={product.name} loading="lazy" />
@@ -44,7 +47,7 @@ export default function ProductCard({ product, index = 0 }) {
           <span className="product-card-cat">{product.category_name || 'Non classé'}</span>
           <h3 className="product-card-title">{product.name}</h3>
 
-          {product.seller_name && (
+          {product.seller_name && !isStore && (
             <span className="product-card-seller">
               {product.seller_avatar ? (
                 <img src={product.seller_avatar.startsWith('http') ? product.seller_avatar : `${API_BASE}/uploads/avatars/${product.seller_avatar}`} alt="" className="product-card-seller-avatar" />
