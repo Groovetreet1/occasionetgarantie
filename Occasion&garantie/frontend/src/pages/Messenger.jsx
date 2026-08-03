@@ -5,6 +5,7 @@ import { BsWhatsapp } from 'react-icons/bs';
 import api from '../api/axios';
 import { useAuth } from '../context/AuthContext';
 import { toWhatsAppNumber } from '../utils/media';
+import AudioPlayer from '../components/AudioPlayer';
 
 const MAX_AUDIO_SECONDS = 60;
 const MEDIA_BASE = import.meta.env.VITE_API_URL || '';
@@ -388,10 +389,7 @@ export default function Messenger() {
                   if (msg.audio) {
                     return (
                       <div key={msg.id} className={`messenger-msg ${isMine ? 'mine' : 'theirs'} messenger-msg-audio`}>
-                        <div className="messenger-audio-wrap">
-                          <audio controls preload="metadata" src={audioSrc(msg.audio)} style={{ width: '100%', maxWidth: 260, height: 40, display: 'block' }} />
-                          {msg.duration ? <div className="messenger-audio-dur">{msg.duration}s</div> : null}
-                        </div>
+                        <AudioPlayer src={audioSrc(msg.audio)} duration={msg.duration} />
                         <div className="messenger-msg-time">{new Date(msg.created_at).toLocaleTimeString('fr-FR', { hour: '2-digit', minute: '2-digit' })}</div>
                       </div>
                     );
@@ -442,8 +440,9 @@ export default function Messenger() {
                   </div>
                 ) : recordedBlob ? (
                   <div className="messenger-recording">
-                    <audio controls src={recordedUrl} style={{ flex: 1, height: 40, minWidth: 0 }} />
-                    <span className="messenger-rec-timer">{recordedDuration}s</span>
+                    <div className="messenger-preview-audio">
+                      <AudioPlayer src={recordedUrl} duration={recordedDuration} size="preview" />
+                    </div>
                     <button onClick={sendAudio} disabled={sendingAudio} className="messenger-rec-stop" title="Envoyer">
                       <FiSend size={16} />
                     </button>
