@@ -192,17 +192,14 @@ export default function Home() {
 
       <motion.section className="section sell-promo" variants={fadeUp} initial="hidden" whileInView="show" viewport={{ once: true }}>
         <div className="container">
-          <div className="sell-promo-grid">
+          <div className="sell-promo-bar">
             <div className="sell-promo-content">
-              <h2>Vous avez un telephone a vendre ?</h2>
-              <p>Publiez votre annonce gratuitement et trouvez un acheteur rapidement. Zero commission.</p>
-              <Link to="/vendre" className="btn btn-primary btn-lg">Vendre maintenant <FiArrowRight size={18} /></Link>
+              <h2>Un telephone a vendre ?</h2>
+              <p>Annonce gratuite, zero commission, paiement securise.</p>
             </div>
-            <div className="sell-promo-stats">
-              <div className="stat-badge"><FiStar size={18} /> Gratuit</div>
-              <div className="stat-badge"><FiShoppingBag size={18} /> Sans commission</div>
-              <div className="stat-badge"><FiShield size={18} /> Paiement securise</div>
-            </div>
+            <Link to="/vendre" className="btn btn-primary">
+              Vendre maintenant <FiArrowRight size={16} />
+            </Link>
           </div>
         </div>
       </motion.section>

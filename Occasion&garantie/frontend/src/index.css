@@ -1408,22 +1408,19 @@ select.form-control, .form-group select { cursor: pointer; appearance: auto; }
 
 /* Sell promo section */
 .sell-promo { background: var(--bg-secondary); }
-.sell-promo-grid {
-  display: grid; grid-template-columns: 1fr 1fr; gap: 48px; align-items: center;
+.sell-promo-bar {
+  display: flex; align-items: center; justify-content: space-between;
+  gap: 20px; flex-wrap: wrap; padding: 20px 24px;
+  background: var(--bg-card); border: 1px solid var(--border-light);
+  border-radius: var(--radius-lg); box-shadow: var(--shadow);
 }
-.sell-promo-content h2 { font-size: 28px; font-weight: 800; margin-bottom: 12px; }
-.sell-promo-content p { font-size: 15px; color: var(--text-secondary); margin-bottom: 24px; }
-.sell-promo-stats { display: flex; flex-direction: column; gap: 16px; }
-.stat-badge {
-  display: flex; align-items: center; gap: 12px; padding: 16px 20px;
-  background: var(--bg-card); border: 1px solid var(--border); border-radius: var(--radius);
-  font-weight: 600; font-size: 14px;
-}
+.sell-promo-content h2 { font-size: 18px; font-weight: 800; margin-bottom: 2px; }
+.sell-promo-content p { font-size: 13px; color: var(--text-secondary); margin: 0; }
 @media (max-width: 768px) {
   .marketplace-hero h1 { font-size: 28px; }
   .hero-search { flex-direction: column; padding: 12px; }
   .hero-search button { width: 100%; }
-  .sell-promo-grid { grid-template-columns: 1fr; text-align: center; }
+  .sell-promo-bar { flex-direction: column; text-align: center; }
 }
 
 /* Section header with action */
