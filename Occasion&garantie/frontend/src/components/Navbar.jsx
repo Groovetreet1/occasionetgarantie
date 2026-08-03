@@ -163,7 +163,7 @@ export default function Navbar() {
               <NavLink to="/reprise" className="navbar-sell-link"><FiSmartphone size={14} /> Reprise</NavLink>
             )}
             {user?.role == 'seller' ? (
-              <NavLink to="/seller" className="navbar-sell-link"><FiTrendingUp size={14} /> Vendre</NavLink>
+              <NavLink to="/seller/products/new" className="navbar-sell-link"><FiTrendingUp size={14} /> Vendre</NavLink>
             ) : user?.role !== 'admin' && (
               <NavLink to="/vendre" className="navbar-sell-link"><FiTrendingUp size={14} /> Vendre</NavLink>
             )}
@@ -319,7 +319,7 @@ export default function Navbar() {
           <NavLink to="/reprise" onClick={closeMenu}><FiSmartphone size={14} /> Reprise</NavLink>
         )}
         {user?.role == 'seller' ? (
-          <NavLink to="/seller" onClick={closeMenu} className="navbar-mobile-sell"><FiTrendingUp size={14} /> Vendre</NavLink>
+          <NavLink to="/seller/products/new" onClick={closeMenu} className="navbar-mobile-sell"><FiTrendingUp size={14} /> Vendre</NavLink>
         ) : user?.role !== 'admin' && (
           <NavLink to="/vendre" onClick={closeMenu} className="navbar-mobile-sell"><FiTrendingUp size={14} /> Vendre</NavLink>
         )}
