@@ -1357,6 +1357,13 @@ select.form-control, .form-group select { cursor: pointer; appearance: auto; }
 }
 .navbar-sell-link:hover { opacity: 0.9; transform: translateY(-1px); }
 .navbar-sell-link { transition: all 0.3s ease; }
+.navbar-desktop-nav a.navbar-sell-link.active {
+  color: #fff !important; background: #4b5563;
+}
+.navbar-desktop-nav a.navbar-sell-link.active:hover { background: #374151; }
+.navbar-mobile-panel a.navbar-mobile-sell.active {
+  background: #4b5563; color: #fff !important;
+}
 .navbar-desktop-nav { gap: 8px; }
 .navbar-mobile-sell {
   display: flex; align-items: center; justify-content: center; gap: 8px; padding: 16px;
