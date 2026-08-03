@@ -36,6 +36,7 @@ export default function Messenger() {
   const pollRef = useRef(null);
   const typingDebounceRef = useRef(null);
   const prevMsgCountRef = useRef(0);
+  const wasNearBottomRef = useRef(true);
   const mediaRecorderRef = useRef(null);
   const mediaStreamRef = useRef(null);
   const recordTimerRef = useRef(null);
@@ -86,6 +87,8 @@ export default function Messenger() {
     if (justOpenedRef.current && messages.length > 0) {
       justOpenedRef.current = false;
       scrollToBottom(false);
+    } else if (messages.length > prevMsgCountRef.current && wasNearBottomRef.current) {
+      scrollToBottom(true);
     }
     prevMsgCountRef.current = messages.length;
   }, [messages]);
@@ -102,6 +105,7 @@ export default function Messenger() {
     try {
       const { data } = await api.get(`/chat/conversations/${activeConv}/messages`);
       if (data.length > prevMsgCountRef.current) {
+        wasNearBottomRef.current = isNearBottom();
         setMessages(data);
       } else if (isNearBottom()) {
         setMessages(data);
@@ -139,6 +143,7 @@ export default function Messenger() {
     if (!text.trim() || !activeConv || sending) return;
     setSending(true);
     const wasNearBottom = isNearBottom();
+    wasNearBottomRef.current = wasNearBottom;
     const msgText = text.trim();
     setText('');
     try {
@@ -250,6 +255,7 @@ export default function Messenger() {
     if (!recordedBlob || !activeConv || sendingAudio) return;
     setSendingAudio(true);
     const wasNearBottom = isNearBottom();
+    wasNearBottomRef.current = wasNearBottom;
     const fd = new FormData();
     const ext = recordedBlob.type.includes('mp4') ? 'm4a' : 'webm';
     fd.append('audio', recordedBlob, `voix.${ext}`);

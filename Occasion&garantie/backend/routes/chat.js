@@ -148,7 +148,7 @@ router.get('/conversations/:id/messages', authenticate, async (req, res) => {
     if (convs.length === 0) return res.status(403).json({ message: 'Acces refuse.' });
 
     const [rows] = await pool.query(
-      'SELECT m.*, u.full_name as sender_name FROM messages m LEFT JOIN users u ON m.sender_id = u.id WHERE m.conversation_id = ? ORDER BY m.created_at ASC',
+      'SELECT m.*, u.full_name as sender_name FROM messages m LEFT JOIN users u ON m.sender_id = u.id WHERE m.conversation_id = ? ORDER BY m.created_at ASC, m.id ASC',
       [req.params.id]
     );
     res.json(rows);
