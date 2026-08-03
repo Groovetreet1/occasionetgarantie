@@ -51,13 +51,20 @@ export default function Messenger() {
     el.scrollTo({ top: el.scrollHeight, behavior: smooth ? 'smooth' : 'auto' });
   };
 
-  const forceScrollBottom = (tries = 3) => {
-    requestAnimationFrame(() => {
+  const forceScrollBottom = () => {
+    let attempts = 0;
+    const tryScroll = () => {
+      attempts++;
       const el = messagesContainerRef.current;
       if (!el) return;
       el.scrollTop = el.scrollHeight;
-      if (tries > 0) setTimeout(() => forceScrollBottom(tries - 1), 80);
-    });
+      const visible = el.offsetHeight > 0 && el.scrollHeight > 0;
+      const atBottom = el.scrollTop + el.clientHeight >= el.scrollHeight - 10;
+      if ((!visible || !atBottom) && attempts < 20) {
+        setTimeout(tryScroll, 100);
+      }
+    };
+    requestAnimationFrame(tryScroll);
   };
 
   const isNearBottom = () => {
@@ -104,6 +111,12 @@ export default function Messenger() {
     }
     prevMsgCountRef.current = messages.length;
   }, [messages]);
+
+  useEffect(() => {
+    if (!showMobileList && activeConv && messages.length > 0) {
+      forceScrollBottom();
+    }
+  }, [showMobileList, activeConv]);
 
   const loadConversations = async () => {
     try {
