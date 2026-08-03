@@ -10,6 +10,7 @@ const statusConfig = {
   contre_offre: { label: 'Contre-offre', color: '#3b82f6', bg: 'rgba(59,130,246,0.1)' },
   acceptee: { label: 'Acceptée', color: '#10b981', bg: 'rgba(16,185,129,0.1)' },
   refusee: { label: 'Refusée', color: '#ef4444', bg: 'rgba(239,68,68,0.1)' },
+  annulee: { label: 'Annulée', color: '#64748b', bg: 'rgba(100,116,139,0.1)' },
 };
 
 export default function MyOffers() {
@@ -78,7 +79,7 @@ export default function MyOffers() {
           </div>
         ) : offers.map(o => {
           const cfg = statusConfig[o.status] || { label: o.status, color: '#94a3b8', bg: 'rgba(148,163,184,0.1)' };
-          const pending = o.status === 'en_attente' || (o.status === 'contre_offre' && Number(o.counter_by) !== Number(user.id));
+          const pending = o.status === 'en_attente' || (o.status === 'contre_offre' && Number(o.counter_by) === Number(user.id));
           return (
             <div key={o.id} style={{
               background: 'var(--bg-card)', border: '1px solid var(--border)',
@@ -125,6 +126,11 @@ export default function MyOffers() {
                       <FiX size={13} style={{ verticalAlign: 'middle', marginRight: 3 }} /> Refuser
                     </button>
                   </>
+                )}
+                {o.status === 'en_attente' && (
+                  <button onClick={() => respond(o.id, 'annulee')} className="btn" style={{ fontSize: 12, padding: '6px 12px', background: 'transparent', color: '#64748b', border: '1.5px solid #64748b' }}>
+                    <FiX size={13} style={{ verticalAlign: 'middle', marginRight: 3 }} /> Annuler
+                  </button>
                 )}
                 {pending && (
                   <span style={{ fontSize: 12, color: 'var(--text-muted)', display: 'flex', alignItems: 'center', gap: 4 }}>

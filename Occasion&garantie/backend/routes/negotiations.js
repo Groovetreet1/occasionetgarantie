@@ -157,7 +157,7 @@ async function ensureAcceptedConversation(neg, price) {
 router.put('/:id', authenticate, async (req, res) => {
   try {
     const { status, price } = req.body;
-    if (!['acceptee', 'refusee', 'contre_offre'].includes(status)) {
+    if (!['acceptee', 'refusee', 'contre_offre', 'annulee'].includes(status)) {
       return res.status(400).json({ message: 'Statut invalide.' });
     }
 
@@ -167,12 +167,33 @@ router.put('/:id', authenticate, async (req, res) => {
     if (req.user.role !== 'admin' && neg.seller_id !== req.user.id && neg.buyer_id !== req.user.id) {
       return res.status(403).json({ message: 'Accès refusé.' });
     }
-    if (neg.status === 'acceptee' || neg.status === 'refusee') {
+    if (['acceptee', 'refusee', 'annulee'].includes(neg.status)) {
       return res.status(400).json({ message: 'Cette offre a déjà été traitée.' });
     }
 
     const isSeller = neg.seller_id === req.user.id;
     const isBuyer = neg.buyer_id === req.user.id;
+
+    // Buyer can cancel their own pending offer at any time
+    if (status === 'annulee') {
+      if (!isBuyer && req.user.role !== 'admin') {
+        return res.status(403).json({ message: 'Seul le client peut annuler cette offre.' });
+      }
+      await pool.query('UPDATE negotiations SET status = ? WHERE id = ?', ['annulee', req.params.id]);
+      try {
+        await ensureNotifications();
+        const [prods] = await pool.query('SELECT name FROM products WHERE id = ?', [neg.product_id]);
+        const pName = prods[0]?.name || 'Produit';
+        const cancelledPrice = neg.counter_price != null ? Number(neg.counter_price) : Number(neg.offered_price);
+        await pool.query(
+          'INSERT INTO notifications (user_id, type, title, message, link) VALUES (?, ?, ?, ?, ?)',
+          [neg.seller_id, 'negociation_annulee', 'Offre annulée',
+           `Le client a annulé sa négociation de ${cancelledPrice} DH pour "${pName}".`,
+           '/seller']
+        );
+      } catch (nErr) { console.error('Notification failed:', nErr.message); }
+      return res.json({ message: 'Offre annulée.' });
+    }
 
     if (neg.status === 'en_attente') {
       if (!isSeller && req.user.role !== 'admin') {
