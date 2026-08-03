@@ -61,6 +61,16 @@ router.post('/', async (req, res) => {
     const ip = getClientIp(req);
     const today = new Date().toISOString().slice(0, 10);
 
+    if (userId) {
+      try {
+        await pool.query("ALTER TABLE users ADD COLUMN suspended TINYINT(1) DEFAULT 0"); } catch (e) { if (e.errno !== 1060 && e.code !== 'ER_DUP_FIELDNAME') {}
+      }
+      const [susRows] = await pool.query('SELECT suspended, suspension_reason FROM users WHERE id = ?', [userId]);
+      if (susRows.length > 0 && susRows[0].suspended) {
+        return res.status(403).json({ message: 'Compte suspendu : les envois sont bloques tant que le compte n est pas reactive.', suspended: true, suspension_reason: susRows[0].suspension_reason });
+      }
+    }
+
     let userEmail = email || null;
     if (userId) {
       const [users] = await pool.query('SELECT email FROM users WHERE id = ?', [userId]);

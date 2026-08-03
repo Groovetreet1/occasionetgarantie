@@ -2077,6 +2077,35 @@ select.form-control, .form-group select { cursor: pointer; appearance: auto; }
 [data-theme="dark"] .avito-search-all { border-top-color: #2d2d44; }
 .avito-search-empty { padding: 20px; text-align: center; font-size: 13px; color: #999; }
 .spinner-sm { width: 22px; height: 22px; }
+
+/* Suspended account blocking modal */
+.suspended-overlay {
+  position: fixed; inset: 0; z-index: 100000;
+  background: rgba(15, 15, 30, 0.72); backdrop-filter: blur(8px);
+  display: flex; align-items: center; justify-content: center; padding: 20px;
+}
+.suspended-modal {
+  background: var(--bg-card); border: 1px solid rgba(220,38,38,0.25); border-radius: 18px;
+  max-width: 420px; width: 100%; padding: 32px 28px; text-align: center;
+  box-shadow: 0 24px 80px rgba(0,0,0,0.35);
+}
+.suspended-icon {
+  width: 68px; height: 68px; margin: 0 auto 18px; border-radius: 50%;
+  background: rgba(220,38,38,0.12); color: #dc2626;
+  display: flex; align-items: center; justify-content: center;
+}
+.suspended-modal h2 { font-size: 22px; font-weight: 800; margin: 0 0 10px; color: var(--text-primary); }
+.suspended-reason {
+  font-size: 14px; color: var(--text-secondary); line-height: 1.6; margin: 0 0 18px;
+}
+.suspended-note {
+  display: flex; align-items: flex-start; gap: 10px; text-align: left;
+  padding: 12px 14px; border-radius: 10px; font-size: 13px; line-height: 1.5;
+  background: rgba(220,38,38,0.07); color: var(--text-secondary);
+}
+.suspended-note svg { color: #dc2626; flex-shrink: 0; margin-top: 2px; }
+.suspended-contact { font-size: 13px; color: var(--text-secondary); margin: 18px 0 0; }
+.suspended-contact strong { color: var(--text-primary); }
 .avito-search-icon {
   position: absolute;
   left: 14px;

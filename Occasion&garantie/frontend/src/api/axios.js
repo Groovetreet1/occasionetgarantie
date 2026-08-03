@@ -13,12 +13,21 @@ api.interceptors.request.use((config) => {
 });
 
 let onUnauthorized = null;
+let onSuspended = null;
 api.onUnauthorized = (fn) => { onUnauthorized = fn; };
+api.onSuspended = (fn) => { onSuspended = fn; };
 
 api.interceptors.response.use(
   (res) => res,
   (err) => {
-    if (err.response?.status === 401 || err.response?.data?.suspended) {
+    const data = err.response?.data;
+    if (err.response?.status === 403 && data?.suspended) {
+      localStorage.removeItem('token');
+      localStorage.removeItem('user');
+      if (onSuspended) onSuspended(data.suspension_reason || data.message || '');
+      return Promise.reject(err);
+    }
+    if (err.response?.status === 401) {
       localStorage.removeItem('token');
       localStorage.removeItem('user');
       if (onUnauthorized) onUnauthorized();

@@ -6,6 +6,7 @@ const AuthContext = createContext();
 export function AuthProvider({ children }) {
   const [user, setUser] = useState(null);
   const [loading, setLoading] = useState(true);
+  const [suspended, setSuspended] = useState(null);
 
   useEffect(() => {
     let cancelled = false;
@@ -13,13 +14,42 @@ export function AuthProvider({ children }) {
     if (token) {
       api.get('/auth/me')
         .then((res) => { if (!cancelled) setUser(res.data); })
-        .catch(() => { if (!cancelled) localStorage.removeItem('token'); })
+        .catch((err) => {
+          if (!cancelled) {
+            if (err.response?.status === 403 && err.response?.data?.suspended) {
+              localStorage.removeItem('token');
+              localStorage.removeItem('user');
+              setSuspended(err.response.data.suspension_reason || '');
+            } else {
+              localStorage.removeItem('token');
+            }
+          }
+        })
         .finally(() => { if (!cancelled) setLoading(false); });
     } else {
       setLoading(false);
     }
     return () => { cancelled = true; };
   }, []);
+
+  useEffect(() => {
+    const token = localStorage.getItem('token');
+    if (!token) return;
+    const id = setInterval(async () => {
+      try {
+        const { data } = await api.get('/auth/me');
+        setUser(data);
+      } catch (err) {
+        if (err.response?.status === 403 && err.response?.data?.suspended) {
+          localStorage.removeItem('token');
+          localStorage.removeItem('user');
+          setUser(null);
+          setSuspended(err.response.data.suspension_reason || '');
+        }
+      }
+    }, 30000);
+    return () => clearInterval(id);
+  }, [user?.id]);
 
   const login = async (email, password, latitude, longitude) => {
     const { data } = await api.post('/auth/login', { email, password, latitude, longitude });
@@ -50,13 +80,14 @@ export function AuthProvider({ children }) {
     } catch (err) {
       if (err.response?.status === 403 && err.response?.data?.suspended) {
         logout();
+        setSuspended(err.response.data.suspension_reason || '');
       }
       console.error('refreshUser failed:', err);
     }
   };
 
   return (
-    <AuthContext.Provider value={{ user, loading, login, signup, logout, refreshUser }}>
+    <AuthContext.Provider value={{ user, loading, suspended, setSuspended, login, signup, logout, refreshUser }}>
       {children}
     </AuthContext.Provider>
   );

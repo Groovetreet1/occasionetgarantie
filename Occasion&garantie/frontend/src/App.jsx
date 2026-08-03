@@ -6,6 +6,8 @@ import Navbar from './components/Navbar';
 import Footer from './components/Footer';
 import SupportFloat from './components/SupportFloat';
 import ErrorBoundary from './components/ErrorBoundary';
+import SuspendedModal from './components/SuspendedModal';
+import { useAuth } from './context/AuthContext';
 import AdminRoute from './components/AdminRoute';
 import SellerRoute from './components/SellerRoute';
 import Home from './pages/Home';
@@ -68,9 +70,17 @@ function AnimatedPage({ children }) {
 export default function App() {
   const location = useLocation();
   const navigate = useNavigate();
+  const { suspended, setSuspended, logout } = useAuth();
 
   useEffect(() => { window.scrollTo(0, 0); }, [location.pathname]);
   useEffect(() => { api.onUnauthorized(() => navigate('/login', { replace: true })); }, [navigate]);
+  useEffect(() => {
+    api.onSuspended((reason) => {
+      logout();
+      setSuspended(reason || '');
+      navigate('/login', { replace: true });
+    });
+  }, [logout, setSuspended, navigate]);
 
   return (
     <>
@@ -123,6 +133,7 @@ export default function App() {
       </ErrorBoundary>
       <SupportFloat />
       <Footer />
+      {suspended && <SuspendedModal reason={suspended} />}
     </>
   );
 }
