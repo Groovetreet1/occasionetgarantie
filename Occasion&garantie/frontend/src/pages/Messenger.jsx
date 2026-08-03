@@ -53,6 +53,15 @@ export default function Messenger() {
     el.scrollTo({ top: el.scrollHeight, behavior: smooth ? 'smooth' : 'auto' });
   };
 
+  const forceScrollBottom = (tries = 3) => {
+    requestAnimationFrame(() => {
+      const el = messagesContainerRef.current;
+      if (!el) return;
+      el.scrollTop = el.scrollHeight;
+      if (tries > 0) setTimeout(() => forceScrollBottom(tries - 1), 80);
+    });
+  };
+
   const isNearBottom = () => {
     const el = messagesContainerRef.current;
     if (!el) return true;
@@ -74,6 +83,8 @@ export default function Messenger() {
   useEffect(() => {
     if (activeConv) {
       justOpenedRef.current = true;
+      prevMsgCountRef.current = 0;
+      setMessages([]);
       loadMessages();
       checkTyping();
       clearInterval(pollRef.current);
@@ -89,7 +100,7 @@ export default function Messenger() {
   useEffect(() => {
     if (justOpenedRef.current && messages.length > 0) {
       justOpenedRef.current = false;
-      scrollToBottom(false);
+      forceScrollBottom();
     } else if (messages.length > prevMsgCountRef.current && wasNearBottomRef.current) {
       scrollToBottom(true);
     }
@@ -107,10 +118,14 @@ export default function Messenger() {
     if (!activeConv) return;
     try {
       const { data } = await api.get(`/chat/conversations/${activeConv}/messages`);
-      if (data.length > prevMsgCountRef.current) {
+      const sorted = [...data].sort((a, b) => {
+        if (a.id !== b.id) return a.id - b.id;
+        return new Date(a.created_at) - new Date(b.created_at);
+      });
+      if (sorted.length > prevMsgCountRef.current) {
         wasNearBottomRef.current = isNearBottom();
       }
-      setMessages(data);
+      setMessages(sorted);
     } catch {}
   };
 
@@ -150,7 +165,7 @@ export default function Messenger() {
     try {
       const { data } = await api.post(`/chat/conversations/${activeConv}/messages`, { text: msgText });
       prevMsgCountRef.current++;
-      setMessages((prev) => [...prev, data]);
+      setMessages((prev) => [...prev, data].sort((a, b) => a.id - b.id));
       if (wasNearBottom) setTimeout(scrollToBottom, 100);
       loadConversations();
       setTimeout(() => inputRef.current?.focus(), 100);
@@ -266,7 +281,7 @@ export default function Messenger() {
         headers: { 'Content-Type': 'multipart/form-data' },
       });
       prevMsgCountRef.current++;
-      setMessages((prev) => [...prev, data]);
+      setMessages((prev) => [...prev, data].sort((a, b) => a.id - b.id));
       if (wasNearBottom) setTimeout(scrollToBottom, 100);
       loadConversations();
       if (recordedUrl) URL.revokeObjectURL(recordedUrl);
