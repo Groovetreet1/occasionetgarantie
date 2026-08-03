@@ -132,7 +132,7 @@ export default function App() {
       </AnimatePresence>
       </ErrorBoundary>
       <SupportFloat />
-      <Footer />
+      {!location.pathname.startsWith('/messenger') && <Footer />}
       {suspended && <SuspendedModal reason={suspended} onClose={() => setSuspended(null)} />}
     </>
   );
