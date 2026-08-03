@@ -1,7 +1,7 @@
 import { useEffect, useState } from 'react';
-import { Link } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
-import { FiPlus, FiEdit2, FiTrash2, FiPackage, FiCheckCircle, FiPercent, FiCreditCard, FiDollarSign, FiX, FiCopy, FiCheck, FiUpload, FiLock, FiStar, FiSmartphone, FiArrowRight, FiClock, FiAlertCircle, FiEye, FiInfo, FiMessageCircle } from 'react-icons/fi';
+import { FiPlus, FiEdit2, FiTrash2, FiPackage, FiCheckCircle, FiPercent, FiCreditCard, FiDollarSign, FiX, FiCopy, FiCheck, FiUpload, FiLock, FiStar, FiSmartphone, FiArrowRight, FiClock, FiAlertCircle, FiEye, FiInfo, FiMessageCircle, FiSend } from 'react-icons/fi';
 import api from '../api/axios';
 import { useAuth } from '../context/AuthContext';
 import SellerNav from '../components/SellerNav';
@@ -24,6 +24,7 @@ const statusColors = {
 
 export default function SellerDashboard() {
   const { user } = useAuth();
+  const navigate = useNavigate();
   const [profile, setProfile] = useState(null);
   const [products, setProducts] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -40,6 +41,8 @@ export default function SellerDashboard() {
   const [sellerRatings, setSellerRatings] = useState(null);
   const [pendingReprises, setPendingReprises] = useState([]);
   const [negotiations, setNegotiations] = useState([]);
+  const [counterTarget, setCounterTarget] = useState(null);
+  const [counterPrice, setCounterPrice] = useState('');
   const [rejectedPopup, setRejectedPopup] = useState(null);
   const [deleteTarget, setDeleteTarget] = useState(null);
   const [deleteRejectedTarget, setDeleteRejectedTarget] = useState(null);
@@ -67,8 +70,25 @@ export default function SellerDashboard() {
 
   const handleNegotiation = async (id, status) => {
     try {
-      await api.put(`/negotiations/${id}`, { status });
+      const { data } = await api.put(`/negotiations/${id}`, { status });
       setNegotiations(prev => prev.map(n => n.id === id ? { ...n, status } : n));
+      if (data.conversation_id) {
+        navigate(`/messenger/${data.conversation_id}`);
+      }
+    } catch (err) {
+      alert(err.response?.data?.message || 'Erreur');
+    }
+  };
+
+  const submitCounter = async () => {
+    if (!counterTarget) return;
+    const price = parseFloat(counterPrice);
+    if (!price || price <= 0) { alert('Entrez un prix valide.'); return; }
+    try {
+      await api.put(`/negotiations/${counterTarget.id}`, { status: 'contre_offre', price });
+      setNegotiations(prev => prev.map(n => n.id === counterTarget.id ? { ...n, status: 'contre_offre', counter_price: price, counter_by: user.id } : n));
+      setCounterTarget(null);
+      setCounterPrice('');
     } catch (err) {
       alert(err.response?.data?.message || 'Erreur');
     }
@@ -338,16 +358,24 @@ export default function SellerDashboard() {
             </div>
           )}
 
-          {negotiations.filter(n => n.status === 'en_attente').length > 0 && (
+          {(() => {
+            const pending = negotiations.filter(n =>
+              n.status === 'en_attente' ||
+              (n.status === 'contre_offre' && Number(n.counter_by) !== Number(user.id))
+            );
+            if (pending.length === 0) return null;
+            return (
             <div style={{ background: 'var(--bg-card)', border: '1px solid var(--border)', borderRadius: 'var(--radius-lg)', padding: 16, marginTop: 16 }}>
               <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 12 }}>
                 <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
                   <FiMessageCircle size={18} style={{ color: 'var(--primary)' }} />
-                  <span style={{ fontWeight: 700, fontSize: 15 }}>Négociations de prix ({negotiations.filter(n => n.status === 'en_attente').length})</span>
+                  <span style={{ fontWeight: 700, fontSize: 15 }}>Négociations de prix ({pending.length})</span>
                 </div>
               </div>
               <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
-                {negotiations.filter(n => n.status === 'en_attente').slice(0, 5).map(n => (
+                {pending.slice(0, 5).map(n => {
+                  const isCounter = n.status === 'contre_offre';
+                  return (
                   <div key={n.id} style={{
                     display: 'flex', alignItems: 'center', gap: 10, padding: '10px 12px',
                     background: 'var(--bg-secondary)', borderRadius: 10, fontSize: 13, flexWrap: 'wrap',
@@ -355,7 +383,11 @@ export default function SellerDashboard() {
                     <div style={{ flex: 1, minWidth: 180 }}>
                       <div style={{ fontWeight: 600 }}>{n.product_name}</div>
                       <div style={{ fontSize: 11, color: 'var(--text-muted)' }}>
-                        {n.buyer_name} — propose <strong style={{ color: 'var(--primary)' }}>{Number(n.offered_price)} DH</strong>
+                        {n.buyer_name} — {isCounter ? (
+                          <>contre-offre <strong style={{ color: 'var(--primary)' }}>{Number(n.counter_price)} DH</strong> (votre prix : {Number(n.offered_price)} DH)</>
+                        ) : (
+                          <>propose <strong style={{ color: 'var(--primary)' }}>{Number(n.offered_price)} DH</strong></>
+                        )}
                         {n.message && ` — "${n.message}"`}
                       </div>
                     </div>
@@ -363,15 +395,20 @@ export default function SellerDashboard() {
                       <button onClick={() => handleNegotiation(n.id, 'acceptee')} className="btn" style={{ fontSize: 12, padding: '6px 12px', background: '#10b981', color: '#fff', border: 'none' }}>
                         <FiCheck size={13} style={{ verticalAlign: 'middle', marginRight: 3 }} /> Accepter
                       </button>
+                      <button onClick={() => { setCounterTarget(n); setCounterPrice(''); }} className="btn" style={{ fontSize: 12, padding: '6px 12px', background: 'var(--primary)', color: '#fff', border: 'none' }}>
+                        <FiSend size={13} style={{ verticalAlign: 'middle', marginRight: 3 }} /> Contre-proposer
+                      </button>
                       <button onClick={() => handleNegotiation(n.id, 'refusee')} className="btn" style={{ fontSize: 12, padding: '6px 12px', background: 'transparent', color: '#ef4444', border: '1.5px solid #ef4444' }}>
                         <FiX size={13} style={{ verticalAlign: 'middle', marginRight: 3 }} /> Refuser
                       </button>
                     </div>
                   </div>
-                ))}
+                  );
+                })}
               </div>
             </div>
-          )}
+            );
+          })()}
 
           <div className="dashboard-products">
           <h3>Mes annonces ({products.length})</h3>          {products.length === 0 ? (
@@ -484,6 +521,33 @@ export default function SellerDashboard() {
                   <FiTrash2 size={14} /> Supprimer
                 </button>
               </div>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {counterTarget && (
+        <div style={{ position: 'fixed', inset: 0, background: 'rgba(0,0,0,0.5)', zIndex: 1002, display: 'flex', alignItems: 'center', justifyContent: 'center', padding: 16 }}
+          onClick={() => setCounterTarget(null)}>
+          <div style={{ background: 'var(--bg-card)', borderRadius: 16, padding: 24, maxWidth: 400, width: '100%', boxShadow: '0 20px 60px rgba(0,0,0,0.3)' }} onClick={(e) => e.stopPropagation()}>
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 12 }}>
+              <h3 style={{ fontSize: 17, fontWeight: 700 }}>Contre-proposer un prix</h3>
+              <button onClick={() => setCounterTarget(null)} style={{ background: 'none', border: 'none', color: 'var(--text-muted)', cursor: 'pointer', padding: 4 }}><FiX size={18} /></button>
+            </div>
+            <p style={{ fontSize: 13, color: 'var(--text-secondary)', marginBottom: 12 }}>
+              Offre du client : <strong>{Number(counterTarget.offered_price)} DH</strong> — {counterTarget.product_name}
+            </p>
+            <input
+              type="number" min="0" placeholder="Votre prix (DH)" value={counterPrice}
+              onChange={e => setCounterPrice(e.target.value)}
+              autoFocus
+              style={{ width: '100%', padding: '12px 14px', borderRadius: 10, border: '1px solid var(--border)', background: 'var(--bg-secondary)', color: 'var(--text)', fontSize: 14, fontFamily: 'var(--font)', marginBottom: 16, boxSizing: 'border-box' }}
+            />
+            <div style={{ display: 'flex', gap: 10 }}>
+              <button className="btn btn-outline" onClick={() => setCounterTarget(null)} style={{ flex: 1, justifyContent: 'center' }}>Annuler</button>
+              <button className="form-submit" onClick={submitCounter} style={{ flex: 1, justifyContent: 'center' }}>
+                <FiSend size={15} /> Envoyer
+              </button>
             </div>
           </div>
         </div>

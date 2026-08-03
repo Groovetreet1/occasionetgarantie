@@ -12,6 +12,7 @@ const emails = require('../emails');
       seller_id INT NOT NULL,
       product_id INT,
       product_name VARCHAR(200),
+      negotiation_id INT,
       created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
       updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
       FOREIGN KEY (buyer_id) REFERENCES users(id) ON DELETE CASCADE,

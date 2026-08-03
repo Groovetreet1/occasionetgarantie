@@ -241,6 +241,9 @@ export default function Navbar() {
                       <NavLink to="/profile" onClick={() => setDropdownOpen(false)}>
                         <FiUser size={14} /> Mon Profil
                       </NavLink>
+                      <NavLink to="/offres" onClick={() => setDropdownOpen(false)}>
+                        <FiMessageCircle size={14} /> Mes offres
+                      </NavLink>
                       <NavLink to="/messenger" onClick={() => setDropdownOpen(false)}>
                         <FiMessageCircle size={14} /> Messages
                       </NavLink>
@@ -324,6 +327,7 @@ export default function Navbar() {
         {user ? (
           <>
             <NavLink to="/profile" onClick={closeMenu}><FiUser size={14} /> Mon Profil</NavLink>
+            <NavLink to="/offres" onClick={closeMenu}><FiMessageCircle size={14} /> Mes offres</NavLink>
             <NavLink to="/messenger" onClick={closeMenu}><FiMessageCircle size={14} /> Messages</NavLink>
             {user.role !== 'admin' && (
               user.premium ? (

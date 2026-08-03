@@ -115,6 +115,8 @@ const { ensureTables } = require('./services/tracker');
       buyer_id INT NOT NULL,
       seller_id INT NOT NULL,
       offered_price DECIMAL(10,2) NOT NULL,
+      counter_price DECIMAL(10,2) NULL,
+      counter_by INT NULL,
       message VARCHAR(500),
       status VARCHAR(20) DEFAULT 'en_attente',
       created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
