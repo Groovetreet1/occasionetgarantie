@@ -1,10 +1,9 @@
 import { useEffect, useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Link } from 'react-router-dom';
-import { FiArrowLeft, FiSmartphone, FiClock, FiRefreshCw, FiCheck, FiX, FiPhone, FiMessageCircle, FiDollarSign, FiTrash2 } from 'react-icons/fi';
+import { FiArrowLeft, FiSmartphone, FiClock, FiRefreshCw, FiCheck, FiX, FiPhone, FiDollarSign, FiTrash2 } from 'react-icons/fi';
 import ConfirmModal from '../components/ConfirmModal';
 import api from '../api/axios';
-import { toWhatsAppNumber } from '../utils/media';
 
 const API_BASE = import.meta.env.VITE_API_URL || '';
 
@@ -231,12 +230,6 @@ export default function RepriseList() {
                           fontSize: 11, padding: '5px 12px', marginLeft: 'auto', textDecoration: 'none',
                         }}>
                           <FiPhone size={12} /> Appeler
-                        </a>
-                        <a href={`https://wa.me/${toWhatsAppNumber(r.phone)}`} target="_blank" rel="noopener noreferrer"
-                          className="btn btn-primary" style={{
-                            fontSize: 11, padding: '5px 12px', background: '#25D366', textDecoration: 'none',
-                          }}>
-                          <FiMessageCircle size={12} /> WhatsApp
                         </a>
                       </div>
                     )}

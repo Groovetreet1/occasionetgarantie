@@ -1,7 +1,6 @@
 import { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
 import { FiPlus, FiEdit2, FiTrash2, FiPackage, FiArrowLeft, FiStar, FiCheck, FiX, FiClock, FiEye, FiThumbsDown } from 'react-icons/fi';
-import { BsWhatsapp } from 'react-icons/bs';
 import api from '../api/axios';
 import ConfirmModal from '../components/ConfirmModal';
 const stateLabels = { neuf: 'Neuf', comme_neuf: 'Comme neuf', tres_bon: 'Très bon', bon: 'Bon', acceptable: 'Acceptable' };

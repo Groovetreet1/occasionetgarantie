@@ -1,10 +1,8 @@
 import { useEffect, useState, useRef, useCallback } from 'react';
 import { useParams, Link } from 'react-router-dom';
 import { FiMessageCircle, FiSend, FiArrowLeft, FiUser, FiStar, FiTrash2, FiShoppingBag, FiMic, FiX, FiMoreVertical, FiInfo } from 'react-icons/fi';
-import { BsWhatsapp } from 'react-icons/bs';
 import api from '../api/axios';
 import { useAuth } from '../context/AuthContext';
-import { toWhatsAppNumber } from '../utils/media';
 import AudioPlayer from '../components/AudioPlayer';
 
 const MAX_AUDIO_SECONDS = 60;
@@ -329,8 +327,6 @@ export default function Messenger() {
   const conv = conversations.find(c => c.id === Number(activeConv));
   const isSeller = conv && user && conv.seller_id === user.id;
   const otherName = conv ? (isSeller ? conv.buyer_name : conv.seller_name) : '';
-  const otherPhone = conv ? (isSeller ? conv.buyer_phone : conv.seller_phone) : '';
-  const waMsg = otherPhone ? encodeURIComponent(`Bonjour ! Vous avez un message de ${user?.full_name || user?.fullName} sur Occasion & Garantie.`) : '';
 
   return (
     <section className="messenger-page">
@@ -402,17 +398,6 @@ export default function Messenger() {
                     {conv?.product_name && <span style={{ fontSize: '11px', color: 'var(--text-muted)', display: 'block' }}>{conv.product_name}</span>}
                   </div>
                 </div>
-                {otherPhone && (
-                  <a
-                    href={`https://wa.me/${toWhatsAppNumber(otherPhone)}?text=${waMsg}`}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="messenger-wa-btn"
-                    title="Contacter sur WhatsApp"
-                  >
-                    <BsWhatsapp size={18} />
-                  </a>
-                )}
               </div>
 
               <div className="messenger-messages" ref={messagesContainerRef}>

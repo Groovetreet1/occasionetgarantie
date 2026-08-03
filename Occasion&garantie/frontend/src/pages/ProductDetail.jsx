@@ -1,11 +1,9 @@
 import { useParams, Link, useNavigate } from 'react-router-dom';
 import { useEffect, useState, useRef } from 'react';
 import { FiArrowLeft, FiShoppingBag, FiShield, FiCheck, FiMonitor, FiCpu, FiHardDrive, FiBattery, FiCamera, FiDroplet, FiX, FiChevronLeft, FiChevronRight, FiUser, FiMessageCircle, FiStar, FiSmartphone, FiMapPin, FiLock, FiGrid } from 'react-icons/fi';
-import { BsWhatsapp } from 'react-icons/bs';
 import api from '../api/axios';
 import { useAuth } from '../context/AuthContext';
 import SellerRating from '../components/SellerRating';
-import { toWhatsAppNumber } from '../utils/media';
 
 const stateLabels = {
   neuf: 'Neuf',
@@ -160,9 +158,6 @@ export default function ProductDetail() {
   };
 
   const formatPrice = (p) => new Intl.NumberFormat('fr-FR', { style: 'currency', currency: 'MAD' }).format(p).replace('MAD', '').trim() + ' DH';  const API_BASE = import.meta.env.VITE_API_URL || '';
-  const waMsg = encodeURIComponent(`Bonjour ! Je suis intéresse(e) par : ${product.name} (${formatPrice(product.price)})`);
-  const sellerPhone = toWhatsAppNumber(product.seller_phone);
-  const waUrl = sellerPhone ? `https://wa.me/${sellerPhone}?text=${waMsg}` : null;
   let specs = {};
   try { specs = typeof product.specs === 'string' ? JSON.parse(product.specs) : (product.specs || {}); } catch (e) { specs = {}; }
 
@@ -469,24 +464,6 @@ export default function ProductDetail() {
 
               {user && user.id !== product.seller_id && (
                 <>
-                  {waUrl && (
-                    <a
-                      href={waUrl}
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      className="btn"
-                      style={{
-                        width: '100%', marginTop: '24px', background: '#25D366', color: 'white',
-                        fontSize: '18px', padding: '16px 36px', justifyContent: 'center',
-                        boxShadow: '0 4px 16px rgba(37,211,102,0.35)',
-                      }}
-                      onMouseOver={(e) => e.currentTarget.style.background = '#1da851'}
-                      onMouseOut={(e) => e.currentTarget.style.background = '#25D366'}
-                    >
-                      <BsWhatsapp size={22} /> Contacter le vendeur
-                    </a>
-                  )}
-
                   {product.seller_id && (
                     <button
                       onClick={handleStartChat}
