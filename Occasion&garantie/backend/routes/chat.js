@@ -57,12 +57,14 @@ const audioUpload = multer({
       text TEXT NOT NULL,
       audio VARCHAR(500) DEFAULT NULL,
       duration INT DEFAULT NULL,
+      read_at DATETIME DEFAULT NULL,
       created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
       FOREIGN KEY (conversation_id) REFERENCES conversations(id) ON DELETE CASCADE,
       FOREIGN KEY (sender_id) REFERENCES users(id) ON DELETE CASCADE
     )`);
     try { await pool.query('ALTER TABLE messages ADD COLUMN audio VARCHAR(500) DEFAULT NULL'); } catch (e) { if (e.errno !== 1060 && e.code !== 'ER_DUP_FIELDNAME') console.log('audio col:', e.message); }
     try { await pool.query('ALTER TABLE messages ADD COLUMN duration INT DEFAULT NULL'); } catch (e) { if (e.errno !== 1060 && e.code !== 'ER_DUP_FIELDNAME') console.log('duration col:', e.message); }
+    try { await pool.query('ALTER TABLE messages ADD COLUMN read_at DATETIME DEFAULT NULL'); } catch (e) { if (e.errno !== 1060 && e.code !== 'ER_DUP_FIELDNAME') console.log('read_at col:', e.message); }
     console.log('conversations + messages tables ready');
   } catch (e) {
     console.log('chat tables check skipped:', e.message);
@@ -151,6 +153,17 @@ router.get('/conversations/:id/messages', authenticate, async (req, res) => {
       'SELECT m.*, u.full_name as sender_name FROM messages m LEFT JOIN users u ON m.sender_id = u.id WHERE m.conversation_id = ? ORDER BY m.created_at ASC, m.id ASC',
       [req.params.id]
     );
+
+    await pool.query(
+      'UPDATE messages SET read_at = NOW() WHERE conversation_id = ? AND sender_id != ? AND read_at IS NULL',
+      [req.params.id, req.user.id]
+    );
+    if (rows.length > 0) {
+      for (const r of rows) {
+        if (r.sender_id !== req.user.id) r.read_at = r.read_at || new Date().toISOString();
+      }
+    }
+
     res.json(rows);
   } catch (err) {
     console.error('GET /conversations/:id/messages:', err.message);
@@ -171,6 +184,31 @@ router.delete('/conversations/:id', authenticate, async (req, res) => {
     res.json({ message: 'Conversation supprimée.' });
   } catch (err) {
     console.error('DELETE /conversations/:id:', err.message);
+    res.status(500).json({ message: 'Erreur serveur.' });
+  }
+});
+
+router.delete('/conversations/:id/messages/:messageId', authenticate, async (req, res) => {
+  try {
+    const [convs] = await pool.query(
+      'SELECT * FROM conversations WHERE id = ? AND (buyer_id = ? OR seller_id = ?)',
+      [req.params.id, req.user.id, req.user.id]
+    );
+    if (convs.length === 0) return res.status(403).json({ message: 'Acces refuse.' });
+
+    const [rows] = await pool.query('SELECT * FROM messages WHERE id = ? AND conversation_id = ?', [req.params.messageId, req.params.id]);
+    if (rows.length === 0) return res.status(404).json({ message: 'Message introuvable.' });
+    if (rows[0].sender_id !== req.user.id) return res.status(403).json({ message: 'Vous ne pouvez supprimer que vos propres messages.' });
+
+    const file = rows[0].audio;
+    await pool.query('DELETE FROM messages WHERE id = ?', [req.params.messageId]);
+    if (file && !file.includes('..')) {
+      try { fs.unlinkSync(path.join(__dirname, '..', 'uploads', file)); } catch {}
+    }
+
+    res.json({ message: 'Message supprimé.' });
+  } catch (err) {
+    console.error('DELETE /conversations/:id/messages/:messageId:', err.message);
     res.status(500).json({ message: 'Erreur serveur.' });
   }
 });

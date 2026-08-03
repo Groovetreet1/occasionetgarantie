@@ -1,6 +1,6 @@
 import { useEffect, useState, useRef, useCallback } from 'react';
 import { useParams, Link } from 'react-router-dom';
-import { FiMessageCircle, FiSend, FiArrowLeft, FiUser, FiStar, FiTrash2, FiShoppingBag, FiMic, FiX } from 'react-icons/fi';
+import { FiMessageCircle, FiSend, FiArrowLeft, FiUser, FiStar, FiTrash2, FiShoppingBag, FiMic, FiX, FiMoreVertical, FiInfo } from 'react-icons/fi';
 import { BsWhatsapp } from 'react-icons/bs';
 import api from '../api/axios';
 import { useAuth } from '../context/AuthContext';
@@ -23,6 +23,9 @@ export default function Messenger() {
   const [typingName, setTypingName] = useState('');
   const [expandedMsgs, setExpandedMsgs] = useState({});
   const [deleteTarget, setDeleteTarget] = useState(null);
+  const [msgMenuFor, setMsgMenuFor] = useState(null);
+  const [deleteMsgTarget, setDeleteMsgTarget] = useState(null);
+  const [infoTarget, setInfoTarget] = useState(null);
   const [recording, setRecording] = useState(false);
   const [recTime, setRecTime] = useState(0);
   const [recordedBlob, setRecordedBlob] = useState(null);
@@ -106,10 +109,8 @@ export default function Messenger() {
       const { data } = await api.get(`/chat/conversations/${activeConv}/messages`);
       if (data.length > prevMsgCountRef.current) {
         wasNearBottomRef.current = isNearBottom();
-        setMessages(data);
-      } else if (isNearBottom()) {
-        setMessages(data);
       }
+      setMessages(data);
     } catch {}
   };
 
@@ -296,6 +297,20 @@ export default function Messenger() {
     }
   };
 
+  const handleDeleteMsg = async () => {
+    if (!deleteMsgTarget || !activeConv) return;
+    try {
+      await api.delete(`/chat/conversations/${activeConv}/messages/${deleteMsgTarget.id}`);
+      setMessages((prev) => prev.filter(m => m.id !== deleteMsgTarget.id));
+      setDeleteMsgTarget(null);
+      setMsgMenuFor(null);
+    } catch (err) {
+      setDeleteMsgTarget(null);
+      setMsgMenuFor(null);
+      alert(err.response?.data?.message || 'Erreur lors de la suppression');
+    }
+  };
+
   const conv = conversations.find(c => c.id === Number(activeConv));
   const isSeller = conv && user && conv.seller_id === user.id;
   const otherName = conv ? (isSeller ? conv.buyer_name : conv.seller_name) : '';
@@ -395,8 +410,36 @@ export default function Messenger() {
                   if (msg.audio) {
                     return (
                       <div key={msg.id} className={`messenger-msg ${isMine ? 'mine' : 'theirs'} messenger-msg-audio`}>
-                        <AudioPlayer src={audioSrc(msg.audio)} duration={msg.duration} />
-                        <div className="messenger-msg-time">{new Date(msg.created_at).toLocaleTimeString('fr-FR', { hour: '2-digit', minute: '2-digit' })}</div>
+                        <div className="messenger-audio-row">
+                          <AudioPlayer src={audioSrc(msg.audio)} duration={msg.duration} />
+                          <button
+                            className={`messenger-msg-menu-btn${msgMenuFor === msg.id ? ' open' : ''}`}
+                            onClick={() => setMsgMenuFor(msgMenuFor === msg.id ? null : msg.id)}
+                            title="Options du message"
+                          >
+                            <FiMoreVertical size={16} />
+                          </button>
+                        </div>
+                        <div className="messenger-msg-time-row">
+                          <span className="messenger-msg-time">{new Date(msg.created_at).toLocaleTimeString('fr-FR', { hour: '2-digit', minute: '2-digit' })}</span>
+                          {isMine && (
+                            <span className={`messenger-read-state${msg.read_at ? ' read' : ''}`}>
+                              {msg.read_at ? 'Lu' : 'Envoyé'}
+                            </span>
+                          )}
+                        </div>
+                        {msgMenuFor === msg.id && (
+                          <div className="messenger-msg-menu">
+                            {isMine && (
+                              <button className="messenger-msg-menu-item" onClick={() => { setMsgMenuFor(null); setDeleteMsgTarget(msg); }}>
+                                <FiTrash2 size={14} /> Supprimer
+                              </button>
+                            )}
+                            <button className="messenger-msg-menu-item" onClick={() => { setMsgMenuFor(null); setInfoTarget(msg); }}>
+                              <FiInfo size={14} /> Infos
+                            </button>
+                          </div>
+                        )}
                       </div>
                     );
                   }
@@ -495,6 +538,39 @@ export default function Messenger() {
               <button className="messenger-confirm-delete-btn" onClick={() => handleDeleteConv(deleteTarget)}>
                 <FiTrash2 size={15} /> Supprimer
               </button>
+            </div>
+          </div>
+        </div>
+      )}
+      {deleteMsgTarget && (
+        <div className="messenger-confirm-overlay" onClick={() => setDeleteMsgTarget(null)}>
+          <div className="messenger-confirm" onClick={(e) => e.stopPropagation()}>
+            <div className="messenger-confirm-icon"><FiTrash2 size={26} /></div>
+            <h3>Supprimer ce message ?</h3>
+            <p>Ce message vocal sera supprimé pour vous et votre correspondant. Cette action est irréversible.</p>
+            <div className="messenger-confirm-actions">
+              <button className="btn" onClick={() => setDeleteMsgTarget(null)}>Annuler</button>
+              <button className="messenger-confirm-delete-btn" onClick={handleDeleteMsg}>
+                <FiTrash2 size={15} /> Supprimer
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {infoTarget && (
+        <div className="messenger-confirm-overlay" onClick={() => setInfoTarget(null)}>
+          <div className="messenger-confirm" onClick={(e) => e.stopPropagation()}>
+            <div className="messenger-confirm-icon"><FiInfo size={26} /></div>
+            <h3>Infos du message</h3>
+            <p>Message vocal envoyé le <strong>{new Date(infoTarget.created_at).toLocaleString('fr-FR', { day: 'numeric', month: 'long', hour: '2-digit', minute: '2-digit' })}</strong>.</p>
+            <p>
+              {infoTarget.read_at
+                ? <>Écouté par le destinataire le <strong>{new Date(infoTarget.read_at).toLocaleString('fr-FR', { day: 'numeric', month: 'long', hour: '2-digit', minute: '2-digit' })}</strong>.</>
+                : <><strong>Pas encore écouté</strong> par le destinataire.</>}
+            </p>
+            <div className="messenger-confirm-actions">
+              <button className="btn" onClick={() => setInfoTarget(null)}>Fermer</button>
             </div>
           </div>
         </div>

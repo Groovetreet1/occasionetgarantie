@@ -1,12 +1,19 @@
 import { useState, useRef, useEffect } from 'react';
 import { FiPlay, FiPause } from 'react-icons/fi';
 
+const RATES = [0.5, 0.75, 1, 1.25, 1.5, 2];
+
 export default function AudioPlayer({ src, duration, size = 'message' }) {
   const audioRef = useRef(null);
   const [playing, setPlaying] = useState(false);
   const [progress, setProgress] = useState(0);
   const [current, setCurrent] = useState(0);
   const [metaDuration, setMetaDuration] = useState(duration || 0);
+  const [rate, setRate] = useState(1);
+
+  useEffect(() => {
+    if (audioRef.current) audioRef.current.playbackRate = rate;
+  }, [rate]);
 
   useEffect(() => {
     const a = audioRef.current;
@@ -78,6 +85,14 @@ export default function AudioPlayer({ src, duration, size = 'message' }) {
       <div className="audio-track" onClick={seek}>
         <div className="audio-track-fill" style={{ width: `${progress}%` }} />
       </div>
+      <button
+        type="button"
+        className="audio-speed-btn"
+        onClick={() => setRate((r) => RATES[(RATES.indexOf(r) + 1) % RATES.length])}
+        title="Vitesse de lecture"
+      >
+        {rate}x
+      </button>
       <span className="audio-time">{fmt(current)}</span>
       <span className="audio-time audio-time-total">{fmt(total)}</span>
     </div>
