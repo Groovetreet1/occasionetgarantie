@@ -1,11 +1,12 @@
-import { FiLock, FiAlertTriangle } from 'react-icons/fi';
+import { FiLock, FiAlertTriangle, FiX } from 'react-icons/fi';
 
-export default function SuspendedModal({ reason }) {
+export default function SuspendedModal({ reason, onClose }) {
   return (
     <div className="suspended-overlay" role="dialog" aria-modal="true" aria-label="Compte suspendu">
       <div className="suspended-modal">
+        <button className="suspended-close" onClick={onClose} aria-label="Fermer"><FiX size={20} /></button>
         <div className="suspended-icon">
-          <FiLock size={34} />
+          <FiLock size={32} />
         </div>
         <h2>Compte suspendu</h2>
         <p className="suspended-reason">
@@ -21,6 +22,11 @@ export default function SuspendedModal({ reason }) {
         <p className="suspended-contact">
           Email : <strong>contact-occasionetgarantie@proton.me</strong>
         </p>
+        {onClose && (
+          <button className="btn btn-outline" onClick={onClose} style={{ width: '100%', justifyContent: 'center', marginTop: '18px' }}>
+            Fermer
+          </button>
+        )}
       </div>
     </div>
   );

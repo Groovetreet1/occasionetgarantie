@@ -133,7 +133,7 @@ export default function App() {
       </ErrorBoundary>
       <SupportFloat />
       <Footer />
-      {suspended && <SuspendedModal reason={suspended} />}
+      {suspended && <SuspendedModal reason={suspended} onClose={() => setSuspended(null)} />}
     </>
   );
 }
