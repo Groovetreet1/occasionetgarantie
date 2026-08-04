@@ -1211,7 +1211,7 @@ select.form-control, .form-group select { cursor: pointer; appearance: auto; }
   font-size: 11px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.6px;
   color: var(--text-muted); margin-bottom: 10px;
 }
-.theme-menu-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; }
+.theme-menu-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 8px; }
 .theme-swatch {
   display: flex; flex-direction: column; align-items: center; gap: 6px;
   padding: 10px 4px 8px; border-radius: 10px; cursor: pointer; position: relative;
