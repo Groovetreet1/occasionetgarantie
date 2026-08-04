@@ -1,15 +1,49 @@
-import { FiSun, FiMoon } from 'react-icons/fi';
+import { useState, useRef, useEffect } from 'react';
+import { FiDroplet, FiCheck } from 'react-icons/fi';
 import { useTheme } from '../context/ThemeContext';
 
 export default function ThemeToggle() {
-  const { theme, toggle } = useTheme();
+  const { theme, setTheme, themes } = useTheme();
+  const [open, setOpen] = useState(false);
+  const ref = useRef(null);
+
+  useEffect(() => {
+    const handler = (e) => {
+      if (ref.current && !ref.current.contains(e.target)) setOpen(false);
+    };
+    document.addEventListener('mousedown', handler);
+    return () => document.removeEventListener('mousedown', handler);
+  }, []);
+
   return (
-    <button
-      onClick={toggle}
-      className="theme-toggle"
-      title={theme === 'dark' ? 'Mode clair' : 'Mode sombre'}
-    >
-      {theme === 'dark' ? <FiSun /> : <FiMoon />}
-    </button>
+    <div className="theme-picker" ref={ref}>
+      <button
+        onClick={() => setOpen((o) => !o)}
+        className="theme-toggle"
+        title="Changer de theme"
+        aria-label="Changer de theme"
+      >
+        <FiDroplet />
+      </button>
+      {open && (
+        <div className="theme-menu">
+          <div className="theme-menu-title">Choisissez un fond</div>
+          <div className="theme-menu-grid">
+            {themes.map((t) => (
+              <button
+                key={t.id}
+                className={`theme-swatch ${t.id === theme ? 'active' : ''}`}
+                onClick={() => { setTheme(t.id); setOpen(false); }}
+                title={t.label}
+              >
+                <span className="theme-swatch-dot" style={{ background: t.color, borderColor: t.text }} />
+                <span className="theme-swatch-label">{t.label}</span>
+                {t.id === theme && <FiCheck className="theme-swatch-check" size={12} />}
+              </button>
+            ))}
+          </div>
+        </div>
+      )}
+    </div>
   );
 }
