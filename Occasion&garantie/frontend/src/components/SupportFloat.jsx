@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { FiArrowUp, FiHeadphones, FiX, FiSend, FiCheckCircle, FiMail, FiAlertCircle, FiEdit3, FiInfo, FiLock } from 'react-icons/fi';
 import api from '../api/axios';
 import { useAuth } from '../context/AuthContext';
@@ -14,6 +14,7 @@ export default function SupportFloat() {
   const { user } = useAuth();
   const [showScroll, setShowScroll] = useState(false);
   const [open, setOpen] = useState(false);
+  const rootRef = useRef(null);
   const [step, setStep] = useState('choices'); // choices | form | done
   const [selectedType, setSelectedType] = useState(null);
   const [name, setName] = useState(user?.fullName || user?.full_name || '');
@@ -31,6 +32,15 @@ export default function SupportFloat() {
     window.addEventListener('scroll', handle);
     return () => window.removeEventListener('scroll', handle);
   }, []);
+
+  useEffect(() => {
+    if (!open) return;
+    const handler = (e) => {
+      if (rootRef.current && !rootRef.current.contains(e.target)) handleClose();
+    };
+    document.addEventListener('mousedown', handler);
+    return () => document.removeEventListener('mousedown', handler);
+  }, [open]);
 
   useEffect(() => {
     if (user?.fullName || user?.full_name) setName(user.fullName || user.full_name);
@@ -82,7 +92,7 @@ export default function SupportFloat() {
   };
 
   return (
-    <div className="support-float">
+    <div className="support-float" ref={rootRef}>
       <button
         onClick={() => window.scrollTo({ top: 0, behavior: 'smooth' })}
         className="scroll-top-btn"

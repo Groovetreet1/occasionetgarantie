@@ -40,7 +40,10 @@ export default function Navbar() {
 
   useEffect(() => {
     const handle = (e) => {
-      if (navRef.current && !navRef.current.contains(e.target) && panelRef.current && !panelRef.current.contains(e.target)) setMenuOpen(false);
+      const inPanel = panelRef.current && panelRef.current.contains(e.target);
+      const onHamburger = e.target.closest && e.target.closest('.navbar-hamburger');
+      if (!inPanel && !onHamburger) setMenuOpen(false);
+      else if (panelRef.current && e.target === panelRef.current) setMenuOpen(false);
       if (dropdownRef.current && !dropdownRef.current.contains(e.target)) setDropdownOpen(false);
       if (prodsRef.current && !prodsRef.current.contains(e.target)) setProdsOpen(false);
     };
@@ -226,8 +229,12 @@ export default function Navbar() {
             )}
             {user ? (
               <div className="navbar-dropdown" ref={dropdownRef}>
-                <button className="navbar-user" onClick={() => setDropdownOpen((o) => !o)}>
-                  {user.avatar ? <img src={typeof user.avatar === 'string' && user.avatar.startsWith('http') ? user.avatar : `${API_BASE}/uploads/avatars/${user.avatar}`} alt="" className="navbar-user-avatar" /> : <FiUser size={16} />} <span>{user.fullName || user.full_name}</span> <FiChevronDown size={14} />
+                <button className="navbar-user" onClick={() => setDropdownOpen((o) => !o)} title={user.fullName || user.full_name}>
+                  {user.avatar ? (
+                    <img src={typeof user.avatar === 'string' && user.avatar.startsWith('http') ? user.avatar : `${API_BASE}/uploads/avatars/${user.avatar}`} alt="" className="navbar-user-avatar" />
+                  ) : (
+                    <span className="navbar-user-fallback"><FiUser size={18} /></span>
+                  )}
                 </button>
                 <AnimatePresence>
                   {dropdownOpen && (
@@ -241,12 +248,16 @@ export default function Navbar() {
                       <NavLink to="/profile" onClick={() => setDropdownOpen(false)}>
                         <FiUser size={14} /> Mon Profil
                       </NavLink>
-                      <NavLink to="/offres" onClick={() => setDropdownOpen(false)}>
-                        <FiMessageCircle size={14} /> Mes offres
-                      </NavLink>
-                      <NavLink to="/messenger" onClick={() => setDropdownOpen(false)}>
-                        <FiMessageCircle size={14} /> Messages
-                      </NavLink>
+                      {user.role !== 'admin' && (
+                        <>
+                          <NavLink to="/offres" onClick={() => setDropdownOpen(false)}>
+                            <FiMessageCircle size={14} /> Mes offres
+                          </NavLink>
+                          <NavLink to="/messenger" onClick={() => setDropdownOpen(false)}>
+                            <FiMessageCircle size={14} /> Messages
+                          </NavLink>
+                        </>
+                      )}
                       {user.role !== 'admin' && (
                         user.premium ? (
                           <span className="navbar-premium-badge" onClick={() => setDropdownOpen(false)}>
@@ -327,8 +338,12 @@ export default function Navbar() {
         {user ? (
           <>
             <NavLink to="/profile" onClick={closeMenu}><FiUser size={14} /> Mon Profil</NavLink>
-            <NavLink to="/offres" onClick={closeMenu}><FiMessageCircle size={14} /> Mes offres</NavLink>
-            <NavLink to="/messenger" onClick={closeMenu}><FiMessageCircle size={14} /> Messages</NavLink>
+            {user.role !== 'admin' && (
+              <>
+                <NavLink to="/offres" onClick={closeMenu}><FiMessageCircle size={14} /> Mes offres</NavLink>
+                <NavLink to="/messenger" onClick={closeMenu}><FiMessageCircle size={14} /> Messages</NavLink>
+              </>
+            )}
             {user.role !== 'admin' && (
               user.premium ? (
                 <span className="navbar-premium-badge" style={{ padding: '10px', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 6, fontSize: 14, fontWeight: 500 }}>
