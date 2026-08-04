@@ -88,6 +88,53 @@ export default function About() {
         </div>
       </section>
 
+      <section style={{ padding: '60px 0' }}>
+        <div className="container">
+          <div style={{ textAlign: 'center', marginBottom: '40px' }}>
+            <h2 style={{ fontSize: '24px', fontWeight: 700, marginBottom: '8px' }}>Notre équipe</h2>
+            <p style={{ color: 'var(--text-secondary)' }}>Les passionnés derrière Occasion & Garantie, au service de la communauté tech au Maghreb.</p>
+          </div>
+          <div className="about-team-grid">
+            {[
+              {
+                name: 'Elmahfoudy Abdellah',
+                role: 'CEO & Fondateur',
+                flag: '🇲🇦',
+                country: 'Maroc',
+                img: null,
+                desc: 'Visionnaire et fondateur d\'Occasion & Garantie, Abdellah pilote la stratégie globale de la plateforme. Passionné de tech et d\'entrepreneuriat, il s\'est donné pour mission de rendre la technologie reconditionnée accessible, fiable et abordable pour tous les Marocains.',
+              },
+              {
+                name: 'Najem-Eddine',
+                role: 'Chef des Opérations',
+                flag: '🇩🇿',
+                country: 'Algérie',
+                img: null,
+                desc: 'Originaire d\'Algérie, Najem-Eddine orchestre toute la logistique et le contrôle qualité. Garant du respect des standards sur chaque produit, il veille à ce que chaque téléphone soit testé, vérifié et certifié avant d\'arriver entre vos mains.',
+              },
+              {
+                name: 'Elhamidy Mehdi',
+                role: 'Chef du Support Client',
+                flag: '🇲🇦',
+                country: 'Maroc',
+                img: null,
+                desc: 'Mehdi est la voix de la plateforme. Toujours à l\'écoute, il gère l\'assistance, les réclamations et la satisfaction client. Son objectif : une réponse rapide et une expérience sans stress pour chaque utilisateur, du premier clic à l\'après-vente.',
+              },
+            ].map((m) => (
+              <div key={m.name} className="about-team-card">
+                <div className="about-team-avatar">
+                  {m.img ? <img src={m.img} alt={m.name} /> : <span>{m.name.split(' ').map(w => w[0]).join('')}</span>}
+                </div>
+                <h3>{m.name}</h3>
+                <div className="about-team-role">{m.role}</div>
+                <div className="about-team-country">{m.flag} {m.country}</div>
+                <p>{m.desc}</p>
+              </div>
+            ))}
+          </div>
+        </div>
+      </section>
+
       <section style={{ padding: '60px 0', background: 'var(--bg-secondary)' }}>
         <div className="container" style={{ textAlign: 'center' }}>
           <h2 style={{ fontSize: '24px', fontWeight: 700, marginBottom: '40px' }}>Ce que nous offrons</h2>

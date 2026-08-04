@@ -166,9 +166,11 @@ export default function Profile() {
           <button type="button" onClick={() => setActiveTab('password')} className={activeTab === 'password' ? 'btn btn-primary' : 'btn btn-outline'} style={{ flex: 1, justifyContent: 'center' }}>
             <FiLock size={16} /> Mot de passe
           </button>
-          <button type="button" onClick={() => setActiveTab('delete')} className={activeTab === 'delete' ? 'btn btn-primary' : 'btn btn-outline'} style={{ flex: 1, justifyContent: 'center', color: activeTab === 'delete' ? '#fff' : 'var(--error)', background: activeTab === 'delete' ? 'var(--error)' : 'transparent' }}>
-            <FiTrash2 size={16} /> Supprimer
-          </button>
+          {role !== 'admin' && (
+            <button type="button" onClick={() => setActiveTab('delete')} className={activeTab === 'delete' ? 'btn btn-primary' : 'btn btn-outline'} style={{ flex: 1, justifyContent: 'center', color: activeTab === 'delete' ? '#fff' : 'var(--error)', background: activeTab === 'delete' ? 'var(--error)' : 'transparent' }}>
+              <FiTrash2 size={16} /> Supprimer
+            </button>
+          )}
         </div>
 
         {activeTab === 'profile' && (
@@ -264,7 +266,7 @@ export default function Profile() {
           </motion.form>
         )}
 
-        {activeTab === 'delete' && (
+        {activeTab === 'delete' && role !== 'admin' && (
           <DeleteAccount onDeleted={() => { localStorage.clear(); navigate('/'); }} />
         )}
       </div>
