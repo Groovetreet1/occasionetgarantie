@@ -101,7 +101,7 @@ export default function About() {
                 role: 'CEO & Fondateur',
                 flag: '🇲🇦',
                 country: 'Maroc',
-                img: null,
+                img: '/team/abdellah.jpg',
                 desc: 'Visionnaire et fondateur d\'Occasion & Garantie, Abdellah pilote la stratégie globale de la plateforme. Passionné de tech et d\'entrepreneuriat, il s\'est donné pour mission de rendre la technologie reconditionnée accessible, fiable et abordable pour tous les Marocains.',
               },
               {
@@ -109,7 +109,7 @@ export default function About() {
                 role: 'Chef des Opérations',
                 flag: '🇩🇿',
                 country: 'Algérie',
-                img: null,
+                img: '/team/najem.jpg',
                 desc: 'Originaire d\'Algérie, Najem-Eddine orchestre toute la logistique et le contrôle qualité. Garant du respect des standards sur chaque produit, il veille à ce que chaque téléphone soit testé, vérifié et certifié avant d\'arriver entre vos mains.',
               },
               {
@@ -117,7 +117,7 @@ export default function About() {
                 role: 'Chef du Support Client',
                 flag: '🇲🇦',
                 country: 'Maroc',
-                img: null,
+                img: '/team/mehdi.jpg',
                 desc: 'Mehdi est la voix de la plateforme. Toujours à l\'écoute, il gère l\'assistance, les réclamations et la satisfaction client. Son objectif : une réponse rapide et une expérience sans stress pour chaque utilisateur, du premier clic à l\'après-vente.',
               },
             ].map((m) => (
