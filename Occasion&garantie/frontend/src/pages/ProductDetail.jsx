@@ -333,69 +333,6 @@ export default function ProductDetail() {
                 </div>
               )}
 
-              {user && user.role !== 'seller' && user.id !== product.seller_id && (
-                <div style={{ marginTop: '20px', borderTop: '1px solid var(--border)', paddingTop: '16px' }}>
-                  {repDone ? (
-                    <div style={{ textAlign: 'center', padding: '12px', background: 'rgba(16,185,129,0.1)', borderRadius: 10, fontSize: 14, color: '#10b981', fontWeight: 600 }}>
-                      Reprise soumise ! Le vendeur va vous contacter.
-                    </div>
-                  ) : !showReprise ? (
-                    <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
-                      <button onClick={() => setShowReprise(true)} className="btn" style={{
-                        width: '100%', background: 'transparent', border: '2px dashed var(--primary)', color: 'var(--primary)',
-                        fontSize: '14px', padding: '12px', justifyContent: 'center', borderRadius: 10, cursor: 'pointer', fontFamily: 'var(--font)',
-                      }}>
-                        <FiSmartphone size={18} /> Proposer une reprise pour mon telephone
-                      </button>
-                      <Link to="/reprise" style={{ width: '100%', textAlign: 'center', fontSize: '13px', fontWeight: 600, color: 'var(--text-muted)', textDecoration: 'underline' }}>
-                        Estimer la valeur de mon appareil sur le marche
-                      </Link>
-                    </div>
-                  ) : (
-                    <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
-                      <div style={{ fontSize: 14, fontWeight: 700, display: 'flex', alignItems: 'center', gap: 6 }}>
-                        <FiSmartphone size={16} /> Reprise de votre telephone
-                      </div>
-                      <input type="text" placeholder="Marque (ex: Samsung)" value={repBrand} onChange={e => setRepBrand(e.target.value)}
-                        style={{ padding: '10px 14px', borderRadius: 8, border: '1px solid var(--border)', background: 'var(--bg-card)', color: 'var(--text)', fontSize: 13, fontFamily: 'var(--font)' }} />
-                      <input type="text" placeholder="Modele (ex: Galaxy S23)" value={repModel} onChange={e => setRepModel(e.target.value)}
-                        style={{ padding: '10px 14px', borderRadius: 8, border: '1px solid var(--border)', background: 'var(--bg-card)', color: 'var(--text)', fontSize: 13, fontFamily: 'var(--font)' }} />
-                      <input type="text" placeholder="IMEI (optionnel)" value={repImei} onChange={e => setRepImei(e.target.value.replace(/\D/g, '').slice(0, 15))}
-                        style={{ padding: '10px 14px', borderRadius: 8, border: '1px solid var(--border)', background: 'var(--bg-card)', color: 'var(--text)', fontSize: 13, fontFamily: 'var(--font)' }} />
-                      <textarea placeholder="Description / etat du telephone (optionnel)" value={repNotes} onChange={e => setRepNotes(e.target.value)} rows={2}
-                        style={{ padding: '10px 14px', borderRadius: 8, border: '1px solid var(--border)', background: 'var(--bg-card)', color: 'var(--text)', fontSize: 13, fontFamily: 'var(--font)', resize: 'vertical' }} />
-
-                      <div style={{ marginTop: 4 }}>
-                        <div style={{ fontSize: 12, fontWeight: 600, marginBottom: 6 }}>Photos guidees</div>
-                        <div style={{ display: 'flex', gap: 4, marginBottom: 8 }}>
-                          {repSteps.map((s, i) => (
-                            <div key={s.key} style={{ flex: 1, height: 3, borderRadius: 2, background: repPhotos[s.key] ? 'var(--primary)' : i === repStep ? 'var(--primary)' : 'var(--border)', opacity: i === repStep ? 0.7 : 1 }} />
-                          ))}
-                        </div>
-                        <div onClick={() => repFileRef.current?.click()} style={{
-                          border: '2px dashed var(--border)', borderRadius: 10, padding: '16px', textAlign: 'center',
-                          background: 'var(--bg-secondary)', cursor: 'pointer', fontSize: 13, color: 'var(--text-muted)',
-                        }}>
-                          <FiCamera size={24} style={{ display: 'block', margin: '0 auto 4px' }} />
-                          {repSteps[repStep]?.label} — {repSteps[repStep]?.hint}
-                          {repPhotos[repSteps[repStep]?.key] && <span style={{ color: '#10b981', display: 'block', marginTop: 4 }}>Photo prise</span>}
-                        </div>
-                        <input ref={repFileRef} type="file" accept="image/*" capture="environment" onChange={handleRepPhoto} style={{ display: 'none' }} />
-                      </div>
-
-                      <div style={{ display: 'flex', gap: 6, marginTop: 4 }}>
-                        <button onClick={submitReprise} disabled={!repBrand || !repModel || !repAllDone || submittingRep}
-                          className="btn btn-primary" style={{ fontSize: 13, padding: '10px 20px' }}>
-                          {submittingRep ? 'Envoi...' : 'Envoyer la reprise'}
-                        </button>
-                        <button onClick={() => { setShowReprise(false); setRepBrand(''); setRepModel(''); setRepImei(''); setRepNotes(''); setRepPhotos({}); setRepStep(0); }}
-                          className="btn btn-ghost" style={{ fontSize: 13, padding: '10px 20px' }}>Annuler</button>
-                      </div>
-                    </div>
-                  )}
-                </div>
-              )}
-
               {user && user.role === 'seller' && user.id === product.seller_id && (
                 <div style={{ marginTop: '20px', borderTop: '1px solid var(--border)', paddingTop: '16px' }}>
                   <div style={{ fontSize: 14, fontWeight: 700, display: 'flex', alignItems: 'center', gap: 6, marginBottom: 8 }}>

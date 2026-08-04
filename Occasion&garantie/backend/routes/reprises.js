@@ -55,7 +55,7 @@ router.post('/', authenticate, (req, res) => {
     (async () => {
       try {
         await ensureTable();
-        const { brand, model, imei, product_id, client_notes, estimated_price, battery_health } = req.body;
+        const { brand, model, imei, product_id, client_notes, estimated_price, battery_health: batteryHealth } = req.body;
         if (!brand || !model) return res.status(400).json({ message: 'Marque et modele requis.' });
 
         const photos = {};
