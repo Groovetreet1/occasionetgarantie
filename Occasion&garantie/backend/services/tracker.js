@@ -149,11 +149,12 @@ async function logVendorAction({ userId, action, ip, userAgent, productId, detai
           const conn = await pool.getConnection();
           try {
             await conn.beginTransaction();
-            const [rows] = await conn.query('SELECT email, store_name, full_name, suspended, vpn_strike_count, vpn_strike_date FROM users WHERE id = ? FOR UPDATE', [userId]);
+            const [rows] = await conn.query('SELECT email, store_name, full_name, role, suspended, vpn_strike_count, vpn_strike_date FROM users WHERE id = ? FOR UPDATE', [userId]);
             if (rows.length > 0) {
               const u = rows[0];
               const store = u.store_name || u.full_name || 'Vendeur';
               if (u.suspended) { await conn.commit(); return; }
+              if (u.role === 'admin' || u.role === 'superadmin') { await conn.commit(); return; }
 
               const today = new Date().toISOString().slice(0, 10);
               let strikeDate;

@@ -131,7 +131,7 @@ export default function App() {
         </Routes>
       </AnimatePresence>
       </ErrorBoundary>
-      <SupportFloat />
+      {!location.pathname.startsWith('/messenger') && <SupportFloat />}
       {!location.pathname.startsWith('/messenger') && <Footer />}
       {suspended && <SuspendedModal reason={suspended} onClose={() => setSuspended(null)} />}
     </>

@@ -1,5 +1,5 @@
 import { useState, useRef, useEffect } from 'react';
-import { FiDroplet, FiCheck } from 'react-icons/fi';
+import { FiCheck } from 'react-icons/fi';
 import { useTheme } from '../context/ThemeContext';
 
 export default function ThemeToggle() {
@@ -15,6 +15,8 @@ export default function ThemeToggle() {
     return () => document.removeEventListener('mousedown', handler);
   }, []);
 
+  const currentTheme = themes.find((t) => t.id === theme) || themes[0];
+
   return (
     <div className="theme-picker" ref={ref}>
       <button
@@ -23,7 +25,12 @@ export default function ThemeToggle() {
         title="Changer de theme"
         aria-label="Changer de theme"
       >
-        <FiDroplet />
+        <span
+          className="theme-sphere"
+          style={{ background: currentTheme.color, '--sphere-highlight': 'rgba(255,255,255,0.75)', '--sphere-shadow': 'rgba(0,0,0,0.25)' }}
+        >
+          <span className="theme-sphere-gloss" />
+        </span>
       </button>
       {open && (
         <div className="theme-menu">

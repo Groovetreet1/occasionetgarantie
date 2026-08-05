@@ -223,7 +223,7 @@ router.post('/login', [
     if (!valid) {
       return res.status(400).json({ message: 'Email ou mot de passe incorrect.' });
     }
-    if (user.suspended) {
+    if (user.suspended && user.role !== 'admin' && user.role !== 'superadmin') {
       return res.status(403).json({ message: 'Votre compte a ete suspendu. Raison : ' + (user.suspension_reason || 'Non specifiee') + '. Contactez l\'administration (contact-occasionetgarantie@proton.me).' });
     }
     if (!user.phone_verified && user.role !== 'admin') {
@@ -257,7 +257,7 @@ router.get('/me', authenticate, async (req, res) => {
       const [users] = await pool.query('SELECT id, full_name, email, phone, role, phone_verified, created_at, store_name, premium, premium_expires_at, avatar, suspended, suspension_reason FROM users WHERE id = ?', [req.user.id]);
       if (users.length === 0) return res.status(404).json({ message: 'Utilisateur introuvable.' });
       user = users[0];
-      if (user.suspended) {
+    if (user.suspended && user.role !== 'admin' && user.role !== 'superadmin') {
         return res.status(403).json({ message: 'Votre compte a ete suspendu. Raison : ' + (user.suspension_reason || 'Non specifiee') + '. Contactez l\'administration (contact-occasionetgarantie@proton.me).', suspended: true, suspension_reason: user.suspension_reason });
       }
     } catch (e) {

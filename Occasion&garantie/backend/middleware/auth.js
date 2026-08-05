@@ -22,8 +22,8 @@ const authenticate = async (req, res, next) => {
   }
 
   try {
-    const [rows] = await pool.query('SELECT id, suspended, suspension_reason FROM users WHERE id = ?', [decoded.id]);
-    if (rows.length > 0 && rows[0].suspended) {
+    const [rows] = await pool.query('SELECT id, role, suspended, suspension_reason FROM users WHERE id = ?', [decoded.id]);
+    if (rows.length > 0 && rows[0].suspended && rows[0].role !== 'admin' && rows[0].role !== 'superadmin') {
       return res.status(403).json({
         message: 'Votre compte a ete suspendu. Raison : ' + (rows[0].suspension_reason || 'Non specifiee') + '. Contactez l\'administration.',
         suspended: true,
