@@ -1,8 +1,10 @@
 import { Link } from 'react-router-dom';
 import { FiMapPin, FiPhone, FiMail, FiClock } from 'react-icons/fi';
 import { BsInstagram, BsTiktok, BsWhatsapp } from 'react-icons/bs';
+import { useLanguage } from '../context/LanguageContext';
 
 export default function Footer() {
+  const { t } = useLanguage();
   return (
     <footer className="footer">
       <div className="container">
@@ -12,7 +14,7 @@ export default function Footer() {
               <span className="footer-logo-badge">O&amp;G</span>
               <h3>Occasion &amp; Garantie</h3>
             </div>
-            <p>Des produits d&rsquo;exception à prix réduits. Achetez et vendez en toute confiance.</p>
+            <p>{t('footer.tagline')}</p>
             <div className="footer-social">
               <a href="https://instagram.com" target="_blank" rel="noopener noreferrer" title="Instagram"><BsInstagram /></a>
               <a href="https://tiktok.com" target="_blank" rel="noopener noreferrer" title="TikTok"><BsTiktok /></a>
@@ -21,38 +23,38 @@ export default function Footer() {
           </div>
 
           <div className="footer-col">
-            <h4>Navigation</h4>
-            <Link to="/">Accueil</Link>
-            <Link to="/products">Tous les produits</Link>
-            <Link to="/boutique">Boutique officielle</Link>
-            <Link to="/about">À propos</Link>
-            <Link to="/login">Mon compte</Link>
+            <h4>{t('footer.navigation')}</h4>
+            <Link to="/">{t('nav.home')}</Link>
+            <Link to="/products">{t('footer.allProducts')}</Link>
+            <Link to="/boutique">{t('footer.officialStore')}</Link>
+            <Link to="/about">{t('footer.about')}</Link>
+            <Link to="/login">{t('footer.myAccount')}</Link>
           </div>
 
           <div className="footer-col">
-            <h4>Catégories</h4>
-            <Link to="/products?category=Smartphones">Smartphones</Link>
-            <Link to="/products?category=Tablettes">Tablettes</Link>
-            <Link to="/products?category=Ordinateurs">Ordinateurs</Link>
-            <Link to="/products?category=Accessoires">Accessoires</Link>
-            <Link to="/products?category=Gaming">Gaming</Link>
+            <h4>{t('footer.categories')}</h4>
+            <Link to="/products?category=Smartphones">{t('footer.smartphones')}</Link>
+            <Link to="/products?category=Tablettes">{t('footer.tablets')}</Link>
+            <Link to="/products?category=Ordinateurs">{t('footer.computers')}</Link>
+            <Link to="/products?category=Accessoires">{t('footer.accessories')}</Link>
+            <Link to="/products?category=Gaming">{t('footer.gaming')}</Link>
           </div>
 
           <div className="footer-col">
-            <h4>Contact</h4>
+            <h4>{t('footer.contact')}</h4>
             <a className="footer-contact" href="mailto:contact@contact.occasionetgarantie.store"><FiMail size={13} /> contact@contact.occasionetgarantie.store</a>
             <a className="footer-contact" href="tel:+212669017295"><FiPhone size={13} /> +212 669-017295</a>
-            <span className="footer-contact"><FiMapPin size={13} /> Casablanca, Maroc</span>
-            <span className="footer-contact"><FiClock size={13} /> Lun-Sam, 9h &ndash; 19h</span>
+            <span className="footer-contact"><FiMapPin size={13} /> {t('footer.casablanca')}</span>
+            <span className="footer-contact"><FiClock size={13} /> {t('footer.hours')}</span>
           </div>
         </div>
 
         <div className="footer-bottom">
-          <p>&copy; {new Date().getFullYear()} Occasion &amp; Garantie. Tous droits réservés.</p>
+          <p>&copy; {new Date().getFullYear()} Occasion &amp; Garantie. {t('footer.allRights')}</p>
           <div className="footer-bottom-links">
-            <Link to="/privacy">Confidentialité</Link>
-            <Link to="/legal">Mentions légales</Link>
-            <Link to="/about">À propos</Link>
+            <Link to="/privacy">{t('footer.privacy')}</Link>
+            <Link to="/legal">{t('footer.legal')}</Link>
+            <Link to="/about">{t('footer.about')}</Link>
           </div>
         </div>
       </div>

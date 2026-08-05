@@ -1,9 +1,11 @@
 import { useState } from 'react';
 import { useSearchParams, useNavigate, Link } from 'react-router-dom';
 import { FiSmartphone, FiMail, FiCheckCircle, FiRefreshCw } from 'react-icons/fi';
+import { useLanguage } from '../context/LanguageContext';
 import api from '../api/axios';
 
 export default function VerifyCode() {
+  const { t } = useLanguage();
   const [searchParams] = useSearchParams();
   const email = searchParams.get('email') || '';
   const method = searchParams.get('method') || 'sms';
@@ -23,7 +25,7 @@ export default function VerifyCode() {
       await api.post('/auth/verify-code', { email, code });
       setSuccess(true);
     } catch (err) {
-      setError(err.response?.data?.message || 'Code invalide.');
+      setError(err.response?.data?.message || t('auth.invalidCodeFallback'));
     } finally {
       setLoading(false);
     }
@@ -36,7 +38,7 @@ export default function VerifyCode() {
       const { data } = await api.post('/auth/resend-code', { email });
       setResent(true);
     } catch (err) {
-      setError(err.response?.data?.message || 'Erreur lors du renvoi.');
+      setError(err.response?.data?.message || t('auth.resendErrorFallback'));
     } finally {
       setResending(false);
     }
@@ -48,16 +50,16 @@ export default function VerifyCode() {
         <div className="auth-container">
           <div className="auth-header">
             <FiCheckCircle size={40} style={{ color: 'var(--success)', marginBottom: '8px' }} />
-            <h1>Compte verifie</h1>
-            <p>Votre compte est maintenant actif</p>
+            <h1>{t('auth.accountVerifiedTitle')}</h1>
+            <p>{t('auth.accountVerifiedSubtitle')}</p>
           </div>
           <div className="auth-card" style={{ textAlign: 'center' }}>
             <FiCheckCircle size={48} style={{ color: 'var(--success)', marginBottom: '16px' }} />
             <p style={{ marginBottom: '24px', color: 'var(--text-secondary)' }}>
-              Votre compte a ete verifie avec succes.
+              {t('auth.accountVerifiedText')}
             </p>
             <Link to="/login" className="btn btn-primary" style={{ width: '100%', justifyContent: 'center' }}>
-              Se connecter
+              {t('auth.loginButton')}
             </Link>
           </div>
         </div>
@@ -70,22 +72,22 @@ export default function VerifyCode() {
       <div className="auth-container">
         <div className="auth-header">
           {method === 'email' ? <FiMail size={32} style={{ color: 'var(--primary)', marginBottom: '8px' }} /> : <FiSmartphone size={32} style={{ color: 'var(--primary)', marginBottom: '8px' }} />}
-          <h1>Verification</h1>
-          <p>Entrez le code recu par {method === 'email' ? 'email' : 'SMS'}</p>
+          <h1>{t('auth.verificationTitle')}</h1>
+          <p>{method === 'email' ? t('auth.enterCodeByEmail') : t('auth.enterCodeBySms')}</p>
         </div>
         <div className="auth-card">
           {error && <div className="alert alert-error">{error}</div>}
           {resent && (
             <div className="alert alert-success" style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-              <FiCheckCircle size={18} /> Un nouveau code a ete envoye.
+              <FiCheckCircle size={18} /> {t('auth.newCodeSent')}
             </div>
           )}
           <p style={{ fontSize: '14px', color: 'var(--text-secondary)', marginBottom: '20px', textAlign: 'center' }}>
-            Un code a 6 chiffres a ete envoye a <strong>{email}</strong> par {method === 'email' ? 'email' : 'SMS'}.
+            {t('auth.codeSentToPrefix')} <strong>{email}</strong> {t('auth.codeSentVia')} {method === 'email' ? t('auth.emailOption') : t('auth.smsOption')}.
           </p>
           <form onSubmit={handleSubmit}>
             <div className="form-group">
-              <label>Code de verification</label>
+              <label>{t('auth.verificationCodeLabel')}</label>
               <input
                 type="text"
                 inputMode="numeric"
@@ -93,14 +95,14 @@ export default function VerifyCode() {
                 maxLength={6}
                 value={code}
                 onChange={(e) => setCode(e.target.value.replace(/\D/g, ''))}
-                placeholder="123456"
+                placeholder={t('auth.verificationCodePlaceholder')}
                 required
                 style={{ textAlign: 'center', fontSize: '24px', letterSpacing: '8px' }}
                 autoFocus
               />
             </div>
             <button type="submit" className="form-submit" disabled={loading || code.length !== 6}>
-              {loading ? 'Verification...' : 'Verifier mon compte'}
+              {loading ? t('auth.verifying') : t('auth.verifyMyAccount')}
             </button>
           </form>
           <div style={{ textAlign: 'center', marginTop: '16px' }}>
@@ -115,11 +117,11 @@ export default function VerifyCode() {
               }}
             >
               <FiRefreshCw size={14} className={resending ? 'spin' : ''} />
-              {resending ? 'Envoi...' : 'Renvoyer le code'}
+              {resending ? t('auth.resending') : t('auth.resendCode')}
             </button>
           </div>
           <div className="form-footer">
-            <Link to="/login">Retour a la connexion</Link>
+            <Link to="/login">{t('auth.backToLogin')}</Link>
           </div>
         </div>
       </div>

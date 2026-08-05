@@ -2,86 +2,88 @@ import { useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import { FiArrowLeft } from 'react-icons/fi';
 import { motion } from 'framer-motion';
+import { useLanguage } from '../context/LanguageContext';
 
 export default function Privacy() {
-  useEffect(() => { document.title = 'Politique de confidentialité - Occasion & Garantie'; }, []);
+  const { t } = useLanguage();
+  useEffect(() => { document.title = t('about.privacyMetaTitle'); }, [t]);
 
   return (
     <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }}>
       <div className="container legal-page">
-        <Link to="/" className="back-link"><FiArrowLeft size={14} /> Retour à l'accueil</Link>
-        <h1>Politique de confidentialité</h1>
-        <p className="legal-date">Dernière mise à jour : juillet 2026</p>
+        <Link to="/" className="back-link"><FiArrowLeft size={14} /> {t('about.backHome')}</Link>
+        <h1>{t('about.privacyTitle')}</h1>
+        <p className="legal-date">{t('about.lastUpdate')}</p>
 
         <section>
-          <h2>1. Collecte des données</h2>
-          <p>Nous collectons les données suivantes lorsque vous utilisez notre plateforme :</p>
+          <h2>{t('about.privacy1')}</h2>
+          <p>{t('about.privacy1Intro')}</p>
           <ul>
-            <li>Nom et prénom</li>
-            <li>Adresse email</li>
-            <li>Numéro de téléphone</li>
-            <li>Photos et descriptions de produits</li>
-            <li>Données de navigation (cookies, pages visitées)</li>
+            <li>{t('about.privacy1Li1')}</li>
+            <li>{t('about.privacy1Li2')}</li>
+            <li>{t('about.privacy1Li3')}</li>
+            <li>{t('about.privacy1Li4')}</li>
+            <li>{t('about.privacy1Li5')}</li>
           </ul>
         </section>
 
         <section>
-          <h2>2. Utilisation des données</h2>
-          <p>Vos données sont utilisées pour :</p>
+          <h2>{t('about.privacy2')}</h2>
+          <p>{t('about.privacy2Intro')}</p>
           <ul>
-            <li>Créer et gérer votre compte</li>
-            <li>Publier et gérer vos annonces</li>
-            <li>Vous contacter suite à une réservation ou un achat</li>
-            <li>Améliorer notre plateforme et votre expérience utilisateur</li>
-            <li>Vous envoyer des notifications importantes</li>
+            <li>{t('about.privacy2Li1')}</li>
+            <li>{t('about.privacy2Li2')}</li>
+            <li>{t('about.privacy2Li3')}</li>
+            <li>{t('about.privacy2Li4')}</li>
+            <li>{t('about.privacy2Li5')}</li>
           </ul>
         </section>
 
         <section>
-          <h2>3. Cookies</h2>
-          <p>Nous utilisons des cookies pour :</p>
+          <h2>{t('about.privacy3')}</h2>
+          <p>{t('about.privacy3Intro')}</p>
           <ul>
-            <li>Assurer le fonctionnement de la plateforme (cookies techniques)</li>
-            <li>Analyser l'audience et améliorer nos services</li>
-            <li>Afficher des publicités adaptées via Google AdSense</li>
+            <li>{t('about.privacy3Li1')}</li>
+            <li>{t('about.privacy3Li2')}</li>
+            <li>{t('about.privacy3Li3')}</li>
           </ul>
-          <p>En utilisant notre site, vous consentez à l'utilisation de ces cookies.</p>
+          <p>{t('about.privacy3Consent')}</p>
         </section>
 
         <section>
-          <h2>4. Partage des données</h2>
-          <p>Nous ne partageons vos données personnelles avec aucun tiers, sauf :</p>
+          <h2>{t('about.privacy4')}</h2>
+          <p>{t('about.privacy4Intro')}</p>
           <ul>
-            <li>Si requis par la loi</li>
-            <li>Pour les traitements de paiement sécurisés</li>
-            <li>Pour les services d'hébergement et d'infrastructure technique</li>
+            <li>{t('about.privacy4Li1')}</li>
+            <li>{t('about.privacy4Li2')}</li>
+            <li>{t('about.privacy4Li3')}</li>
           </ul>
         </section>
 
         <section>
-          <h2>5. Sécurité</h2>
-          <p>Nous mettons en œuvre des mesures de sécurité techniques et organisationnelles pour protéger vos données personnelles contre tout accès non autorisé, modification, divulgation ou destruction.</p>
+          <h2>{t('about.privacy5')}</h2>
+          <p>{t('about.privacy5Body')}</p>
         </section>
 
         <section>
-          <h2>6. Vos droits</h2>
-          <p>Conformément à la loi marocaine 09-08 et au RGPD, vous disposez des droits suivants :</p>
+          <h2>{t('about.privacy6')}</h2>
+          <p>{t('about.privacy6Intro')}</p>
           <ul>
-            <li>Droit d'accès à vos données</li>
-            <li>Droit de rectification</li>
-            <li>Droit à l'effacement</li>
-            <li>Droit d'opposition au traitement</li>
-            <li>Droit à la portabilité</li>
+            <li>{t('about.privacy6Li1')}</li>
+            <li>{t('about.privacy6Li2')}</li>
+            <li>{t('about.privacy6Li3')}</li>
+            <li>{t('about.privacy6Li4')}</li>
+            <li>{t('about.privacy6Li5')}</li>
           </ul>
-          <p>Pour exercer vos droits, contactez-nous à : contact@contact.occasionetgarantie.store</p>
+          <p>{t('about.privacy6Rights')}</p>
         </section>
 
         <section>
-          <h2>7. Contact</h2>
-          <p>Pour toute question relative à cette politique de confidentialité :</p>
-          <p>Email : contact@contact.occasionetgarantie.store</p>
-          <p>Téléphone : +212 669-017295</p>
-          <p>Adresse : Casablanca, Maroc</p>
+          <h2>{t('about.privacy7')}</h2>
+          <p>{t('about.privacy7Intro')}</p>
+          <p>{t('about.contactEmail')} : contact@contact.occasionetgarantie.store</p>
+          <p>{t('about.contactPhone')} : +212 669-017295</p>
+          <p>{t('about.contactAddress')} : Casablanca, Maroc</p>
         </section>
       </div>
     </motion.div>

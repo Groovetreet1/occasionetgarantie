@@ -3,12 +3,14 @@ import { useParams, Link } from 'react-router-dom';
 import { motion } from 'framer-motion';
 import { FiUser, FiPackage, FiCalendar, FiArrowLeft, FiStar } from 'react-icons/fi';
 import api from '../api/axios';
+import { useLanguage } from '../context/LanguageContext';
 import ProductCard from '../components/ProductCard';
 
 const API_BASE = import.meta.env.VITE_API_URL || '';
 
 export default function SellerProfile() {
   const { id } = useParams();
+  const { t, lang } = useLanguage();
   const [seller, setSeller] = useState(null);
   const [products, setProducts] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -25,12 +27,12 @@ export default function SellerProfile() {
   }, [id]);
 
   if (loading) return <div className="loading-spinner" />;
-  if (!seller) return <div className="container" style={{ textAlign: 'center', paddingTop: 80, color: 'var(--text-secondary)' }}><h2>Vendeur introuvable</h2></div>;
+  if (!seller) return <div className="container" style={{ textAlign: 'center', paddingTop: 80, color: 'var(--text-secondary)' }}><h2>{t('seller.sellerNotFound')}</h2></div>;
 
   return (
     <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }}>
       <div className="container seller-profile-page">
-        <Link to="/products" className="back-link"><FiArrowLeft size={14} /> Retour aux produits</Link>
+        <Link to="/products" className="back-link"><FiArrowLeft size={14} /> {t('seller.backToProducts')}</Link>
 
         <div className="seller-profile-card">
           <div className="avatar-rating">
@@ -42,19 +44,19 @@ export default function SellerProfile() {
           <div className="seller-info">
             <h1>{seller.store_name || seller.full_name} {seller.premium ? <FiStar size={20} style={{ color: '#FFD700', verticalAlign: 'middle', marginLeft: 4 }} /> : null}</h1>
             <p className="seller-meta">
-              <FiCalendar size={14} /> Membre depuis {new Date(seller.created_at).toLocaleDateString('fr-FR', { month: 'long', year: 'numeric' })}
+              <FiCalendar size={14} /> {t('seller.memberSince', { date: new Date(seller.created_at).toLocaleDateString(lang === 'ar' ? 'ar' : 'fr-FR', { month: 'long', year: 'numeric' }) })}
             </p>
             <p className="seller-meta">
-              <FiPackage size={14} /> {seller.productCount} produit{seller.productCount > 1 ? 's' : ''} actif{seller.productCount > 1 ? 's' : ''}
+              <FiPackage size={14} /> {t(seller.productCount > 1 ? 'seller.activeProductMany' : 'seller.activeProductOne', { count: seller.productCount })}
             </p>
           </div>
         </div>
 
-        <h2 className="section-title">Produits du vendeur</h2>
+        <h2 className="section-title">{t('seller.sellerProductsTitle')}</h2>
         {products.length === 0 ? (
           <div className="empty-state">
             <FiPackage size={48} />
-            <p>Aucun produit disponible pour le moment.</p>
+            <p>{t('seller.noProducts')}</p>
           </div>
         ) : (
           <div className="products-grid">

@@ -3,17 +3,10 @@ import { useNavigate, useParams, useSearchParams } from 'react-router-dom';
 import { motion } from 'framer-motion';
 import { FiUpload, FiX, FiMapPin } from 'react-icons/fi';
 import api from '../api/axios';
+import { useLanguage } from '../context/LanguageContext';
 import SellerNav from '../components/SellerNav';
 
 const API_BASE = import.meta.env.VITE_API_URL || '';
-
-const states = [
-  { value: 'neuf', label: 'Neuf', desc: 'Jamais utilisé, emballage d\'origine' },
-  { value: 'comme_neuf', label: 'Comme neuf', desc: 'Utilisé quelques jours, sans défaut' },
-  { value: 'tres_bon', label: 'Très bon état', desc: 'Légères traces d\'utilisation' },
-  { value: 'bon', label: 'Bon état', desc: 'Quelques rayures visibles' },
-  { value: 'acceptable', label: 'Acceptable', desc: 'Défauts esthétiques, fonctionne parfaitement' },
-];
 
 const defaultSpecs = {
   'Ecran': '', 'Processeur': '', 'RAM': '', 'Stockage': '', 'Appareil': '', 'Batterie': '',
@@ -23,9 +16,18 @@ export default function SellerProductForm() {
   const { id } = useParams();
   const [searchParams] = useSearchParams();
   const navigate = useNavigate();
+  const { t } = useLanguage();
   const isEdit = Boolean(id);
   const fileInputRef = useRef(null);
   const isStore = searchParams.get('type') === 'store';
+
+  const states = [
+    { value: 'neuf', label: t('seller.stateNeuf'), desc: t('seller.stateNeufDesc') },
+    { value: 'comme_neuf', label: t('seller.stateCommeNeuf'), desc: t('seller.stateCommeNeufDesc') },
+    { value: 'tres_bon', label: t('seller.stateTresBon'), desc: t('seller.stateTresBonDesc') },
+    { value: 'bon', label: t('seller.stateBon'), desc: t('seller.stateBonDesc') },
+    { value: 'acceptable', label: t('seller.stateAcceptable'), desc: t('seller.stateAcceptableDesc') },
+  ];
 
   const [form, setForm] = useState({
     name: '', slug: '', description: '', price: '', old_price: '',
@@ -122,7 +124,7 @@ export default function SellerProductForm() {
       const allExisting = [...existingImages, ...res.data.urls];
       return { image: allExisting[0], gallery: allExisting };
     } catch (err) {
-      throw new Error(err.response?.data?.message || 'Erreur upload');
+      throw new Error(err.response?.data?.message || t('seller.uploadError'));
     } finally {
       setUploading(false);
     }
@@ -132,11 +134,11 @@ export default function SellerProductForm() {
     e.preventDefault();
     setError('');
     if (!form.name || !form.price) {
-      setError('Le nom et le prix sont requis.');
+      setError(t('seller.nameAndPriceRequired'));
       return;
     }
     if (form.description && form.description.length > 150) {
-      setError('La description est limitée à 150 caractères maximum.');
+      setError(t('seller.descriptionTooLong'));
       return;
     }
     setSaving(true);
@@ -167,7 +169,7 @@ export default function SellerProductForm() {
       }
       navigate(isStore ? '/admin/store-products' : '/seller');
     } catch (err) {
-      setError(err.response?.data?.message || 'Erreur lors de l\'enregistrement.');
+      setError(err.response?.data?.message || t('seller.saveError'));
     }
     setSaving(false);
   };
@@ -175,8 +177,8 @@ export default function SellerProductForm() {
   return (
     <div className="seller-page">
       <div className="seller-page-header">
-        <h1>{isEdit ? 'Modifier le produit' : 'Nouvelle annonce'} {isStore && <span style={{ fontSize: 14, fontWeight: 600, color: '#d97706', background: 'rgba(217,119,6,0.1)', padding: '4px 10px', borderRadius: 8, marginLeft: 8, verticalAlign: 'middle' }}>Boutique Officielle</span>}</h1>
-        <button className="btn btn-outline" onClick={() => navigate(isStore ? '/admin/store-products' : '/seller')}>← Retour</button>
+        <h1>{isEdit ? t('seller.editProduct') : t('seller.newAd')} {isStore && <span style={{ fontSize: 14, fontWeight: 600, color: '#d97706', background: 'rgba(217,119,6,0.1)', padding: '4px 10px', borderRadius: 8, marginLeft: 8, verticalAlign: 'middle' }}>{t('seller.officialStore')}</span>}</h1>
+        <button className="btn btn-outline" onClick={() => navigate(isStore ? '/admin/store-products' : '/seller')}>← {t('seller.back')}</button>
       </div>
 
       <SellerNav />
@@ -186,11 +188,11 @@ export default function SellerProductForm() {
 
           <form onSubmit={handleSubmit} className="seller-form">
             <div className="seller-form-card">
-              <h3>Photos</h3>
+              <h3>{t('seller.photos')}</h3>
               <div className="upload-zone" onClick={() => fileInputRef.current?.click()}>
                 <FiUpload size={28} />
-                <p>Ajoutez des photos du produit</p>
-                <small>JPG, PNG, WebP - 5MB max par photo</small>
+                <p>{t('seller.addProductPhotos')}</p>
+                <small>{t('seller.photoFormatHint')}</small>
               </div>
               <input ref={fileInputRef} type="file" multiple accept="image/*" onChange={handleFileSelect} style={{ display: 'none' }} />
               {(existingImages.length > 0 || gallery.length > 0) && (
@@ -212,15 +214,15 @@ export default function SellerProductForm() {
             </div>
 
             <div className="seller-form-card">
-              <h3>Informations</h3>
+              <h3>{t('seller.informations')}</h3>
               <div className="form-row">
                 <div className="form-group">
-                  <label>Nom du produit *</label>
-                  <input name="name" value={form.name} onChange={handleChange} className="form-control" placeholder="Ex: iPhone 13 128Go" />
+                  <label>{t('seller.productName')}</label>
+                  <input name="name" value={form.name} onChange={handleChange} className="form-control" placeholder={t('seller.productNamePlaceholder')} />
                 </div>
                 <div className="form-group">
-                  <label>Marque</label>
-                  <input name="brand" value={form.brand} onChange={handleChange} className="form-control" placeholder="Ex: Apple, Samsung" list="brands" />
+                  <label>{t('seller.brandLabel')}</label>
+                  <input name="brand" value={form.brand} onChange={handleChange} className="form-control" placeholder={t('seller.brandPlaceholder')} list="brands" />
                   <datalist id="brands">
                     <option value="Apple" /><option value="Samsung" /><option value="Xiaomi" />
                     <option value="Huawei" /><option value="OnePlus" /><option value="Oppo" />
@@ -228,8 +230,8 @@ export default function SellerProductForm() {
                   </datalist>
                 </div>
                 <div className="form-group">
-                  <label>Ville</label>
-                  <input name="ville" value={form.ville} onChange={handleChange} className="form-control" placeholder="Votre ville" list="villes" />
+                  <label>{t('seller.cityLabel')}</label>
+                  <input name="ville" value={form.ville} onChange={handleChange} className="form-control" placeholder={t('seller.cityPlaceholder')} list="villes" />
                   <datalist id="villes">
                     <option value="Casablanca" /><option value="Rabat" /><option value="Marrakech" />
                     <option value="Fès" /><option value="Tanger" /><option value="Agadir" />
@@ -242,28 +244,28 @@ export default function SellerProductForm() {
                 </div>
               </div>
               <div className="form-group">
-                <label>Description</label>
+                <label>{t('seller.descriptionLabel')}</label>
                 <textarea name="description" value={form.description} onChange={handleChange} className="form-control form-textarea"
-                  rows={5} maxLength={150} placeholder="Décrivez l'état du produit..." />
-                <small className="text-secondary">{form.description.length}/150 caractères</small>
+                  rows={5} maxLength={150} placeholder={t('seller.descriptionPlaceholder')} />
+                <small className="text-secondary">{t('seller.charCount', { count: form.description.length })}</small>
               </div>
             </div>
 
             <div className="seller-form-card">
-              <h3>Prix & Catégorie</h3>
+              <h3>{t('seller.priceCategory')}</h3>
               <div className={`form-row ${isEdit ? 'three' : 'two'}`}>
                 <div className="form-group">
-                  <label>Prix (DH) *</label>
+                  <label>{t('seller.priceLabel')}</label>
                   <div className="input-with-suffix"><input name="price" type="number" value={form.price} onChange={handleChange} className="form-control" placeholder="3500" /><span>DH</span></div>
                 </div>
                 {isEdit && (
                   <div className="form-group">
-                    <label>Ancien prix (DH)</label>
+                    <label>{t('seller.oldPriceLabel')}</label>
                     <div className="input-with-suffix"><input name="old_price" type="number" value={form.old_price} onChange={handleChange} className="form-control" placeholder="5500" /><span>DH</span></div>
                   </div>
                 )}
                 <div className="form-group">
-                  <label>Catégorie</label>
+                  <label>{t('seller.categoryLabel')}</label>
                   <select name="category_id" value={form.category_id} onChange={handleChange} className="form-control">
                     <option value="1">Smartphones</option>
                     <option value="2">Tablettes</option>
@@ -271,13 +273,13 @@ export default function SellerProductForm() {
                     <option value="4">Accessoires</option>
                     <option value="5">Gaming</option>
                     </select>
-                    <small style={{ display: 'block', color: 'var(--text-secondary)', marginTop: 6, fontSize: 12 }}>Uniquement les produits electronique et tech sont autorises.</small>
+                    <small style={{ display: 'block', color: 'var(--text-secondary)', marginTop: 6, fontSize: 12 }}>{t('seller.categoriesAllowed')}</small>
                 </div>
               </div>
             </div>
 
             <div className="seller-form-card">
-              <h3>État & Garantie</h3>
+              <h3>{t('seller.conditionWarranty')}</h3>
               <div className="state-grid">
                 {states.map(s => (
                   <label key={s.value} className={`state-option ${form.state === s.value ? 'active' : ''}`}>
@@ -289,7 +291,7 @@ export default function SellerProductForm() {
               </div>
               <div className="form-row" style={{ marginTop: 16 }}>
                 <div className="form-group">
-                  <label>Garantie</label>
+                  <label>{t('seller.warrantyLabel')}</label>
                   <select name="warranty" value={form.warranty} onChange={handleChange} className="form-control">
                     <option value="1 mois">1 mois</option>
                     <option value="3 mois">3 mois</option>
@@ -303,13 +305,13 @@ export default function SellerProductForm() {
             </div>
 
             <div className="seller-form-card">
-              <h3>Caractéristiques techniques</h3>
+              <h3>{t('seller.techSpecs')}</h3>
               <div className="form-row two">
                 {Object.entries(defaultSpecs).map(([key]) => (
                   <div key={key} className="form-group">
                     <label>{key}</label>
                     <input value={form.specs[key] || ''} onChange={e => handleSpecChange(key, e.target.value)}
-                      className="form-control" placeholder={`Ex: 6.1" Super Retina`} />
+                      className="form-control" placeholder={t('seller.specPlaceholder')} />
                   </div>
                 ))}
               </div>
@@ -319,15 +321,15 @@ export default function SellerProductForm() {
               <FiMapPin size={16} style={{
                 color: gpsState === 'got' ? '#10b981' : gpsState === 'waiting' ? '#f59e0b' : '#ef4444',
               }} />
-              {gpsState === 'got' ? `Localisation obtenue - Ville: ${form.ville || '...'}` :
-               gpsState === 'waiting' ? 'Obtention de la position... Veuillez autoriser la localisation.' :
-               gpsState === 'denied' ? 'Localisation refusee — obligatoire pour publier une annonce' :
-               gpsState === 'unavailable' ? 'Geolocalisation indisponible sur cet appareil' : ''}
+              {gpsState === 'got' ? t('seller.gpsGot', { city: form.ville || '...' }) :
+               gpsState === 'waiting' ? t('seller.gpsWaiting') :
+               gpsState === 'denied' ? t('seller.gpsDenied') :
+               gpsState === 'unavailable' ? t('seller.gpsUnavailable') : ''}
             </div>
             <div className="seller-form-actions">
-              <button type="button" className="btn btn-secondary" onClick={() => navigate('/seller')}>Annuler</button>
+              <button type="button" className="btn btn-secondary" onClick={() => navigate('/seller')}>{t('seller.cancel')}</button>
               <button type="submit" className="btn btn-primary btn-lg" disabled={saving || uploading || gpsState === 'waiting' || gpsState === 'denied' || gpsState === 'unavailable'}>
-                {uploading ? 'Upload...' : saving ? 'Enregistrement...' : gpsState === 'waiting' ? 'Attente GPS...' : gpsState === 'denied' || gpsState === 'unavailable' ? 'Localisation requise' : isEdit ? 'Mettre à jour' : 'Publier l\'annonce'}
+                {uploading ? t('seller.uploadingBtn') : saving ? t('seller.saving') : gpsState === 'waiting' ? t('seller.waitingGps') : gpsState === 'denied' || gpsState === 'unavailable' ? t('seller.locationRequired') : isEdit ? t('seller.update') : t('seller.publishAd')}
               </button>
             </div>
           </form>

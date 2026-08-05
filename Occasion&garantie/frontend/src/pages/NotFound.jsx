@@ -1,8 +1,10 @@
 import { Link } from 'react-router-dom';
 import { motion } from 'framer-motion';
 import { FiHome, FiSearch } from 'react-icons/fi';
+import { useLanguage } from '../context/LanguageContext';
 
 export default function NotFound() {
+  const { t } = useLanguage();
   return (
     <section className="auth-page">
       <motion.div className="auth-container"
@@ -23,12 +25,12 @@ export default function NotFound() {
           >
             404
           </motion.div>
-          <h1>Page introuvable</h1>
-          <p>La page que vous cherchez n'existe pas ou a été déplacée.</p>
+          <h1>{t('profile.pageNotFound')}</h1>
+          <p>{t('profile.pageNotFoundDesc')}</p>
         </div>
         <div style={{ display: 'flex', gap: 12, justifyContent: 'center', marginTop: 24 }}>
-          <Link to="/" className="btn btn-primary"><FiHome size={16} /> Accueil</Link>
-          <Link to="/products" className="btn btn-outline"><FiSearch size={16} /> Voir les produits</Link>
+          <Link to="/" className="btn btn-primary"><FiHome size={16} /> {t('common.home')}</Link>
+          <Link to="/products" className="btn btn-outline"><FiSearch size={16} /> {t('profile.viewProducts')}</Link>
         </div>
       </motion.div>
     </section>

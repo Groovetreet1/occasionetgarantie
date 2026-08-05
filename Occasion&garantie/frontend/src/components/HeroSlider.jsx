@@ -2,29 +2,30 @@ import { useState, useEffect, useCallback, useRef } from 'react';
 import { Link } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
 import { FiArrowRight, FiChevronLeft, FiChevronRight } from 'react-icons/fi';
+import { useLanguage } from '../context/LanguageContext';
 
 const slides = [
   {
     id: 1,
-    title: "Des produits d'exception à prix réduits",
-    subtitle: 'Chaque article est vérifié, testé et garanti. Profitez du meilleur de la technologie sans vous ruiner.',
-    cta: 'Découvrir nos produits',
+    titleKey: 'home.heroSlide1Title',
+    subtitleKey: 'home.heroSlide1Subtitle',
+    ctaKey: 'home.heroSlide1Cta',
     link: '/products',
     orbColor: '#F59E0B',
   },
   {
     id: 2,
-    title: 'Qualité testée et vérifiée',
-    subtitle: 'Nos experts vérifient chaque article avant mise en vente. Qualité irréprochable.',
-    cta: 'Créer un compte',
+    titleKey: 'home.heroSlide2Title',
+    subtitleKey: 'home.heroSlide2Subtitle',
+    ctaKey: 'home.heroSlide2Cta',
     link: '/signup',
     orbColor: '#F59E0B',
   },
   {
     id: 3,
-    title: 'Avis clients vérifiés',
-    subtitle: 'Chaque vendeur est noté par ses clients. Achetez en toute confiance.',
-    cta: 'Voir les avis',
+    titleKey: 'home.heroSlide3Title',
+    subtitleKey: 'home.heroSlide3Subtitle',
+    ctaKey: 'home.heroSlide3Cta',
     link: '/products',
     orbColor: '#3B82F6',
   },
@@ -37,6 +38,7 @@ const slideVariants = {
 };
 
 export default function HeroSlider() {
+  const { t } = useLanguage();
   const [current, setCurrent] = useState(0);
   const [paused, setPaused] = useState(false);
   const timerRef = useRef(null);
@@ -90,10 +92,10 @@ export default function HeroSlider() {
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ duration: 0.5, delay: 0.2 }}
               >
-                <h2>{slides[current].title}</h2>
-                <p>{slides[current].subtitle}</p>
+                <h2>{t(slides[current].titleKey)}</h2>
+                <p>{t(slides[current].subtitleKey)}</p>
                 <Link to={slides[current].link} className="btn btn-primary">
-                  {slides[current].cta} <FiArrowRight size={18} />
+                  {t(slides[current].ctaKey)} <FiArrowRight size={18} />
                 </Link>
               </motion.div>
             </div>
@@ -101,16 +103,16 @@ export default function HeroSlider() {
         </motion.div>
       </AnimatePresence>
 
-      <button className="hero-arrow hero-arrow-prev" onClick={prev} aria-label="Précédent">
+      <button className="hero-arrow hero-arrow-prev" onClick={prev} aria-label={t('home.heroPrev')}>
         <FiChevronLeft size={28} />
       </button>
-      <button className="hero-arrow hero-arrow-next" onClick={next} aria-label="Suivant">
+      <button className="hero-arrow hero-arrow-next" onClick={next} aria-label={t('home.heroNext')}>
         <FiChevronRight size={28} />
       </button>
       <div className="hero-dots">
         {slides.map((_, i) => (
           <button key={i} className={`hero-dot ${i === current ? 'active' : ''}`}
-            onClick={() => goTo(i)} aria-label={`Slide ${i + 1}`} />
+            onClick={() => goTo(i)} aria-label={t('home.heroSlideLabel', { number: i + 1 })} />
         ))}
       </div>
     </section>

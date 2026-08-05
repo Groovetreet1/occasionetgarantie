@@ -3,6 +3,7 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { FiX, FiShield, FiCheck, FiLock, FiUpload, FiStar, FiCheckCircle, FiCopy } from 'react-icons/fi';
 import api from '../api/axios';
 import { useAuth } from '../context/AuthContext';
+import { useLanguage } from '../context/LanguageContext';
 
 const PREMIUM_AMOUNT = 50;
 
@@ -25,6 +26,7 @@ const copyText = async (text) => {
 
 export default function PremiumPopup({ open, onClose }) {
   const { user, refreshUser } = useAuth();
+  const { t } = useLanguage();
   const [step, setStep] = useState('info');
   const [paymentId, setPaymentId] = useState(null);
   const [bankInfo, setBankInfo] = useState(null);
@@ -52,7 +54,7 @@ export default function PremiumPopup({ open, onClose }) {
       setBankInfo(data.bank);
       setStep('payment');
     } catch (err) {
-      setMsg({ type: 'error', text: err.response?.data?.message || 'Erreur.' });
+      setMsg({ type: 'error', text: err.response?.data?.message || t('common.errorShort') });
     } finally {
       setLoading(false);
     }
@@ -72,7 +74,7 @@ export default function PremiumPopup({ open, onClose }) {
       setMsg({ type: 'success', text: data.message });
       setStep('done');
     } catch (err) {
-      setMsg({ type: 'error', text: err.response?.data?.message || 'Erreur.' });
+      setMsg({ type: 'error', text: err.response?.data?.message || t('common.errorShort') });
     } finally {
       setUploading(false);
     }
@@ -104,37 +106,37 @@ export default function PremiumPopup({ open, onClose }) {
             ) : step === 'info' && user?.premium ? (
               <div className="premium-content">
                 <div className="premium-icon-wrap premium-icon-success"><FiCheckCircle size={32} /></div>
-                <h2>Vous êtes déjà Premium</h2>
-                <p className="premium-sub">Merci pour votre confiance !</p>
+                <h2>{t('common.alreadyPremium')}</h2>
+                <p className="premium-sub">{t('common.thanksForTrust')}</p>
                 <ul className="premium-benefits">
-                  <li><FiCheck size={16} /> Navigation sans publicité</li>
-                  <li><FiShield size={16} /> Accès prioritaire</li>
-                  <li><FiStar size={16} /> Badge Premium sur votre profil</li>
+                  <li><FiCheck size={16} /> {t('common.noAds')}</li>
+                  <li><FiShield size={16} /> {t('common.priorityAccess')}</li>
+                  <li><FiStar size={16} /> {t('common.premiumBadge')}</li>
                 </ul>
-                <button className="form-submit" onClick={onClose}>Fermer</button>
+                <button className="form-submit" onClick={onClose}>{t('common.close')}</button>
               </div>
             ) : step === 'info' && (
               <div className="premium-content">
                 <div className="premium-icon-wrap"><FiStar size={32} /></div>
-                <h2>Passer en Premium</h2>
-                <p className="premium-sub">Profitez du site sans publicité</p>
+                <h2>{t('common.goPremiumTitle')}</h2>
+                <p className="premium-sub">{t('common.enjoyNoAds')}</p>
 
                 <ul className="premium-benefits">
-                  <li><FiCheck size={16} /> Navigation sans publicit&eacute;</li>
-                  <li><FiShield size={16} /> Acc&egrave;s prioritaire</li>
-                  <li><FiStar size={16} /> Badge Premium sur votre profil</li>
-                  <li><FiLock size={16} /> Fonctionnalit&eacute;s exclusives</li>
+                  <li><FiCheck size={16} /> {t('common.noAds')}</li>
+                  <li><FiShield size={16} /> {t('common.priorityAccess')}</li>
+                  <li><FiStar size={16} /> {t('common.premiumBadge')}</li>
+                  <li><FiLock size={16} /> {t('common.exclusiveFeatures')}</li>
                 </ul>
 
                 <div className="premium-price">
                   <span className="premium-amount">{PREMIUM_AMOUNT} DH</span>
-                  <span className="premium-period">/ an</span>
+                  <span className="premium-period">{t('common.perYear')}</span>
                 </div>
 
                 {msg && <div className={`alert alert-${msg.type}`}>{msg.text}</div>}
 
                 <button className="form-submit" onClick={handleStart} disabled={loading}>
-                  {loading ? 'Chargement...' : `Passer Premium - ${PREMIUM_AMOUNT} DH`}
+                  {loading ? t('common.loading') : t('common.goPremiumWithPrice', { amount: PREMIUM_AMOUNT })}
                 </button>
               </div>
             )}
@@ -142,37 +144,37 @@ export default function PremiumPopup({ open, onClose }) {
             {step === 'payment' && (
               <div className="premium-content">
                 <div className="premium-icon-wrap"><FiLock size={32} /></div>
-                <h2>Paiement</h2>
-                <p className="premium-sub">Virement bancaire de {PREMIUM_AMOUNT} DH</p>
+                <h2>{t('common.payment')}</h2>
+                <p className="premium-sub">{t('common.bankTransferOf', { amount: PREMIUM_AMOUNT })}</p>
 
                 {bankInfo && (
                   <div className="premium-bank-info">
                     <div className="premium-bank-row">
-                      <span>Banque</span>
+                      <span>{t('common.bank')}</span>
                       <strong>{bankInfo.bank}</strong>
                     </div>
                     <div className="premium-bank-row">
-                      <span>Titulaire</span>
+                      <span>{t('common.holder')}</span>
                       <strong>{bankInfo.holder}</strong>
-                      <button className="premium-copy-btn" onClick={async () => { await copyText(bankInfo.holder); setCopiedField('holder'); setTimeout(() => setCopiedField(null), 1500); }} title="Copier">
+                      <button className="premium-copy-btn" onClick={async () => { await copyText(bankInfo.holder); setCopiedField('holder'); setTimeout(() => setCopiedField(null), 1500); }} title={t('common.copy')}>
                         {copiedField === 'holder' ? <FiCheck size={14} /> : <FiCopy size={14} />}
                       </button>
                     </div>
                     <div className="premium-bank-row">
-                      <span>RIB</span>
+                      <span>{t('common.rib')}</span>
                       <strong className="premium-rib">{bankInfo.rib}</strong>
-                      <button className="premium-copy-btn" onClick={async () => { await copyText(bankInfo.rib); setCopiedField('rib'); setTimeout(() => setCopiedField(null), 1500); }} title="Copier">
+                      <button className="premium-copy-btn" onClick={async () => { await copyText(bankInfo.rib); setCopiedField('rib'); setTimeout(() => setCopiedField(null), 1500); }} title={t('common.copy')}>
                         {copiedField === 'rib' ? <FiCheck size={14} /> : <FiCopy size={14} />}
                       </button>
                     </div>
-                    <div className="premium-bank-row"><span>Montant</span><strong>{bankInfo.amount} DH</strong></div>
+                    <div className="premium-bank-row"><span>{t('common.amount')}</span><strong>{bankInfo.amount} DH</strong></div>
                   </div>
                 )}
 
-                <p className="premium-upload-label">Apr&egrave;s le virement, envoyez la capture d'&eacute;cran :</p>
+                <p className="premium-upload-label">{t('common.sendScreenshotAfter')}</p>
 
                 <label className={`premium-upload-btn ${uploading ? 'loading' : ''}`}>
-                  {uploading ? 'Envoi...' : <><FiUpload size={16} /> Envoyer la capture</>}
+                  {uploading ? t('common.sending') : <><FiUpload size={16} /> {t('common.sendScreenshot')}</>}
                   <input type="file" accept="image/*" onChange={handleUploadScreenshot} hidden disabled={uploading} />
                 </label>
 
@@ -183,12 +185,12 @@ export default function PremiumPopup({ open, onClose }) {
             {step === 'done' && (
               <div className="premium-content">
                 <div className="premium-icon-wrap premium-icon-success"><FiCheck size={32} /></div>
-                <h2>Merci !</h2>
-                <p className="premium-sub">Votre demande est en cours de v&eacute;rification</p>
+                <h2>{t('common.thanks')}</h2>
+                <p className="premium-sub">{t('common.requestPending')}</p>
                 <p style={{ fontSize: 13, color: 'var(--text-secondary)', marginBottom: 20 }}>
-                  L&rsquo;administrateur va confirmer votre paiement sous 24h. Vous recevrez une notification SMS.
+                  {t('common.adminWillConfirm')}
                 </p>
-                <button className="form-submit" onClick={onClose}>OK</button>
+                <button className="form-submit" onClick={onClose}>{t('common.ok')}</button>
               </div>
             )}
           </motion.div>

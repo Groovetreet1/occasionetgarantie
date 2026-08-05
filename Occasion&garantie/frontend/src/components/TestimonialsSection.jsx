@@ -1,17 +1,19 @@
 import { useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { FiChevronLeft, FiChevronRight, FiStar } from 'react-icons/fi';
+import { useLanguage } from '../context/LanguageContext';
 
 const testimonials = [
-  { name: 'Karim B.', role: 'Achat iPhone 13', text: "Très satisfait de mon achat. Le téléphone était en parfait état, comme neuf. Je recommande vivement !", rating: 5 },
-  { name: 'Sara M.', role: 'Achat MacBook Air', text: "Je cherchais un MacBook reconditionné de qualité. Produit conforme à la description, emballage soigné. Service client réactif sur WhatsApp.", rating: 5 },
-  { name: 'Youssef H.', role: 'Achat Galaxy S24', text: "Première expérience avec ce site, et franchement satisfait. Le rapport qualité-prix est imbattable. Je reviendrai pour mes prochains achats.", rating: 5 },
-  { name: 'Fatima Z.', role: 'Achat iPad 9', text: "Produit impeccable, conforme à la description. Je recommande à tous ceux qui cherchent des produits reconditionnés de qualité.", rating: 4 },
-  { name: 'Amine R.', role: 'Achat accessoires', text: "Coque et verre trempé de très bonne qualité. Prix raisonnables. Le site est bien fait et facile à naviguer.", rating: 5 },
-  { name: 'Nadia L.', role: 'Achat iPhone 14 Pro', text: "L'iPhone est comme neuf, batterie à 100%. Service après-vente au top. 5 étoiles sans hésitation.", rating: 5 },
+  { name: 'Karim B.', roleKey: 'home.t1Role', textKey: 'home.t1Text', rating: 5 },
+  { name: 'Sara M.', roleKey: 'home.t2Role', textKey: 'home.t2Text', rating: 5 },
+  { name: 'Youssef H.', roleKey: 'home.t3Role', textKey: 'home.t3Text', rating: 5 },
+  { name: 'Fatima Z.', roleKey: 'home.t4Role', textKey: 'home.t4Text', rating: 4 },
+  { name: 'Amine R.', roleKey: 'home.t5Role', textKey: 'home.t5Text', rating: 5 },
+  { name: 'Nadia L.', roleKey: 'home.t6Role', textKey: 'home.t6Text', rating: 5 },
 ];
 
 export default function TestimonialsSection() {
+  const { t } = useLanguage();
   const [current, setCurrent] = useState(0);
   const [direction, setDirection] = useState(1);
 
@@ -30,8 +32,8 @@ export default function TestimonialsSection() {
         <motion.div style={{ textAlign: 'center', marginBottom: '48px' }}
           initial={{ opacity: 0, y: 30 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }}
         >
-          <h2 className="section-title">Ce que disent nos clients</h2>
-          <p className="section-subtitle">Des milliers de clients satisfaits nous font confiance.</p>
+          <h2 className="section-title">{t('home.testimonialsTitle')}</h2>
+          <p className="section-subtitle">{t('home.testimonialsSubtitle')}</p>
         </motion.div>
 
         <div className="testimonials-carousel">
@@ -53,12 +55,12 @@ export default function TestimonialsSection() {
                     <FiStar key={i} size={18} fill={i < testimonials[current].rating ? 'var(--primary)' : 'none'} color="var(--primary)" />
                   ))}
                 </div>
-                <p className="testimonial-text">"{testimonials[current].text}"</p>
+                <p className="testimonial-text">"{t(testimonials[current].textKey)}"</p>
                 <div className="testimonial-author">
                   <div className="testimonial-avatar">{testimonials[current].name[0]}</div>
                   <div>
                     <strong>{testimonials[current].name}</strong>
-                    <span>{testimonials[current].role}</span>
+                    <span>{t(testimonials[current].roleKey)}</span>
                   </div>
                 </div>
               </motion.div>

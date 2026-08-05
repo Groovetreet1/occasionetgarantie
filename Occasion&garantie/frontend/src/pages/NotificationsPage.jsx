@@ -3,9 +3,11 @@ import { Link, useNavigate } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
 import { FiArrowLeft, FiBell, FiCheck, FiTrash2 } from 'react-icons/fi';
 import api from '../api/axios';
+import { useLanguage } from '../context/LanguageContext';
 
 export default function NotificationsPage() {
   const navigate = useNavigate();
+  const { t } = useLanguage();
   const [notifications, setNotifications] = useState([]);
   const [loading, setLoading] = useState(true);
   const [showCleanConfirm, setShowCleanConfirm] = useState(false);
@@ -37,20 +39,20 @@ export default function NotificationsPage() {
       <div className="container" style={{ position: 'relative', zIndex: 1, maxWidth: 600, margin: '0 auto', padding: '20px' }}>
         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 20 }}>
           <div>
-            <Link to="/" className="btn btn-ghost" style={{ marginBottom: 8 }}><FiArrowLeft /> Accueil</Link>
+            <Link to="/" className="btn btn-ghost" style={{ marginBottom: 8 }}><FiArrowLeft /> {t('common.home')}</Link>
             <h1 style={{ fontSize: 24, fontWeight: 800, display: 'flex', alignItems: 'center', gap: 8 }}>
-              <FiBell size={22} style={{ color: 'var(--primary)' }} /> Notifications
+              <FiBell size={22} style={{ color: 'var(--primary)' }} /> {t('profile.notificationsTitle')}
             </h1>
           </div>
           <div style={{ display: 'flex', gap: 8 }}>
             {notifications.length > 0 && (
               <button onClick={() => setShowCleanConfirm(true)} className="btn btn-ghost" style={{ fontSize: 13, display: 'flex', alignItems: 'center', gap: 6, color: 'var(--error)' }}>
-                <FiTrash2 size={14} /> Vider
+                <FiTrash2 size={14} /> {t('profile.clear')}
               </button>
             )}
             {notifications.some(n => !n.read_at) && (
               <button onClick={markAllRead} className="btn btn-ghost" style={{ fontSize: 13, display: 'flex', alignItems: 'center', gap: 6 }}>
-                <FiCheck size={14} /> Tout marquer lu
+                <FiCheck size={14} /> {t('profile.markAllRead')}
               </button>
             )}
           </div>
@@ -61,7 +63,7 @@ export default function NotificationsPage() {
         ) : notifications.length === 0 ? (
           <div style={{ textAlign: 'center', padding: '60px 0', color: 'var(--text-muted)' }}>
             <FiBell size={40} style={{ opacity: 0.3, marginBottom: 10 }} />
-            <p>Aucune notification.</p>
+            <p>{t('profile.noNotifications')}</p>
           </div>
         ) : (
           <div style={{ display: 'flex', flexDirection: 'column', gap: 6 }}>
@@ -96,16 +98,16 @@ export default function NotificationsPage() {
             <div style={{ width: 56, height: 56, borderRadius: '50%', background: 'rgba(239,68,68,0.1)', display: 'flex', alignItems: 'center', justifyContent: 'center', margin: '0 auto 16px' }}>
               <FiTrash2 size={26} color="#dc2626" />
             </div>
-            <h3 style={{ fontSize: 18, fontWeight: 700, marginBottom: 8 }}>Vider les notifications ?</h3>
+            <h3 style={{ fontSize: 18, fontWeight: 700, marginBottom: 8 }}>{t('profile.clearNotifsTitle')}</h3>
             <p style={{ fontSize: 14, color: 'var(--text-secondary)', marginBottom: 24, lineHeight: 1.5 }}>
-              Cette action est irreversible. Toutes vos notifications seront supprimees.
+              {t('profile.clearNotifsDesc')}
             </p>
             <div style={{ display: 'flex', gap: 10 }}>
               <button onClick={() => setShowCleanConfirm(false)} className="btn btn-outline" style={{ flex: 1, justifyContent: 'center', padding: '10px 0' }}>
-                Annuler
+                {t('common.cancel')}
               </button>
               <button onClick={confirmClean} className="form-submit" style={{ flex: 1, justifyContent: 'center', padding: '10px 0', background: '#dc2626', borderColor: '#dc2626' }}>
-                <FiTrash2 size={14} /> Vider
+                <FiTrash2 size={14} /> {t('profile.clear')}
               </button>
             </div>
           </motion.div>

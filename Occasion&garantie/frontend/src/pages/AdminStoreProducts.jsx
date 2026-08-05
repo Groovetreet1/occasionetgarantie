@@ -2,6 +2,7 @@ import { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
 import { FiPlus, FiEdit2, FiTrash2, FiPackage, FiArrowLeft, FiStar, FiShield, FiShoppingBag, FiDollarSign, FiEye, FiPhone, FiMessageCircle, FiClock } from 'react-icons/fi';
 import api from '../api/axios';
+import { useLanguage } from '../context/LanguageContext';
 
 const stateLabels = { neuf: 'Neuf', comme_neuf: 'Comme neuf', tres_bon: 'Très bon', bon: 'Bon', acceptable: 'Acceptable' };
 const formatPrice = (p) => new Intl.NumberFormat('fr-FR', { style: 'currency', currency: 'MAD' }).format(p).replace('MAD', '').trim() + ' DH';
@@ -9,6 +10,7 @@ const formatPrice = (p) => new Intl.NumberFormat('fr-FR', { style: 'currency', c
 const contactStatusColors = { en_attente: { bg: '#d97706', label: 'En attente' }, contacte: { bg: '#3b82f6', label: 'Contacté' }, termine: { bg: '#059669', label: 'Terminé' } };
 
 export default function AdminStoreProducts() {
+  const { t } = useLanguage();
   const [tab, setTab] = useState('produits');
   const [products, setProducts] = useState([]);
   const [stats, setStats] = useState({ total: 0, featured: 0, inStock: 0, sold: 0 });
@@ -30,10 +32,10 @@ export default function AdminStoreProducts() {
     setSeedLoading(true); setSeedMsg(null);
     try {
       const res = await api.post('/admin/seed');
-      setSeedMsg({ type: 'success', text: res.data.message || 'Seed terminé.' });
+      setSeedMsg({ type: 'success', text: res.data.message || t('admin.seedDone') });
       fetchProducts(page, limit);
     } catch (err) {
-      setSeedMsg({ type: 'error', text: err.response?.data?.error || err.response?.data?.message || 'Erreur seed.' });
+      setSeedMsg({ type: 'error', text: err.response?.data?.error || err.response?.data?.message || t('admin.seedError') });
     } finally {
       setSeedLoading(false);
       setTimeout(() => setSeedMsg(null), 5000);
@@ -59,13 +61,13 @@ export default function AdminStoreProducts() {
   useEffect(() => { if (tab === 'produits') fetchProducts(page, limit); else fetchContacts(cPage, cLimit); }, [tab, page, limit, cPage, cLimit]);
 
   const handleDelete = async (id) => {
-    if (!confirm('Supprimer ce produit ?')) return;
+    if (!confirm(t('admin.deleteProductTitle'))) return;
     setActionId(id);
     try {
       await api.delete(`/products/${id}`);
       fetchProducts(page, limit);
     } catch (err) {
-      alert(err.response?.data?.message || 'Erreur');
+      alert(err.response?.data?.message || t('admin.error'));
     } finally {
       setActionId(null);
     }
@@ -77,7 +79,7 @@ export default function AdminStoreProducts() {
       await api.put(`/products/${p.id}`, { featured: !p.featured });
       fetchProducts(page, limit);
     } catch (err) {
-      alert(err.response?.data?.message || 'Erreur');
+      alert(err.response?.data?.message || t('admin.error'));
     } finally {
       setActionId(null);
     }
@@ -89,7 +91,7 @@ export default function AdminStoreProducts() {
       await api.patch(`/products/${id}/status`, { status });
       fetchProducts(page, limit);
     } catch (err) {
-      alert(err.response?.data?.message || 'Erreur');
+      alert(err.response?.data?.message || t('admin.error'));
     } finally {
       setActionId(null);
     }
@@ -101,7 +103,7 @@ export default function AdminStoreProducts() {
       await api.put(`/admin/store-contacts/${id}/status`, { status });
       fetchContacts(cPage, cLimit);
     } catch (err) {
-      alert(err.response?.data?.message || 'Erreur');
+      alert(err.response?.data?.message || t('admin.error'));
     } finally {
       setActionId(null);
     }
@@ -114,9 +116,9 @@ export default function AdminStoreProducts() {
       <div className="container" style={{ position: 'relative', zIndex: 1 }}>
         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '24px', flexWrap: 'wrap', gap: '12px' }}>
           <div>
-            <Link to="/admin" className="btn btn-ghost" style={{ marginBottom: '8px' }}><FiArrowLeft /> Dashboard</Link>
+            <Link to="/admin" className="btn btn-ghost" style={{ marginBottom: '8px' }}><FiArrowLeft /> {t('admin.dashboardTitle')}</Link>
             <h1 style={{ fontSize: '28px', fontWeight: 800, display: 'flex', alignItems: 'center', gap: 10 }}>
-              <FiShield style={{ color: '#d97706' }} /> Boutique Officielle
+              <FiShield style={{ color: '#d97706' }} /> {t('admin.officialStore')}
             </h1>
           </div>
           <div style={{ display: 'flex', alignItems: 'center', gap: 8, flexWrap: 'wrap' }}>
@@ -127,20 +129,20 @@ export default function AdminStoreProducts() {
             )}
             <button onClick={handleSeed} disabled={seedLoading}
               style={{ padding: '10px 20px', borderRadius: 10, fontWeight: 600, fontSize: 14, border: '1px solid var(--border)', background: 'var(--bg-card)', color: 'var(--text)', cursor: seedLoading ? 'wait' : 'pointer', display: 'flex', alignItems: 'center', gap: 8, opacity: seedLoading ? 0.6 : 1 }}>
-              <FiPackage size={18} /> {seedLoading ? 'Génération...' : 'Générer produits'}
+              <FiPackage size={18} /> {seedLoading ? t('admin.generating') : t('admin.generateProducts')}
             </button>
             <Link to="/seller/products/new?type=store" className="btn" style={{ background: '#d97706', color: '#fff', padding: '10px 20px', borderRadius: 10, fontWeight: 600, fontSize: 14, display: 'flex', alignItems: 'center', gap: 8 }}>
-              <FiPlus size={18} /> Nouveau produit
+              <FiPlus size={18} /> {t('admin.newProduct')}
             </Link>
           </div>
         </div>
 
         <div style={{ display: 'grid', gap: '16px', gridTemplateColumns: 'repeat(auto-fill, minmax(180px, 1fr))', marginBottom: '24px' }}>
           {[
-            { label: 'Produits', value: stats.total, icon: FiPackage, color: '#3b82f6', bg: 'rgba(59,130,246,0.1)' },
-            { label: 'En vedette', value: stats.featured, icon: FiStar, color: '#d97706', bg: 'rgba(217,119,6,0.1)' },
-            { label: 'En stock', value: stats.inStock, icon: FiShoppingBag, color: '#059669', bg: 'rgba(5,150,105,0.1)' },
-            { label: 'Vendus', value: stats.sold, icon: FiDollarSign, color: '#dc2626', bg: 'rgba(220,38,38,0.1)' },
+            { label: t('admin.products'), value: stats.total, icon: FiPackage, color: '#3b82f6', bg: 'rgba(59,130,246,0.1)' },
+            { label: t('admin.statsFeatured'), value: stats.featured, icon: FiStar, color: '#d97706', bg: 'rgba(217,119,6,0.1)' },
+            { label: t('admin.statsInStock'), value: stats.inStock, icon: FiShoppingBag, color: '#059669', bg: 'rgba(5,150,105,0.1)' },
+            { label: t('admin.statsSold'), value: stats.sold, icon: FiDollarSign, color: '#dc2626', bg: 'rgba(220,38,38,0.1)' },
           ].map(s => {
             const Icon = s.icon;
             return (
@@ -160,11 +162,11 @@ export default function AdminStoreProducts() {
         <div style={{ display: 'flex', gap: 0, marginBottom: 24, borderBottom: '2px solid var(--border)' }}>
           <button onClick={() => setTab('produits')}
             style={{ padding: '10px 20px', border: 'none', background: 'none', cursor: 'pointer', fontWeight: 600, fontSize: 14, color: tab === 'produits' ? '#d97706' : 'var(--text-muted)', borderBottom: tab === 'produits' ? '2px solid #d97706' : '2px solid transparent', marginBottom: -2, transition: '0.2s' }}>
-            <FiPackage size={14} style={{ marginRight: 6 }} /> Produits ({stats.total})
+            <FiPackage size={14} style={{ marginRight: 6 }} /> {t('admin.tabProducts', { count: stats.total })}
           </button>
           <button onClick={() => setTab('demandes')}
             style={{ padding: '10px 20px', border: 'none', background: 'none', cursor: 'pointer', fontWeight: 600, fontSize: 14, color: tab === 'demandes' ? '#d97706' : 'var(--text-muted)', borderBottom: tab === 'demandes' ? '2px solid #d97706' : '2px solid transparent', marginBottom: -2, transition: '0.2s' }}>
-            <FiMessageCircle size={14} style={{ marginRight: 6 }} /> Demandes ({cTotal})
+            <FiMessageCircle size={14} style={{ marginRight: 6 }} /> {t('admin.tabRequests', { count: cTotal })}
           </button>
         </div>
 
@@ -172,8 +174,8 @@ export default function AdminStoreProducts() {
           loading ? (
             <div style={{ padding: '60px 0' }}><div className="spinner" /></div>
           ) : products.length === 0 ? (
-            <div className="empty-state"><FiPackage size={48} /><p>Aucun produit dans la boutique officielle.</p>
-              <Link to="/seller/products/new?type=store" className="btn" style={{ marginTop: 12, background: '#d97706', color: '#fff', padding: '10px 20px', borderRadius: 10, fontWeight: 600, fontSize: 14 }}><FiPlus size={16} /> Ajouter un produit</Link>
+            <div className="empty-state"><FiPackage size={48} /><p>{t('admin.noStoreProducts')}</p>
+              <Link to="/seller/products/new?type=store" className="btn" style={{ marginTop: 12, background: '#d97706', color: '#fff', padding: '10px 20px', borderRadius: 10, fontWeight: 600, fontSize: 14 }}><FiPlus size={16} /> {t('admin.addProduct')}</Link>
             </div>
           ) : (
             <>
@@ -181,12 +183,12 @@ export default function AdminStoreProducts() {
               <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: 13 }}>
                 <thead>
                   <tr style={{ borderBottom: '1px solid var(--border)', color: 'var(--text-muted)', textTransform: 'uppercase', fontSize: 10, letterSpacing: '0.5px' }}>
-                    <th style={{ padding: '10px 6px', textAlign: 'left' }}>Produit</th>
-                    <th style={{ padding: '10px 6px', textAlign: 'left' }}>Prix</th>
-                    <th style={{ padding: '10px 6px', textAlign: 'left' }}>Stock</th>
-                    <th style={{ padding: '10px 6px', textAlign: 'left' }}>Statut</th>
-                    <th style={{ padding: '10px 6px', textAlign: 'left' }}>Vedette</th>
-                    <th style={{ padding: '10px 6px', textAlign: 'left' }}>Actions</th>
+                    <th style={{ padding: '10px 6px', textAlign: 'left' }}>{t('admin.thProduct')}</th>
+                    <th style={{ padding: '10px 6px', textAlign: 'left' }}>{t('admin.thPrice')}</th>
+                    <th style={{ padding: '10px 6px', textAlign: 'left' }}>{t('admin.thStock')}</th>
+                    <th style={{ padding: '10px 6px', textAlign: 'left' }}>{t('admin.thStatus')}</th>
+                    <th style={{ padding: '10px 6px', textAlign: 'left' }}>{t('admin.thFeatured')}</th>
+                    <th style={{ padding: '10px 6px', textAlign: 'left' }}>{t('admin.thActions')}</th>
                   </tr>
                 </thead>
                 <tbody>
@@ -210,9 +212,9 @@ export default function AdminStoreProducts() {
                       <td style={{ padding: '8px 6px' }}>
                         <select value={p.status || 'disponible'} onChange={e => quickStatus(p.id, e.target.value)}
                           style={{ padding: '4px 8px', borderRadius: 6, border: '1px solid var(--border)', background: statusColors[p.status || 'disponible'] + '15', color: statusColors[p.status || 'disponible'], fontWeight: 600, fontSize: 11, cursor: 'pointer' }}>
-                          <option value="disponible">Disponible</option>
-                          <option value="en_attente">En attente</option>
-                          <option value="vendu">Vendu</option>
+                          <option value="disponible">{t('admin.statusAvailable')}</option>
+                          <option value="en_attente">{t('admin.pending')}</option>
+                          <option value="vendu">{t('admin.statusSold')}</option>
                         </select>
                       </td>
                       <td style={{ padding: '8px 6px' }}>
@@ -248,11 +250,11 @@ export default function AdminStoreProducts() {
                   <option value={50}>50</option>
                   <option value={100}>100</option>
                 </select>
-                <span style={{ fontSize: 13, color: 'var(--text-muted)' }}>{total} produit{total > 1 ? 's' : ''}</span>
+                <span style={{ fontSize: 13, color: 'var(--text-muted)' }}>{total} {total > 1 ? t('admin.productPlural') : t('admin.productSingular')}</span>
               </div>
               <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
                 <button onClick={() => setPage(p => Math.max(1, p - 1))} disabled={page <= 1}
-                  style={{ padding: '6px 14px', borderRadius: 8, border: '1px solid var(--border)', background: 'var(--bg-card)', color: 'var(--text)', cursor: page <= 1 ? 'not-allowed' : 'pointer', opacity: page <= 1 ? 0.4 : 1, fontSize: 13 }}>← Précedent</button>
+                  style={{ padding: '6px 14px', borderRadius: 8, border: '1px solid var(--border)', background: 'var(--bg-card)', color: 'var(--text)', cursor: page <= 1 ? 'not-allowed' : 'pointer', opacity: page <= 1 ? 0.4 : 1, fontSize: 13 }}>← {t('admin.previous')}</button>
                 {Array.from({ length: Math.min(totalPages, 10) }, (_, i) => {
                   const start = Math.max(1, page - 5);
                   const p = start + i;
@@ -265,7 +267,7 @@ export default function AdminStoreProducts() {
                   );
                 })}
                 <button onClick={() => setPage(p => Math.min(totalPages, p + 1))} disabled={page >= totalPages}
-                  style={{ padding: '6px 14px', borderRadius: 8, border: '1px solid var(--border)', background: 'var(--bg-card)', color: 'var(--text)', cursor: page >= totalPages ? 'not-allowed' : 'pointer', opacity: page >= totalPages ? 0.4 : 1, fontSize: 13 }}>Suivant →</button>
+                  style={{ padding: '6px 14px', borderRadius: 8, border: '1px solid var(--border)', background: 'var(--bg-card)', color: 'var(--text)', cursor: page >= totalPages ? 'not-allowed' : 'pointer', opacity: page >= totalPages ? 0.4 : 1, fontSize: 13 }}>{t('admin.next')} →</button>
               </div>
             </div>
             </>
@@ -274,19 +276,19 @@ export default function AdminStoreProducts() {
           loading ? (
             <div style={{ padding: '60px 0' }}><div className="spinner" /></div>
           ) : contacts.length === 0 ? (
-            <div className="empty-state"><FiMessageCircle size={48} /><p>Aucune demande de contact pour le moment.</p></div>
+            <div className="empty-state"><FiMessageCircle size={48} /><p>{t('admin.noContactRequests')}</p></div>
           ) : (
             <>
             <div style={{ overflowX: 'auto' }}>
               <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: 13 }}>
                 <thead>
                   <tr style={{ borderBottom: '1px solid var(--border)', color: 'var(--text-muted)', textTransform: 'uppercase', fontSize: 10, letterSpacing: '0.5px' }}>
-                    <th style={{ padding: '10px 6px', textAlign: 'left' }}>Client</th>
-                    <th style={{ padding: '10px 6px', textAlign: 'left' }}>Téléphone</th>
-                    <th style={{ padding: '10px 6px', textAlign: 'left' }}>Produit</th>
-                    <th style={{ padding: '10px 6px', textAlign: 'left' }}>Message</th>
-                    <th style={{ padding: '10px 6px', textAlign: 'left' }}>Date</th>
-                    <th style={{ padding: '10px 6px', textAlign: 'left' }}>Statut</th>
+                    <th style={{ padding: '10px 6px', textAlign: 'left' }}>{t('admin.thClient')}</th>
+                    <th style={{ padding: '10px 6px', textAlign: 'left' }}>{t('admin.thPhone')}</th>
+                    <th style={{ padding: '10px 6px', textAlign: 'left' }}>{t('admin.thProduct')}</th>
+                    <th style={{ padding: '10px 6px', textAlign: 'left' }}>{t('admin.thMessage')}</th>
+                    <th style={{ padding: '10px 6px', textAlign: 'left' }}>{t('admin.thDate')}</th>
+                    <th style={{ padding: '10px 6px', textAlign: 'left' }}>{t('admin.thStatus')}</th>
                   </tr>
                 </thead>
                 <tbody>
@@ -305,12 +307,12 @@ export default function AdminStoreProducts() {
                           {c.image && <img src={c.image} alt="" style={{ width: 32, height: 32, borderRadius: 6, objectFit: 'contain', background: 'var(--bg-card)' }} />}
                           <div>
                             <div style={{ fontSize: 12, fontWeight: 600, lineHeight: 1.2 }}>{c.product_name}</div>
-                            {c.slug && <Link to={`/boutique/${c.slug}`} style={{ fontSize: 10, color: '#3b82f6' }}>Voir</Link>}
+                            {c.slug && <Link to={`/boutique/${c.slug}`} style={{ fontSize: 10, color: '#3b82f6' }}>{t('admin.view')}</Link>}
                           </div>
                         </div>
                       </td>
                       <td style={{ padding: '8px 6px', maxWidth: 200, fontSize: 12, color: 'var(--text-secondary)' }}>
-                        {c.message ? c.message.length > 60 ? c.message.slice(0, 60) + '...' : c.message : <span style={{ color: 'var(--text-muted)', fontStyle: 'italic' }}>Aucun message</span>}
+                        {c.message ? c.message.length > 60 ? c.message.slice(0, 60) + '...' : c.message : <span style={{ color: 'var(--text-muted)', fontStyle: 'italic' }}>{t('admin.noMessage')}</span>}
                       </td>
                       <td style={{ padding: '8px 6px', fontSize: 11, color: 'var(--text-secondary)' }}>
                         {new Date(c.created_at).toLocaleDateString('fr-FR', { day: 'numeric', month: 'short', hour: '2-digit', minute: '2-digit' })}
@@ -318,9 +320,9 @@ export default function AdminStoreProducts() {
                       <td style={{ padding: '8px 6px' }}>
                         <select value={c.status || 'en_attente'} onChange={e => updateContactStatus(c.id, e.target.value)}
                           style={{ padding: '4px 8px', borderRadius: 6, border: '1px solid var(--border)', background: contactStatusColors[c.status || 'en_attente'].bg + '15', color: contactStatusColors[c.status || 'en_attente'].bg, fontWeight: 600, fontSize: 11, cursor: 'pointer' }}>
-                          <option value="en_attente">En attente</option>
-                          <option value="contacte">Contacté</option>
-                          <option value="termine">Terminé</option>
+                          <option value="en_attente">{t('admin.pending')}</option>
+                          <option value="contacte">{t('admin.contacted')}</option>
+                          <option value="termine">{t('admin.completed')}</option>
                         </select>
                       </td>
                     </tr>
@@ -336,11 +338,11 @@ export default function AdminStoreProducts() {
                   <option value={20}>20</option>
                   <option value={50}>50</option>
                 </select>
-                <span style={{ fontSize: 13, color: 'var(--text-muted)' }}>{cTotal} demande{cTotal > 1 ? 's' : ''}</span>
+                <span style={{ fontSize: 13, color: 'var(--text-muted)' }}>{cTotal} {cTotal > 1 ? t('admin.requestPlural') : t('admin.requestSingular')}</span>
               </div>
               <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
                 <button onClick={() => setCPage(p => Math.max(1, p - 1))} disabled={cPage <= 1}
-                  style={{ padding: '6px 14px', borderRadius: 8, border: '1px solid var(--border)', background: 'var(--bg-card)', color: 'var(--text)', cursor: cPage <= 1 ? 'not-allowed' : 'pointer', opacity: cPage <= 1 ? 0.4 : 1, fontSize: 13 }}>← Précedent</button>
+                  style={{ padding: '6px 14px', borderRadius: 8, border: '1px solid var(--border)', background: 'var(--bg-card)', color: 'var(--text)', cursor: cPage <= 1 ? 'not-allowed' : 'pointer', opacity: cPage <= 1 ? 0.4 : 1, fontSize: 13 }}>← {t('admin.previous')}</button>
                 {Array.from({ length: Math.min(cTotalPages, 10) }, (_, i) => {
                   const start = Math.max(1, cPage - 5);
                   const p = start + i;
@@ -353,7 +355,7 @@ export default function AdminStoreProducts() {
                   );
                 })}
                 <button onClick={() => setCPage(p => Math.min(cTotalPages, p + 1))} disabled={cPage >= cTotalPages}
-                  style={{ padding: '6px 14px', borderRadius: 8, border: '1px solid var(--border)', background: 'var(--bg-card)', color: 'var(--text)', cursor: cPage >= cTotalPages ? 'not-allowed' : 'pointer', opacity: cPage >= cTotalPages ? 0.4 : 1, fontSize: 13 }}>Suivant →</button>
+                  style={{ padding: '6px 14px', borderRadius: 8, border: '1px solid var(--border)', background: 'var(--bg-card)', color: 'var(--text)', cursor: cPage >= cTotalPages ? 'not-allowed' : 'pointer', opacity: cPage >= cTotalPages ? 0.4 : 1, fontSize: 13 }}>{t('admin.next')} →</button>
               </div>
             </div>
             </>

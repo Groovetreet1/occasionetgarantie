@@ -3,13 +3,15 @@ import { useEffect, useState } from 'react';
 import { FiArrowLeft, FiShoppingBag, FiCheck, FiMonitor, FiCpu, FiHardDrive, FiBattery, FiCamera, FiDroplet, FiX, FiChevronLeft, FiChevronRight, FiSend, FiCheckCircle, FiShield, FiLock, FiGrid } from 'react-icons/fi';
 import api from '../api/axios';
 import { useAuth } from '../context/AuthContext';
+import { useLanguage } from '../context/LanguageContext';
 
-const stateLabels = { neuf: 'Neuf', comme_neuf: 'Comme neuf', tres_bon: 'Très bon état', bon: 'Bon état', acceptable: 'État acceptable' };
+const stateLabels = { neuf: 'products.stateNeuf', comme_neuf: 'products.stateCommeNeuf', tres_bon: 'products.stateTresBon', bon: 'products.stateBon', acceptable: 'products.stateAcceptableFull' };
 const specIcons = { Ecran: FiMonitor, Processeur: FiCpu, RAM: FiHardDrive, Stockage: FiHardDrive, Batterie: FiBattery, Appareil: FiCamera, Couleur: FiDroplet, GPU: FiMonitor, OS: FiMonitor };
 
 export default function StoreProductDetail() {
   const { slug } = useParams();
   const { user } = useAuth();
+  const { t } = useLanguage();
   const [product, setProduct] = useState(null);
   const [loading, setLoading] = useState(true);
   const [lightboxIndex, setLightboxIndex] = useState(0);
@@ -62,14 +64,14 @@ export default function StoreProductDetail() {
   const nextImage = () => setLightboxIndex(i => (i + 1) % allImages.length);
 
   if (loading) return <div className="auth-page"><div className="spinner" /></div>;
-  if (!product) return <div className="auth-page"><div className="empty-state"><div className="icon"><FiShoppingBag size={48} /></div><h2>Produit introuvable</h2><Link to="/boutique" className="btn btn-primary" style={{ marginTop: 16 }}><FiArrowLeft /> Retour a la boutique</Link></div></div>;
+  if (!product) return <div className="auth-page"><div className="empty-state"><div className="icon"><FiShoppingBag size={48} /></div><h2>{t('shop.notFound')}</h2><Link to="/boutique" className="btn btn-primary" style={{ marginTop: 16 }}><FiArrowLeft /> {t('shop.backToStore')}</Link></div></div>;
 
   return (
     <section className="product-detail-section" style={{ paddingTop: '100px' }}>
       <div className="container">
-        <Link to="/boutique" className="btn btn-ghost" style={{ marginBottom: '24px' }}><FiArrowLeft /> Retour a la boutique</Link>
+        <Link to="/boutique" className="btn btn-ghost" style={{ marginBottom: '24px' }}><FiArrowLeft /> {t('shop.backToStore')}</Link>
         <div style={{ background: 'rgba(245,158,11,0.08)', border: '1px solid rgba(245,158,11,0.2)', borderRadius: 12, padding: '10px 16px', display: 'flex', alignItems: 'center', gap: 8, marginBottom: 24, fontSize: 13, color: '#d97706', fontWeight: 600 }}>
-          <FiShield size={16} /> Boutique Officielle Occasion & Garantie
+          <FiShield size={16} /> {t('shop.storeBanner')}
         </div>
         <div className="product-detail-grid">
           <div>
@@ -92,7 +94,7 @@ export default function StoreProductDetail() {
             {similar.length > 0 && (
               <div style={{ marginTop: 24, border: '1px solid var(--border)', borderRadius: 'var(--radius)', padding: 16, background: 'var(--bg-card)' }}>
                 <h3 style={{ fontSize: 15, fontWeight: 700, marginBottom: 12, display: 'flex', alignItems: 'center', gap: 6 }}>
-                  <FiGrid size={16} style={{ color: 'var(--primary)' }} /> Produits similaires
+                  <FiGrid size={16} style={{ color: 'var(--primary)' }} /> {t('shop.similarProducts')}
                 </h3>
                 <div style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
                   {similar.map(p => (
@@ -122,15 +124,15 @@ export default function StoreProductDetail() {
               {product.old_price && <span className="price-old">{formatPrice(product.old_price)}</span>}
             </div>
             <div className="product-detail-tags">
-              <span className="product-detail-tag state">{stateLabels[product.state] || product.state}</span>
-              <span className="product-detail-tag verified"><FiCheck size={12} /> Verifie</span>
+              <span className="product-detail-tag state">{t(stateLabels[product.state] || product.state)}</span>
+              <span className="product-detail-tag verified"><FiCheck size={12} /> {t('shop.verified')}</span>
               {product.brand && <span className="product-detail-tag brand">{product.brand}</span>}
             </div>
             <p className="product-detail-desc">{product.description}</p>
 
             {specs && Object.keys(specs).length > 0 && Object.entries(specs).some(([, v]) => v !== null && v !== undefined && String(v).trim() !== '') && (
               <div className="product-detail-specs">
-                <h3>Fiche technique</h3>
+                <h3>{t('shop.techSpecs')}</h3>
                 <div className="product-detail-specs-grid">
                   {Object.entries(specs).filter(([, val]) => val !== null && val !== undefined && String(val).trim() !== '').map(([key, val]) => {
                     const Icon = specIcons[key] || FiCpu;
@@ -144,8 +146,8 @@ export default function StoreProductDetail() {
             )}
 
             <div style={{ marginTop: 24, borderTop: '1px solid var(--border)', paddingTop: 20 }}>
-              <h3 style={{ fontSize: 16, fontWeight: 700, marginBottom: 4 }}>Vous etes interesse ?</h3>
-              <p style={{ fontSize: 13, color: 'var(--text-secondary)', marginBottom: 16 }}>Laissez vos coordonnees, nous vous contacterons.</p>
+              <h3 style={{ fontSize: 16, fontWeight: 700, marginBottom: 4 }}>{t('shop.interestedTitle')}</h3>
+              <p style={{ fontSize: 13, color: 'var(--text-secondary)', marginBottom: 16 }}>{t('shop.interestedDesc')}</p>
               {!user ? (
                 <div
                   style={{
@@ -156,32 +158,32 @@ export default function StoreProductDetail() {
                 >
                   <FiLock size={28} style={{ color: 'var(--primary)', opacity: 0.9 }} />
                   <div style={{ fontSize: '15px', fontWeight: 700, marginTop: '10px' }}>
-                    Connectez-vous pour etre contacte
+                    {t('shop.loginToContact')}
                   </div>
                   <p style={{ fontSize: '13px', color: 'var(--text-muted)', margin: '6px auto 16px', maxWidth: '280px' }}>
-                    Creez un compte gratuit pour nous envoyer votre demande.
+                    {t('shop.loginToContactDesc')}
                   </p>
                   <div style={{ display: 'flex', gap: '8px', justifyContent: 'center', flexWrap: 'wrap' }}>
                     <Link to="/login" className="btn btn-primary" style={{ padding: '10px 24px', fontSize: '14px' }}>
-                      Se connecter
+                      {t('shop.login')}
                     </Link>
                     <Link to="/signup" className="btn" style={{ padding: '10px 24px', fontSize: '14px' }}>
-                      Creer un compte
+                      {t('shop.signup')}
                     </Link>
                   </div>
                 </div>
               ) : done ? (
                 <div style={{ textAlign: 'center', padding: 24, background: 'rgba(16,185,129,0.1)', borderRadius: 12 }}>
                   <FiCheckCircle size={40} style={{ color: '#10b981', marginBottom: 8 }} />
-                  <div style={{ fontSize: 14, color: '#10b981', fontWeight: 600 }}>Message envoye ! Nous vous contacterons dans les plus brefs delais.</div>
+                  <div style={{ fontSize: 14, color: '#10b981', fontWeight: 600 }}>{t('shop.messageSent')}</div>
                 </div>
               ) : (
                 <form onSubmit={handleSubmit} style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
-                  <input value={formName} onChange={e => setFormName(e.target.value)} placeholder="Votre nom *" required style={{ padding: '12px 14px', borderRadius: 8, border: '1px solid var(--border)', background: 'var(--bg-card)', color: 'var(--text)', fontSize: 14, fontFamily: 'var(--font)' }} />
-                  <input value={formPhone} onChange={e => setFormPhone(e.target.value)} placeholder="Votre telephone *" required style={{ padding: '12px 14px', borderRadius: 8, border: '1px solid var(--border)', background: 'var(--bg-card)', color: 'var(--text)', fontSize: 14, fontFamily: 'var(--font)' }} />
-                  <textarea value={formMsg} onChange={e => setFormMsg(e.target.value)} placeholder="Message (optionnel)" rows={2} style={{ padding: '12px 14px', borderRadius: 8, border: '1px solid var(--border)', background: 'var(--bg-card)', color: 'var(--text)', fontSize: 14, fontFamily: 'var(--font)', resize: 'vertical' }} />
+                  <input value={formName} onChange={e => setFormName(e.target.value)} placeholder={t('shop.namePlaceholder')} required style={{ padding: '12px 14px', borderRadius: 8, border: '1px solid var(--border)', background: 'var(--bg-card)', color: 'var(--text)', fontSize: 14, fontFamily: 'var(--font)' }} />
+                  <input value={formPhone} onChange={e => setFormPhone(e.target.value)} placeholder={t('shop.phonePlaceholder')} required style={{ padding: '12px 14px', borderRadius: 8, border: '1px solid var(--border)', background: 'var(--bg-card)', color: 'var(--text)', fontSize: 14, fontFamily: 'var(--font)' }} />
+                  <textarea value={formMsg} onChange={e => setFormMsg(e.target.value)} placeholder={t('shop.msgPlaceholder')} rows={2} style={{ padding: '12px 14px', borderRadius: 8, border: '1px solid var(--border)', background: 'var(--bg-card)', color: 'var(--text)', fontSize: 14, fontFamily: 'var(--font)', resize: 'vertical' }} />
                   <button type="submit" disabled={submitting || !formName || !formPhone} className="btn btn-primary" style={{ justifyContent: 'center', padding: '14px', fontSize: 15 }}>
-                    <FiSend size={16} /> {submitting ? 'Envoi...' : 'Envoyer ma demande'}
+                    <FiSend size={16} /> {submitting ? t('shop.sending') : t('shop.sendRequest')}
                   </button>
                 </form>
               )}

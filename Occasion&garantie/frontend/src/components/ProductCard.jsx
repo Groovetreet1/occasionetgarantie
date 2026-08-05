@@ -1,15 +1,17 @@
 import { Link } from 'react-router-dom';
 import { motion } from 'framer-motion';
 import { FiShoppingBag, FiUser, FiShield, FiStar, FiMapPin } from 'react-icons/fi';
+import { useLanguage } from '../context/LanguageContext';
 
 const API_BASE = import.meta.env.VITE_API_URL || '';
 
 const stateLabels = {
-  neuf: 'Neuf', comme_neuf: 'Comme neuf', tres_bon: 'Très bon état',
-  bon: 'Bon état', acceptable: 'Acceptable',
+  neuf: 'products.stateNeuf', comme_neuf: 'products.stateCommeNeuf', tres_bon: 'products.stateTresBon',
+  bon: 'products.stateBon', acceptable: 'products.stateAcceptable',
 };
 
 export default function ProductCard({ product, index = 0 }) {
+  const { t } = useLanguage();
   const formatPrice = (p) =>
     new Intl.NumberFormat('fr-FR', { style: 'currency', currency: 'MAD' })
       .format(p).replace('MAD', '').trim() + ' DH';
@@ -31,9 +33,9 @@ export default function ProductCard({ product, index = 0 }) {
       <Link to={detailLink} className={`product-card ${isSold ? 'product-sold' : ''}`}>
         <div className="product-card-image">
           {discount > 0 && <span className="badge-discount">-{discount}%</span>}
-          {isSold && <div className="product-sold-overlay">Vendu</div>}
-          {isPending && <span className="badge-pending">Réservé</span>}
-          {isStore && <span className="badge-store">Boutique Officielle</span>}
+          {isSold && <div className="product-sold-overlay">{t('products.sold')}</div>}
+          {isPending && <span className="badge-pending">{t('products.reserved')}</span>}
+          {isStore && <span className="badge-store">{t('products.officialStore')}</span>}
           <div className="product-card-img-wrap">
             {imgUrl ? (
               <img src={imgUrl} alt={product.name} loading="lazy" />
@@ -44,7 +46,7 @@ export default function ProductCard({ product, index = 0 }) {
         </div>
 
         <div className="product-card-body">
-          <span className="product-card-cat">{product.category_name || 'Non classé'}</span>
+          <span className="product-card-cat">{product.category_name || t('products.uncategorized')}</span>
           <h3 className="product-card-title">{product.name}</h3>
 
           {product.seller_name && !isStore && (
@@ -65,7 +67,7 @@ export default function ProductCard({ product, index = 0 }) {
 
           <div className="product-card-meta">
             {product.state && (
-              <span className="meta-chip">{stateLabels[product.state] || product.state}</span>
+              <span className="meta-chip">{t(stateLabels[product.state] || product.state)}</span>
             )}
             {product.ville && (
               <span className="meta-chip meta-chip-location"><FiMapPin size={10} /> {product.ville}</span>

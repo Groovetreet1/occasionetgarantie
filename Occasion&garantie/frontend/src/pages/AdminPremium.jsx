@@ -3,10 +3,12 @@ import { Link } from 'react-router-dom';
 import { FiCheck, FiX, FiClock, FiArrowLeft, FiStar, FiEye, FiThumbsDown, FiTrash2 } from 'react-icons/fi';
 import api from '../api/axios';
 import ConfirmModal from '../components/ConfirmModal';
+import { useLanguage } from '../context/LanguageContext';
 
 const API_BASE = import.meta.env.VITE_API_URL || '';
 
 export default function AdminPremium() {
+  const { t } = useLanguage();
   const [payments, setPayments] = useState([]);
   const [loading, setLoading] = useState(true);
   const [actionId, setActionId] = useState(null);
@@ -30,7 +32,7 @@ export default function AdminPremium() {
       await api.post(`/admin/premium-payments/${id}/confirm`);
       setPayments(payments.map(p => p.id === id ? { ...p, status: 'actif' } : p));
     } catch (err) {
-      alert(err.response?.data?.message || 'Erreur');
+      alert(err.response?.data?.message || t('admin.error'));
     } finally {
       setActionId(null);
     }
@@ -43,7 +45,7 @@ export default function AdminPremium() {
       setPayments(payments.map(p => p.id === id ? { ...p, status: 'rejete', rejection_reason: reason } : p));
       setRejectModal(null);
     } catch (err) {
-      alert(err.response?.data?.message || 'Erreur');
+      alert(err.response?.data?.message || t('admin.error'));
     } finally {
       setActionId(null);
     }
@@ -58,7 +60,7 @@ export default function AdminPremium() {
       await api.delete(`/admin/premium-payments/${id}`);
       setPayments(payments.filter(p => p.id !== id));
     } catch (err) {
-      alert(err.response?.data?.message || 'Erreur');
+      alert(err.response?.data?.message || t('admin.error'));
     } finally {
       setActionId(null);
     }
@@ -71,13 +73,13 @@ export default function AdminPremium() {
       <div className="container" style={{ position: 'relative', zIndex: 1 }}>
         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '32px', flexWrap: 'wrap', gap: '12px' }}>
           <div>
-            <Link to="/admin" className="btn btn-ghost" style={{ marginBottom: '8px' }}><FiArrowLeft /> Dashboard</Link>
-            <h1 style={{ fontSize: '28px', fontWeight: 800 }}>Gestion Premium</h1>
-            <p style={{ color: 'var(--text-secondary)' }}>{payments.length} demande{payments.length > 1 ? 's' : ''}</p>
+            <Link to="/admin" className="btn btn-ghost" style={{ marginBottom: '8px' }}><FiArrowLeft /> {t('admin.dashboardTitle')}</Link>
+            <h1 style={{ fontSize: '28px', fontWeight: 800 }}>{t('admin.premiumManagementTitle')}</h1>
+            <p style={{ color: 'var(--text-secondary)' }}>{payments.length} {payments.length > 1 ? t('admin.requestPlural') : t('admin.requestSingular')}</p>
           </div>
           <div style={{ display: 'flex', gap: 8 }}>
-            <Link to="/admin/premium" className="btn btn-primary" style={{ fontSize: 13 }}>Premium</Link>
-            <Link to="/admin/credits" className="btn btn-outline" style={{ fontSize: 13 }}>Credits</Link>
+            <Link to="/admin/premium" className="btn btn-primary" style={{ fontSize: 13 }}>{t('admin.premiumTab')}</Link>
+            <Link to="/admin/credits" className="btn btn-outline" style={{ fontSize: 13 }}>{t('admin.creditsTab')}</Link>
 
           </div>
         </div>
@@ -85,20 +87,20 @@ export default function AdminPremium() {
         {loading ? (
           <div style={{ padding: '60px 0' }}><div className="spinner" /></div>
         ) : payments.length === 0 ? (
-          <div className="empty-state"><FiStar size={48} /><p>Aucune demande premium pour le moment.</p></div>
+          <div className="empty-state"><FiStar size={48} /><p>{t('admin.noPremiumRequests')}</p></div>
         ) : (
           <div style={{ overflowX: 'auto' }}>
             <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: '14px' }}>
               <thead>
                 <tr style={{ borderBottom: '1px solid var(--border)', color: 'var(--text-muted)', textTransform: 'uppercase', fontSize: '11px', letterSpacing: '0.5px' }}>
-                  <th style={{ padding: '12px 8px', textAlign: 'left' }}>ID</th>
-                  <th style={{ padding: '12px 8px', textAlign: 'left' }}>Client</th>
-                  <th style={{ padding: '12px 8px', textAlign: 'left' }}>Téléphone</th>
-                  <th style={{ padding: '12px 8px', textAlign: 'left' }}>Montant</th>
-                  <th style={{ padding: '12px 8px', textAlign: 'left' }}>Date</th>
-                  <th style={{ padding: '12px 8px', textAlign: 'left' }}>Statut</th>
-                  <th style={{ padding: '12px 8px', textAlign: 'left' }}>Screenshot</th>
-                  <th style={{ padding: '12px 8px', textAlign: 'left' }}>Action</th>
+                  <th style={{ padding: '12px 8px', textAlign: 'left' }}>{t('admin.thId')}</th>
+                  <th style={{ padding: '12px 8px', textAlign: 'left' }}>{t('admin.thClient')}</th>
+                  <th style={{ padding: '12px 8px', textAlign: 'left' }}>{t('admin.thPhone')}</th>
+                  <th style={{ padding: '12px 8px', textAlign: 'left' }}>{t('admin.thAmount')}</th>
+                  <th style={{ padding: '12px 8px', textAlign: 'left' }}>{t('admin.thDate')}</th>
+                  <th style={{ padding: '12px 8px', textAlign: 'left' }}>{t('admin.thStatus')}</th>
+                  <th style={{ padding: '12px 8px', textAlign: 'left' }}>{t('admin.thScreenshot')}</th>
+                  <th style={{ padding: '12px 8px', textAlign: 'left' }}>{t('admin.thAction')}</th>
                 </tr>
               </thead>
               <tbody>
@@ -111,17 +113,17 @@ export default function AdminPremium() {
                     <td style={{ padding: '12px 8px', fontSize: '12px', color: 'var(--text-secondary)' }}>{formatDate(p.created_at)}</td>
                     <td style={{ padding: '12px 8px' }}>
                       {p.status === 'actif' ? (
-                        <span style={{ color: 'var(--success)', display: 'flex', alignItems: 'center', gap: 4 }}><FiCheck size={14} /> Actif</span>
+                        <span style={{ color: 'var(--success)', display: 'flex', alignItems: 'center', gap: 4 }}><FiCheck size={14} /> {t('admin.active')}</span>
                       ) : p.status === 'rejete' ? (
-                        <span title={p.rejection_reason} style={{ color: 'var(--error)', display: 'flex', alignItems: 'center', gap: 4, cursor: 'help' }}><FiX size={14} /> Rejeté</span>
+                        <span title={p.rejection_reason} style={{ color: 'var(--error)', display: 'flex', alignItems: 'center', gap: 4, cursor: 'help' }}><FiX size={14} /> {t('admin.rejected')}</span>
                       ) : (
-                        <span style={{ color: '#d97706', display: 'flex', alignItems: 'center', gap: 4 }}><FiClock size={14} /> En attente</span>
+                        <span style={{ color: '#d97706', display: 'flex', alignItems: 'center', gap: 4 }}><FiClock size={14} /> {t('admin.pending')}</span>
                       )}
                     </td>
                     <td style={{ padding: '12px 8px' }}>
                       {p.screenshot ? (
                         <a href={p.screenshot.startsWith('http') ? p.screenshot : `${API_BASE}/uploads/premium/${p.screenshot}`} target="_blank" rel="noopener noreferrer" className="btn btn-secondary" style={{ padding: '4px 10px', fontSize: '12px' }}>
-                          <FiEye size={14} /> Voir
+                          <FiEye size={14} /> {t('admin.view')}
                         </a>
                       ) : (
                         <span style={{ color: 'var(--text-muted)' }}><FiX size={14} /></span>
@@ -136,7 +138,7 @@ export default function AdminPremium() {
                             className="btn btn-primary"
                             style={{ padding: '6px 14px', fontSize: '12px' }}
                           >
-                            {actionId === p.id ? '...' : <><FiCheck size={14} /> Confirmer</>}
+                            {actionId === p.id ? '...' : <><FiCheck size={14} /> {t('admin.confirm')}</>}
                           </button>
                           <button
                             onClick={() => setRejectModal(p)}
@@ -144,13 +146,13 @@ export default function AdminPremium() {
                             className="btn"
                             style={{ padding: '6px 14px', fontSize: '12px', background: 'rgba(239,68,68,0.15)', color: 'var(--error)', border: 'none' }}
                           >
-                            <FiThumbsDown size={14} /> Rejeter
+                            <FiThumbsDown size={14} /> {t('admin.reject')}
                           </button>
                         </div>
                       ) : p.status === 'rejete' ? (
-                        <span style={{ color: 'var(--error)', fontSize: '12px', fontWeight: 600 }} title={p.rejection_reason}>Rejeté</span>
+                        <span style={{ color: 'var(--error)', fontSize: '12px', fontWeight: 600 }} title={p.rejection_reason}>{t('admin.rejected')}</span>
                       ) : (
-                        <span style={{ color: 'var(--success)', fontSize: '12px', fontWeight: 600 }}>Confirmé</span>
+                        <span style={{ color: 'var(--success)', fontSize: '12px', fontWeight: 600 }}>{t('admin.confirmed')}</span>
                       )}
                       <button
                         onClick={() => setDeleteTarget(p.id)}
@@ -161,7 +163,7 @@ export default function AdminPremium() {
                           color: 'var(--text-muted)', cursor: 'pointer',
                           padding: '4px', verticalAlign: 'middle'
                         }}
-                        title="Supprimer"
+                        title={t('admin.delete')}
                       >
                         <FiTrash2 size={14} />
                       </button>
@@ -185,9 +187,9 @@ export default function AdminPremium() {
             padding: '32px', maxWidth: '480px', width: '100%',
             border: '1px solid var(--border)'
           }} onClick={e => e.stopPropagation()}>
-            <h2 style={{ fontSize: '20px', fontWeight: 700, marginBottom: '8px' }}>Rejeter la demande Premium</h2>
+            <h2 style={{ fontSize: '20px', fontWeight: 700, marginBottom: '8px' }}>{t('admin.rejectPremiumTitle')}</h2>
             <p style={{ color: 'var(--text-secondary)', fontSize: '14px', marginBottom: '20px' }}>
-              Client: <strong>{rejectModal.full_name}</strong> &middot; {Number(rejectModal.amount).toLocaleString()} DH
+              {t('admin.clientLabel')} <strong>{rejectModal.full_name}</strong> &middot; {Number(rejectModal.amount).toLocaleString()} DH
             </p>
             <RejectForm
               paymentId={rejectModal.id}
@@ -203,18 +205,18 @@ export default function AdminPremium() {
         open={!!confirmTarget}
         onClose={() => setConfirmTarget(null)}
         onConfirm={executeConfirm}
-        title="Confirmer ce paiement Premium ?"
-        message="Cette action confirmera le paiement premium."
-        confirmText="Confirmer"
+        title={t('admin.confirmPaymentTitle')}
+        message={t('admin.confirmPaymentMessage')}
+        confirmText={t('admin.confirm')}
         confirmColor="#059669"
       />
       <ConfirmModal
         open={!!deleteTarget}
         onClose={() => setDeleteTarget(null)}
         onConfirm={executeDelete}
-        title="Supprimer cette demande ?"
-        message="Cette action est irreversible."
-        confirmText="Supprimer"
+        title={t('admin.deleteRequestTitle')}
+        message={t('admin.irreversible')}
+        confirmText={t('admin.delete')}
         confirmColor="#dc2626"
         icon={<FiTrash2 size={26} color="#dc2626" />}
       />
@@ -223,14 +225,15 @@ export default function AdminPremium() {
 }
 
 function RejectForm({ onSubmit, onCancel, loading }) {
+  const { t } = useLanguage();
   const [reason, setReason] = useState('');
 
-  const defaultReason = 'Paiement non valide. Veuillez reessayer avec un virement correct de 50 DH.';
+  const defaultReason = t('admin.defaultRejectReason');
 
   return (
     <div>
       <label style={{ display: 'block', fontSize: '13px', fontWeight: 600, marginBottom: '6px', color: 'var(--text-secondary)' }}>
-        Raison du rejet (optionnelle)
+        {t('admin.rejectReasonLabel')}
       </label>
       <textarea
         value={reason}
@@ -246,7 +249,7 @@ function RejectForm({ onSubmit, onCancel, loading }) {
       />
       <div style={{ display: 'flex', gap: '10px', justifyContent: 'flex-end' }}>
         <button onClick={onCancel} className="btn btn-ghost" disabled={loading} style={{ padding: '10px 20px' }}>
-          Annuler
+          {t('admin.cancel')}
         </button>
         <button
           onClick={() => onSubmit(reason.trim() || defaultReason)}
@@ -254,7 +257,7 @@ function RejectForm({ onSubmit, onCancel, loading }) {
           className="btn"
           style={{ padding: '10px 20px', background: 'rgba(239,68,68,0.15)', color: 'var(--error)', border: 'none', fontWeight: 600 }}
         >
-          {loading ? '...' : 'Rejeter la demande'}
+          {loading ? '...' : t('admin.rejectRequest')}
         </button>
       </div>
     </div>

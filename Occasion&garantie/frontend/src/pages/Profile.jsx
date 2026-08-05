@@ -4,6 +4,7 @@ import { motion } from 'framer-motion';
 import { Link, useNavigate } from 'react-router-dom';
 import api from '../api/axios';
 import { useAuth } from '../context/AuthContext';
+import { useLanguage } from '../context/LanguageContext';
 
 const API_BASE = import.meta.env.VITE_API_URL || '';
 const container = { hidden: {}, show: { transition: { staggerChildren: 0.06 } } };
@@ -12,6 +13,7 @@ const item = { hidden: { opacity: 0, y: 20 }, show: { opacity: 1, y: 0, transiti
 export default function Profile() {
   const navigate = useNavigate();
   const { refreshUser } = useAuth();
+  const { t } = useLanguage();
   const fileRef = useRef();
   const [name, setName] = useState('');
   const [email, setEmail] = useState('');
@@ -63,9 +65,9 @@ export default function Profile() {
       });
       setAvatar(data.avatar);
       refreshUser();
-      setMsg({ type: 'success', text: 'Photo de profil mise a jour.' });
+      setMsg({ type: 'success', text: t('profile.avatarUpdated') });
     } catch (err) {
-      setMsg({ type: 'error', text: err.response?.data?.message || 'Erreur.' });
+      setMsg({ type: 'error', text: err.response?.data?.message || t('profile.error') });
     } finally {
       setUploading(false);
     }
@@ -78,9 +80,9 @@ export default function Profile() {
     try {
       await api.put('/auth/profile', { fullName: name });
       localStorage.setItem('user', JSON.stringify({ fullName: name }));
-      setMsg({ type: 'success', text: 'Profil mis a jour avec succes.' });
+      setMsg({ type: 'success', text: t('profile.profileUpdated') });
     } catch (err) {
-      setMsg({ type: 'error', text: err.response?.data?.message || 'Erreur.' });
+      setMsg({ type: 'error', text: err.response?.data?.message || t('profile.error') });
     } finally {
       setSaving(false);
     }
@@ -91,23 +93,23 @@ export default function Profile() {
     setPwdMsg(null);
 
     if (!oldPassword) {
-      setPwdMsg({ type: 'error', text: 'Veuillez entrer votre ancien mot de passe.' });
+      setPwdMsg({ type: 'error', text: t('profile.oldPasswordRequired') });
       return;
     }
     if (newPassword !== confirmPassword) {
-      setPwdMsg({ type: 'error', text: 'Les nouveaux mots de passe ne correspondent pas.' });
+      setPwdMsg({ type: 'error', text: t('profile.passwordMismatch') });
       return;
     }
 
     setSavingPwd(true);
     try {
       await api.put('/auth/profile', { oldPassword, newPassword });
-      setPwdMsg({ type: 'success', text: 'Mot de passe modifie avec succes.' });
+      setPwdMsg({ type: 'success', text: t('profile.passwordUpdated') });
       setOldPassword('');
       setNewPassword('');
       setConfirmPassword('');
     } catch (err) {
-      setPwdMsg({ type: 'error', text: err.response?.data?.message || 'Erreur.' });
+      setPwdMsg({ type: 'error', text: err.response?.data?.message || t('profile.error') });
     } finally {
       setSavingPwd(false);
     }
@@ -120,7 +122,7 @@ export default function Profile() {
       await api.post('/auth/send-phone-code', { newPhone });
       setPhoneStep('verify');
     } catch (err) {
-      setMsg({ type: 'error', text: err.response?.data?.message || 'Erreur.' });
+      setMsg({ type: 'error', text: err.response?.data?.message || t('profile.error') });
     } finally {
       setPhoneLoading(false);
     }
@@ -136,9 +138,9 @@ export default function Profile() {
       setNewPhone('');
       setPhoneCode('');
       setPhoneStep('form');
-      setMsg({ type: 'success', text: 'Numero mis a jour avec succes.' });
+      setMsg({ type: 'success', text: t('profile.phoneUpdated') });
     } catch (err) {
-      setMsg({ type: 'error', text: err.response?.data?.message || 'Code incorrect.' });
+      setMsg({ type: 'error', text: err.response?.data?.message || t('profile.incorrectCode') });
     } finally {
       setPhoneLoading(false);
     }
@@ -154,21 +156,21 @@ export default function Profile() {
     <motion.section className="auth-page" variants={container} initial="hidden" animate="show">
       <div className="auth-container">
         <motion.div variants={item} className="auth-header">
-          <Link to="/" className="btn btn-ghost" style={{ marginBottom: '12px' }}><FiArrowLeft /> Retour</Link>
-          <h1>Mon Profil</h1>
-          <p>Gerer vos informations personnelles</p>
+          <Link to="/" className="btn btn-ghost" style={{ marginBottom: '12px' }}><FiArrowLeft /> {t('common.back')}</Link>
+          <h1>{t('profile.title')}</h1>
+          <p>{t('profile.subtitle')}</p>
         </motion.div>
 
         <div className="profile-tabs" style={{ display: 'flex', gap: 8, marginBottom: 20 }}>
           <button type="button" onClick={() => setActiveTab('profile')} className={activeTab === 'profile' ? 'btn btn-primary' : 'btn btn-outline'} style={{ flex: 1, justifyContent: 'center' }}>
-            <FiUser size={16} /> Profil
+            <FiUser size={16} /> {t('profile.tabProfile')}
           </button>
           <button type="button" onClick={() => setActiveTab('password')} className={activeTab === 'password' ? 'btn btn-primary' : 'btn btn-outline'} style={{ flex: 1, justifyContent: 'center' }}>
-            <FiLock size={16} /> Mot de passe
+            <FiLock size={16} /> {t('profile.tabPassword')}
           </button>
           {role !== 'admin' && (
             <button type="button" onClick={() => setActiveTab('delete')} className={activeTab === 'delete' ? 'btn btn-primary' : 'btn btn-outline'} style={{ flex: 1, justifyContent: 'center', color: activeTab === 'delete' ? '#fff' : 'var(--error)', background: activeTab === 'delete' ? 'var(--error)' : 'transparent' }}>
-              <FiTrash2 size={16} /> Supprimer
+              <FiTrash2 size={16} /> {t('profile.tabDelete')}
             </button>
           )}
         </div>
@@ -201,38 +203,38 @@ export default function Profile() {
             </div>
 
             <div className="form-group">
-              <label><FiUser size={14} /> Nom complet</label>
+              <label><FiUser size={14} /> {t('profile.fullName')}</label>
               <input type="text" value={name} onChange={(e) => setName(e.target.value)} required />
             </div>
 
             <div className="form-group">
-              <label><FiMail size={14} /> Email</label>
+              <label><FiMail size={14} /> {t('common.email')}</label>
               <input type="email" value={email} disabled style={{ opacity: 0.6, cursor: 'not-allowed' }} />
-              <small style={{ color: 'var(--text-muted)', fontSize: 11 }}>L&rsquo;email ne peut pas etre modifie.</small>
+              <small style={{ color: 'var(--text-muted)', fontSize: 11 }}>{t('profile.emailImmutable')}</small>
             </div>
 
             <div className="form-group">
-              <label><FiPhone size={14} /> Telephone</label>
+              <label><FiPhone size={14} /> {t('common.phone')}</label>
               <div className="profile-phone-row" style={{ display: 'flex', gap: 8 }}>
                 <input type="tel" value={phone} disabled style={{ opacity: 0.6, cursor: 'not-allowed', flex: 1 }} />
                 <button type="button" className="btn btn-outline" onClick={() => setShowPhoneModal(true)} style={{ whiteSpace: 'nowrap' }}>
-                  Changer
+                  {t('profile.change')}
                 </button>
               </div>
             </div>
 
             {(role === 'seller' || role === 'admin') && storeName && (
               <div className="form-group">
-                <label><FiShoppingBag size={14} /> Boutique</label>
+                <label><FiShoppingBag size={14} /> {t('profile.store')}</label>
                 <input type="text" value={storeName} disabled style={{ opacity: 0.6, cursor: 'not-allowed' }} />
                 <small style={{ color: 'var(--text-muted)', fontSize: 11 }}>
-                  Pour modifier le nom de votre boutique, contactez le support.
+                  {t('profile.storeChangeHint')}
                 </small>
               </div>
             )}
 
             <motion.button className="form-submit" type="submit" disabled={saving} whileTap={{ scale: 0.97 }}>
-              <FiSave size={16} /> {saving ? 'Enregistrement...' : 'Enregistrer le profil'}
+              <FiSave size={16} /> {saving ? t('profile.saving') : t('profile.saveProfile')}
             </motion.button>
           </motion.form>
         )}
@@ -240,28 +242,28 @@ export default function Profile() {
         {activeTab === 'password' && (
           <motion.form variants={item} className="auth-card" onSubmit={handlePasswordSubmit}>
             <h3 style={{ marginBottom: 16, fontSize: 15, display: 'flex', alignItems: 'center', gap: 8 }}>
-              <FiLock size={16} /> Changer le mot de passe
+              <FiLock size={16} /> {t('profile.changePassword')}
             </h3>
 
             {pwdMsg && <div className={`alert alert-${pwdMsg.type}`}>{pwdMsg.text}</div>}
 
             <div className="form-group">
-              <label>Ancien mot de passe</label>
-              <input type="password" value={oldPassword} onChange={(e) => setOldPassword(e.target.value)} placeholder="Votre mot de passe actuel" />
+              <label>{t('profile.oldPassword')}</label>
+              <input type="password" value={oldPassword} onChange={(e) => setOldPassword(e.target.value)} placeholder={t('profile.currentPasswordPlaceholder')} />
             </div>
 
             <div className="form-group">
-              <label>Nouveau mot de passe</label>
-              <input type="password" value={newPassword} onChange={(e) => setNewPassword(e.target.value)} placeholder="Au moins 6 caracteres" minLength={6} />
+              <label>{t('profile.newPassword')}</label>
+              <input type="password" value={newPassword} onChange={(e) => setNewPassword(e.target.value)} placeholder={t('profile.passwordMinPlaceholder')} minLength={6} />
             </div>
 
             <div className="form-group">
-              <label>Confirmer le mot de passe</label>
-              <input type="password" value={confirmPassword} onChange={(e) => setConfirmPassword(e.target.value)} placeholder="Repetez le nouveau mot de passe" minLength={6} />
+              <label>{t('profile.confirmPassword')}</label>
+              <input type="password" value={confirmPassword} onChange={(e) => setConfirmPassword(e.target.value)} placeholder={t('profile.repeatPasswordPlaceholder')} minLength={6} />
             </div>
 
             <motion.button className="form-submit" type="submit" disabled={savingPwd} whileTap={{ scale: 0.97 }}>
-              <FiSave size={16} /> {savingPwd ? 'Modification...' : 'Modifier le mot de passe'}
+              <FiSave size={16} /> {savingPwd ? t('profile.modifyingPassword') : t('profile.modifyPassword')}
             </motion.button>
           </motion.form>
         )}
@@ -281,7 +283,7 @@ export default function Profile() {
             boxShadow: '0 20px 60px rgba(0,0,0,0.3)',
           }} onClick={(e) => e.stopPropagation()}>
             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 20 }}>
-              <h2 style={{ fontSize: 18 }}>Changer de numero</h2>
+              <h2 style={{ fontSize: 18 }}>{t('profile.changeNumber')}</h2>
               <button type="button" onClick={() => { setShowPhoneModal(false); setPhoneStep('form'); setNewPhone(''); setPhoneCode(''); }} style={{ background: 'none', border: 'none', color: 'var(--text-muted)', cursor: 'pointer', fontSize: 20 }}>
                 <FiX />
               </button>
@@ -290,11 +292,11 @@ export default function Profile() {
             {phoneStep === 'form' ? (
               <form onSubmit={handlePhoneChange}>
                 <div className="form-group">
-                  <label>Nouveau numero</label>
+                  <label>{t('profile.newNumber')}</label>
                   <input type="tel" value={newPhone} onChange={(e) => setNewPhone(e.target.value)} placeholder="+212 6XX XXX XXX" required />
                 </div>
                 <button type="submit" className="form-submit" disabled={phoneLoading}>
-                  {phoneLoading ? 'Envoi...' : 'Envoyer le code'}
+                  {phoneLoading ? t('profile.sending') : t('profile.sendCode')}
                 </button>
               </form>
             ) : (
@@ -305,14 +307,14 @@ export default function Profile() {
                   </svg>
                 </div>
                 <p style={{ marginBottom: 16, color: 'var(--text-secondary)', textAlign: 'center', fontSize: 13 }}>
-                  Un code a ete envoye au <strong>{newPhone}</strong>
+                  {t('profile.codeSentTo')} <strong>{newPhone}</strong>
                 </p>
                 <div className="form-group">
-                  <label>Code de verification</label>
+                  <label>{t('profile.verificationCode')}</label>
                   <input type="text" placeholder="000000" value={phoneCode} onChange={(e) => setPhoneCode(e.target.value.replace(/\D/g, '').slice(0, 6))} required maxLength={6} style={{ textAlign: 'center', fontSize: 24, letterSpacing: 8, fontWeight: 700 }} />
                 </div>
                 <button type="submit" className="form-submit" disabled={phoneLoading || phoneCode.length < 6}>
-                  {phoneLoading ? 'Verification...' : 'Verifier le numero'}
+                  {phoneLoading ? t('profile.verifying') : t('profile.verifyNumber')}
                 </button>
               </form>
             )}
@@ -324,6 +326,7 @@ export default function Profile() {
 }
 
 function DeleteAccount({ onDeleted }) {
+  const { t } = useLanguage();
   const [password, setPassword] = useState('');
   const [deleting, setDeleting] = useState(false);
   const [step, setStep] = useState('confirm');
@@ -337,7 +340,7 @@ function DeleteAccount({ onDeleted }) {
       await api.delete('/auth/account', { data: { password } });
       onDeleted();
     } catch (err) {
-      setError(err.response?.data?.message || 'Erreur lors de la suppression.');
+      setError(err.response?.data?.message || t('profile.deleteError'));
       setDeleting(false);
     }
   };
@@ -345,7 +348,7 @@ function DeleteAccount({ onDeleted }) {
   return (
     <motion.div variants={item} className="auth-card">
       <h3 style={{ marginBottom: 16, fontSize: 15, display: 'flex', alignItems: 'center', gap: 8, color: 'var(--error)' }}>
-        <FiTrash2 size={16} /> Supprimer mon compte
+        <FiTrash2 size={16} /> {t('profile.deleteAccount')}
       </h3>
 
       {error && <div className="alert alert-error">{error}</div>}
@@ -353,7 +356,7 @@ function DeleteAccount({ onDeleted }) {
       {step === 'confirm' ? (
         <div>
           <p style={{ fontSize: 14, color: 'var(--text-secondary)', marginBottom: 16 }}>
-            Cette action est <strong>irreversible</strong>. Toutes vos donnees (produits, conversations, annonces) seront definitivement supprimees.
+            {t('profile.deleteActionWarning')} <strong>{t('profile.irreversible')}</strong>. {t('profile.deleteDataDesc')}
           </p>
           <motion.button
             className="form-submit"
@@ -361,21 +364,21 @@ function DeleteAccount({ onDeleted }) {
             whileTap={{ scale: 0.97 }}
             style={{ background: 'var(--error)', color: '#fff' }}
           >
-            <FiTrash2 size={16} /> Supprimer mon compte
+            <FiTrash2 size={16} /> {t('profile.deleteAccount')}
           </motion.button>
         </div>
       ) : (
         <div>
           <p style={{ fontSize: 14, color: 'var(--text-secondary)', marginBottom: 12 }}>
-            Confirmez avec votre mot de passe pour supprimer definitivement votre compte.
+            {t('profile.confirmPasswordToDelete')}
           </p>
           <div className="form-group">
-            <label>Mot de passe</label>
+            <label>{t('common.password')}</label>
             <input
               type="password"
               value={password}
               onChange={(e) => setPassword(e.target.value)}
-              placeholder="Votre mot de passe"
+              placeholder={t('profile.yourPasswordPlaceholder')}
               autoFocus
             />
           </div>
@@ -386,7 +389,7 @@ function DeleteAccount({ onDeleted }) {
               disabled={deleting}
               style={{ flex: 1, justifyContent: 'center', padding: '12px' }}
             >
-              Annuler
+              {t('common.cancel')}
             </button>
             <motion.button
               className="form-submit"
@@ -395,7 +398,7 @@ function DeleteAccount({ onDeleted }) {
               whileTap={{ scale: 0.97 }}
               style={{ flex: 1, background: 'var(--error)', color: '#fff' }}
             >
-              {deleting ? 'Suppression...' : 'Confirmer la suppression'}
+              {deleting ? t('profile.deleting') : t('profile.confirmDelete')}
             </motion.button>
           </div>
         </div>

@@ -1,9 +1,11 @@
 import { useState, useRef, useEffect } from 'react';
 import { FiPlay, FiPause } from 'react-icons/fi';
+import { useLanguage } from '../context/LanguageContext';
 
 const RATES = [0.5, 0.75, 1, 1.25, 1.5, 2];
 
 export default function AudioPlayer({ src, duration, size = 'message' }) {
+  const { t } = useLanguage();
   const audioRef = useRef(null);
   const [playing, setPlaying] = useState(false);
   const [progress, setProgress] = useState(0);
@@ -79,7 +81,7 @@ export default function AudioPlayer({ src, duration, size = 'message' }) {
   return (
     <div className={`audio-player audio-player-${size}`}>
       <audio ref={audioRef} preload="metadata" src={src} />
-      <button type="button" className="audio-play-btn" onClick={toggle} aria-label={playing ? 'Pause' : 'Play'}>
+      <button type="button" className="audio-play-btn" onClick={toggle} aria-label={playing ? t('messenger.pause') : t('messenger.play')}>
         {playing ? <FiPause size={16} /> : <FiPlay size={16} style={{ marginLeft: 2 }} />}
       </button>
       <div className="audio-track" onClick={seek}>
@@ -89,7 +91,7 @@ export default function AudioPlayer({ src, duration, size = 'message' }) {
         type="button"
         className="audio-speed-btn"
         onClick={() => setRate((r) => RATES[(RATES.indexOf(r) + 1) % RATES.length])}
-        title="Vitesse de lecture"
+        title={t('messenger.speed')}
       >
         {rate}x
       </button>

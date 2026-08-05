@@ -3,6 +3,7 @@ import { Link } from 'react-router-dom';
 import { FiArrowLeft, FiPackage, FiCheck, FiX, FiClock, FiDollarSign, FiMapPin, FiTag, FiShield, FiBox, FiChevronLeft, FiChevronRight } from 'react-icons/fi';
 import api from '../api/axios';
 import ConfirmModal from '../components/ConfirmModal';
+import { useLanguage } from '../context/LanguageContext';
 
 const API_BASE = import.meta.env.VITE_API_URL || '';
 
@@ -19,6 +20,7 @@ const stateLabels = {
 };
 
 export default function AdminPendingProducts() {
+  const { t } = useLanguage();
   const [products, setProducts] = useState([]);
   const [loading, setLoading] = useState(true);
   const [selectedProduct, setSelectedProduct] = useState(null);
@@ -63,7 +65,7 @@ export default function AdminPendingProducts() {
       setApproveDone(true);
       setProducts(prev => prev.filter(p => p.id !== selectedProduct.id));
     } catch (e) {
-      alert(e?.response?.data?.message || 'Erreur');
+      alert(e?.response?.data?.message || t('admin.error'));
     } finally {
       setActionLoading(false);
     }
@@ -84,7 +86,7 @@ export default function AdminPendingProducts() {
       setProducts(prev => prev.filter(p => p.id !== selectedProduct.id));
       setRejectSubmitted(true);
     } catch (e) {
-      alert(e?.response?.data?.message || 'Erreur');
+      alert(e?.response?.data?.message || t('admin.error'));
     } finally {
       setActionLoading(false);
     }
@@ -114,9 +116,9 @@ export default function AdminPendingProducts() {
     <section className="admin-dashboard">
       <div className="container" style={{ position: 'relative', zIndex: 1 }}>
         <div style={{ marginBottom: 24 }}>
-          <Link to="/admin" className="btn btn-ghost" style={{ marginBottom: 8 }}><FiArrowLeft /> Dashboard</Link>
+          <Link to="/admin" className="btn btn-ghost" style={{ marginBottom: 8 }}><FiArrowLeft /> {t('admin.dashboardTitle')}</Link>
           <h1 style={{ fontSize: 28, fontWeight: 800, display: 'flex', alignItems: 'center', gap: 10 }}>
-            <FiPackage size={28} style={{ color: 'var(--primary)' }} /> Produits en attente
+            <FiPackage size={28} style={{ color: 'var(--primary)' }} /> {t('admin.pendingProductsTitle')}
           </h1>
         </div>
 
@@ -125,7 +127,7 @@ export default function AdminPendingProducts() {
         ) : products.length === 0 ? (
           <div style={{ textAlign: 'center', padding: '60px 0', color: 'var(--text-muted)' }}>
             <FiPackage size={48} style={{ opacity: 0.3, marginBottom: 12 }} />
-            <p>Aucun produit en attente d'approbation.</p>
+            <p>{t('admin.noPendingProducts')}</p>
           </div>
         ) : (
           <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
@@ -145,10 +147,10 @@ export default function AdminPendingProducts() {
                 <div style={{ display: 'flex', gap: 6 }} onClick={e => e.stopPropagation()}>
                   <button onClick={(e) => { e.stopPropagation(); setQuickApprove(p.id); }}
                     className="btn btn-primary" style={{ fontSize: 12, padding: '6px 14px' }}>
-                    <FiCheck size={13} /> Approuver
+                    <FiCheck size={13} /> {t('admin.approve')}
                   </button>
                   <button onClick={(e) => { e.stopPropagation(); openProduct(p); }} className="btn btn-outline" style={{ fontSize: 12, padding: '6px 14px', color: 'var(--error)', borderColor: 'var(--error)' }}>
-                    <FiX size={13} /> Refuser
+                    <FiX size={13} /> {t('admin.refuse')}
                   </button>
                 </div>
               </div>
@@ -165,9 +167,9 @@ export default function AdminPendingProducts() {
           setQuickApprove(null);
           try { await api.put(`/admin/products/${id}/approve`); setProducts(prev => prev.filter(x => x.id !== id)); } catch {}
         }}
-        title="Approuver ce produit ?"
-        message="Le produit sera visible sur le site."
-        confirmText="Approuver"
+        title={t('admin.approveConfirmTitle')}
+        message={t('admin.approveConfirmMessage')}
+        confirmText={t('admin.approve')}
         confirmColor="#059669"
       />
       {selectedProduct && (
@@ -181,30 +183,30 @@ export default function AdminPendingProducts() {
                 <div style={{ width: 64, height: 64, borderRadius: '50%', background: 'rgba(5,150,105,0.1)', display: 'flex', alignItems: 'center', justifyContent: 'center', margin: '0 auto 16px' }}>
                   <FiCheck size={32} color="#059669" />
                 </div>
-                <h2 style={{ fontSize: 22, fontWeight: 700, marginBottom: 8 }}>Merci!</h2>
+                <h2 style={{ fontSize: 22, fontWeight: 700, marginBottom: 8 }}>{t('admin.thankYou')}</h2>
                 <p style={{ color: 'var(--text-secondary)', fontSize: 14, marginBottom: 24 }}>
-                  L'annonce "{selectedProduct.name}" a été approuvée avec succès.
+                  {t('admin.approvedMessage', { name: selectedProduct.name })}
                 </p>
-                <button className="btn btn-primary" onClick={closeProduct}>Fermer</button>
+                <button className="btn btn-primary" onClick={closeProduct}>{t('admin.close')}</button>
               </div>
             ) : rejectSubmitted ? (
               <div style={{ padding: 48, textAlign: 'center' }}>
                 <div style={{ width: 64, height: 64, borderRadius: '50%', background: 'rgba(239,68,68,0.1)', display: 'flex', alignItems: 'center', justifyContent: 'center', margin: '0 auto 16px' }}>
                   <FiX size={32} color="#dc2626" />
                 </div>
-                <h2 style={{ fontSize: 22, fontWeight: 700, marginBottom: 8 }}>Annonce refusée</h2>
+                <h2 style={{ fontSize: 22, fontWeight: 700, marginBottom: 8 }}>{t('admin.rejectedTitle')}</h2>
                 <p style={{ color: 'var(--text-secondary)', fontSize: 14, marginBottom: 8 }}>
-                  L'annonce "{selectedProduct.name}" a été refusée.
+                  {t('admin.rejectedMessage', { name: selectedProduct.name })}
                 </p>
                 <p style={{ color: 'var(--text-muted)', fontSize: 13, marginBottom: 24, background: 'var(--bg-secondary)', padding: 12, borderRadius: 10 }}>
-                  Raison envoyée au vendeur :<br/><strong>{rejectReasons.join(' ; ')}</strong>
+                  {t('admin.reasonSent')}<br/><strong>{rejectReasons.join(' ; ')}</strong>
                 </p>
-                <button className="btn btn-primary" onClick={closeProduct}>Fermer</button>
+                <button className="btn btn-primary" onClick={closeProduct}>{t('admin.close')}</button>
               </div>
             ) : rejectConfirming && !rejectSubmitted ? (
               <div style={{ padding: 20 }}>
                 <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 16 }}>
-                  <h3 style={{ fontSize: 16, fontWeight: 600, margin: 0 }}>سبب الرفض :</h3>
+                  <h3 style={{ fontSize: 16, fontWeight: 600, margin: 0 }}>{t('admin.rejectReasonTitle')}</h3>
                   <button onClick={() => { setRejectConfirming(false); setRejectReasons([]); }} style={{ background: 'none', border: 'none', color: 'var(--text-muted)', cursor: 'pointer', padding: 4 }}>
                     <FiX size={18} />
                   </button>
@@ -226,7 +228,7 @@ export default function AdminPendingProducts() {
                 </div>
                 <button onClick={handleReject} disabled={rejectReasons.length === 0 || actionLoading}
                   className="form-submit" style={{ width: '100%', justifyContent: 'center', background: 'var(--error)', borderColor: 'var(--error)', padding: 12 }}>
-                  <FiX size={14} /> {actionLoading ? '...' : 'تأكيد الرفض (Confirmer)'}
+                  <FiX size={14} /> {actionLoading ? '...' : t('admin.confirmReject')}
                 </button>
               </div>
             ) : (
@@ -301,48 +303,48 @@ export default function AdminPendingProducts() {
                     {selectedProduct.category_name && (
                       <div style={{ fontSize: 13, display: 'flex', alignItems: 'center', gap: 6 }}>
                         <FiTag size={13} style={{ color: 'var(--text-muted)' }} />
-                        <span style={{ color: 'var(--text-secondary)' }}>Catégorie:</span> {selectedProduct.category_name}
+                        <span style={{ color: 'var(--text-secondary)' }}>{t('admin.categoryLabel')}</span> {selectedProduct.category_name}
                       </div>
                     )}
                     {selectedProduct.brand && (
                       <div style={{ fontSize: 13, display: 'flex', alignItems: 'center', gap: 6 }}>
                         <FiBox size={13} style={{ color: 'var(--text-muted)' }} />
-                        <span style={{ color: 'var(--text-secondary)' }}>Marque:</span> {selectedProduct.brand}
+                        <span style={{ color: 'var(--text-secondary)' }}>{t('admin.brandLabel')}</span> {selectedProduct.brand}
                       </div>
                     )}
                     {selectedProduct.state && (
                       <div style={{ fontSize: 13, display: 'flex', alignItems: 'center', gap: 6 }}>
                         <FiShield size={13} style={{ color: 'var(--text-muted)' }} />
-                        <span style={{ color: 'var(--text-secondary)' }}>État:</span> {stateLabels[selectedProduct.state] || selectedProduct.state}
+                        <span style={{ color: 'var(--text-secondary)' }}>{t('admin.stateLabel')}</span> {stateLabels[selectedProduct.state] || selectedProduct.state}
                       </div>
                     )}
                     {selectedProduct.warranty && (
                       <div style={{ fontSize: 13, display: 'flex', alignItems: 'center', gap: 6 }}>
                         <FiClock size={13} style={{ color: 'var(--text-muted)' }} />
-                        <span style={{ color: 'var(--text-secondary)' }}>Garantie:</span> {selectedProduct.warranty}
+                        <span style={{ color: 'var(--text-secondary)' }}>{t('admin.warrantyLabel')}</span> {selectedProduct.warranty}
                       </div>
                     )}
                     {selectedProduct.ville && (
                       <div style={{ fontSize: 13, display: 'flex', alignItems: 'center', gap: 6 }}>
                         <FiMapPin size={13} style={{ color: 'var(--text-muted)' }} />
-                        <span style={{ color: 'var(--text-secondary)' }}>Ville:</span> {selectedProduct.ville}
+                        <span style={{ color: 'var(--text-secondary)' }}>{t('admin.villeLabel')}</span> {selectedProduct.ville}
                       </div>
                     )}
                     {selectedProduct.stock !== undefined && (
                       <div style={{ fontSize: 13, display: 'flex', alignItems: 'center', gap: 6 }}>
                         <FiPackage size={13} style={{ color: 'var(--text-muted)' }} />
-                        <span style={{ color: 'var(--text-secondary)' }}>Stock:</span> {selectedProduct.stock}
+                        <span style={{ color: 'var(--text-secondary)' }}>{t('admin.stockLabel')}</span> {selectedProduct.stock}
                       </div>
                     )}
                     <div style={{ fontSize: 13, display: 'flex', alignItems: 'center', gap: 6 }}>
                       <FiDollarSign size={13} style={{ color: 'var(--text-muted)' }} />
-                      <span style={{ color: 'var(--text-secondary)' }}>Vendeur:</span> {selectedProduct.store_name || selectedProduct.seller_name}
+                      <span style={{ color: 'var(--text-secondary)' }}>{t('admin.sellerLabel')}</span> {selectedProduct.store_name || selectedProduct.seller_name}
                     </div>
                   </div>
 
                   {selectedProduct.description && (
                     <div style={{ marginBottom: 16 }}>
-                      <div style={{ fontSize: 12, fontWeight: 600, color: 'var(--text-muted)', textTransform: 'uppercase', letterSpacing: '0.5px', marginBottom: 4 }}>Description</div>
+                      <div style={{ fontSize: 12, fontWeight: 600, color: 'var(--text-muted)', textTransform: 'uppercase', letterSpacing: '0.5px', marginBottom: 4 }}>{t('admin.descriptionLabel')}</div>
                       <p style={{ fontSize: 13, color: 'var(--text-secondary)', lineHeight: 1.6, margin: 0 }}>{selectedProduct.description}</p>
                     </div>
                   )}
@@ -353,7 +355,7 @@ export default function AdminPendingProducts() {
                       if (specs && typeof specs === 'object' && Object.keys(specs).length > 0) {
                         return (
                           <div style={{ marginBottom: 16 }}>
-                            <div style={{ fontSize: 12, fontWeight: 600, color: 'var(--text-muted)', textTransform: 'uppercase', letterSpacing: '0.5px', marginBottom: 4 }}>Spécifications</div>
+                            <div style={{ fontSize: 12, fontWeight: 600, color: 'var(--text-muted)', textTransform: 'uppercase', letterSpacing: '0.5px', marginBottom: 4 }}>{t('admin.specsLabel')}</div>
                             <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 4 }}>
                               {Object.entries(specs).map(([k, v]) => (
                                 <div key={k} style={{ fontSize: 12, padding: '4px 8px', background: 'var(--bg-secondary)', borderRadius: 6 }}>
@@ -371,10 +373,10 @@ export default function AdminPendingProducts() {
 
                   <div style={{ borderTop: '1px solid var(--border)', paddingTop: 16, display: 'flex', gap: 10 }}>
                     <button onClick={handleApprove} disabled={actionLoading} className="btn btn-primary" style={{ flex: 1, justifyContent: 'center', padding: '12px 16px' }}>
-                      <FiCheck size={16} /> {actionLoading ? '...' : 'Approuver'}
+                      <FiCheck size={16} /> {actionLoading ? '...' : t('admin.approve')}
                     </button>
                     <button onClick={() => setRejectConfirming(true)} disabled={actionLoading} className="btn btn-outline" style={{ flex: 1, justifyContent: 'center', padding: '12px 16px', color: 'var(--error)', borderColor: 'var(--error)' }}>
-                      <FiX size={16} /> Refuser
+                      <FiX size={16} /> {t('admin.refuse')}
                     </button>
                   </div>
                 </div>

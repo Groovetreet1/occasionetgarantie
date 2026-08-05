@@ -3,14 +3,15 @@ import { useEffect, useState, useRef } from 'react';
 import { FiArrowLeft, FiShoppingBag, FiShield, FiCheck, FiMonitor, FiCpu, FiHardDrive, FiBattery, FiCamera, FiDroplet, FiX, FiChevronLeft, FiChevronRight, FiUser, FiMessageCircle, FiStar, FiSmartphone, FiMapPin, FiLock, FiGrid } from 'react-icons/fi';
 import api from '../api/axios';
 import { useAuth } from '../context/AuthContext';
+import { useLanguage } from '../context/LanguageContext';
 import SellerRating from '../components/SellerRating';
 
 const stateLabels = {
-  neuf: 'Neuf',
-  comme_neuf: 'Comme neuf',
-  tres_bon: 'Très bon état',
-  bon: 'Bon état',
-  acceptable: 'État acceptable',
+  neuf: 'products.stateNeuf',
+  comme_neuf: 'products.stateCommeNeuf',
+  tres_bon: 'products.stateTresBon',
+  bon: 'products.stateBon',
+  acceptable: 'products.stateAcceptableFull',
 };
 
 const specIcons = {
@@ -22,6 +23,7 @@ const specIcons = {
 export default function ProductDetail() {
   const { slug } = useParams();
   const { user } = useAuth();
+  const { t } = useLanguage();
   const navigate = useNavigate();
   const [product, setProduct] = useState(null);
   const [loading, setLoading] = useState(true);
@@ -93,7 +95,7 @@ export default function ProductDetail() {
       });
       navigate(`/messenger/${data.id}`);
     } catch (err) {
-      alert(err.response?.data?.message || 'Erreur');
+      alert(err.response?.data?.message || t('products.errorGeneric'));
     }
   };
 
@@ -103,19 +105,19 @@ export default function ProductDetail() {
     <div className="auth-page">
       <div className="empty-state">
         <div className="icon"><FiShoppingBag size={48} /></div>
-        <h2>Produit introuvable</h2>
+        <h2>{t('products.notFound')}</h2>
         <Link to="/products" className="btn btn-primary" style={{ marginTop: '16px' }}>
-          <FiArrowLeft /> Retour aux produits
+          <FiArrowLeft /> {t('products.backToProducts')}
         </Link>
       </div>
     </div>
   );
 
   const repSteps = [
-    { key: 'front', label: 'Face avant', hint: "Photo de l'ecran" },
-    { key: 'back', label: 'Face arriere', hint: 'Photo du dos' },
-    { key: 'side', label: 'Cote', hint: 'Photo du cote' },
-    { key: 'screen', label: 'Ecran allume', hint: "Allumez l'ecran et prenez la photo" },
+    { key: 'front', label: t('products.repriseFront'), hint: t('products.repriseFrontHint') },
+    { key: 'back', label: t('products.repriseBack'), hint: t('products.repriseBackHint') },
+    { key: 'side', label: t('products.repriseSide'), hint: t('products.repriseSideHint') },
+    { key: 'screen', label: t('products.repriseScreen'), hint: t('products.repriseScreenHint') },
   ];
   const repAllDone = Object.keys(repPhotos).length === repSteps.length;
 
@@ -138,21 +140,21 @@ export default function ProductDetail() {
       for (const [k, f] of Object.entries(repPhotos)) fd.append(k, f);
       await api.post('/reprises', fd, { headers: { 'Content-Type': 'multipart/form-data' } });
       setRepDone(true);
-    } catch (e) { alert(e?.response?.data?.message || "Erreur lors de l'envoi"); }
+    } catch (e) { alert(e?.response?.data?.message || t('products.sendError')); }
     setSubmittingRep(false);
   };
 
   const submitNegotiate = async () => {
     if (!user) { navigate('/login'); return; }
     const price = parseFloat(offerPrice);
-    if (!price || price <= 0) { setNegError('Entrez un prix valide.'); return; }
+    if (!price || price <= 0) { setNegError(t('products.enterValidPrice')); return; }
     setNegError('');
     setNegotiating(true);
     try {
       await api.post('/negotiations', { product_id: product.id, offered_price: price, message: offerMessage.trim() || null });
       setNegDone(true);
     } catch (e) {
-      setNegError(e?.response?.data?.message || "Erreur lors de l'envoi");
+      setNegError(e?.response?.data?.message || t('products.sendError'));
     }
     setNegotiating(false);
   };
@@ -177,7 +179,7 @@ export default function ProductDetail() {
   const similarBlock = similar.length > 0 ? (
     <div style={{ marginTop: '24px', border: '1px solid var(--border)', borderRadius: 'var(--radius)', padding: '16px', background: 'var(--bg-card)' }}>
       <h3 style={{ fontSize: '15px', fontWeight: 700, marginBottom: '12px', display: 'flex', alignItems: 'center', gap: 6 }}>
-        <FiGrid size={16} style={{ color: 'var(--primary)' }} /> Produits similaires
+        <FiGrid size={16} style={{ color: 'var(--primary)' }} /> {t('products.similarProducts')}
       </h3>
       <div style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>
         {similar.map(p => (
@@ -203,7 +205,7 @@ export default function ProductDetail() {
       <section className="product-detail-section">
         <div className="container">
           <Link to="/products" className="btn btn-ghost" style={{ marginBottom: '24px' }}>
-            <FiArrowLeft /> Retour aux produits
+            <FiArrowLeft /> {t('products.backToProducts')}
           </Link>
 
           <div className="product-detail-grid">
@@ -249,7 +251,7 @@ export default function ProductDetail() {
                       boxShadow: '0 4px 14px var(--primary-glow)',
                     }}
                   >
-                    <FiMessageCircle size={14} style={{ marginRight: 4, verticalAlign: 'middle' }} /> Négocier le prix
+                    <FiMessageCircle size={14} style={{ marginRight: 4, verticalAlign: 'middle' }} /> {t('products.negotiate')}
                   </button>
                 )}
               </div>
@@ -258,23 +260,23 @@ export default function ProductDetail() {
                 <div style={{ margin: '12px 0', padding: '16px', border: '1px solid var(--border)', borderRadius: 12, background: 'var(--bg-card)' }}>
                   {negDone ? (
                     <div style={{ textAlign: 'center', padding: '12px', background: 'rgba(16,185,129,0.1)', borderRadius: 10, fontSize: 14, color: '#10b981', fontWeight: 600 }}>
-                      Offre envoyée ! Le vendeur va vous répondre.
+                      {t('products.offerSent')}
                     </div>
                   ) : (
                     <>
                       <div style={{ fontSize: 14, fontWeight: 700, marginBottom: 10, display: 'flex', alignItems: 'center', gap: 6 }}>
-                        <FiMessageCircle size={16} /> Proposer un prix
+                        <FiMessageCircle size={16} /> {t('products.offerTitle')}
                       </div>
-                      <input type="number" min="0" placeholder={`Votre prix (actuel : ${product.price} DH)`} value={offerPrice} onChange={e => setOfferPrice(e.target.value)}
+                      <input type="number" min="0" placeholder={t('products.offerPlaceholder', { price: product.price })} value={offerPrice} onChange={e => setOfferPrice(e.target.value)}
                         style={{ width: '100%', padding: '10px 14px', borderRadius: 8, border: '1px solid var(--border)', background: 'var(--bg-secondary)', color: 'var(--text)', fontSize: 13, fontFamily: 'var(--font)', marginBottom: 8, boxSizing: 'border-box' }} />
-                      <textarea placeholder="Message (optionnel)" value={offerMessage} onChange={e => setOfferMessage(e.target.value)} rows={2} maxLength={500}
+                      <textarea placeholder={t('products.offerMessagePlaceholder')} value={offerMessage} onChange={e => setOfferMessage(e.target.value)} rows={2} maxLength={500}
                         style={{ width: '100%', padding: '10px 14px', borderRadius: 8, border: '1px solid var(--border)', background: 'var(--bg-secondary)', color: 'var(--text)', fontSize: 13, fontFamily: 'var(--font)', resize: 'vertical', marginBottom: 8, boxSizing: 'border-box' }} />
                       {negError && <div style={{ fontSize: 12, color: '#ef4444', marginBottom: 8 }}>{negError}</div>}
                       <div style={{ display: 'flex', gap: 6 }}>
                         <button onClick={submitNegotiate} disabled={negotiating} className="btn btn-primary" style={{ fontSize: 13, padding: '10px 18px' }}>
-                          {negotiating ? 'Envoi...' : 'Envoyer l\'offre'}
+                          {negotiating ? t('products.sending') : t('products.sendOffer')}
                         </button>
-                        <button onClick={() => { setShowNegotiate(false); setOfferPrice(''); setOfferMessage(''); setNegError(''); }} className="btn btn-ghost" style={{ fontSize: 13, padding: '10px 18px' }}>Annuler</button>
+                        <button onClick={() => { setShowNegotiate(false); setOfferPrice(''); setOfferMessage(''); setNegError(''); }} className="btn btn-ghost" style={{ fontSize: 13, padding: '10px 18px' }}>{t('common.cancel')}</button>
                       </div>
                     </>
                   )}
@@ -282,8 +284,8 @@ export default function ProductDetail() {
               )}
 
               <div className="product-detail-tags">
-                <span className="product-detail-tag state">{stateLabels[product.state] || product.state}</span>
-                <span className="product-detail-tag verified"><FiCheck size={12} /> Vérifié</span>
+                <span className="product-detail-tag state">{t(stateLabels[product.state] || product.state)}</span>
+                <span className="product-detail-tag verified"><FiCheck size={12} /> {t('products.verified')}</span>
                 {product.brand && <span className="product-detail-tag brand">{product.brand}</span>}
                 {product.ville && <span className="product-detail-tag location"><FiMapPin size={12} /> {product.ville}</span>}
               </div>
@@ -292,7 +294,7 @@ export default function ProductDetail() {
 
               {specs && Object.keys(specs).length > 0 && Object.entries(specs).some(([, v]) => v !== null && v !== undefined && String(v).trim() !== '') && (
                 <div className="product-detail-specs">
-                  <h3>Fiche technique</h3>
+                  <h3>{t('products.techSpecs')}</h3>
                   <div className="product-detail-specs-grid">
                     {Object.entries(specs).filter(([, val]) => val !== null && val !== undefined && String(val).trim() !== '').map(([key, val]) => {
                       const Icon = specIcons[key] || FiCpu;
@@ -316,7 +318,7 @@ export default function ProductDetail() {
 
               {product.seller_name && (
                 <div className="product-seller-info">
-                  <h4>Vendu par</h4>
+                  <h4>{t('products.soldBy')}</h4>
                     <Link to={`/seller/${product.seller_id}`} className="seller-badge">
                       <div className="seller-avatar-mini">
                         {product.seller_avatar ? <img src={product.seller_avatar.startsWith('http') ? product.seller_avatar : `${API_BASE}/uploads/avatars/${product.seller_avatar}`} alt="" /> : product.seller_logo ? <img src={product.seller_logo.startsWith('http') ? product.seller_logo : `${API_BASE}/uploads/avatars/${product.seller_logo}`} alt="" /> : <FiUser size={18} />}
@@ -325,7 +327,7 @@ export default function ProductDetail() {
                       <strong>{product.seller_name} {product.seller_premium ? <FiStar size={14} style={{ color: '#FFD700', verticalAlign: 'middle', marginLeft: 2 }} /> : null}</strong>
                       {product.seller_rating_count > 0 && (
                         <small style={{ display: 'flex', alignItems: 'center', gap: 4, color: 'var(--text-muted)' }}>
-                          <FiStar size={12} fill="var(--primary)" color="var(--primary)" /> {product.seller_rating_avg}/5 ({product.seller_rating_count} avis)
+                          <FiStar size={12} fill="var(--primary)" color="var(--primary)" /> {product.seller_rating_avg}/5 ({t('products.reviewsCount', { count: product.seller_rating_count })})
                         </small>
                       )}
                     </div>
@@ -336,7 +338,7 @@ export default function ProductDetail() {
               {user && user.role === 'seller' && user.id === product.seller_id && (
                 <div style={{ marginTop: '20px', borderTop: '1px solid var(--border)', paddingTop: '16px' }}>
                   <div style={{ fontSize: 14, fontWeight: 700, display: 'flex', alignItems: 'center', gap: 6, marginBottom: 8 }}>
-                    <FiSmartphone size={16} /> Reprise
+                    <FiSmartphone size={16} /> {t('products.reprise')}
                   </div>
                   {vendorReprises.length > 0 ? vendorReprises.map(r => (
                     <div key={r.id} style={{
@@ -352,15 +354,15 @@ export default function ProductDetail() {
                         background: r.status === 'en_attente' ? 'rgba(245,158,11,0.1)' : r.status === 'estime' ? 'rgba(59,130,246,0.1)' : 'rgba(16,185,129,0.1)',
                         color: r.status === 'en_attente' ? '#f59e0b' : r.status === 'estime' ? '#3b82f6' : '#10b981',
                       }}>
-                        {r.status === 'en_attente' ? 'Nouveau' : r.status === 'estime' ? 'Estime' : 'Accepte'}
+                        {r.status === 'en_attente' ? t('products.repriseNew') : r.status === 'estime' ? t('products.repriseEstimated') : t('products.repriseAccepted')}
                       </span>
                       <Link to="/reprise/list" style={{ color: 'var(--primary)', fontWeight: 600, fontSize: 12, textDecoration: 'none', whiteSpace: 'nowrap' }}>
-                        Traiter →
+                        {t('products.repriseTreat')} →
                       </Link>
                     </div>
                   )) : (
                     <div style={{ fontSize: 13, color: 'var(--text-muted)', textAlign: 'center', padding: '12px 0' }}>
-                      Aucune demande de reprise pour cet article
+                      {t('products.repriseNoRequests')}
                     </div>
                   )}
                   <Link to="/reprise/list" style={{
@@ -368,7 +370,7 @@ export default function ProductDetail() {
                     marginTop: 8, padding: '10px', borderRadius: 10, fontSize: 13, fontWeight: 600,
                     background: 'var(--btn-primary)', color: '#fff', textDecoration: 'none',
                   }}>
-                    Gerer toutes les demandes →
+                    {t('products.repriseManageAll')} →
                   </Link>
                 </div>
               )}
@@ -383,17 +385,17 @@ export default function ProductDetail() {
                 >
                   <FiLock size={28} style={{ color: 'var(--primary)', opacity: 0.9 }} />
                   <div style={{ fontSize: '15px', fontWeight: 700, marginTop: '10px' }}>
-                    Connectez-vous pour contacter le vendeur
+                    {t('products.loginToContact')}
                   </div>
                   <p style={{ fontSize: '13px', color: 'var(--text-muted)', margin: '6px auto 16px', maxWidth: '280px' }}>
-                    Creez un compte gratuit pour voir les coordonnees du vendeur et lui envoyer un message.
+                    {t('products.loginToContactDesc')}
                   </p>
                   <div style={{ display: 'flex', gap: '8px', justifyContent: 'center', flexWrap: 'wrap' }}>
                     <Link to="/login" className="btn btn-primary" style={{ padding: '10px 24px', fontSize: '14px' }}>
-                      Se connecter
+                      {t('products.login')}
                     </Link>
                     <Link to="/signup" className="btn" style={{ padding: '10px 24px', fontSize: '14px' }}>
-                      Creer un compte
+                      {t('products.signup')}
                     </Link>
                   </div>
                 </div>
@@ -415,7 +417,7 @@ export default function ProductDetail() {
                       onMouseOver={(e) => e.currentTarget.style.background = 'var(--gradient-hover)'}
                       onMouseOut={(e) => e.currentTarget.style.background = 'var(--gradient)'}
                     >
-                      <FiMessageCircle size={20} /> Envoyer un message
+                      <FiMessageCircle size={20} /> {t('products.sendMessage')}
                     </button>
                   )}
                 </>

@@ -5,10 +5,11 @@ import { FiSearch, FiSliders, FiPackage, FiX, FiArrowRight, FiShield, FiShopping
 import { motion } from 'framer-motion';
 import api from '../api/axios';
 import HomeProductCard from '../components/HomeProductCard';
+import { useLanguage } from '../context/LanguageContext';
 
 const STATE_LABELS = {
-  neuf: 'Neuf', comme_neuf: 'Comme neuf', tres_bon: 'Très bon état',
-  bon: 'Bon état', acceptable: 'Acceptable',
+  neuf: 'products.stateNeuf', comme_neuf: 'products.stateCommeNeuf', tres_bon: 'products.stateTresBon',
+  bon: 'products.stateBon', acceptable: 'products.stateAcceptable',
 };
 
 const CATEGORIES = ['Tous', 'Smartphones', 'Tablettes', 'Ordinateurs', 'Accessoires', 'Gaming'];
@@ -17,6 +18,7 @@ const fadeUp = { hidden: { opacity: 0, y: 24 }, show: { opacity: 1, y: 0, transi
 
 export default function Products() {
   const [searchParams] = useSearchParams();
+  const { t } = useLanguage();
   const [allProducts, setAllProducts] = useState([]);
   const [loading, setLoading] = useState(true);
   const [search, setSearch] = useState('');
@@ -31,7 +33,7 @@ export default function Products() {
   const [storeLoad, setStoreLoad] = useState(true);
   const [cities, setCities] = useState([]);
 
-  useEffect(() => { document.title = 'Tous les produits - Occasion & Garantie'; }, []);
+  useEffect(() => { document.title = t('products.metaTitle'); }, [t]);
 
   useEffect(() => {
     const catParam = searchParams.get('category');
@@ -77,6 +79,7 @@ export default function Products() {
   const showMore = () => setVisibleCount(prev => prev + 12);
   const displayed = filtered.slice(0, visibleCount);
   const hasMore = visibleCount < filtered.length;
+  const productCount = Array.isArray(allProducts) ? allProducts.length : 0;
 
   const handleSearchSubmit = (e) => {
     e.preventDefault();
@@ -95,13 +98,13 @@ export default function Products() {
       <div className="products-page-hero">
         <div className="container">
           <motion.div initial="hidden" animate="show" variants={fadeUp}>
-            <h1>Marketplace</h1>
-            <p>{Array.isArray(allProducts) ? allProducts.length : 0} article{Array.isArray(allProducts) && allProducts.length > 1 ? 's' : ''} disponible{Array.isArray(allProducts) && allProducts.length > 1 ? 's' : ''}</p>
+            <h1>{t('products.pageTitle')}</h1>
+            <p>{productCount} {productCount > 1 ? t('products.articles') : t('products.article')} {productCount > 1 ? t('products.availablePlural') : t('products.available')}</p>
           </motion.div>
           <motion.form initial="hidden" animate="show" variants={fadeUp} onSubmit={handleSearchSubmit} className="products-page-search">
             <FiSearch size={18} />
-            <input type="text" placeholder="Rechercher par nom, marque..." value={search} onChange={e => setSearch(e.target.value)} />
-            <button type="submit">Chercher</button>
+            <input type="text" placeholder={t('products.searchPlaceholder')} value={search} onChange={e => setSearch(e.target.value)} />
+            <button type="submit">{t('products.searchBtn')}</button>
           </motion.form>
         </div>
       </div>
@@ -112,10 +115,10 @@ export default function Products() {
             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 16 }}>
               <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
                 <FiShield style={{ color: '#d97706' }} />
-                <span style={{ fontWeight: 700, fontSize: 16 }}>Boutique Officielle</span>
-                <span style={{ fontSize: 12, color: 'var(--text-secondary)' }}>— Vendu par Occasion & Garantie</span>
+                <span style={{ fontWeight: 700, fontSize: 16 }}>{t('products.storeOfficial')}</span>
+                <span style={{ fontSize: 12, color: 'var(--text-secondary)' }}>{t('products.storeSoldBy')}</span>
               </div>
-              <Link to="/boutique" style={{ fontSize: 13, color: '#d97706', fontWeight: 600, textDecoration: 'none' }}>Voir tout <FiArrowRight size={14} style={{ verticalAlign: 'middle' }} /></Link>
+              <Link to="/boutique" style={{ fontSize: 13, color: '#d97706', fontWeight: 600, textDecoration: 'none' }}>{t('products.viewAll')} <FiArrowRight size={14} style={{ verticalAlign: 'middle' }} /></Link>
             </div>
             <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(160px, 1fr))', gap: 12 }}>
               {storeProducts.slice(0, 6).map(p => (
@@ -138,60 +141,60 @@ export default function Products() {
         <motion.div className="products-categories" initial="hidden" animate="show" variants={fadeUp}>
           {CATEGORIES.map(c => (
             <button key={c} className={`cat-pill ${category === c ? 'active' : ''}`} onClick={() => { setCategory(c); setVisibleCount(12); }}>
-              {c}
+              {c === 'Tous' ? t('products.all') : c}
             </button>
           ))}
         </motion.div>
 
         <div className="products-toolbar">
           <button className={`btn ${hasFilters ? 'btn-primary' : 'btn-outline'}`} onClick={() => setShowFilters(o => !o)}>
-            <FiSliders size={14} /> Filtres{hasFilters ? ` (${[category !== 'Tous', stateFilter !== 'Tous', !!ville, !!priceMin || !!priceMax].filter(Boolean).length})` : ''}
+            <FiSliders size={14} /> {t('products.filters')}{hasFilters ? ` (${[category !== 'Tous', stateFilter !== 'Tous', !!ville, !!priceMin || !!priceMax].filter(Boolean).length})` : ''}
           </button>
           {hasFilters && (
-            <button className="btn-filter-reset" onClick={resetFilters}>Réinitialiser</button>
+            <button className="btn-filter-reset" onClick={resetFilters}>{t('products.reset')}</button>
           )}
-          <span className="products-count">{filtered.length} résultat{filtered.length > 1 ? 's' : ''}</span>
+          <span className="products-count">{filtered.length} {filtered.length > 1 ? t('products.results') : t('products.result')}</span>
         </div>
 
         {showFilters && (
           <motion.div initial={{ opacity: 0, y: -8 }} animate={{ opacity: 1, y: 0 }} className="filters-panel">
             <div className="filters-header">
-              <span className="filters-title">Filtres</span>
+              <span className="filters-title">{t('products.filtersTitle')}</span>
               <button className="filters-close" onClick={() => setShowFilters(false)}><FiX size={18} /></button>
             </div>
             <div className="filters-body">
               <div className="filter-group">
-                <label className="filter-label">Catégorie</label>
+                <label className="filter-label">{t('products.filterCategory')}</label>
                 <div className="filter-chips">
                   {CATEGORIES.map(c => (
-                    <button key={c} className={`filter-chip${category === c ? ' active' : ''}`} onClick={() => setCategory(c)}>{c}</button>
+                    <button key={c} className={`filter-chip${category === c ? ' active' : ''}`} onClick={() => setCategory(c)}>{c === 'Tous' ? t('products.all') : c}</button>
                   ))}
                 </div>
               </div>
               <div className="filter-group">
-                <label className="filter-label">État</label>
+                <label className="filter-label">{t('products.filterState')}</label>
                 <div className="filter-chips">
-                  <button className={`filter-chip${stateFilter === 'Tous' ? ' active' : ''}`} onClick={() => setStateFilter('Tous')}>Tous</button>
+                  <button className={`filter-chip${stateFilter === 'Tous' ? ' active' : ''}`} onClick={() => setStateFilter('Tous')}>{t('products.all')}</button>
                   {Object.entries(STATE_LABELS).map(([val, label]) => (
-                    <button key={val} className={`filter-chip${stateFilter === val ? ' active' : ''}`} onClick={() => setStateFilter(val)}>{label}</button>
+                    <button key={val} className={`filter-chip${stateFilter === val ? ' active' : ''}`} onClick={() => setStateFilter(val)}>{t(label)}</button>
                   ))}
                 </div>
               </div>
               <div className="filter-group">
-                <label className="filter-label">Ville</label>
+                <label className="filter-label">{t('products.filterCity')}</label>
                 <div className="filter-chips">
-                  <button className={`filter-chip${ville === '' ? ' active' : ''}`} onClick={() => setVille('')}>Toutes les villes</button>
+                  <button className={`filter-chip${ville === '' ? ' active' : ''}`} onClick={() => setVille('')}>{t('products.allCities')}</button>
                   {cities.map(c => (
                     <button key={c} className={`filter-chip${ville === c ? ' active' : ''}`} onClick={() => setVille(c)}>{c}</button>
                   ))}
                 </div>
               </div>
               <div className="filter-group">
-                <label className="filter-label">Prix (DH)</label>
+                <label className="filter-label">{t('products.filterPrice')}</label>
                 <div className="filter-price-row">
-                  <input type="number" placeholder="Min" value={priceMin} onChange={e => setPriceMin(e.target.value)} className="filter-price-input" min="0" />
+                  <input type="number" placeholder={t('products.priceMin')} value={priceMin} onChange={e => setPriceMin(e.target.value)} className="filter-price-input" min="0" />
                   <span style={{ color: 'var(--text-muted)' }}>—</span>
-                  <input type="number" placeholder="Max" value={priceMax} onChange={e => setPriceMax(e.target.value)} className="filter-price-input" min="0" />
+                  <input type="number" placeholder={t('products.priceMax')} value={priceMax} onChange={e => setPriceMax(e.target.value)} className="filter-price-input" min="0" />
                 </div>
               </div>
             </div>
@@ -208,7 +211,7 @@ export default function Products() {
             {hasMore && (
               <div className="products-load-more">
                 <button className="btn btn-outline btn-lg" onClick={showMore}>
-                  Voir plus ({filtered.length - visibleCount} restants)
+                  {t('products.showMore')} ({filtered.length - visibleCount} {t('products.remaining')})
                 </button>
               </div>
             )}
@@ -216,9 +219,9 @@ export default function Products() {
         ) : (
           <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="empty-state">
             <FiPackage size={48} />
-            <h3>Aucun résultat</h3>
-            <p>Essayez de modifier vos filtres ou votre recherche.</p>
-            {hasFilters && <button className="btn btn-outline" onClick={resetFilters}>Réinitialiser les filtres</button>}
+            <h3>{t('products.noResults')}</h3>
+            <p>{t('products.noResultsDesc')}</p>
+            {hasFilters && <button className="btn btn-outline" onClick={resetFilters}>{t('products.resetFilters')}</button>}
           </motion.div>
         )}
       </div>

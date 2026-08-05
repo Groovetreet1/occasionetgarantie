@@ -1,0 +1,22 @@
+﻿export const frFooter = {
+  footer: {
+    tagline: 'Des produits d’exception à prix réduits. Achetez et vendez en toute confiance.',
+    navigation: 'Navigation',
+    categories: 'Catégories',
+    contact: 'Contact',
+    myAccount: 'Mon compte',
+    allProducts: 'Tous les produits',
+    officialStore: 'Boutique officielle',
+    about: 'À propos',
+    smartphones: 'Smartphones',
+    tablets: 'Tablettes',
+    computers: 'Ordinateurs',
+    accessories: 'Accessoires',
+    gaming: 'Gaming',
+    allRights: 'Tous droits réservés.',
+    privacy: 'Confidentialité',
+    legal: 'Mentions légales',
+    hours: 'Lun-Sam, 9h – 19h',
+    casablanca: 'Casablanca, Maroc',
+  },
+};

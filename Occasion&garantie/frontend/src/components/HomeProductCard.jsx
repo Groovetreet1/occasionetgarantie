@@ -3,12 +3,14 @@ import { Link } from 'react-router-dom';
 import { motion } from 'framer-motion';
 import { FiShoppingBag } from 'react-icons/fi';
 import { TbChevronLeft, TbChevronRight } from 'react-icons/tb';
+import { useLanguage } from '../context/LanguageContext';
 
 const API_BASE = import.meta.env.VITE_API_URL || '';
 
 const toUrl = (img) => (img ? (img.startsWith('http') ? img : `${API_BASE}/uploads/${img}`) : null);
 
 export default function HomeProductCard({ product, index = 0 }) {
+  const { t } = useLanguage();
   const [photoIndex, setPhotoIndex] = useState(0);
 
   const formatPrice = (p) =>
@@ -53,9 +55,9 @@ export default function HomeProductCard({ product, index = 0 }) {
       <Link to={detailLink} className={`product-card product-card-compact ${isSold ? 'product-sold' : ''}`}>
         <div className="product-card-image">
           {discount > 0 && <span className="badge-discount">-{discount}%</span>}
-          {isSold && <div className="product-sold-overlay">Vendu</div>}
-          {isPending && <span className="badge-pending">Réservé</span>}
-          {isStore && <span className="badge-store">Boutique Officielle</span>}
+          {isSold && <div className="product-sold-overlay">{t('home.sold')}</div>}
+          {isPending && <span className="badge-pending">{t('home.reserved')}</span>}
+          {isStore && <span className="badge-store">{t('home.officialStore')}</span>}
           <div className="product-card-img-wrap">
             {currentImg ? (
               <img src={currentImg} alt={product.name} loading="lazy" />
@@ -65,10 +67,10 @@ export default function HomeProductCard({ product, index = 0 }) {
           </div>
           {photos.length > 1 && (
             <>
-              <button className="photo-nav-btn photo-prev" onClick={goPrev} aria-label="Photo précédente">
+              <button className="photo-nav-btn photo-prev" onClick={goPrev} aria-label={t('home.photoPrev')}>
                 <TbChevronLeft size={16} />
               </button>
-              <button className="photo-nav-btn photo-next" onClick={goNext} aria-label="Photo suivante">
+              <button className="photo-nav-btn photo-next" onClick={goNext} aria-label={t('home.photoNext')}>
                 <TbChevronRight size={16} />
               </button>
               <span className="photo-count">{photoIndex + 1}/{photos.length}</span>

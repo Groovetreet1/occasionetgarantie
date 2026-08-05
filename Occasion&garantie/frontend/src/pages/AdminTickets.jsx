@@ -2,10 +2,12 @@ import { useEffect, useState, useCallback } from 'react';
 import { Link } from 'react-router-dom';
 import { FiArrowLeft, FiHeadphones, FiSearch, FiClock, FiRefreshCw, FiSend, FiCheckCircle, FiMail, FiChevronDown, FiChevronUp, FiChevronLeft, FiChevronRight } from 'react-icons/fi';
 import api from '../api/axios';
+import { useLanguage } from '../context/LanguageContext';
 
 const PER_PAGE = 10;
 
 export default function AdminTickets() {
+  const { t } = useLanguage();
   const [tickets, setTickets] = useState([]);
   const [loading, setLoading] = useState(true);
   const [search, setSearch] = useState('');
@@ -60,7 +62,7 @@ export default function AdminTickets() {
       setReplies(prev => ({ ...prev, [ticketNumber]: '' }));
       setTimeout(() => setSent(prev => ({ ...prev, [ticketNumber]: false })), 3000);
     } catch (err) {
-      alert(err.response?.data?.message || 'Erreur');
+      alert(err.response?.data?.message || t('admin.error'));
     } finally {
       setSending(prev => ({ ...prev, [ticketNumber]: false }));
     }
@@ -74,15 +76,15 @@ export default function AdminTickets() {
           disabled={page <= 1}
           style={{ padding: '6px 10px', border: '1px solid var(--border)', borderRadius: '6px', background: 'var(--bg-card)', color: 'var(--text)', cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '4px', fontSize: '12px', opacity: page <= 1 ? 0.4 : 1 }}
         >
-          <FiChevronLeft size={14} /> Precedent
+          <FiChevronLeft size={14} /> {t('admin.previous')}
         </button>
-        <span style={{ fontSize: '12px', color: 'var(--text-muted)', padding: '0 8px' }}>Page {page} / {Math.ceil(total / PER_PAGE)}</span>
+        <span style={{ fontSize: '12px', color: 'var(--text-muted)', padding: '0 8px' }}>{t('admin.pageOf', { page, total: Math.ceil(total / PER_PAGE) })}</span>
         <button
           onClick={() => setPage(p => p + 1)}
           disabled={!hasMore}
           style={{ padding: '6px 10px', border: '1px solid var(--border)', borderRadius: '6px', background: 'var(--bg-card)', color: 'var(--text)', cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '4px', fontSize: '12px', opacity: !hasMore ? 0.4 : 1 }}
         >
-          Suivant <FiChevronRight size={14} />
+          {t('admin.next')} <FiChevronRight size={14} />
         </button>
       </div>
     ) : null
@@ -93,13 +95,13 @@ export default function AdminTickets() {
       <div className="container" style={{ position: 'relative', zIndex: 1 }}>
         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '24px', flexWrap: 'wrap', gap: '12px' }}>
           <div>
-            <Link to="/admin" className="btn btn-ghost" style={{ marginBottom: '8px' }}><FiArrowLeft /> Dashboard</Link>
+            <Link to="/admin" className="btn btn-ghost" style={{ marginBottom: '8px' }}><FiArrowLeft /> {t('admin.dashboardTitle')}</Link>
             <h1 style={{ fontSize: '28px', fontWeight: 800, display: 'flex', alignItems: 'center', gap: '10px' }}>
-              <FiHeadphones size={28} style={{ color: 'var(--primary)' }} /> Tickets Support
+              <FiHeadphones size={28} style={{ color: 'var(--primary)' }} /> {t('admin.ticketsSupportTitle')}
             </h1>
           </div>
           <button onClick={load} className="btn btn-outline" style={{ display: 'flex', alignItems: 'center', gap: '6px' }} disabled={loading}>
-            <FiRefreshCw size={16} className={loading ? 'spin' : ''} /> {loading ? 'Chargement...' : 'Actualiser'}
+            <FiRefreshCw size={16} className={loading ? 'spin' : ''} /> {loading ? t('admin.loading') : t('admin.refresh')}
           </button>
         </div>
 
@@ -107,7 +109,7 @@ export default function AdminTickets() {
           <FiSearch size={18} style={{ position: 'absolute', left: '14px', top: '14px', color: 'var(--text-muted)' }} />
           <input
             type="text"
-            placeholder="Rechercher par numero ticket, nom, email ou message..."
+            placeholder={t('admin.ticketsSearchPlaceholder')}
             value={search}
             onChange={(e) => { setSearch(e.target.value); setPageNr(1); setPageR(1); }}
             style={{ width: '100%', padding: '12px 14px 12px 42px', border: '1px solid var(--border)', borderRadius: '10px', background: 'var(--bg-card)', color: 'var(--text)', fontFamily: 'var(--font)', fontSize: '14px', boxSizing: 'border-box' }}
@@ -119,14 +121,14 @@ export default function AdminTickets() {
         ) : filtered.length === 0 ? (
           <div style={{ textAlign: 'center', padding: '60px 0', color: 'var(--text-muted)' }}>
             <FiHeadphones size={48} style={{ opacity: 0.3, marginBottom: '12px' }} />
-            <p>Aucun ticket pour le moment.</p>
+            <p>{t('admin.noTickets')}</p>
           </div>
         ) : (
           <div style={{ display: 'flex', flexDirection: 'row', gap: '16px', alignItems: 'flex-start', flexWrap: 'wrap' }}>
             {notRepliedAll.length > 0 && (
               <div style={{ flex: '1 1 300px', minWidth: 0 }}>
                 <h3 style={{ fontSize: '16px', fontWeight: 700, color: 'var(--text)', margin: '0 0 8px', display: 'flex', alignItems: 'center', gap: '8px' }}>
-                  <span style={{ width: '8px', height: '8px', borderRadius: '50%', background: 'var(--primary)' }} /> En attente de reponse ({totalNr})
+                  <span style={{ width: '8px', height: '8px', borderRadius: '50%', background: 'var(--primary)' }} /> {t('admin.awaitingReply', { count: totalNr })}
                 </h3>
                 {notReplied.map(ticket => {
               const isOpen = expanded === ticket.id;
@@ -151,7 +153,7 @@ export default function AdminTickets() {
                       </div>
                       <div style={{ fontWeight: 600, fontSize: '15px' }}>{ticket.name}</div>
                       <div style={{ fontSize: '12px', color: 'var(--text-muted)', marginTop: '2px', display: 'flex', alignItems: 'center', gap: '4px' }}>
-                        <FiMail size={11} /> {ticket.email || 'Email inconnu'}
+                        <FiMail size={11} /> {ticket.email || t('admin.unknownEmail')}
                       </div>
                     </div>
                     <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
@@ -170,13 +172,13 @@ export default function AdminTickets() {
 
                       {sent[ticket.ticket_number] ? (
                         <div style={{ display: 'flex', alignItems: 'center', gap: '8px', padding: '12px', background: 'rgba(16,185,129,0.1)', borderRadius: '8px', color: 'var(--success)', fontSize: '14px' }}>
-                          <FiCheckCircle size={18} /> Reponse envoyee avec succes !
+                          <FiCheckCircle size={18} /> {t('admin.replySent')}
                         </div>
                       ) : (
                         <div>
                           <textarea
                             rows={3}
-                            placeholder="Ecrire une reponse..."
+                            placeholder={t('admin.replyPlaceholder')}
                             value={replies[ticket.ticket_number] || ''}
                             onChange={(e) => setReplies(prev => ({ ...prev, [ticket.ticket_number]: e.target.value }))}
                             style={{ width: '100%', padding: '10px 12px', border: '1px solid var(--border)', borderRadius: '8px', background: 'var(--bg-secondary)', color: 'var(--text)', fontFamily: 'var(--font)', fontSize: '13px', boxSizing: 'border-box', resize: 'vertical', minHeight: '60px' }}
@@ -186,10 +188,10 @@ export default function AdminTickets() {
                             disabled={sending[ticket.ticket_number] || !(replies[ticket.ticket_number] || '').trim()}
                             style={{ marginTop: '8px', padding: '10px 20px', border: 'none', borderRadius: '8px', background: 'var(--gradient)', color: 'white', cursor: 'pointer', fontFamily: 'var(--font)', fontSize: '13px', fontWeight: 600, display: 'inline-flex', alignItems: 'center', gap: '6px' }}
                           >
-                            {sending[ticket.ticket_number] ? 'Envoi...' : <><FiSend size={14} /> Envoyer la reponse</>}
+                            {sending[ticket.ticket_number] ? t('admin.sending') : <><FiSend size={14} /> {t('admin.sendReply')}</>}
                           </button>
                           <span style={{ marginLeft: '12px', fontSize: '12px', color: 'var(--text-muted)' }}>
-                            La reponse sera envoyee a {ticket.email}
+                            {t('admin.replyWillGoTo', { email: ticket.email })}
                           </span>
                         </div>
                       )}
@@ -204,7 +206,7 @@ export default function AdminTickets() {
             {repliedAll.length > 0 && (
               <div style={{ flex: '1 1 300px', minWidth: 0 }}>
                 <h3 style={{ fontSize: '16px', fontWeight: 700, color: 'var(--text)', margin: '0 0 8px', display: 'flex', alignItems: 'center', gap: '8px' }}>
-                  <span style={{ width: '8px', height: '8px', borderRadius: '50%', background: 'var(--success)' }} /> Repondu ({totalR})
+                  <span style={{ width: '8px', height: '8px', borderRadius: '50%', background: 'var(--success)' }} /> {t('admin.repliedSection', { count: totalR })}
                 </h3>
                 {replied.map(ticket => {
               const isOpen = expanded === ticket.id;
@@ -227,12 +229,12 @@ export default function AdminTickets() {
                           #{ticket.ticket_number}
                         </span>
                         <span style={{ display: 'inline-flex', alignItems: 'center', gap: '4px', fontSize: '11px', color: 'var(--success)' }}>
-                          <FiCheckCircle size={12} /> Repondu {formatDate(ticket.replied_at)}
+                          <FiCheckCircle size={12} /> {t('admin.repliedStatus')} {formatDate(ticket.replied_at)}
                         </span>
                       </div>
                       <div style={{ fontWeight: 600, fontSize: '15px' }}>{ticket.name}</div>
                       <div style={{ fontSize: '12px', color: 'var(--text-muted)', marginTop: '2px', display: 'flex', alignItems: 'center', gap: '4px' }}>
-                        <FiMail size={11} /> {ticket.email || 'Email inconnu'}
+                        <FiMail size={11} /> {ticket.email || t('admin.unknownEmail')}
                       </div>
                     </div>
                     <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
@@ -249,13 +251,13 @@ export default function AdminTickets() {
                       </div>
                       {sent[ticket.ticket_number] ? (
                         <div style={{ display: 'flex', alignItems: 'center', gap: '8px', padding: '12px', background: 'rgba(16,185,129,0.1)', borderRadius: '8px', color: 'var(--success)', fontSize: '14px' }}>
-                          <FiCheckCircle size={18} /> Reponse envoyee avec succes !
+                          <FiCheckCircle size={18} /> {t('admin.replySent')}
                         </div>
                       ) : (
                         <div>
                           <textarea
                             rows={3}
-                            placeholder="Ecrire une nouvelle reponse..."
+                            placeholder={t('admin.newReplyPlaceholder')}
                             value={replies[ticket.ticket_number] || ''}
                             onChange={(e) => setReplies(prev => ({ ...prev, [ticket.ticket_number]: e.target.value }))}
                             style={{ width: '100%', padding: '10px 12px', border: '1px solid var(--border)', borderRadius: '8px', background: 'var(--bg-secondary)', color: 'var(--text)', fontFamily: 'var(--font)', fontSize: '13px', boxSizing: 'border-box', resize: 'vertical', minHeight: '60px' }}
@@ -265,10 +267,10 @@ export default function AdminTickets() {
                             disabled={sending[ticket.ticket_number] || !(replies[ticket.ticket_number] || '').trim()}
                             style={{ marginTop: '8px', padding: '10px 20px', border: 'none', borderRadius: '8px', background: 'var(--gradient)', color: 'white', cursor: 'pointer', fontFamily: 'var(--font)', fontSize: '13px', fontWeight: 600, display: 'inline-flex', alignItems: 'center', gap: '6px' }}
                           >
-                            {sending[ticket.ticket_number] ? 'Envoi...' : <><FiSend size={14} /> Envoyer une reponse</>}
+                            {sending[ticket.ticket_number] ? t('admin.sending') : <><FiSend size={14} /> {t('admin.sendNewReply')}</>}
                           </button>
                           <span style={{ marginLeft: '12px', fontSize: '12px', color: 'var(--text-muted)' }}>
-                            La reponse sera envoyee a {ticket.email}
+                            {t('admin.replyWillGoTo', { email: ticket.email })}
                           </span>
                         </div>
                       )}

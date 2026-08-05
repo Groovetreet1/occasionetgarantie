@@ -1,17 +1,19 @@
 import { Link, useLocation } from 'react-router-dom';
 import { FiBarChart2, FiTrendingUp, FiPlus, FiUser, FiShoppingBag } from 'react-icons/fi';
 import { useAuth } from '../context/AuthContext';
-
-const links = [
-  { to: '/seller', label: 'Tableau de Bord', icon: FiBarChart2 },
-  { to: '/seller/stats', label: 'Statistiques', icon: FiTrendingUp },
-  { to: '/seller/products/new', label: 'Nouveau produit', icon: FiPlus },
-  { to: '/profile', label: 'Mon Profil', icon: FiUser },
-];
+import { useLanguage } from '../context/LanguageContext';
 
 export default function SellerNav() {
   const location = useLocation();
   const { user } = useAuth();
+  const { t } = useLanguage();
+
+  const links = [
+    { to: '/seller', label: t('seller.navDashboard'), icon: FiBarChart2 },
+    { to: '/seller/stats', label: t('seller.navStats'), icon: FiTrendingUp },
+    { to: '/seller/products/new', label: t('seller.navNewProduct'), icon: FiPlus },
+    { to: '/profile', label: t('seller.navProfile'), icon: FiUser },
+  ];
 
   return (
     <div className="seller-nav-bar">
@@ -29,7 +31,7 @@ export default function SellerNav() {
       </div>
       {user && (
         <Link to={`/seller/${user.id}`} className="seller-nav-shop">
-          <FiShoppingBag size={16} /> <span>Boutique</span>
+          <FiShoppingBag size={16} /> <span>{t('seller.navStore')}</span>
         </Link>
       )}
     </div>

@@ -2,6 +2,7 @@ import { useEffect, useState, useRef } from 'react';
 import { useNavigate, useParams, useSearchParams, Link } from 'react-router-dom';
 import { FiArrowLeft, FiSave, FiUpload, FiX } from 'react-icons/fi';
 import api from '../api/axios';
+import { useLanguage } from '../context/LanguageContext';
 const stateOptions = [
   { value: 'neuf', label: 'Neuf' },
   { value: 'comme_neuf', label: 'Comme neuf' },
@@ -13,6 +14,7 @@ const stateOptions = [
 const defaultSpecs = { Ecran: '', Processeur: '', RAM: '', Stockage: '', Batterie: '', Couleur: '' };
 
 export default function AdminProductForm() {
+  const { t } = useLanguage();
   const { id } = useParams();
   const [searchParams] = useSearchParams();
   const isEdit = !!id;
@@ -55,7 +57,7 @@ export default function AdminProductForm() {
   };
 
   const addSpecField = () => {
-    const key = prompt('Nom de la caractéristique :');
+    const key = prompt(t('admin.specPrompt'));
     if (key && !(key in form.specs)) {
       setForm((f) => ({ ...f, specs: { ...f.specs, [key]: '' } }));
     }
@@ -76,7 +78,7 @@ export default function AdminProductForm() {
       const { data } = await api.post('/upload?single=true', fd);
       setForm((f) => ({ ...f, image: data.url }));
     } catch (err) {
-      alert('Erreur upload: ' + (err.response?.data?.message || err.message));
+      alert(t('admin.uploadError') + ' ' + (err.response?.data?.message || err.message));
     } finally {
       setUploading(false);
     }
@@ -92,7 +94,7 @@ export default function AdminProductForm() {
       const { data } = await api.post('/upload', fd);
       setForm((f) => ({ ...f, gallery: [...f.gallery, ...data.urls] }));
     } catch (err) {
-      alert('Erreur upload: ' + (err.response?.data?.message || err.message));
+      alert(t('admin.uploadError') + ' ' + (err.response?.data?.message || err.message));
     } finally {
       setGalleryUploading(false);
       if (galleryRef.current) galleryRef.current.value = '';
@@ -113,14 +115,14 @@ export default function AdminProductForm() {
   const handleSubmit = async (e) => {
     e.preventDefault();
     if (!form.description || form.description.length < 10) {
-      return alert('Veuillez entrer une description complète (min. 10 caractères).');
+      return alert(t('admin.descriptionMinError'));
     }
     if (form.description.length > 150) {
-      return alert('La description est limitée à 150 caractères maximum.');
+      return alert(t('admin.descriptionMaxError'));
     }
     const emptySpecs = Object.entries(form.specs).filter(([k, v]) => !v && k !== '').map(([k]) => k);
     if (emptySpecs.filter(k => ['Ecran','Processeur','RAM','Stockage'].includes(k)).length > 0) {
-      return alert('Veuillez remplir les specs essentielles : Écran, Processeur, RAM, Stockage.');
+      return alert(t('admin.essentialSpecsError'));
     }
     setSaving(true);
     try {
@@ -139,7 +141,7 @@ export default function AdminProductForm() {
       }
       navigate('/admin');
     } catch (err) {
-      alert('Erreur : ' + (err.response?.data?.message || err.message));
+      alert(t('admin.error') + ' : ' + (err.response?.data?.message || err.message));
     } finally {
       setSaving(false);
     }
@@ -149,41 +151,41 @@ export default function AdminProductForm() {
     <section style={{ paddingTop: '100px', paddingBottom: '60px', position: 'relative' }}>
       <div className="container" style={{ position: 'relative', zIndex: 1, maxWidth: '800px' }}>
         <Link to="/admin" className="btn btn-ghost" style={{ marginBottom: '16px' }}>
-          <FiArrowLeft /> Retour au dashboard
+          <FiArrowLeft /> {t('admin.backToDashboard')}
         </Link>
         <h1 style={{ fontSize: '28px', fontWeight: 800, marginBottom: '32px' }}>
-          {isEdit ? 'Modifier le produit' : 'Nouveau produit'}
+          {isEdit ? t('admin.editProduct') : t('admin.newProduct')}
         </h1>
 
         <form onSubmit={handleSubmit} style={{ display: 'flex', flexDirection: 'column', gap: '20px' }}>
           <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '16px' }}>
             <div className="form-group" style={{ gridColumn: 'span 2' }}>
-              <label>Nom du produit</label>
+              <label>{t('admin.productNameLabel')}</label>
               <input name="name" value={form.name} onChange={handleChange} required onBlur={(e) => { if (!form.slug) generateSlug(); }} />
             </div>
             <div className="form-group">
-              <label>Slug <button type="button" onClick={generateSlug} style={{ background: 'none', border: 'none', color: 'var(--primary)', cursor: 'pointer', fontSize: '12px' }}>Générer</button></label>
+              <label>{t('admin.slugLabel')} <button type="button" onClick={generateSlug} style={{ background: 'none', border: 'none', color: 'var(--primary)', cursor: 'pointer', fontSize: '12px' }}>{t('admin.generate')}</button></label>
               <input name="slug" value={form.slug} onChange={handleChange} required />
             </div>
             <div className="form-group">
-              <label>Marque</label>
-              <input name="brand" value={form.brand} onChange={handleChange} placeholder="Apple, Samsung..." />
+              <label>{t('admin.brandField')}</label>
+              <input name="brand" value={form.brand} onChange={handleChange} placeholder={t('admin.brandPlaceholder')} />
             </div>
             <div className="form-group" style={{ gridColumn: 'span 2' }}>
-              <label>Description</label>
+              <label>{t('admin.descriptionLabel')}</label>
               <textarea name="description" value={form.description} onChange={handleChange} rows={3} maxLength={150} style={{ width: '100%', padding: '14px 16px', background: 'var(--bg-secondary)', border: '1px solid var(--border)', borderRadius: 'var(--radius)', color: 'var(--text-primary)', fontFamily: 'inherit', fontSize: '15px', resize: 'vertical' }} />
-              <small className="text-secondary">{form.description.length}/150 caractères</small>
+              <small className="text-secondary">{t('admin.charCount', { count: form.description.length })}</small>
             </div>
             <div className="form-group">
-              <label>Prix (DH)</label>
+              <label>{t('admin.priceLabel')}</label>
               <input name="price" type="number" step="0.01" value={form.price} onChange={handleChange} required />
             </div>
             <div className="form-group">
-              <label>Ancien prix (DH)</label>
+              <label>{t('admin.oldPriceLabel')}</label>
               <input name="old_price" type="number" step="0.01" value={form.old_price} onChange={handleChange} />
             </div>
             <div className="form-group">
-              <label>Catégorie</label>
+              <label>{t('admin.thCategory')}</label>
               <select name="category_id" value={form.category_id} onChange={handleChange} style={{ width: '100%', padding: '14px 16px', background: 'var(--bg-secondary)', border: '1px solid var(--border)', borderRadius: 'var(--radius)', color: 'var(--text-primary)', fontFamily: 'inherit', fontSize: '15px' }}>
                 <option value={1}>Smartphones</option>
                 <option value={2}>Tablettes</option>
@@ -191,21 +193,21 @@ export default function AdminProductForm() {
                 <option value={4}>Accessoires</option>
                 <option value={5}>Gaming</option>
                 </select>
-                <small style={{ display: 'block', color: 'var(--text-secondary)', marginTop: 6, fontSize: 12 }}>Uniquement les produits electronique et tech sont autorises.</small>
+                <small style={{ display: 'block', color: 'var(--text-secondary)', marginTop: 6, fontSize: 12 }}>{t('admin.categoryHint')}</small>
             </div>
             <div className="form-group">
-              <label>État</label>
+              <label>{t('admin.thState')}</label>
               <select name="state" value={form.state} onChange={handleChange} style={{ width: '100%', padding: '14px 16px', background: 'var(--bg-secondary)', border: '1px solid var(--border)', borderRadius: 'var(--radius)', color: 'var(--text-primary)', fontFamily: 'inherit', fontSize: '15px' }}>
                 {stateOptions.map((o) => <option key={o.value} value={o.value}>{o.label}</option>)}
               </select>
             </div>
             <div className="form-group">
-              <label>Stock</label>
+              <label>{t('admin.thStock')}</label>
               <input name="stock" type="number" value={form.stock} onChange={handleChange} />
             </div>
             <div className="form-group">
-              <label>Ville</label>
-              <input name="ville" value={form.ville} onChange={handleChange} placeholder="Casablanca, Rabat..." list="villes" />
+              <label>{t('admin.cityLabel')}</label>
+              <input name="ville" value={form.ville} onChange={handleChange} placeholder={t('admin.cityPlaceholder')} list="villes" />
               <datalist id="villes">
                 <option value="Casablanca" /><option value="Rabat" /><option value="Marrakech" />
                 <option value="Fès" /><option value="Tanger" /><option value="Agadir" />
@@ -217,7 +219,7 @@ export default function AdminProductForm() {
               </datalist>
             </div>
             <div className="form-group" style={{ gridColumn: 'span 2' }}>
-              <label>Image principale</label>
+              <label>{t('admin.mainImageLabel')}</label>
               {form.image && (
                 <div style={{ marginBottom: '8px' }}>
                   <img src={form.image.startsWith('http') ? form.image : `/uploads/${form.image}`} alt="Preview" style={{ width: '120px', height: '120px', objectFit: 'cover', borderRadius: 'var(--radius)', border: '1px solid var(--border)' }} />
@@ -226,13 +228,13 @@ export default function AdminProductForm() {
               <div style={{ display: 'flex', gap: '8px' }}>
                 <input type="file" ref={fileRef} accept="image/jpeg,image/png,image/webp,image/avif" style={{ flex: 1, padding: '10px', background: 'var(--bg-secondary)', border: '1px solid var(--border)', borderRadius: 'var(--radius)', color: 'var(--text-primary)', fontSize: '13px' }} />
                 <button type="button" onClick={handleUpload} className="btn btn-secondary" style={{ padding: '10px 16px' }} disabled={uploading}>
-                  <FiUpload size={16} /> {uploading ? '...' : 'Upload'}
+                  <FiUpload size={16} /> {uploading ? '...' : t('admin.upload')}
                 </button>
               </div>
-              <input name="image" value={form.image} onChange={handleChange} placeholder="Ou URL directe" style={{ marginTop: '8px', width: '100%', padding: '8px 12px', background: 'var(--bg-secondary)', border: '1px solid var(--border)', borderRadius: '8px', color: 'var(--text-primary)', fontFamily: 'inherit', fontSize: '13px' }} />
+              <input name="image" value={form.image} onChange={handleChange} placeholder={t('admin.orDirectUrl')} style={{ marginTop: '8px', width: '100%', padding: '8px 12px', background: 'var(--bg-secondary)', border: '1px solid var(--border)', borderRadius: '8px', color: 'var(--text-primary)', fontFamily: 'inherit', fontSize: '13px' }} />
             </div>
             <div className="form-group" style={{ gridColumn: 'span 2' }}>
-              <label>Galerie photos (5 max)</label>
+              <label>{t('admin.galleryLabel')}</label>
               <div style={{ display: 'flex', gap: '6px', flexWrap: 'wrap', marginBottom: '8px' }}>
                 {form.gallery.map((img, i) => (
                   <div key={i} style={{ position: 'relative', width: '80px', height: '80px' }}>
@@ -244,24 +246,24 @@ export default function AdminProductForm() {
               <div style={{ display: 'flex', gap: '8px' }}>
                 <input type="file" ref={galleryRef} accept="image/jpeg,image/png,image/webp,image/avif" multiple style={{ flex: 1, padding: '10px', background: 'var(--bg-secondary)', border: '1px solid var(--border)', borderRadius: 'var(--radius)', color: 'var(--text-primary)', fontSize: '13px' }} />
                 <button type="button" onClick={handleGalleryUpload} className="btn btn-secondary" style={{ padding: '10px 16px' }} disabled={galleryUploading}>
-                  <FiUpload size={16} /> {galleryUploading ? '...' : 'Upload'}
+                  <FiUpload size={16} /> {galleryUploading ? '...' : t('admin.upload')}
                 </button>
               </div>
             </div>
             <div className="form-group" style={{ display: 'flex', alignItems: 'center', gap: '8px', paddingTop: '30px' }}>
               <input name="featured" type="checkbox" checked={form.featured} onChange={handleChange} id="featured" style={{ width: '18px', height: '18px' }} />
-              <label htmlFor="featured" style={{ margin: 0, cursor: 'pointer' }}>Produit à la une</label>
+              <label htmlFor="featured" style={{ margin: 0, cursor: 'pointer' }}>{t('admin.featuredProduct')}</label>
             </div>
             <div className="form-group" style={{ display: 'flex', alignItems: 'center', gap: '8px', paddingTop: '8px' }}>
               <input name="product_type" type="checkbox" checked={form.product_type === 'store'} onChange={(e) => setForm(f => ({ ...f, product_type: e.target.checked ? 'store' : 'vendor' }))} id="storeProduct" style={{ width: '18px', height: '18px' }} />
-              <label htmlFor="storeProduct" style={{ margin: 0, cursor: 'pointer', background: 'rgba(245,158,11,0.1)', padding: '4px 12px', borderRadius: 8, color: '#d97706', fontWeight: 600 }}>Produit Boutique Officielle</label>
+              <label htmlFor="storeProduct" style={{ margin: 0, cursor: 'pointer', background: 'rgba(245,158,11,0.1)', padding: '4px 12px', borderRadius: 8, color: '#d97706', fontWeight: 600 }}>{t('admin.storeProductLabel')}</label>
             </div>
           </div>
 
           <div style={{ borderTop: '1px solid var(--border)', paddingTop: '20px' }}>
             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '16px' }}>
-              <h3 style={{ fontSize: '18px', fontWeight: 700 }}>Fiche technique</h3>
-              <button type="button" onClick={addSpecField} className="btn btn-secondary" style={{ padding: '6px 14px', fontSize: '13px' }}>+ Ajouter</button>
+              <h3 style={{ fontSize: '18px', fontWeight: 700 }}>{t('admin.techSheetTitle')}</h3>
+              <button type="button" onClick={addSpecField} className="btn btn-secondary" style={{ padding: '6px 14px', fontSize: '13px' }}>{t('admin.addButton')}</button>
             </div>
             <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '12px' }}>
               {Object.entries(form.specs).map(([key, val]) => (
@@ -278,7 +280,7 @@ export default function AdminProductForm() {
                     value={val}
                     onChange={(e) => handleSpecChange(key, e.target.value)}
                     style={{ width: '40%', padding: '8px 10px', background: 'var(--bg-secondary)', border: '1px solid var(--border)', borderRadius: '8px', color: 'var(--text-primary)', fontFamily: 'inherit', fontSize: '13px' }}
-                    placeholder="Valeur"
+                    placeholder={t('admin.valuePlaceholder')}
                   />
                   <button type="button" onClick={() => removeSpecField(key)} style={{ background: 'none', border: 'none', color: 'var(--error)', cursor: 'pointer', fontSize: '18px' }}>×</button>
                 </div>
@@ -287,7 +289,7 @@ export default function AdminProductForm() {
           </div>
 
           <button type="submit" className="btn btn-primary" style={{ justifyContent: 'center', fontSize: '16px', padding: '16px' }} disabled={saving}>
-            <FiSave size={18} /> {saving ? 'Enregistrement...' : (isEdit ? 'Mettre à jour' : 'Créer le produit')}
+            <FiSave size={18} /> {saving ? t('admin.saving') : (isEdit ? t('admin.updateButton') : t('admin.createButton'))}
           </button>
         </form>
       </div>

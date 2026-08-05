@@ -1,0 +1,22 @@
+﻿export const arFooter = {
+  footer: {
+    tagline: 'منتجات استثنائية بأسعار مخفضة. اشترِ وبع بكل ثقة.',
+    navigation: 'التنقل',
+    categories: 'الفئات',
+    contact: 'اتصل بنا',
+    myAccount: 'حسابي',
+    allProducts: 'جميع المنتجات',
+    officialStore: 'المتجر الرسمي',
+    about: 'من نحن',
+    smartphones: 'الهواتف الذكية',
+    tablets: 'الأجهزة اللوحية',
+    computers: 'الحواسيب',
+    accessories: 'الإكسسوارات',
+    gaming: 'ألعاب الفيديو',
+    allRights: 'جميع الحقوق محفوظة.',
+    privacy: 'الخصوصية',
+    legal: 'الشروط القانونية',
+    hours: 'الاثنين-السبت، 9ص – 7م',
+    casablanca: 'الدار البيضاء، المغرب',
+  },
+};

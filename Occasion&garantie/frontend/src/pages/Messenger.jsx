@@ -3,6 +3,7 @@ import { useParams, Link } from 'react-router-dom';
 import { FiMessageCircle, FiSend, FiArrowLeft, FiUser, FiStar, FiTrash2, FiShoppingBag, FiMic, FiX, FiMoreVertical, FiInfo } from 'react-icons/fi';
 import api from '../api/axios';
 import { useAuth } from '../context/AuthContext';
+import { useLanguage } from '../context/LanguageContext';
 import AudioPlayer from '../components/AudioPlayer';
 
 const MAX_AUDIO_SECONDS = 60;
@@ -11,6 +12,7 @@ const MEDIA_BASE = import.meta.env.VITE_API_URL || '';
 export default function Messenger() {
   const { id } = useParams();
   const { user } = useAuth();
+  const { t } = useLanguage();
   const [conversations, setConversations] = useState([]);
   const [activeConv, setActiveConv] = useState(null);
   const [messages, setMessages] = useState([]);
@@ -186,7 +188,7 @@ export default function Messenger() {
       setTimeout(() => inputRef.current?.focus(), 100);
     } catch (err) {
       setText(msgText);
-      alert(err.response?.data?.message || 'Erreur');
+      alert(err.response?.data?.message || t('messenger.error'));
     } finally { setSending(false); }
   };
 
@@ -218,7 +220,7 @@ export default function Messenger() {
   const startRecording = async () => {
     if (!activeConv) return;
     if (!navigator.mediaDevices?.getUserMedia) {
-      alert('Votre navigateur ne supporte pas l\'enregistrement audio.');
+      alert(t('messenger.micNotSupported'));
       return;
     }
     try {
@@ -260,7 +262,7 @@ export default function Messenger() {
         });
       }, 1000);
     } catch (e) {
-      alert('Accès au micro refusé ou indisponible.');
+      alert(t('messenger.micDenied'));
     }
   };
 
@@ -305,7 +307,7 @@ export default function Messenger() {
       setRecordedDuration(0);
       setRecTime(0);
     } catch (err) {
-      alert(err.response?.data?.message || 'Erreur lors de l\'envoi du message vocal');
+      alert(err.response?.data?.message || t('messenger.voiceSendError'));
     } finally { setSendingAudio(false); }
   };
 
@@ -323,7 +325,7 @@ export default function Messenger() {
       setDeleteTarget(null);
     } catch (err) {
       setDeleteTarget(null);
-      alert(err.response?.data?.message || 'Erreur');
+      alert(err.response?.data?.message || t('messenger.error'));
     }
   };
 
@@ -337,7 +339,7 @@ export default function Messenger() {
     } catch (err) {
       setDeleteMsgTarget(null);
       setMsgMenuFor(null);
-      alert(err.response?.data?.message || 'Erreur lors de la suppression');
+      alert(err.response?.data?.message || t('messenger.deleteError'));
     }
   };
 
@@ -350,7 +352,7 @@ export default function Messenger() {
       <div className="messenger-container">
         <div className={`messenger-sidebar ${showMobileList ? '' : 'messenger-hide-mobile'}`}>
           <div className="messenger-sidebar-header">
-            <h2><FiMessageCircle size={18} /> Messages</h2>
+            <h2><FiMessageCircle size={18} /> {t('messenger.title')}</h2>
           </div>
           <div className="messenger-conv-list">
             {loading ? (
@@ -358,8 +360,8 @@ export default function Messenger() {
             ) : conversations.length === 0 ? (
               <div style={{ padding: '40px 20px', textAlign: 'center', color: 'var(--text-muted)', fontSize: '14px' }}>
                 <FiMessageCircle size={32} style={{ opacity: 0.3, marginBottom: '8px' }} />
-                <p>Aucune conversation</p>
-                <p style={{ fontSize: '12px', marginTop: '4px' }}>Contactez un vendeur depuis un produit</p>
+                <p>{t('messenger.noConversations')}</p>
+                <p style={{ fontSize: '12px', marginTop: '4px' }}>{t('messenger.noConversationsHint')}</p>
               </div>
             ) : conversations.map((c) => {
               const isActive = Number(activeConv) === c.id;
@@ -381,7 +383,7 @@ export default function Messenger() {
                     <button
                       className="messenger-conv-delete"
                       onClick={(e) => { e.stopPropagation(); setDeleteTarget(c.id); }}
-                      title="Supprimer la conversation"
+                      title={t('messenger.deleteConversation')}
                     >
                       <FiTrash2 size={15} />
                     </button>
@@ -396,10 +398,10 @@ export default function Messenger() {
           {!activeConv ? (
             <div className="messenger-empty">
               <FiMessageCircle size={48} />
-              <h3>Vos messages</h3>
-              <p>Sélectionnez une conversation ou contactez un vendeur depuis un produit.</p>
+              <h3>{t('messenger.yourMessages')}</h3>
+              <p>{t('messenger.emptyHint')}</p>
               <Link to="/products" className="btn btn-primary" style={{ marginTop: '12px' }}>
-                <FiShoppingBag size={16} /> Voir les produits
+                <FiShoppingBag size={16} /> {t('messenger.viewProducts')}
               </Link>
             </div>
           ) : (
@@ -420,7 +422,7 @@ export default function Messenger() {
               <div className="messenger-messages" ref={messagesContainerRef}>
                 {messages.length === 0 ? (
                   <div style={{ textAlign: 'center', color: 'var(--text-muted)', padding: '40px', fontSize: '14px' }}>
-                    Aucun message. Envoyez le premier message !
+                    {t('messenger.noMessages')}
                   </div>
                 ) : (<>
                   <div className="messenger-messages-spacer" />
@@ -434,7 +436,7 @@ export default function Messenger() {
                           <button
                             className={`messenger-msg-menu-btn${msgMenuFor === msg.id ? ' open' : ''}`}
                             onClick={() => setMsgMenuFor(msgMenuFor === msg.id ? null : msg.id)}
-                            title="Options du message"
+                            title={t('messenger.messageOptions')}
                           >
                             <FiMoreVertical size={16} />
                           </button>
@@ -443,7 +445,7 @@ export default function Messenger() {
                           <span className="messenger-msg-time">{new Date(msg.created_at).toLocaleTimeString('fr-FR', { hour: '2-digit', minute: '2-digit' })}</span>
                           {isMine && (
                             <span className={`messenger-read-state${msg.read_at ? ' read' : ''}`}>
-                              {msg.read_at ? 'Lu' : 'Envoyé'}
+                              {msg.read_at ? t('messenger.read') : t('messenger.sent')}
                             </span>
                           )}
                         </div>
@@ -451,11 +453,11 @@ export default function Messenger() {
                           <div className="messenger-msg-menu">
                             {isMine && (
                               <button className="messenger-msg-menu-item" onClick={() => { setMsgMenuFor(null); setDeleteMsgTarget(msg); }}>
-                                <FiTrash2 size={14} /> Supprimer
+                                <FiTrash2 size={14} /> {t('common.delete')}
                               </button>
                             )}
                             <button className="messenger-msg-menu-item" onClick={() => { setMsgMenuFor(null); setInfoTarget(msg); }}>
-                              <FiInfo size={14} /> Infos
+                              <FiInfo size={14} /> {t('messenger.info')}
                             </button>
                           </div>
                         )}
@@ -478,7 +480,7 @@ export default function Messenger() {
                             color: isMine ? 'rgba(255,255,255,0.85)' : 'var(--primary)',
                           }}
                         >
-                          {isExpanded ? 'Afficher moins' : 'Afficher la suite'}
+                          {isExpanded ? t('messenger.showLess') : t('messenger.showMore')}
                         </button>
                       )}
                       <div className="messenger-msg-time">{new Date(msg.created_at).toLocaleTimeString('fr-FR', { hour: '2-digit', minute: '2-digit' })}</div>
@@ -487,7 +489,7 @@ export default function Messenger() {
                 })}
                 {typingName && (
                   <div className="messenger-msg theirs messenger-typing">
-                    <div className="messenger-msg-text"><em>{typingName}</em> écrit...</div>
+                    <div className="messenger-msg-text"><em>{typingName}</em>{t('messenger.typing', { name: '' })}</div>
                   </div>
                 )}
                 <div ref={messagesEndRef} />
@@ -499,11 +501,11 @@ export default function Messenger() {
                   <div className="messenger-recording">
                     <div className="messenger-rec-dot" />
                     <span className="messenger-rec-timer">0:{String(recTime).padStart(2, '0')}</span>
-                    <span className="messenger-rec-hint">Enregistrement…</span>
-                    <button onClick={stopRecording} className="messenger-rec-stop" title="Arrêter et envoyer">
+                    <span className="messenger-rec-hint">{t('messenger.recording')}</span>
+                    <button onClick={stopRecording} className="messenger-rec-stop" title={t('messenger.stopAndSend')}>
                       <FiSend size={16} />
                     </button>
-                    <button onClick={cancelRecording} className="messenger-rec-cancel" title="Annuler">
+                    <button onClick={cancelRecording} className="messenger-rec-cancel" title={t('common.cancel')}>
                       <FiX size={16} />
                     </button>
                   </div>
@@ -512,10 +514,10 @@ export default function Messenger() {
                     <div className="messenger-preview-audio">
                       <AudioPlayer src={recordedUrl} duration={recordedDuration} size="preview" />
                     </div>
-                    <button onClick={sendAudio} disabled={sendingAudio} className="messenger-rec-stop" title="Envoyer">
+                    <button onClick={sendAudio} disabled={sendingAudio} className="messenger-rec-stop" title={t('common.send')}>
                       <FiSend size={16} />
                     </button>
-                    <button onClick={cancelRecording} className="messenger-rec-cancel" title="Supprimer">
+                    <button onClick={cancelRecording} className="messenger-rec-cancel" title={t('common.delete')}>
                       <FiX size={16} />
                     </button>
                   </div>
@@ -524,7 +526,7 @@ export default function Messenger() {
                     <input
                       ref={inputRef}
                       type="text"
-                      placeholder="Écrivez un message..."
+                      placeholder={t('messenger.writeMessage')}
                       value={text}
                       onChange={handleInputChange}
                       onKeyDown={handleKeyDown}
@@ -532,7 +534,7 @@ export default function Messenger() {
                       maxLength={100}
                       className="messenger-input"
                     />
-                    <button onClick={startRecording} disabled={sending} className="messenger-mic-btn" title="Message vocal (max 60s)">
+                    <button onClick={startRecording} disabled={sending} className="messenger-mic-btn" title={t('messenger.voiceMessage')}>
                       <FiMic size={18} />
                     </button>
                     <button onClick={handleSend} disabled={!text.trim() || sending} className="messenger-send-btn">
@@ -551,12 +553,12 @@ export default function Messenger() {
         <div className="messenger-confirm-overlay" onClick={() => setDeleteTarget(null)}>
           <div className="messenger-confirm" onClick={(e) => e.stopPropagation()}>
             <div className="messenger-confirm-icon"><FiTrash2 size={26} /></div>
-            <h3>Supprimer la conversation ?</h3>
-            <p>Cette conversation et tous ses messages seront supprimés définitivement. Cette action est irréversible.</p>
+            <h3>{t('messenger.deleteConvTitle')}</h3>
+            <p>{t('messenger.deleteConvDesc')}</p>
             <div className="messenger-confirm-actions">
-              <button className="btn" onClick={() => setDeleteTarget(null)}>Annuler</button>
+              <button className="btn" onClick={() => setDeleteTarget(null)}>{t('common.cancel')}</button>
               <button className="messenger-confirm-delete-btn" onClick={() => handleDeleteConv(deleteTarget)}>
-                <FiTrash2 size={15} /> Supprimer
+                <FiTrash2 size={15} /> {t('common.delete')}
               </button>
             </div>
           </div>
@@ -566,12 +568,12 @@ export default function Messenger() {
         <div className="messenger-confirm-overlay" onClick={() => setDeleteMsgTarget(null)}>
           <div className="messenger-confirm" onClick={(e) => e.stopPropagation()}>
             <div className="messenger-confirm-icon"><FiTrash2 size={26} /></div>
-            <h3>Supprimer ce message ?</h3>
-            <p>Ce message vocal sera supprimé pour vous et votre correspondant. Cette action est irréversible.</p>
+            <h3>{t('messenger.deleteMsgTitle')}</h3>
+            <p>{t('messenger.deleteMsgDesc')}</p>
             <div className="messenger-confirm-actions">
-              <button className="btn" onClick={() => setDeleteMsgTarget(null)}>Annuler</button>
+              <button className="btn" onClick={() => setDeleteMsgTarget(null)}>{t('common.cancel')}</button>
               <button className="messenger-confirm-delete-btn" onClick={handleDeleteMsg}>
-                <FiTrash2 size={15} /> Supprimer
+                <FiTrash2 size={15} /> {t('common.delete')}
               </button>
             </div>
           </div>
@@ -582,15 +584,15 @@ export default function Messenger() {
         <div className="messenger-confirm-overlay" onClick={() => setInfoTarget(null)}>
           <div className="messenger-confirm" onClick={(e) => e.stopPropagation()}>
             <div className="messenger-confirm-icon"><FiInfo size={26} /></div>
-            <h3>Infos du message</h3>
-            <p>Message vocal envoyé le <strong>{new Date(infoTarget.created_at).toLocaleString('fr-FR', { day: 'numeric', month: 'long', hour: '2-digit', minute: '2-digit' })}</strong>.</p>
+            <h3>{t('messenger.msgInfoTitle')}</h3>
+            <p>{t('messenger.voiceSentAt')} <strong>{new Date(infoTarget.created_at).toLocaleString('fr-FR', { day: 'numeric', month: 'long', hour: '2-digit', minute: '2-digit' })}</strong>.</p>
             <p>
               {infoTarget.read_at
-                ? <>Écouté par le destinataire le <strong>{new Date(infoTarget.read_at).toLocaleString('fr-FR', { day: 'numeric', month: 'long', hour: '2-digit', minute: '2-digit' })}</strong>.</>
-                : <><strong>Pas encore écouté</strong> par le destinataire.</>}
+                ? <>{t('messenger.listenedByRecipient')} <strong>{new Date(infoTarget.read_at).toLocaleString('fr-FR', { day: 'numeric', month: 'long', hour: '2-digit', minute: '2-digit' })}</strong>.</>
+                : <><strong>{t('messenger.notListened')}</strong> {t('messenger.byRecipient')}.</>}
             </p>
             <div className="messenger-confirm-actions">
-              <button className="btn" onClick={() => setInfoTarget(null)}>Fermer</button>
+              <button className="btn" onClick={() => setInfoTarget(null)}>{t('common.close')}</button>
             </div>
           </div>
         </div>

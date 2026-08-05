@@ -1,22 +1,23 @@
 import { FiLock, FiAlertTriangle, FiX } from 'react-icons/fi';
+import { useLanguage } from '../context/LanguageContext';
 
 export default function SuspendedModal({ reason, onClose }) {
+  const { t } = useLanguage();
   return (
-    <div className="suspended-overlay" role="dialog" aria-modal="true" aria-label="Compte suspendu">
+    <div className="suspended-overlay" role="dialog" aria-modal="true" aria-label={t('common.suspendedTitle')}>
       <div className="suspended-modal">
-        <button className="suspended-close" onClick={onClose} aria-label="Fermer"><FiX size={20} /></button>
+        <button className="suspended-close" onClick={onClose} aria-label={t('common.close')}><FiX size={20} /></button>
         <div className="suspended-icon">
           <FiLock size={32} />
         </div>
-        <h2>Compte suspendu</h2>
+        <h2>{t('common.suspendedTitle')}</h2>
         <p className="suspended-reason">
-          {reason || 'Votre compte a ete suspendu par l administration.'}
+          {reason || t('common.suspendedReasonDefault')}
         </p>
         <div className="suspended-note">
           <FiAlertTriangle size={16} />
           <span>
-            Tant que votre compte est suspendu, vous ne pouvez pas effectuer d'actions sur le site.
-            Contactez l'administration pour sa reactivation.
+            {t('common.suspendedNote')}
           </span>
         </div>
         <p className="suspended-contact">
@@ -24,7 +25,7 @@ export default function SuspendedModal({ reason, onClose }) {
         </p>
         {onClose && (
           <button className="btn btn-outline" onClick={onClose} style={{ width: '100%', justifyContent: 'center', marginTop: '18px' }}>
-            Fermer
+            {t('common.close')}
           </button>
         )}
       </div>

@@ -11,6 +11,9 @@
           var valid = ['light', 'sable', 'mint', 'sky', 'rose', 'lavender', 'dark'];
           if (valid.indexOf(t) === -1) t = 'light';
           document.documentElement.setAttribute('data-theme', t);
+          var l = localStorage.getItem('lang');
+          document.documentElement.setAttribute('lang', l === 'ar' ? 'ar' : 'fr');
+          document.documentElement.setAttribute('dir', l === 'ar' ? 'rtl' : 'ltr');
         } catch (e) { document.documentElement.setAttribute('data-theme', 'light'); }
       })();
     </script>
@@ -27,7 +30,7 @@
     <link rel="icon" type="image/x-icon" href="/favicon.ico" />
     <link rel="apple-touch-icon" href="/favicon.ico" />
     <link rel="manifest" href="/manifest.json" />
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet" />
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=Cairo:wght@300;400;500;600;700;800&display=swap" rel="stylesheet" />
   </head>
   <body>
     <div id="root"></div>

@@ -1,9 +1,11 @@
 import { useState } from 'react';
 import { Link, useSearchParams, useNavigate } from 'react-router-dom';
 import { FiLock, FiCheckCircle } from 'react-icons/fi';
+import { useLanguage } from '../context/LanguageContext';
 import api from '../api/axios';
 
 export default function ResetPassword() {
+  const { t } = useLanguage();
   const [searchParams] = useSearchParams();
   const identifierParam = searchParams.get('identifier') || '';
   const userIdParam = searchParams.get('userId') || '';
@@ -24,7 +26,7 @@ export default function ResetPassword() {
       await api.post('/auth/reset-password', body);
       setSuccess(true);
     } catch (err) {
-      setError(err.response?.data?.message || 'Erreur.');
+      setError(err.response?.data?.message || t('auth.genericError'));
     } finally {
       setLoading(false);
     }
@@ -35,9 +37,9 @@ export default function ResetPassword() {
       <div className="auth-page">
         <div className="auth-container">
           <div className="auth-card">
-            <p style={{ textAlign: 'center', color: 'var(--text-secondary)' }}>Lien invalide. Veuillez refaire une demande.</p>
+            <p style={{ textAlign: 'center', color: 'var(--text-secondary)' }}>{t('auth.invalidLink')}</p>
             <Link to="/forgot-password" className="btn btn-primary" style={{ width: '100%', justifyContent: 'center', marginTop: '16px' }}>
-              Mot de passe oublie ?
+              {t('auth.forgotPasswordTitle')}
             </Link>
           </div>
         </div>
@@ -51,10 +53,10 @@ export default function ResetPassword() {
         <div className="auth-container">
           <div className="auth-card" style={{ textAlign: 'center' }}>
             <FiCheckCircle size={48} style={{ color: 'var(--success)', marginBottom: '16px' }} />
-            <h2 style={{ marginBottom: '8px' }}>Mot de passe reinitialise</h2>
-            <p style={{ color: 'var(--text-secondary)', marginBottom: '24px' }}>Votre mot de passe a ete modifie avec succes.</p>
+            <h2 style={{ marginBottom: '8px' }}>{t('auth.passwordResetSuccess')}</h2>
+            <p style={{ color: 'var(--text-secondary)', marginBottom: '24px' }}>{t('auth.passwordChangedSuccess')}</p>
             <Link to="/login" className="btn btn-primary" style={{ width: '100%', justifyContent: 'center' }}>
-              Se connecter
+              {t('auth.loginButton')}
             </Link>
           </div>
         </div>
@@ -66,21 +68,21 @@ export default function ResetPassword() {
     <div className="auth-page">
       <div className="auth-container">
         <div className="auth-header">
-          <h1>Reinitialisation</h1>
-          <p>Entrez le code recu par SMS et votre nouveau mot de passe</p>
+          <h1>{t('auth.resetTitle')}</h1>
+          <p>{t('auth.resetSubtitle')}</p>
         </div>
         <div className="auth-card">
           {error && <div className="alert alert-error">{error}</div>}
           <form onSubmit={handleSubmit}>
             <div className="form-group">
-              <label>Email / Telephone</label>
+              <label>{t('auth.emailPhoneLabel')}</label>
               <input type="text" value={identifierParam} disabled style={{ opacity: 0.6 }} />
             </div>
             <div className="form-group">
-              <label>Code de verification</label>
+              <label>{t('auth.verificationCodeLabel')}</label>
               <input
                 type="text"
-                placeholder="123456"
+                placeholder={t('auth.verificationCodePlaceholder')}
                 value={code}
                 onChange={(e) => setCode(e.target.value.replace(/\D/g, '').slice(0, 6))}
                 required
@@ -89,12 +91,12 @@ export default function ResetPassword() {
               />
             </div>
             <div className="form-group">
-              <label>Nouveau mot de passe</label>
+              <label>{t('auth.newPasswordLabel')}</label>
               <div style={{ position: 'relative' }}>
                 <FiLock size={18} style={{ position: 'absolute', left: '14px', top: '14px', color: 'var(--text-muted)' }} />
                 <input
                   type="password"
-                  placeholder="Au moins 6 caracteres"
+                  placeholder={t('auth.newPasswordPlaceholder')}
                   value={newPassword}
                   onChange={(e) => setNewPassword(e.target.value)}
                   required
@@ -104,11 +106,11 @@ export default function ResetPassword() {
               </div>
             </div>
             <button type="submit" className="form-submit" disabled={loading}>
-              {loading ? 'Reinitialisation...' : 'Reinitialiser le mot de passe'}
+              {loading ? t('auth.resetting') : t('auth.resetPasswordButton')}
             </button>
           </form>
           <div className="form-footer">
-            <Link to="/login">Retour a la connexion</Link>
+            <Link to="/login">{t('auth.backToLogin')}</Link>
           </div>
         </div>
       </div>

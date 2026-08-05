@@ -3,7 +3,9 @@ import { FiUser, FiLogOut, FiSettings, FiChevronDown, FiSmartphone, FiMonitor, F
 import { useState, useRef, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useAuth } from '../context/AuthContext';
+import { useLanguage } from '../context/LanguageContext';
 import ThemeToggle from './ThemeToggle';
+import LanguageToggle from './LanguageToggle';
 import PremiumPopup from './PremiumPopup';
 import api from '../api/axios';
 
@@ -18,6 +20,7 @@ const categories = [
 
 export default function Navbar() {
   const { user, logout } = useAuth();
+  const { t } = useLanguage();
   const navigate = useNavigate();
   const location = useLocation();
   const isProductsActive = location.pathname.startsWith('/products');
@@ -119,7 +122,7 @@ export default function Navbar() {
           <Link to="/" className="navbar-logo"><span>O</span>G</Link>
 
           <div className="navbar-desktop-nav">
-            <NavLink to="/" end>Accueil</NavLink>
+            <NavLink to="/" end>{t('nav.home')}</NavLink>
             <div className="navbar-prods"
               ref={prodsRef}
               onMouseEnter={() => setProdsOpen(true)}
@@ -128,7 +131,7 @@ export default function Navbar() {
               <button className={`navbar-prods-btn${isProductsActive ? ' active' : ''}`}
                 onClick={() => setProdsOpen((o) => !o)}
               >
-                Produits <FiChevronDown size={12} />
+                {t('nav.products')} <FiChevronDown size={12} />
               </button>
               <AnimatePresence>
                 {prodsOpen && (
@@ -139,9 +142,9 @@ export default function Navbar() {
                     exit={{ opacity: 0, y: -8 }}
                     transition={{ duration: 0.15 }}
                   >
-                    <Link to="/products" onClick={() => setProdsOpen(false)}>Tous les produits</Link>
+                    <Link to="/products" onClick={() => setProdsOpen(false)}>{t('nav.allProducts')}</Link>
                     <Link to="/boutique" onClick={() => setProdsOpen(false)} style={{ color: '#d97706', fontWeight: 600 }}>
-                      <FiShield size={14} /> Boutique Officielle
+                      <FiShield size={14} /> {t('nav.officialStore')}
                     </Link>
                     <div style={{ height: 1, background: 'var(--border)', margin: '4px 0' }} />
                     {categories.map((cat) => {
@@ -159,21 +162,22 @@ export default function Navbar() {
                 )}
               </AnimatePresence>
             </div>
-            <NavLink to="/about">À propos</NavLink>
+            <NavLink to="/about">{t('nav.about')}</NavLink>
             {user?.role == 'seller' ? (
-              <NavLink to="/reprise/list" className="navbar-sell-link"><FiSmartphone size={14} /> Demandes reprise</NavLink>
+              <NavLink to="/reprise/list" className="navbar-sell-link"><FiSmartphone size={14} /> {t('nav.tradeInRequests')}</NavLink>
             ) : user?.role == 'admin' ? null : (
-              <NavLink to="/reprise" className="navbar-sell-link"><FiSmartphone size={14} /> Reprise</NavLink>
+              <NavLink to="/reprise" className="navbar-sell-link"><FiSmartphone size={14} /> {t('nav.tradeIn')}</NavLink>
             )}
             {user?.role == 'seller' ? (
-              <NavLink to="/seller/products/new" className="navbar-sell-link"><FiTrendingUp size={14} /> Vendre</NavLink>
+              <NavLink to="/seller/products/new" className="navbar-sell-link"><FiTrendingUp size={14} /> {t('nav.sell')}</NavLink>
             ) : user?.role !== 'admin' && (
-              <NavLink to="/vendre" className="navbar-sell-link"><FiTrendingUp size={14} /> Vendre</NavLink>
+              <NavLink to="/vendre" className="navbar-sell-link"><FiTrendingUp size={14} /> {t('nav.sell')}</NavLink>
             )}
           </div>
 
           <div className="navbar-actions">
             <ThemeToggle />
+            <LanguageToggle />
             {user && (
               <div className="navbar-notif" ref={notifRef}>
                 <button className="navbar-notif-btn" onClick={openNotifs} aria-label="Notifications">
@@ -189,16 +193,16 @@ export default function Navbar() {
                       transition={{ duration: 0.15 }}
                     >
                       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '8px 12px', borderBottom: '1px solid var(--border)' }}>
-                        <strong style={{ fontSize: 13 }}>Notifications</strong>
+                        <strong style={{ fontSize: 13 }}>{t('nav.notifications')}</strong>
                         <div style={{ display: 'flex', gap: 8 }}>
                           {notifications.length > 0 && (
                             <button onClick={cleanAll} style={{ fontSize: 10, background: 'none', border: 'none', color: 'var(--error)', cursor: 'pointer', fontFamily: 'var(--font)', padding: 0 }}>
-                              Vider
+                              {t('nav.clearAll')}
                             </button>
                           )}
                           {notifications.some(n => !n.read_at) && (
                             <button onClick={markAllRead} style={{ fontSize: 10, background: 'none', border: 'none', color: 'var(--primary)', cursor: 'pointer', fontFamily: 'var(--font)', padding: 0 }}>
-                              Tout marquer lu
+                              {t('nav.markAllRead')}
                             </button>
                           )}
                         </div>
@@ -206,7 +210,7 @@ export default function Navbar() {
                       <div style={{ maxHeight: 280, overflowY: 'auto' }}>
                         {notifications.length === 0 ? (
                           <div style={{ padding: '20px 16px', textAlign: 'center', fontSize: 12, color: 'var(--text-muted)' }}>
-                            Aucune notification
+                            {t('nav.noNotifications')}
                           </div>
                         ) : notifications.slice(0, 10).map(n => (
                           <button key={n.id} onClick={() => markRead(n)} style={{
@@ -246,41 +250,41 @@ export default function Navbar() {
                       transition={{ duration: 0.15 }}
                     >
                       <NavLink to="/profile" onClick={() => setDropdownOpen(false)}>
-                        <FiUser size={14} /> Mon Profil
+                        <FiUser size={14} /> {t('nav.myProfile')}
                       </NavLink>
                       {user.role !== 'admin' && (
                         <>
                           <NavLink to="/offres" onClick={() => setDropdownOpen(false)}>
-                            <FiMessageCircle size={14} /> Mes offres
+                            <FiMessageCircle size={14} /> {t('nav.myOffers')}
                           </NavLink>
                           <NavLink to="/messenger" onClick={() => setDropdownOpen(false)}>
-                            <FiMessageCircle size={14} /> Messages
+                            <FiMessageCircle size={14} /> {t('nav.messages')}
                           </NavLink>
                         </>
                       )}
                       {user.role !== 'admin' && (
                         user.premium ? (
                           <span className="navbar-premium-badge" onClick={() => setDropdownOpen(false)}>
-                            <FiStar size={14} /> Premium
+                            <FiStar size={14} /> {t('nav.premium')}
                           </span>
                         ) : (
                           <button onClick={() => { setDropdownOpen(false); setShowPremium(true); }} className="navbar-premium-btn">
-                            <FiStar size={14} /> Passer Premium
+                            <FiStar size={14} /> {t('nav.goPremium')}
                           </button>
                         )
                       )}
                       {(user.role === 'seller') && (
                         <NavLink to="/seller" onClick={() => setDropdownOpen(false)}>
-                          <FiShoppingBag size={14} /> Tableau de Bord
+                          <FiShoppingBag size={14} /> {t('nav.dashboard')}
                         </NavLink>
                       )}
                       {user.role === 'admin' && (
                         <NavLink to="/admin" onClick={() => setDropdownOpen(false)}>
-                          <FiPackage size={14} /> Dashboard
+                          <FiPackage size={14} /> {t('nav.adminDashboard')}
                         </NavLink>
                       )}
                       <button onClick={() => { logout(); navigate('/'); setDropdownOpen(false); }}>
-                        <FiLogOut size={14} /> Déconnexion
+                        <FiLogOut size={14} /> {t('nav.logout')}
                       </button>
                     </motion.div>
                   )}
@@ -288,8 +292,8 @@ export default function Navbar() {
               </div>
             ) : (
               <motion.div className="navbar-auth" initial={{ opacity: 0 }} animate={{ opacity: 1 }}>
-                <Link to="/login" className="navbar-login">Connexion</Link>
-                <Link to="/signup" className="navbar-signup">S'inscrire</Link>
+                <Link to="/login" className="navbar-login">{t('nav.login')}</Link>
+                <Link to="/signup" className="navbar-signup">{t('nav.signup')}</Link>
               </motion.div>
             )}
             <button className={`navbar-hamburger${menuOpen ? ' active' : ''}`} onClick={() => setMenuOpen((o) => !o)} aria-label="Menu">
@@ -300,13 +304,13 @@ export default function Navbar() {
       </motion.nav>
 
       <div className={`navbar-mobile-panel${menuOpen ? ' open' : ''}`} ref={panelRef}>
-        <NavLink to="/" end onClick={closeMenu}>Accueil</NavLink>
+        <NavLink to="/" end onClick={closeMenu}>{t('nav.home')}</NavLink>
         <button onClick={() => setMobileProdsOpen(o => !o)} style={{
           background: 'none', border: 'none', color: 'inherit', cursor: 'pointer', width: '100%',
           padding: '10px', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 6,
           fontSize: 14, fontFamily: 'var(--font)', fontWeight: 500,
         }}>
-          Produits
+          {t('nav.products')}
           <FiChevronDown size={14} style={{ transform: mobileProdsOpen ? 'rotate(180deg)' : 'none', transition: 'transform 0.2s' }} />
         </button>
         {mobileProdsOpen && categories.map((cat) => {
@@ -319,56 +323,56 @@ export default function Navbar() {
             </Link>
           );
         })}
-        <Link to="/products" onClick={closeMenu} style={{ display: 'block', fontSize: 14, padding: '10px', opacity: 0.6, fontWeight: 500 }}>Tous les produits →</Link>
+        <Link to="/products" onClick={closeMenu} style={{ display: 'block', fontSize: 14, padding: '10px', opacity: 0.6, fontWeight: 500 }}>{t('nav.allProducts')} →</Link>
         <Link to="/boutique" onClick={closeMenu} style={{ display: 'block', fontSize: 14, padding: '10px', fontWeight: 600, color: '#d97706' }}>
-          <FiShield size={14} style={{ verticalAlign: 'middle', marginRight: 4 }} /> Boutique Officielle
+          <FiShield size={14} style={{ verticalAlign: 'middle', marginRight: 4 }} /> {t('nav.officialStore')}
         </Link>
-        <NavLink to="/about" onClick={closeMenu}>À propos</NavLink>
+        <NavLink to="/about" onClick={closeMenu}>{t('nav.about')}</NavLink>
         {user?.role == 'seller' ? (
-          <NavLink to="/reprise/list" onClick={closeMenu}><FiSmartphone size={14} /> Demandes reprise</NavLink>
+          <NavLink to="/reprise/list" onClick={closeMenu}><FiSmartphone size={14} /> {t('nav.tradeInRequests')}</NavLink>
         ) : user?.role == 'admin' ? null : (
-          <NavLink to="/reprise" onClick={closeMenu}><FiSmartphone size={14} /> Reprise</NavLink>
+          <NavLink to="/reprise" onClick={closeMenu}><FiSmartphone size={14} /> {t('nav.tradeIn')}</NavLink>
         )}
         {user?.role == 'seller' ? (
-          <NavLink to="/seller/products/new" onClick={closeMenu} className="navbar-mobile-sell"><FiTrendingUp size={14} /> Vendre</NavLink>
+          <NavLink to="/seller/products/new" onClick={closeMenu} className="navbar-mobile-sell"><FiTrendingUp size={14} /> {t('nav.sell')}</NavLink>
         ) : user?.role !== 'admin' && (
-          <NavLink to="/vendre" onClick={closeMenu} className="navbar-mobile-sell"><FiTrendingUp size={14} /> Vendre</NavLink>
+          <NavLink to="/vendre" onClick={closeMenu} className="navbar-mobile-sell"><FiTrendingUp size={14} /> {t('nav.sell')}</NavLink>
         )}
         <div className="navbar-mobile-divider" />
         {user ? (
           <>
-            <NavLink to="/profile" onClick={closeMenu}><FiUser size={14} /> Mon Profil</NavLink>
+            <NavLink to="/profile" onClick={closeMenu}><FiUser size={14} /> {t('nav.myProfile')}</NavLink>
             {user.role !== 'admin' && (
               <>
-                <NavLink to="/offres" onClick={closeMenu}><FiMessageCircle size={14} /> Mes offres</NavLink>
-                <NavLink to="/messenger" onClick={closeMenu}><FiMessageCircle size={14} /> Messages</NavLink>
+                <NavLink to="/offres" onClick={closeMenu}><FiMessageCircle size={14} /> {t('nav.myOffers')}</NavLink>
+                <NavLink to="/messenger" onClick={closeMenu}><FiMessageCircle size={14} /> {t('nav.messages')}</NavLink>
               </>
             )}
             {user.role !== 'admin' && (
               user.premium ? (
                 <span className="navbar-premium-badge" style={{ padding: '10px', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 6, fontSize: 14, fontWeight: 500 }}>
-                  <FiStar size={14} /> Premium
+                  <FiStar size={14} /> {t('nav.premium')}
                 </span>
               ) : (
                 <button onClick={() => { closeMenu(); setShowPremium(true); }} style={{ padding: '10px', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 6, fontSize: 14, fontWeight: 500, background: 'none', border: 'none', color: 'inherit', cursor: 'pointer', width: '100%' }}>
-                  <FiStar size={14} /> Passer Premium
+                  <FiStar size={14} /> {t('nav.goPremium')}
                 </button>
               )
             )}
             {(user.role === 'seller') && (
-              <NavLink to="/seller" onClick={closeMenu}><FiShoppingBag size={14} /> Tableau de Bord</NavLink>
+              <NavLink to="/seller" onClick={closeMenu}><FiShoppingBag size={14} /> {t('nav.dashboard')}</NavLink>
             )}
             {user.role === 'admin' && (
-              <NavLink to="/admin" onClick={closeMenu}><FiPackage size={14} /> Dashboard</NavLink>
+              <NavLink to="/admin" onClick={closeMenu}><FiPackage size={14} /> {t('nav.adminDashboard')}</NavLink>
             )}
             <button onClick={() => { logout(); navigate('/'); closeMenu(); }} className="navbar-mobile-logout">
-              <FiLogOut size={14} /> Déconnexion
+              <FiLogOut size={14} /> {t('nav.logout')}
             </button>
           </>
         ) : (
           <>
-            <NavLink to="/login" onClick={closeMenu}>Connexion</NavLink>
-            <Link to="/signup" className="navbar-mobile-signup" onClick={closeMenu}>S'inscrire</Link>
+            <NavLink to="/login" onClick={closeMenu}>{t('nav.login')}</NavLink>
+            <Link to="/signup" className="navbar-mobile-signup" onClick={closeMenu}>{t('nav.signup')}</Link>
           </>
         )}
       </div>
@@ -384,16 +388,16 @@ export default function Navbar() {
             <div style={{ width: 56, height: 56, borderRadius: '50%', background: 'rgba(239,68,68,0.1)', display: 'flex', alignItems: 'center', justifyContent: 'center', margin: '0 auto 16px' }}>
               <FiTrash2 size={26} color="#dc2626" />
             </div>
-            <h3 style={{ fontSize: 18, fontWeight: 700, marginBottom: 8 }}>Vider les notifications ?</h3>
+            <h3 style={{ fontSize: 18, fontWeight: 700, marginBottom: 8 }}>{t('nav.clearNotifsTitle')}</h3>
             <p style={{ fontSize: 14, color: 'var(--text-secondary)', marginBottom: 24, lineHeight: 1.5 }}>
-              Cette action est irreversible. Toutes vos notifications seront supprimees.
+              {t('nav.clearNotifsDesc')}
             </p>
             <div style={{ display: 'flex', gap: 10 }}>
               <button onClick={() => setShowCleanConfirm(false)} className="btn btn-outline" style={{ flex: 1, justifyContent: 'center', padding: '10px 0' }}>
-                Annuler
+                {t('nav.cancel')}
               </button>
               <button onClick={confirmClean} className="form-submit" style={{ flex: 1, justifyContent: 'center', padding: '10px 0', background: '#dc2626', borderColor: '#dc2626' }}>
-                <FiTrash2 size={14} /> Vider
+                <FiTrash2 size={14} /> {t('nav.clearAll')}
               </button>
             </div>
           </motion.div>

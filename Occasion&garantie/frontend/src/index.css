@@ -1216,6 +1216,9 @@ select.form-control, .form-group select { cursor: pointer; appearance: auto; }
 .theme-toggle { background: none; border: none; color: var(--text-secondary); cursor: pointer; padding: 6px; border-radius: 50%; font-size: 16px; display: flex; align-items: center; justify-content: center; transition: var(--transition); position: relative; }
 .theme-toggle:hover { background: var(--bg-hover); }
 
+.language-toggle { background: none; border: 1px solid var(--border); color: var(--text-secondary); cursor: pointer; padding: 4px 9px; border-radius: 20px; font-size: 12px; font-weight: 600; display: flex; align-items: center; justify-content: center; transition: var(--transition); font-family: var(--font); min-width: 44px; }
+.language-toggle:hover { background: var(--bg-hover); border-color: var(--primary); color: var(--primary); }
+
 .theme-sphere {
   position: relative; display: inline-block;
   width: 26px; height: 26px; border-radius: 50%;
@@ -2547,4 +2550,42 @@ select.form-control, .form-group select { cursor: pointer; appearance: auto; }
 @keyframes brandsLoop {
   0% { transform: translateX(0); }
   100% { transform: translateX(-50%); }
+}
+
+/* ============ RTL support ============ */
+[dir='rtl'] body,
+[dir='rtl'] input,
+[dir='rtl'] button,
+[dir='rtl'] textarea,
+[dir='rtl'] select {
+  font-family: 'Cairo', 'Segoe UI', Tahoma, sans-serif;
+}
+[dir='rtl'] .navbar-desktop-nav {
+  flex-direction: row-reverse;
+}
+[dir='rtl'] .navbar-actions {
+  flex-direction: row-reverse;
+}
+[dir='rtl'] .navbar-mobile-panel a,
+[dir='rtl'] .navbar-mobile-panel button {
+  text-align: right;
+}
+[dir='rtl'] .navbar-dropdown-menu {
+  right: auto;
+  left: 0;
+}
+[dir='rtl'] .navbar-notif-dropdown {
+  right: auto;
+  left: 0;
+}
+[dir='rtl'] .navbar-prods-menu {
+  left: auto;
+  right: 0;
+}
+[dir='rtl'] .brands-scroll-track {
+  animation-direction: reverse;
+}
+[dir='rtl'] .flex-row,
+[dir='rtl'] .row {
+  flex-direction: row-reverse;
 }

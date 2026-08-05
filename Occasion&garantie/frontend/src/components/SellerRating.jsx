@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react';
 import { FiStar, FiEdit2, FiTrash2 } from 'react-icons/fi';
 import api from '../api/axios';
+import { useLanguage } from '../context/LanguageContext';
 import ConfirmModal from './ConfirmModal';
 
 const starStyle = (fill) => ({
@@ -9,6 +10,7 @@ const starStyle = (fill) => ({
 });
 
 export default function SellerRating({ sellerId, currentUserId }) {
+  const { t } = useLanguage();
   const [ratings, setRatings] = useState([]);
   const [stats, setStats] = useState({ total: 0, avg: 0 });
   const [loading, setLoading] = useState(true);
@@ -50,7 +52,7 @@ export default function SellerRating({ sellerId, currentUserId }) {
       setMyComment('');
       load();
     } catch (err) {
-      alert(err.response?.data?.message || 'Erreur');
+      alert(err.response?.data?.message || t('seller.error'));
     } finally {
       setSubmitting(false);
     }
@@ -64,7 +66,7 @@ export default function SellerRating({ sellerId, currentUserId }) {
       await api.delete('/ratings/' + id);
       load();
     } catch (err) {
-      alert(err.response?.data?.message || 'Erreur');
+      alert(err.response?.data?.message || t('seller.error'));
     }
   };
 
@@ -87,7 +89,7 @@ export default function SellerRating({ sellerId, currentUserId }) {
   return (
     <div style={{ marginTop: '32px', padding: '24px', background: 'var(--bg-card)', border: '1px solid var(--border)', borderRadius: 'var(--radius-lg)' }}>
       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '20px', flexWrap: 'wrap', gap: '12px' }}>
-        <h3 style={{ fontSize: '18px', fontWeight: 700 }}>Avis sur le vendeur</h3>
+        <h3 style={{ fontSize: '18px', fontWeight: 700 }}>{t('seller.ratingTitle')}</h3>
         {stats.total > 0 && (
           <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
             <div style={{ display: 'flex', gap: '2px' }}>
@@ -96,7 +98,7 @@ export default function SellerRating({ sellerId, currentUserId }) {
               ))}
             </div>
             <span style={{ fontWeight: 700, fontSize: '16px' }}>{stats.avg}/5</span>
-            <span style={{ color: 'var(--text-muted)', fontSize: '13px' }}>({stats.total} avis)</span>
+            <span style={{ color: 'var(--text-muted)', fontSize: '13px' }}>{t('seller.reviews', { count: stats.total })}</span>
           </div>
         )}
       </div>
@@ -106,7 +108,7 @@ export default function SellerRating({ sellerId, currentUserId }) {
           {!myExisting || editId ? (
             showForm ? (
               <form onSubmit={handleSubmit} style={{ background: 'var(--bg-secondary)', padding: '16px', borderRadius: 'var(--radius)', border: '1px solid var(--border)' }}>
-                <label style={{ display: 'block', fontSize: '14px', fontWeight: 600, marginBottom: '8px' }}>Votre note</label>
+                <label style={{ display: 'block', fontSize: '14px', fontWeight: 600, marginBottom: '8px' }}>{t('seller.yourRating')}</label>
                 <div style={{ display: 'flex', gap: '4px', marginBottom: '12px' }}>
                   {[1,2,3,4,5].map(s => (
                     <button key={s} type="button" onClick={() => setMyRating(s)} style={{ background: 'none', border: 'none', cursor: 'pointer', padding: '2px' }}>
@@ -114,30 +116,30 @@ export default function SellerRating({ sellerId, currentUserId }) {
                     </button>
                   ))}
                 </div>
-                <textarea value={myComment} onChange={e => setMyComment(e.target.value)} placeholder="Votre commentaire (optionnel)" rows={2} maxLength={150} style={{ width: '100%', padding: '10px', borderRadius: '8px', border: '1px solid var(--border)', background: 'var(--bg-card)', color: 'var(--text-primary)', fontFamily: 'inherit', fontSize: '13px', resize: 'vertical', marginBottom: '10px', boxSizing: 'border-box' }} />
-                <div style={{ fontSize: '11px', color: 'var(--text-muted)', marginBottom: '8px' }}>{myComment.length}/150 caractères</div>
+                <textarea value={myComment} onChange={e => setMyComment(e.target.value)} placeholder={t('seller.commentPlaceholder')} rows={2} maxLength={150} style={{ width: '100%', padding: '10px', borderRadius: '8px', border: '1px solid var(--border)', background: 'var(--bg-card)', color: 'var(--text-primary)', fontFamily: 'inherit', fontSize: '13px', resize: 'vertical', marginBottom: '10px', boxSizing: 'border-box' }} />
+                <div style={{ fontSize: '11px', color: 'var(--text-muted)', marginBottom: '8px' }}>{t('seller.charCount', { count: myComment.length })}</div>
                 <div style={{ display: 'flex', gap: '8px' }}>
                   <button type="submit" className="btn btn-primary" style={{ padding: '8px 20px', fontSize: '13px' }} disabled={submitting || myRating === 0}>
-                    {submitting ? '...' : editId ? 'Modifier' : 'Publier'}
+                    {submitting ? '...' : editId ? t('seller.edit') : t('seller.publish')}
                   </button>
-                  <button type="button" onClick={cancelForm} className="btn btn-ghost" style={{ padding: '8px 20px', fontSize: '13px' }}>Annuler</button>
+                  <button type="button" onClick={cancelForm} className="btn btn-ghost" style={{ padding: '8px 20px', fontSize: '13px' }}>{t('seller.cancel')}</button>
                 </div>
               </form>
             ) : canRate ? (
-              <button onClick={() => setShowForm(true)} className="btn btn-outline" style={{ fontSize: '13px' }}><FiStar size={14} /> Noter ce vendeur</button>
+              <button onClick={() => setShowForm(true)} className="btn btn-outline" style={{ fontSize: '13px' }}><FiStar size={14} /> {t('seller.rateSeller')}</button>
             ) : null
           ) : (
             <p style={{ color: 'var(--success)', fontSize: '13px', marginBottom: '16px', display: 'flex', alignItems: 'center', gap: '8px' }}>
-              <span>Merci pour votre avis !</span>
-              <button onClick={() => startEdit(myExisting)} className="btn btn-ghost" style={{ padding: '4px 10px', fontSize: '12px' }}><FiEdit2 size={12} /> Modifier</button>
-              <button onClick={() => setDeleteTargetId(myExisting.id)} className="btn btn-ghost" style={{ padding: '4px 10px', fontSize: '12px', color: 'var(--error)' }}><FiTrash2 size={12} /> Supprimer</button>
+              <span>{t('seller.thanksForReview')}</span>
+              <button onClick={() => startEdit(myExisting)} className="btn btn-ghost" style={{ padding: '4px 10px', fontSize: '12px' }}><FiEdit2 size={12} /> {t('seller.edit')}</button>
+              <button onClick={() => setDeleteTargetId(myExisting.id)} className="btn btn-ghost" style={{ padding: '4px 10px', fontSize: '12px', color: 'var(--error)' }}><FiTrash2 size={12} /> {t('seller.delete')}</button>
             </p>
           )}
         </div>
       )}
 
       {ratings.length === 0 ? (
-        <p style={{ color: 'var(--text-muted)', fontSize: '13px' }}>Aucun avis pour le moment.</p>
+        <p style={{ color: 'var(--text-muted)', fontSize: '13px' }}>{t('seller.noReviews')}</p>
       ) : (
         <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
           {ratings.map(r => (
@@ -157,8 +159,8 @@ export default function SellerRating({ sellerId, currentUserId }) {
                   </div>
                   {currentUserId && r.user_id === currentUserId && !editId && (
                     <div style={{ display: 'flex', gap: '4px' }}>
-                      <button onClick={() => startEdit(r)} style={{ background: 'none', border: 'none', cursor: 'pointer', color: 'var(--text-muted)', padding: '2px' }} title="Modifier"><FiEdit2 size={12} /></button>
-                      <button onClick={() => setDeleteTargetId(r.id)} style={{ background: 'none', border: 'none', cursor: 'pointer', color: 'var(--error)', padding: '2px' }} title="Supprimer"><FiTrash2 size={12} /></button>
+                      <button onClick={() => startEdit(r)} style={{ background: 'none', border: 'none', cursor: 'pointer', color: 'var(--text-muted)', padding: '2px' }} title={t('seller.edit')}><FiEdit2 size={12} /></button>
+                      <button onClick={() => setDeleteTargetId(r.id)} style={{ background: 'none', border: 'none', cursor: 'pointer', color: 'var(--error)', padding: '2px' }} title={t('seller.delete')}><FiTrash2 size={12} /></button>
                     </div>
                   )}
                 </div>
@@ -174,9 +176,9 @@ export default function SellerRating({ sellerId, currentUserId }) {
         open={!!deleteTargetId}
         onClose={() => setDeleteTargetId(null)}
         onConfirm={executeDelete}
-        title="Supprimer votre avis ?"
-        message="Cette action est irreversible."
-        confirmText="Supprimer"
+        title={t('seller.deleteReviewTitle')}
+        message={t('seller.irreversibleAction')}
+        confirmText={t('seller.confirmDelete')}
         confirmColor="#dc2626"
         icon={<FiTrash2 size={26} color="#dc2626" />}
       />

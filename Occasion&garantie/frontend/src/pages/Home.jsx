@@ -8,6 +8,7 @@ import HomeProductCard from '../components/HomeProductCard';
 import TrustBar from '../components/TrustBar';
 import NewsletterSection from '../components/NewsletterSection';
 import PromoPopup from '../components/PromoPopup';
+import { useLanguage } from '../context/LanguageContext';
 
 const fadeUp = { hidden: { opacity: 0, y: 40 }, show: { opacity: 1, y: 0, transition: { duration: 0.5 } } };
 const stagger = { hidden: {}, show: { transition: { staggerChildren: 0.1 } } };
@@ -57,6 +58,7 @@ function BrandCircle({ brand }) {
 
 export default function Home() {
   const navigate = useNavigate();
+  const { t } = useLanguage();
   const [products, setProducts] = useState([]);
   const [searchTerm, setSearchTerm] = useState('');
   const [selectedCategory, setSelectedCategory] = useState('');
@@ -71,7 +73,7 @@ export default function Home() {
   const [suggestLoading, setSuggestLoading] = useState(false);
   const searchWrapRef = useRef(null);
 
-  useEffect(() => { document.title = 'Occasion & Garantie - Achetez et vendez des produits électroniques d\'occasion au Maroc'; }, []);
+  useEffect(() => { document.title = t('home.metaTitle'); }, [t]);
 
   useEffect(() => {
     api.get('/products/cities').then(res => { if (res.data.length) setCities(res.data); }).catch(() => {});
@@ -127,11 +129,11 @@ export default function Home() {
       <section className="avito-hero">
         <div className="container">
           <div className="avito-hero-content">
-            <h1>Occasion & Garantie</h1>
+            <h1>{t('home.heroTitle')}</h1>
             <form onSubmit={handleSearch} className="avito-search-bar">
               <div className="avito-search-input-wrap" ref={searchWrapRef}>
                 <FiSearch size={18} className="avito-search-icon" />
-                <input type="text" value={searchTerm} onChange={e => setSearchTerm(e.target.value)} placeholder="Que cherchez-vous ?" />
+                <input type="text" value={searchTerm} onChange={e => setSearchTerm(e.target.value)} placeholder={t('home.searchPlaceholder')} />
                 {suggestOpen && trimmed.length >= 2 && (
                   <div className="avito-search-dropdown">
                     {suggestLoading ? (
@@ -150,18 +152,18 @@ export default function Home() {
                           </Link>
                         ))}
                         <Link to={`/products?search=${encodeURIComponent(trimmed)}`} className="avito-search-all" onClick={() => setSuggestOpen(false)}>
-                          Voir tous les résultats <FiArrowRight size={14} />
+                          {t('home.seeAllResults')} <FiArrowRight size={14} />
                         </Link>
                       </>
                     ) : (
-                      <div className="avito-search-empty">Aucun résultat pour « {trimmed} »</div>
+                      <div className="avito-search-empty">{t('home.noResult', { query: trimmed })}</div>
                     )}
                   </div>
                 )}
               </div>
               <div className="avito-search-select">
                 <select value={selectedCategory} onChange={e => setSelectedCategory(e.target.value)}>
-                  <option value="">Toutes les categories</option>
+                  <option value="">{t('home.allCategories')}</option>
                   <option value="Smartphones">Smartphones</option>
                   <option value="Tablettes">Tablettes</option>
                   <option value="Ordinateurs">Ordinateurs</option>
@@ -171,11 +173,11 @@ export default function Home() {
               <div className="avito-search-select">
                 <FiMapPin size={16} className="avito-search-icon-inside" />
                 <select value={selectedCity} onChange={e => setSelectedCity(e.target.value)}>
-                  <option value="">Toutes les villes</option>
+                  <option value="">{t('home.allCities')}</option>
                   {cities.map(c => <option key={c} value={c}>{c}</option>)}
                 </select>
               </div>
-              <button type="submit" className="avito-search-btn">Rechercher</button>
+              <button type="submit" className="avito-search-btn">{t('home.searchBtn')}</button>
             </form>
             {brands.length > 0 && (
               <div className="brands-scroll-wrapper" style={{ marginTop: 28 }}>
@@ -197,11 +199,11 @@ export default function Home() {
               <div className="home-heading">
                 <span className="home-heading-icon home-heading-icon-store"><TbShieldCheck size={22} /></span>
                 <div>
-                  <h2 className="home-section-title home-section-title-store">Boutique Officielle</h2>
-                  <p className="home-section-subtitle">Produits vendus directement par Occasion & Garantie</p>
+                  <h2 className="home-section-title home-section-title-store">{t('home.storeOfficial')}</h2>
+                  <p className="home-section-subtitle">{t('home.storeSubtitle')}</p>
                 </div>
               </div>
-              <Link to="/boutique" className="btn btn-secondary">Voir la boutique <FiArrowRight size={16} /></Link>
+              <Link to="/boutique" className="btn btn-secondary">{t('home.viewStore')} <FiArrowRight size={16} /></Link>
             </div>
             {storeLoad ? <SkeletonGrid count={4} /> : (
               <div className="products-grid">
@@ -209,7 +211,7 @@ export default function Home() {
                   <Link key={p.id} to={`/boutique/${p.slug}`} className="product-card" style={{ textDecoration: 'none' }}>
                     <div className="product-card-image" style={{ position: 'relative', background: 'var(--bg-secondary)', aspectRatio: '1/1' }}>
                       {p.image ? <img src={p.image} alt={p.name} style={{ width: '100%', height: '100%', objectFit: 'contain' }} /> : <FiShoppingBag size={48} style={{ opacity: 0.15 }} />}
-                      <span style={{ position: 'absolute', top: 8, right: 8, background: '#d97706', color: '#fff', fontSize: 10, fontWeight: 700, padding: '2px 8px', borderRadius: 6 }}>Officiel</span>
+                      <span style={{ position: 'absolute', top: 8, right: 8, background: '#d97706', color: '#fff', fontSize: 10, fontWeight: 700, padding: '2px 8px', borderRadius: 6 }}>{t('home.officialBadge')}</span>
                     </div>
                     <div className="product-card-info" style={{ padding: 12 }}>
                       <h3 style={{ fontSize: 14, fontWeight: 600, margin: 0, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{p.name}</h3>
@@ -229,18 +231,18 @@ export default function Home() {
             <div className="home-heading">
               <span className="home-heading-icon home-heading-icon-latest"><TbClockHour5 size={22} /></span>
               <div>
-                <h2 className="home-section-title">Dernieres annonces</h2>
-                <p className="home-section-subtitle">{products.length} telephones disponibles a la vente.</p>
+                <h2 className="home-section-title">{t('home.latestAds')}</h2>
+                <p className="home-section-subtitle">{t('home.latestSubtitle', { count: products.length })}</p>
               </div>
             </div>
-            <Link to="/products" className="btn btn-secondary">Voir tout <FiArrowRight size={16} /></Link>
+            <Link to="/products" className="btn btn-secondary">{t('home.viewAll')} <FiArrowRight size={16} /></Link>
           </div>
           {loading ? <SkeletonGrid count={8} /> : products.length > 0 ? (
             <div className="products-grid">
               {products.map((p, i) => <HomeProductCard key={p.id} product={p} index={i} />)}
             </div>
           ) : (
-            <div className="empty-state"><FiSmartphone size={48} /><p>Aucune annonce pour le moment.</p></div>
+            <div className="empty-state"><FiSmartphone size={48} /><p>{t('home.noAds')}</p></div>
           )}
         </div>
       </motion.section>
@@ -251,11 +253,11 @@ export default function Home() {
         <div className="container">
           <div className="sell-promo-bar">
             <div className="sell-promo-content">
-              <h2>Un telephone a vendre ?</h2>
-              <p>Annonce gratuite, zero commission, paiement securise.</p>
+              <h2>{t('home.sellPhoneTitle')}</h2>
+              <p>{t('home.sellPhoneDesc')}</p>
             </div>
             <Link to="/vendre" className="btn btn-primary">
-              Vendre maintenant <FiArrowRight size={16} />
+              {t('home.sellNow')} <FiArrowRight size={16} />
             </Link>
           </div>
         </div>

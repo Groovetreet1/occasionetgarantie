@@ -4,6 +4,7 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { FiPlus, FiEdit2, FiTrash2, FiPackage, FiCheckCircle, FiPercent, FiCreditCard, FiDollarSign, FiX, FiCopy, FiCheck, FiUpload, FiLock, FiStar, FiSmartphone, FiArrowRight, FiClock, FiAlertCircle, FiEye, FiInfo, FiMessageCircle, FiSend } from 'react-icons/fi';
 import api from '../api/axios';
 import { useAuth } from '../context/AuthContext';
+import { useLanguage } from '../context/LanguageContext';
 import SellerNav from '../components/SellerNav';
 import ConfirmModal from '../components/ConfirmModal';
 
@@ -24,6 +25,7 @@ const statusColors = {
 
 export default function SellerDashboard() {
   const { user } = useAuth();
+  const { t } = useLanguage();
   const navigate = useNavigate();
   const [profile, setProfile] = useState(null);
   const [products, setProducts] = useState([]);
@@ -76,21 +78,21 @@ export default function SellerDashboard() {
         navigate(`/messenger/${data.conversation_id}`);
       }
     } catch (err) {
-      alert(err.response?.data?.message || 'Erreur');
+      alert(err.response?.data?.message || t('seller.error'));
     }
   };
 
   const submitCounter = async () => {
     if (!counterTarget) return;
     const price = parseFloat(counterPrice);
-    if (!price || price <= 0) { alert('Entrez un prix valide.'); return; }
+    if (!price || price <= 0) { alert(t('seller.validPrice')); return; }
     try {
       await api.put(`/negotiations/${counterTarget.id}`, { status: 'contre_offre', price });
       setNegotiations(prev => prev.map(n => n.id === counterTarget.id ? { ...n, status: 'contre_offre', counter_price: price, counter_by: user.id } : n));
       setCounterTarget(null);
       setCounterPrice('');
     } catch (err) {
-      alert(err.response?.data?.message || 'Erreur');
+      alert(err.response?.data?.message || t('seller.error'));
     }
   };
 
@@ -101,7 +103,7 @@ export default function SellerDashboard() {
       setShowBuyCredits(false);
       setCreditPayment(data);
     } catch (err) {
-      alert(err.response?.data?.message || 'Erreur');
+      alert(err.response?.data?.message || t('seller.error'));
     } finally {
       setBuyLoading(false);
     }
@@ -119,10 +121,10 @@ export default function SellerDashboard() {
       await api.post('/auth/upload-credit-screenshot', fd, {
         headers: { 'Content-Type': 'multipart/form-data' },
       });
-      setUploadMsg({ type: 'success', text: 'Screenshot envoye. En attente de confirmation admin.' });
+      setUploadMsg({ type: 'success', text: t('seller.screenshotUploaded') });
       setTimeout(() => { setCreditPayment(null); setUploadMsg(null); }, 2500);
     } catch (err) {
-      setUploadMsg({ type: 'error', text: err.response?.data?.message || 'Erreur.' });
+      setUploadMsg({ type: 'error', text: err.response?.data?.message || t('seller.errorGeneric') });
     } finally {
       setUploadingScreenshot(false);
     }
@@ -138,7 +140,7 @@ export default function SellerDashboard() {
       setProducts(products.filter(p => p.id !== id));
       setRejectedPopup(null);
     } catch (err) {
-      alert(err.response?.data?.message || 'Erreur');
+      alert(err.response?.data?.message || t('seller.error'));
     }
   };
 
@@ -150,7 +152,7 @@ export default function SellerDashboard() {
       await api.patch(`/products/${product.id}/status`, { status: nextStatus });
       setProducts(prev => prev.map(p => p.id === product.id ? { ...p, status: nextStatus } : p));
     } catch (err) {
-      alert(err.response?.data?.message || 'Erreur');
+      alert(err.response?.data?.message || t('seller.error'));
     }
   };
 
@@ -160,11 +162,11 @@ export default function SellerDashboard() {
     <div className="seller-page">
       <div className="seller-page-header">
         <div>
-          <h1>Tableau de Bord</h1>
+          <h1>{t('seller.dashboardTitle')}</h1>
           <p className="text-secondary">{user?.full_name || user?.fullName}</p>
         </div>
         <Link to="/seller/products/new" className="btn btn-primary">
-          <FiPlus size={16} /> Nouveau produit
+          <FiPlus size={16} /> {t('seller.newProduct')}
         </Link>
       </div>
 
@@ -176,23 +178,23 @@ export default function SellerDashboard() {
             <div className="stat-card">
               <FiPackage size={20} />
               <span className="stat-value">{profile.stats?.total || 0}</span>
-              <span className="stat-label">Total produits</span>
+              <span className="stat-label">{t('seller.totalProducts')}</span>
             </div>
             <div className="stat-card">
               <FiCheckCircle size={20} />
               <span className="stat-value">{profile.stats?.active_count || 0}</span>
-              <span className="stat-label">Annonces actives</span>
+              <span className="stat-label">{t('seller.activeAds')}</span>
             </div>
             <div className="stat-card">
               <FiPercent size={20} />
               <span className="stat-value">{commissions.summary.total_commission} DH</span>
-              <span className="stat-label">Commission ({commissions.summary.count} ventes)</span>
+              <span className="stat-label">{t('seller.commissionLabel', { count: commissions.summary.count })}</span>
             </div>
             {sellerRatings && (
               <div className="stat-card">
                 <FiStar size={20} style={{ color: '#FFD700' }} />
                 <span className="stat-value">{sellerRatings.stats?.avg || '—'}/5</span>
-                <span className="stat-label">{sellerRatings.stats?.total || 0} avis clients</span>
+                <span className="stat-label">{t('seller.reviewsCount', { count: sellerRatings.stats?.total || 0 })}</span>
               </div>
             )}
           </div>
@@ -200,18 +202,18 @@ export default function SellerDashboard() {
           {profile?.created_at && new Date(profile.created_at).getTime() + 3 * 30 * 24 * 60 * 60 * 1000 > Date.now() && (
             <div style={{ fontSize: 13, color: 'var(--primary)', background: 'var(--bg-secondary)', padding: '10px 14px', borderRadius: 'var(--radius)', border: '1px solid var(--border)', marginTop: 12 }}>
               <FiCheckCircle size={14} style={{ verticalAlign: 'middle', marginRight: 6 }} />
-              Periode gratuite — 0% deduction pendant vos 3 premiers mois !
+              {t('seller.freePeriod')}
             </div>
           )}
 
           <div className="seller-credits-box" style={{ background: 'var(--bg-card)', border: '1px solid var(--border)', borderRadius: 'var(--radius-lg)', padding: 16, marginTop: 16, display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 12 }}>
             <div>
-              <div style={{ fontSize: 12, color: 'var(--text-muted)', marginBottom: 2 }}>Solde credits</div>
-              <div style={{ fontSize: 22, fontWeight: 700, color: 'var(--primary)' }}>{creditBalance} <span style={{ fontSize: 13, fontWeight: 400, color: 'var(--text-secondary)' }}>crédits</span></div>
-              <div style={{ fontSize: 11, color: 'var(--text-muted)' }}>1 credit = 0.10 DH — 2 DH (20 credits) par annonce</div>
+              <div style={{ fontSize: 12, color: 'var(--text-muted)', marginBottom: 2 }}>{t('seller.creditBalance')}</div>
+              <div style={{ fontSize: 22, fontWeight: 700, color: 'var(--primary)' }}>{creditBalance} <span style={{ fontSize: 13, fontWeight: 400, color: 'var(--text-secondary)' }}>{t('seller.credits')}</span></div>
+              <div style={{ fontSize: 11, color: 'var(--text-muted)' }}>{t('seller.creditRateInfo')}</div>
             </div>
             <button className="btn btn-primary" onClick={() => setShowBuyCredits(true)} style={{ whiteSpace: 'nowrap' }}>
-              <FiCreditCard size={16} /> Acheter des credits
+              <FiCreditCard size={16} /> {t('seller.buyCredits')}
             </button>
           </div>
 
@@ -224,23 +226,23 @@ export default function SellerDashboard() {
                 style={{ background: 'var(--bg-card)', borderRadius: 16, padding: 28, maxWidth: 440, width: '100%', boxShadow: '0 20px 60px rgba(0,0,0,0.3)' }}
                 onClick={e => e.stopPropagation()}>
                 <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 16 }}>
-                  <h3 style={{ fontSize: 18, fontWeight: 700 }}>Paiement</h3>
+                  <h3 style={{ fontSize: 18, fontWeight: 700 }}>{t('seller.payment')}</h3>
                   <button onClick={() => setCreditPayment(null)} style={{ background: 'none', border: 'none', color: 'var(--text-muted)', cursor: 'pointer' }}><FiX size={20} /></button>
                 </div>
                 <div style={{ textAlign: 'center', marginBottom: 16 }}>
                   <div style={{ width: 48, height: 48, borderRadius: '50%', background: 'rgba(59,130,246,0.1)', display: 'flex', alignItems: 'center', justifyContent: 'center', margin: '0 auto 8px' }}>
                     <FiLock size={22} color="#3b82f6" />
                   </div>
-                  <p style={{ fontSize: 14, color: 'var(--text-secondary)', margin: 0 }}>Virement bancaire de <strong>{creditPayment.amount_dh} DH</strong></p>
+                  <p style={{ fontSize: 14, color: 'var(--text-secondary)', margin: 0 }}>{t('seller.bankTransferOf')} <strong>{creditPayment.amount_dh} DH</strong></p>
                 </div>
 
                 <div style={{ background: 'var(--bg-secondary)', borderRadius: 12, padding: 16, marginBottom: 16 }}>
                   <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 10 }}>
-                    <span style={{ fontSize: 13, color: 'var(--text-muted)' }}>Banque</span>
+                    <span style={{ fontSize: 13, color: 'var(--text-muted)' }}>{t('seller.bank')}</span>
                     <strong style={{ fontSize: 14 }}>{creditPayment.bank?.bank}</strong>
                   </div>
                   <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 10 }}>
-                    <span style={{ fontSize: 13, color: 'var(--text-muted)' }}>Titulaire</span>
+                    <span style={{ fontSize: 13, color: 'var(--text-muted)' }}>{t('seller.holder')}</span>
                     <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
                       <strong style={{ fontSize: 14 }}>{creditPayment.bank?.holder}</strong>
                       <button onClick={async () => { await copyText(creditPayment.bank?.holder); setCopiedField('holder'); setTimeout(() => setCopiedField(null), 1500); }}
@@ -262,7 +264,7 @@ export default function SellerDashboard() {
                 </div>
 
                 <p style={{ fontSize: 13, color: 'var(--text-secondary)', marginBottom: 12 }}>
-                  Apres le virement, envoyez la capture d'ecran :
+                  {t('seller.afterTransferSendScreenshot')}
                 </p>
 
                 <label style={{
@@ -272,7 +274,7 @@ export default function SellerDashboard() {
                   fontSize: 14, color: uploadingScreenshot ? 'var(--text-muted)' : 'var(--primary)',
                   marginBottom: 12,
                 }}>
-                  {uploadingScreenshot ? 'Envoi...' : <><FiUpload size={16} /> Envoyer la capture</>}
+                  {uploadingScreenshot ? t('seller.sending') : <><FiUpload size={16} /> {t('seller.sendScreenshot')}</>}
                   <input type="file" accept="image/*" onChange={handleUploadCreditScreenshot} hidden disabled={uploadingScreenshot} />
                 </label>
 
@@ -285,7 +287,7 @@ export default function SellerDashboard() {
                 )}
 
                 <p style={{ fontSize: 12, color: 'var(--text-muted)', textAlign: 'center', margin: 0 }}>
-                  Vous recevrez <strong>{creditPayment.credits} credits</strong> apres confirmation admin
+                  {t('seller.youWillReceive')} <strong>{creditPayment.credits} {t('seller.credits')}</strong> {t('seller.afterAdminConfirmation')}
                 </p>
               </motion.div>
             </motion.div>
@@ -295,10 +297,10 @@ export default function SellerDashboard() {
           {showBuyCredits && (
             <div style={{ position: 'fixed', inset: 0, background: 'rgba(0,0,0,0.5)', zIndex: 1000, display: 'flex', alignItems: 'center', justifyContent: 'center', padding: 16 }} onClick={() => setShowBuyCredits(false)}>
               <div style={{ background: 'var(--bg-card)', borderRadius: 16, padding: 24, maxWidth: 400, width: '100%', boxShadow: '0 20px 60px rgba(0,0,0,0.3)' }} onClick={(e) => e.stopPropagation()}>
-                <h3 style={{ fontSize: 18, marginBottom: 8 }}>Acheter des credits</h3>
-                <p style={{ fontSize: 13, color: 'var(--text-secondary)', marginBottom: 16 }}>1000 credits = 100 DH. Une commission fixe de 2 DH (20 credits) est deduite automatiquement a chaque creation d'annonce apres la periode gratuite de 3 mois.</p>
+                <h3 style={{ fontSize: 18, marginBottom: 8 }}>{t('seller.buyCredits')}</h3>
+                <p style={{ fontSize: 13, color: 'var(--text-secondary)', marginBottom: 16 }}>{t('seller.buyCreditsDesc')}</p>
                 <div className="form-group">
-                  <label>Montant (DH)</label>
+                  <label>{t('seller.amount')}</label>
                   <div style={{ display: 'flex', gap: 8 }}>
                     {[50, 100, 200, 500].map(a => (
                       <button key={a} type="button" onClick={() => setBuyAmount(a)} style={{ flex: 1, padding: '10px', borderRadius: 'var(--radius)', border: buyAmount === a ? '2px solid var(--primary)' : '1px solid var(--border)', background: buyAmount === a ? 'var(--bg-secondary)' : 'transparent', cursor: 'pointer', fontWeight: 600, fontSize: 14, color: buyAmount === a ? 'var(--primary)' : 'var(--text-primary)' }}>
@@ -308,13 +310,13 @@ export default function SellerDashboard() {
                   </div>
                 </div>
                 <div style={{ background: 'var(--bg-secondary)', borderRadius: 'var(--radius)', padding: '12px', marginBottom: 16, textAlign: 'center' }}>
-                  <div style={{ fontSize: 11, color: 'var(--text-muted)' }}>Vous recevrez</div>
+                  <div style={{ fontSize: 11, color: 'var(--text-muted)' }}>{t('seller.youReceive')}</div>
                   <div style={{ fontSize: 24, fontWeight: 800, color: 'var(--primary)' }}>{buyAmount * 10} credits</div>
                 </div>
                 <div style={{ display: 'flex', gap: 10 }}>
-                  <button type="button" className="btn btn-outline" onClick={() => setShowBuyCredits(false)} style={{ flex: 1, justifyContent: 'center' }}>Annuler</button>
+                  <button type="button" className="btn btn-outline" onClick={() => setShowBuyCredits(false)} style={{ flex: 1, justifyContent: 'center' }}>{t('seller.cancel')}</button>
                   <button className="form-submit" onClick={handleBuyCredits} disabled={buyLoading} style={{ flex: 1, justifyContent: 'center' }}>
-                    <FiDollarSign size={16} /> {buyLoading ? '...' : `Payer ${buyAmount} DH`}
+                    <FiDollarSign size={16} /> {buyLoading ? '...' : t('seller.pay', { amount: buyAmount })}
                   </button>
                 </div>
               </div>
@@ -326,10 +328,10 @@ export default function SellerDashboard() {
               <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 12 }}>
                 <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
                   <FiSmartphone size={18} style={{ color: '#f59e0b' }} />
-                  <span style={{ fontWeight: 700, fontSize: 15 }}>Demandes de reprise ({pendingReprises.length})</span>
+                  <span style={{ fontWeight: 700, fontSize: 15 }}>{t('seller.repriseRequests', { count: pendingReprises.length })}</span>
                 </div>
                 <Link to="/reprise/list" className="btn btn-primary" style={{ fontSize: 12, padding: '6px 14px', textDecoration: 'none' }}>
-                  Voir tout <FiArrowRight size={13} />
+                  {t('seller.seeAll')} <FiArrowRight size={13} />
                 </Link>
               </div>
               <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
@@ -347,10 +349,10 @@ export default function SellerDashboard() {
                       background: r.status === 'en_attente' ? 'rgba(245,158,11,0.1)' : 'rgba(59,130,246,0.1)',
                       color: r.status === 'en_attente' ? '#f59e0b' : '#3b82f6',
                     }}>
-                      {r.status === 'en_attente' ? 'Nouveau' : 'Estime'}
+                      {r.status === 'en_attente' ? t('seller.new') : t('seller.estimated')}
                     </span>
                     <Link to="/reprise/list" style={{ color: 'var(--primary)', fontWeight: 600, fontSize: 12, textDecoration: 'none' }}>
-                      Traiter →
+                      {t('seller.process')} →
                     </Link>
                   </div>
                 ))}
@@ -369,7 +371,7 @@ export default function SellerDashboard() {
               <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 12 }}>
                 <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
                   <FiMessageCircle size={18} style={{ color: 'var(--primary)' }} />
-                  <span style={{ fontWeight: 700, fontSize: 15 }}>Négociations de prix ({pending.length})</span>
+                  <span style={{ fontWeight: 700, fontSize: 15 }}>{t('seller.priceNegotiations', { count: pending.length })}</span>
                 </div>
               </div>
               <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
@@ -384,22 +386,22 @@ export default function SellerDashboard() {
                       <div style={{ fontWeight: 600 }}>{n.product_name}</div>
                       <div style={{ fontSize: 11, color: 'var(--text-muted)' }}>
                         {n.buyer_name} — {isCounter ? (
-                          <>contre-offre <strong style={{ color: 'var(--primary)' }}>{Number(n.counter_price)} DH</strong> (votre prix : {Number(n.offered_price)} DH)</>
+                          <>{t('seller.counterOffer')} <strong style={{ color: 'var(--primary)' }}>{Number(n.counter_price)} DH</strong> {t('seller.yourPrice', { price: Number(n.offered_price) })}</>
                         ) : (
-                          <>propose <strong style={{ color: 'var(--primary)' }}>{Number(n.offered_price)} DH</strong></>
+                          <>{t('seller.proposes')} <strong style={{ color: 'var(--primary)' }}>{Number(n.offered_price)} DH</strong></>
                         )}
                         {n.message && ` — "${n.message}"`}
                       </div>
                     </div>
                     <div style={{ display: 'flex', gap: 6 }}>
                       <button onClick={() => handleNegotiation(n.id, 'acceptee')} className="btn" style={{ fontSize: 12, padding: '6px 12px', background: '#10b981', color: '#fff', border: 'none' }}>
-                        <FiCheck size={13} style={{ verticalAlign: 'middle', marginRight: 3 }} /> Accepter
+                        <FiCheck size={13} style={{ verticalAlign: 'middle', marginRight: 3 }} /> {t('seller.accept')}
                       </button>
                       <button onClick={() => { setCounterTarget(n); setCounterPrice(''); }} className="btn" style={{ fontSize: 12, padding: '6px 12px', background: 'var(--primary)', color: '#fff', border: 'none' }}>
-                        <FiSend size={13} style={{ verticalAlign: 'middle', marginRight: 3 }} /> Contre-proposer
+                        <FiSend size={13} style={{ verticalAlign: 'middle', marginRight: 3 }} /> {t('seller.counterPropose')}
                       </button>
                       <button onClick={() => handleNegotiation(n.id, 'refusee')} className="btn" style={{ fontSize: 12, padding: '6px 12px', background: 'transparent', color: '#ef4444', border: '1.5px solid #ef4444' }}>
-                        <FiX size={13} style={{ verticalAlign: 'middle', marginRight: 3 }} /> Refuser
+                        <FiX size={13} style={{ verticalAlign: 'middle', marginRight: 3 }} /> {t('seller.refuse')}
                       </button>
                     </div>
                   </div>
@@ -411,12 +413,12 @@ export default function SellerDashboard() {
           })()}
 
           <div className="dashboard-products">
-          <h3>Mes annonces ({products.length})</h3>          {products.length === 0 ? (
+          <h3>{t('seller.myAds', { count: products.length })}</h3>          {products.length === 0 ? (
             <div className="empty-state">
               <FiPackage size={48} />
-              <p>Vous n'avez aucune annonce. Créez votre premier produit !</p>
+              <p>{t('seller.noAds')}</p>
               <Link to="/seller/products/new" className="btn btn-primary">
-                <FiPlus size={16} /> Publier une annonce
+                <FiPlus size={16} /> {t('seller.publishAd')}
               </Link>
             </div>
           ) : (
@@ -424,11 +426,11 @@ export default function SellerDashboard() {
               <table className="admin-table">
                 <thead>
                   <tr>
-                      <th>Produit</th>
-                    <th>Prix</th>
-                    <th>Statut</th>
-                    <th>Approbation</th>
-                    <th>Actions</th>
+                      <th>{t('seller.productCol')}</th>
+                    <th>{t('seller.priceCol')}</th>
+                    <th>{t('seller.statusCol')}</th>
+                    <th>{t('seller.approvalCol')}</th>
+                    <th>{t('seller.actionsCol')}</th>
                   </tr>
                 </thead>
                 <tbody>
@@ -447,30 +449,30 @@ export default function SellerDashboard() {
                       <td>
                         <button className="status-toggle" onClick={() => cycleStatus(p)}
                           style={{ background: statusColors[p.status || 'disponible'] }}>
-                          {p.status === 'disponible' ? 'Disponible' : p.status === 'en_attente' ? 'En attente' : 'Vendu'}
+                          {p.status === 'disponible' ? t('seller.available') : p.status === 'en_attente' ? t('seller.pending') : t('seller.sold')}
                         </button>
                       </td>
                       <td>
                         {p.approved === 1 ? (
                           <span style={{ fontSize: 12, color: '#059669', display: 'flex', alignItems: 'center', gap: 4 }}>
-                            <FiCheckCircle size={13} /> Approuvée
+                            <FiCheckCircle size={13} /> {t('seller.approved')}
                           </span>
                         ) : p.rejection_reason ? (
-                          <span onClick={() => setRejectedPopup(p)} style={{ fontSize: 12, color: '#dc2626', display: 'flex', alignItems: 'center', gap: 4, cursor: 'pointer', textDecoration: 'underline dotted' }} title="Cliquez pour voir le motif">
-                            <FiInfo size={13} /> Refusée
+                          <span onClick={() => setRejectedPopup(p)} style={{ fontSize: 12, color: '#dc2626', display: 'flex', alignItems: 'center', gap: 4, cursor: 'pointer', textDecoration: 'underline dotted' }} title={t('seller.clickToSeeReason')}>
+                            <FiInfo size={13} /> {t('seller.rejected')}
                           </span>
                         ) : (
                           <span style={{ fontSize: 12, color: '#d97706', display: 'flex', alignItems: 'center', gap: 4 }}>
-                            <FiClock size={13} /> En cours
+                            <FiClock size={13} /> {t('seller.inReview')}
                           </span>
                         )}
                       </td>
                       <td>
                         <div className="action-btns">
-                          <Link to={`/seller/products/edit/${p.id}`} className="btn-icon" title="Modifier">
+                          <Link to={`/seller/products/edit/${p.id}`} className="btn-icon" title={t('seller.edit')}>
                             <FiEdit2 size={16} />
                           </Link>
-                          <button className="btn-icon btn-icon-danger" onClick={() => setDeleteTarget(p.id)} title="Supprimer">
+                          <button className="btn-icon btn-icon-danger" onClick={() => setDeleteTarget(p.id)} title={t('seller.delete')}>
                             <FiTrash2 size={16} />
                           </button>
                         </div>
@@ -505,7 +507,7 @@ export default function SellerDashboard() {
               <div style={{ background: 'rgba(239,68,68,0.08)', borderRadius: 10, padding: 14, marginBottom: 16 }}>
                 <div style={{ display: 'flex', alignItems: 'center', gap: 6, marginBottom: 6 }}>
                   <FiAlertCircle size={15} color="#dc2626" />
-                  <span style={{ fontWeight: 700, fontSize: 13, color: '#dc2626' }}>Motif du refus</span>
+                  <span style={{ fontWeight: 700, fontSize: 13, color: '#dc2626' }}>{t('seller.rejectionReason')}</span>
                 </div>
                 <p style={{ fontSize: 13, color: '#991b1b', lineHeight: 1.5, margin: 0, whiteSpace: 'pre-wrap' }}>
                   {rejectedPopup.rejection_reason}
@@ -514,11 +516,11 @@ export default function SellerDashboard() {
 
               <div style={{ display: 'flex', gap: 8 }}>
                 <Link to={`/seller/products/edit/${rejectedPopup.id}`} className="btn btn-primary" style={{ flex: 1, justifyContent: 'center', fontSize: 13, padding: '8px 12px', textDecoration: 'none' }}>
-                  <FiEdit2 size={14} /> Modifier
+                  <FiEdit2 size={14} /> {t('seller.edit')}
                 </Link>
                 <button onClick={() => setDeleteRejectedTarget(rejectedPopup.id)}
                   className="btn btn-outline" style={{ flex: 1, justifyContent: 'center', fontSize: 13, padding: '8px 12px', color: 'var(--error)', borderColor: 'var(--error)' }}>
-                  <FiTrash2 size={14} /> Supprimer
+                  <FiTrash2 size={14} /> {t('seller.delete')}
                 </button>
               </div>
             </div>
@@ -531,22 +533,22 @@ export default function SellerDashboard() {
           onClick={() => setCounterTarget(null)}>
           <div style={{ background: 'var(--bg-card)', borderRadius: 16, padding: 24, maxWidth: 400, width: '100%', boxShadow: '0 20px 60px rgba(0,0,0,0.3)' }} onClick={(e) => e.stopPropagation()}>
             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 12 }}>
-              <h3 style={{ fontSize: 17, fontWeight: 700 }}>Contre-proposer un prix</h3>
+              <h3 style={{ fontSize: 17, fontWeight: 700 }}>{t('seller.counterPriceTitle')}</h3>
               <button onClick={() => setCounterTarget(null)} style={{ background: 'none', border: 'none', color: 'var(--text-muted)', cursor: 'pointer', padding: 4 }}><FiX size={18} /></button>
             </div>
             <p style={{ fontSize: 13, color: 'var(--text-secondary)', marginBottom: 12 }}>
-              Offre du client : <strong>{Number(counterTarget.offered_price)} DH</strong> — {counterTarget.product_name}
+              {t('seller.clientOffer')} <strong>{Number(counterTarget.offered_price)} DH</strong> — {counterTarget.product_name}
             </p>
             <input
-              type="number" min="0" placeholder="Votre prix (DH)" value={counterPrice}
+              type="number" min="0" placeholder={t('seller.yourPricePlaceholder')} value={counterPrice}
               onChange={e => setCounterPrice(e.target.value)}
               autoFocus
               style={{ width: '100%', padding: '12px 14px', borderRadius: 10, border: '1px solid var(--border)', background: 'var(--bg-secondary)', color: 'var(--text)', fontSize: 14, fontFamily: 'var(--font)', marginBottom: 16, boxSizing: 'border-box' }}
             />
             <div style={{ display: 'flex', gap: 10 }}>
-              <button className="btn btn-outline" onClick={() => setCounterTarget(null)} style={{ flex: 1, justifyContent: 'center' }}>Annuler</button>
+              <button className="btn btn-outline" onClick={() => setCounterTarget(null)} style={{ flex: 1, justifyContent: 'center' }}>{t('seller.cancel')}</button>
               <button className="form-submit" onClick={submitCounter} style={{ flex: 1, justifyContent: 'center' }}>
-                <FiSend size={15} /> Envoyer
+                <FiSend size={15} /> {t('seller.send')}
               </button>
             </div>
           </div>
@@ -557,9 +559,9 @@ export default function SellerDashboard() {
         open={!!deleteTarget || !!deleteRejectedTarget}
         onClose={() => { setDeleteTarget(null); setDeleteRejectedTarget(null); }}
         onConfirm={executeDelete}
-        title="Supprimer ce produit ?"
-        message="Cette action est irreversible."
-        confirmText="Supprimer"
+        title={t('seller.deleteProductTitle')}
+        message={t('seller.irreversibleAction')}
+        confirmText={t('seller.confirmDelete')}
         confirmColor="#dc2626"
         icon={<FiTrash2 size={26} color="#dc2626" />}
       />

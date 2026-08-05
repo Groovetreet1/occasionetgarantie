@@ -3,19 +3,21 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { Link } from 'react-router-dom';
 import { FiArrowLeft, FiSmartphone, FiClock, FiRefreshCw, FiCheck, FiX, FiPhone, FiDollarSign, FiTrash2 } from 'react-icons/fi';
 import ConfirmModal from '../components/ConfirmModal';
+import { useLanguage } from '../context/LanguageContext';
 import api from '../api/axios';
 
 const API_BASE = import.meta.env.VITE_API_URL || '';
 
 const statusStyles = {
-  en_attente: { bg: 'rgba(245,158,11,0.1)', color: '#f59e0b', label: 'Nouveau' },
-  estime: { bg: 'rgba(59,130,246,0.1)', color: '#3b82f6', label: 'Estime' },
-  accepte: { bg: 'rgba(16,185,129,0.1)', color: '#10b981', label: 'Accepte' },
-  refuse: { bg: 'rgba(239,68,68,0.1)', color: '#ef4444', label: 'Refuse' },
-  converti: { bg: 'rgba(139,92,246,0.1)', color: '#8b5cf6', label: 'Converti' },
+  en_attente: { bg: 'rgba(245,158,11,0.1)', color: '#f59e0b', label: 'reprise.statusNew' },
+  estime: { bg: 'rgba(59,130,246,0.1)', color: '#3b82f6', label: 'reprise.statusEstimated' },
+  accepte: { bg: 'rgba(16,185,129,0.1)', color: '#10b981', label: 'reprise.statusAccepted' },
+  refuse: { bg: 'rgba(239,68,68,0.1)', color: '#ef4444', label: 'reprise.statusRefused' },
+  converti: { bg: 'rgba(139,92,246,0.1)', color: '#8b5cf6', label: 'reprise.statusConverted' },
 };
 
 export default function RepriseList() {
+  const { t } = useLanguage();
   const [reprises, setReprises] = useState([]);
   const [loading, setLoading] = useState(true);
   const [actionLoading, setActionLoading] = useState(null);
@@ -33,7 +35,7 @@ export default function RepriseList() {
   const load = () => {
     setLoading(true);
     setError(null);
-    api.get('/reprises').then(res => setReprises(res.data)).catch(e => setError(e?.response?.data?.message || e.message || 'Erreur de chargement')).finally(() => setLoading(false));
+    api.get('/reprises').then(res => setReprises(res.data)).catch(e => setError(e?.response?.data?.message || e.message || t('reprise.loadErrorFallback'))).finally(() => setLoading(false));
   };
 
   useEffect(() => { load(); }, []);
@@ -85,13 +87,13 @@ export default function RepriseList() {
       <div className="container" style={{ position: 'relative', zIndex: 1 }}>
         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 24, flexWrap: 'wrap', gap: 12 }}>
           <div>
-            <Link to="/" className="btn btn-ghost" style={{ marginBottom: 8 }}><FiArrowLeft /> Accueil</Link>
+            <Link to="/" className="btn btn-ghost" style={{ marginBottom: 8 }}><FiArrowLeft /> {t('reprise.homeLink')}</Link>
             <h1 style={{ fontSize: 28, fontWeight: 800, display: 'flex', alignItems: 'center', gap: 10 }}>
-              <FiSmartphone size={28} style={{ color: 'var(--primary)' }} /> Demandes de reprise
+              <FiSmartphone size={28} style={{ color: 'var(--primary)' }} /> {t('reprise.pageTitle')}
             </h1>
           </div>
           <button onClick={load} className="btn btn-ghost" style={{ fontSize: 13, display: 'flex', alignItems: 'center', gap: 6 }}>
-            <FiRefreshCw size={14} /> Actualiser
+            <FiRefreshCw size={14} /> {t('reprise.refresh')}
           </button>
         </div>
 
@@ -99,13 +101,13 @@ export default function RepriseList() {
           <div style={{ textAlign: 'center', padding: '60px 0' }}><div className="spinner" /></div>
         ) : error ? (
           <div style={{ textAlign: 'center', padding: '30px 0', color: '#ef4444' }}>
-            <p>Erreur: {error}</p>
-            <button onClick={load} className="btn btn-ghost" style={{ marginTop: 12 }}>Reessayer</button>
+            <p>{t('reprise.errorLabel')} {error}</p>
+            <button onClick={load} className="btn btn-ghost" style={{ marginTop: 12 }}>{t('reprise.retry')}</button>
           </div>
         ) : reprises.length === 0 ? (
           <div style={{ textAlign: 'center', padding: '60px 0', color: 'var(--text-muted)' }}>
             <FiSmartphone size={48} style={{ opacity: 0.3, marginBottom: 12 }} />
-            <p>Aucune demande de reprise pour le moment.</p>
+            <p>{t('reprise.emptyTitle')}</p>
           </div>
         ) : (
           <div style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
@@ -132,7 +134,7 @@ export default function RepriseList() {
                           }} />
                         )}
                         <div style={{ fontSize: 13, fontWeight: 600, color: 'var(--text)' }}>
-                          Article: {r.product_name}
+                          {t('reprise.article', { name: r.product_name })}
                         </div>
                       </div>
                       {pImgs.length > 1 && (
@@ -156,18 +158,18 @@ export default function RepriseList() {
                       <div style={{ flex: 1 }}>
                         <div style={{ fontWeight: 700, fontSize: 15 }}>{r.brand} {r.model}</div>
                         <div style={{ fontSize: 12, color: 'var(--text-muted)', marginTop: 2 }}>
-                          {r.full_name || 'Anonyme'}
-                          {r.imei ? ` | IMEI: ${r.imei}` : ''}
+                          {r.full_name || t('reprise.anonymous')}
+                          {r.imei ? t('reprise.imeiInfo', { imei: r.imei }) : ''}
                         </div>
                         <div style={{ fontSize: 11, color: 'var(--text-muted)', marginTop: 2 }}>
-                          <FiClock size={11} /> {new Date(r.created_at).toLocaleDateString('fr-FR')} a {new Date(r.created_at).toLocaleTimeString('fr-FR', { hour: '2-digit', minute: '2-digit' })}
+                          <FiClock size={11} /> {new Date(r.created_at).toLocaleDateString('fr-FR')} {t('reprise.at')} {new Date(r.created_at).toLocaleTimeString('fr-FR', { hour: '2-digit', minute: '2-digit' })}
                         </div>
                       </div>
                       <span style={{
                         padding: '3px 10px', borderRadius: 12, fontSize: 11, fontWeight: 600, whiteSpace: 'nowrap',
                         background: st.bg, color: st.color,
                       }}>
-                        {st.label}
+                        {st.label && t(st.label)}
                       </span>
                     </div>
 
@@ -201,7 +203,7 @@ export default function RepriseList() {
 
                     {r.status === 'refuse' && r.vendor_notes && (
                       <div style={{ fontSize: 12, color: 'var(--text-secondary)', fontStyle: 'italic', padding: '4px 0' }}>
-                        Raison: {r.vendor_notes}
+                        {t('reprise.reasonLabel')} {r.vendor_notes}
                       </div>
                     )}
 
@@ -210,11 +212,11 @@ export default function RepriseList() {
                         <button onClick={() => update(r.id, { status: 'accepte' })}
                           disabled={actionLoading === r.id}
                           className="btn btn-primary" style={{ fontSize: 12, padding: '8px 16px', flex: 1, justifyContent: 'center' }}>
-                          {actionLoading === r.id ? '...' : <><FiCheck size={14} /> Accepter</>}
+                          {actionLoading === r.id ? '...' : <><FiCheck size={14} /> {t('reprise.accept')}</>}
                         </button>
                         <button onClick={() => { setRefuseTarget(r.id); setRefuseReason(''); }} disabled={actionLoading === r.id}
                           className="btn btn-primary" style={{ fontSize: 12, padding: '8px 16px', flex: 1, justifyContent: 'center', background: '#ef4444' }}>
-                          {actionLoading === r.id ? '...' : <><FiX size={14} /> Refuser</>}
+                          {actionLoading === r.id ? '...' : <><FiX size={14} /> {t('reprise.refuse')}</>}
                         </button>
                       </div>
                     )}
@@ -229,7 +231,7 @@ export default function RepriseList() {
                         <a href={`tel:${r.phone}`} className="btn btn-primary" style={{
                           fontSize: 11, padding: '5px 12px', marginLeft: 'auto', textDecoration: 'none',
                         }}>
-                          <FiPhone size={12} /> Appeler
+                          <FiPhone size={12} /> {t('reprise.call')}
                         </a>
                       </div>
                     )}
@@ -237,7 +239,7 @@ export default function RepriseList() {
                     {isVendor && (r.status === 'accepte' || r.status === 'refuse' || r.status === 'converti') && (
                       <button onClick={() => del(r.id)} disabled={actionLoading === r.id}
                         className="btn btn-primary" style={{ fontSize: 12, padding: '6px 14px', alignSelf: 'flex-start', background: '#ef4444' }}>
-                        <FiTrash2 size={13} /> Supprimer
+                        <FiTrash2 size={13} /> {t('reprise.delete')}
                       </button>
                     )}
                   </div>
@@ -265,19 +267,19 @@ export default function RepriseList() {
               <div style={{ width: 56, height: 56, borderRadius: '50%', background: 'rgba(239,68,68,0.1)', display: 'flex', alignItems: 'center', justifyContent: 'center', margin: '0 auto 16px' }}>
                 <FiX size={26} color="#ef4444" />
               </div>
-              <h3 style={{ fontSize: 18, fontWeight: 700, marginBottom: 8 }}>Refuser la reprise</h3>
+              <h3 style={{ fontSize: 18, fontWeight: 700, marginBottom: 8 }}>{t('reprise.refuseTitle')}</h3>
               <p style={{ fontSize: 14, color: 'var(--text-secondary)', marginBottom: 20, lineHeight: 1.5 }}>
-                Vous pouvez ajouter une raison optionnelle.
+                {t('reprise.refuseReasonOptional')}
               </p>
-              <textarea value={refuseReason} onChange={e => setRefuseReason(e.target.value)} placeholder="Raison du refus..."
+              <textarea value={refuseReason} onChange={e => setRefuseReason(e.target.value)} placeholder={t('reprise.refuseReasonPlaceholder')}
                 style={{ width: '100%', minHeight: 80, padding: 12, borderRadius: 10, border: '1px solid var(--border)', background: 'var(--bg-card)', color: 'var(--text)', fontSize: 14, resize: 'vertical', fontFamily: 'var(--font)', marginBottom: 20, textAlign: 'left', boxSizing: 'border-box' }} />
               <div style={{ display: 'flex', gap: 10 }}>
                 <button onClick={() => setRefuseTarget(null)} className="btn btn-outline" style={{ flex: 1, justifyContent: 'center', padding: '10px 0' }}>
-                  Annuler
+                  {t('reprise.cancel')}
                 </button>
                 <button onClick={() => { update(refuseTarget, { status: 'refuse', vendor_notes: refuseReason || null }); setRefuseTarget(null); }}
                   className="form-submit" style={{ flex: 1, justifyContent: 'center', padding: '10px 0', background: '#ef4444', borderColor: '#ef4444' }}>
-                  <FiX size={14} /> Refuser
+                  <FiX size={14} /> {t('reprise.refuse')}
                 </button>
               </div>
             </motion.div>
@@ -301,9 +303,9 @@ export default function RepriseList() {
         open={!!deleteTarget}
         onClose={() => !actionLoading && setDeleteTarget(null)}
         onConfirm={executeDelete}
-        title="Supprimer cette demande ?"
-        message="Cette action est irreversible."
-        confirmText="Supprimer"
+        title={t('reprise.deleteConfirmTitle')}
+        message={t('reprise.deleteConfirmMessage')}
+        confirmText={t('reprise.deleteConfirmText')}
         confirmColor="#dc2626"
         icon={<FiTrash2 size={26} color="#dc2626" />}
       />

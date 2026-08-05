@@ -2,6 +2,7 @@ import { useEffect, useState, useRef } from 'react';
 import { Link } from 'react-router-dom';
 import { FiArrowLeft, FiShield, FiUser, FiMonitor, FiGlobe, FiClock, FiSearch, FiRefreshCw, FiMapPin, FiCopy } from 'react-icons/fi';
 import api from '../api/axios';
+import { useLanguage } from '../context/LanguageContext';
 
 const actionLabels = {
   connexion: 'Connexion',
@@ -12,16 +13,18 @@ const actionLabels = {
 };
 
 function CoordBadge({ lat, lng }) {
+  const { t } = useLanguage();
   if (!lat || !lng) return null;
   const copy = () => { navigator.clipboard.writeText(`${parseFloat(lat).toFixed(6)}, ${parseFloat(lng).toFixed(6)}`); };
   return (
-    <span onClick={copy} title="Copier" style={{ cursor: 'pointer', display: 'inline-flex', alignItems: 'center', gap: '4px', padding: '2px 8px', background: 'rgba(16,185,129,0.1)', color: '#10b981', borderRadius: '6px', fontSize: '11px', fontWeight: 600, fontFamily: 'monospace' }}>
+    <span onClick={copy} title={t('admin.copy')} style={{ cursor: 'pointer', display: 'inline-flex', alignItems: 'center', gap: '4px', padding: '2px 8px', background: 'rgba(16,185,129,0.1)', color: '#10b981', borderRadius: '6px', fontSize: '11px', fontWeight: 600, fontFamily: 'monospace' }}>
       <FiMapPin size={11} /> {parseFloat(lat).toFixed(5)}, {parseFloat(lng).toFixed(5)} <FiCopy size={10} />
     </span>
   );
 }
 
 export default function AdminVendorLogs() {
+  const { t } = useLanguage();
   const [logs, setLogs] = useState([]);
   const [loading, setLoading] = useState(true);
   const [search, setSearch] = useState('');
@@ -123,10 +126,10 @@ export default function AdminVendorLogs() {
     setReindexMsg('');
     try {
       const res = await api.post('/admin/vendor-logs/reindex');
-      setReindexMsg(`Re-analyse terminee : ${res.data.reindexed}/${res.data.total} traitees`);
+      setReindexMsg(t('admin.reindexDone', { done: res.data.reindexed, total: res.data.total }));
       load();
     } catch (e) {
-      setReindexMsg('Erreur : ' + (e.response?.data?.error || e.message));
+      setReindexMsg(`${t('admin.reindexError')} ${e.response?.data?.error || e.message}`);
     }
     setReindexing(false);
     setTimeout(() => setReindexMsg(''), 6000);
@@ -143,25 +146,24 @@ export default function AdminVendorLogs() {
       <div className="container" style={{ position: 'relative', zIndex: 1 }}>
         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '16px', flexWrap: 'wrap', gap: '12px' }}>
           <div>
-            <Link to="/admin" className="btn btn-ghost" style={{ marginBottom: '4px' }}><FiArrowLeft /> Dashboard</Link>
+            <Link to="/admin" className="btn btn-ghost" style={{ marginBottom: '4px' }}><FiArrowLeft /> {t('admin.dashboardTitle')}</Link>
             <h1 style={{ fontSize: '28px', fontWeight: 800, display: 'flex', alignItems: 'center', gap: '10px' }}>
-              <FiShield size={28} style={{ color: 'var(--primary)' }} /> Journal des vendeurs
+              <FiShield size={28} style={{ color: 'var(--primary)' }} /> {t('admin.vendorLogsTitle')}
             </h1>
-            <p style={{ color: 'var(--text-secondary)', fontSize: '13px' }}>Carte de localisation (IP + GPS) — {hasCoords.length} connexions localisees</p>
+            <p style={{ color: 'var(--text-secondary)', fontSize: '13px' }}>{t('admin.mapSubtitle', { count: hasCoords.length })}</p>
           </div>
           <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-            {reindexMsg && <span style={{ fontSize: '12px', color: reindexMsg.startsWith('Erreur') ? '#ef4444' : '#10b981' }}>{reindexMsg}</span>}
+            {reindexMsg && <span style={{ fontSize: '12px', color: reindexMsg.startsWith(t('admin.reindexError')) ? '#ef4444' : '#10b981' }}>{reindexMsg}</span>}
             <button onClick={reindex} disabled={reindexing} className="btn btn-ghost" style={{ fontSize: '13px', display: 'flex', alignItems: 'center', gap: '6px' }}>
-              <FiRefreshCw size={14} className={reindexing ? 'spin' : ''} /> {reindexing ? 'Analyse...' : 'Re-analyser tout'}
+              <FiRefreshCw size={14} className={reindexing ? 'spin' : ''} /> {reindexing ? t('admin.analyzing') : t('admin.reanalyze')}
             </button>
           </div>
         </div>
 
         {leafletError ? (
           <div style={{ width: '100%', height: '60px', borderRadius: 'var(--radius)', border: '1px solid var(--border)', marginBottom: '20px', display: 'flex', alignItems: 'center', justifyContent: 'center', color: 'var(--text-muted)', fontSize: '13px' }}>
-            Carte indisponible (Leaflet non charge)
-          </div>
-        ) : (
+            {t('admin.mapUnavailable')}
+          </div>        ) : (
           <div ref={mapContainerRef} style={{ width: '100%', height: '480px', borderRadius: 'var(--radius)', border: '1px solid var(--border)', marginBottom: '20px', zIndex: 0, position: 'relative' }} />
         )}
 
@@ -169,7 +171,7 @@ export default function AdminVendorLogs() {
           <FiSearch size={18} style={{ position: 'absolute', left: '14px', top: '14px', color: 'var(--text-muted)' }} />
           <input
             type="text"
-            placeholder="Rechercher par nom, email, IP..."
+            placeholder={t('admin.logsSearchPlaceholder')}
             value={search}
             onChange={(e) => setSearch(e.target.value)}
             style={{ width: '100%', padding: '12px 14px 12px 42px', border: '1px solid var(--border)', borderRadius: '10px', background: 'var(--bg-card)', color: 'var(--text)', fontFamily: 'var(--font)', fontSize: '14px', boxSizing: 'border-box' }}
@@ -181,7 +183,7 @@ export default function AdminVendorLogs() {
         ) : logs.length === 0 ? (
           <div style={{ textAlign: 'center', padding: '40px 0', color: 'var(--text-muted)' }}>
             <FiShield size={48} style={{ opacity: 0.3, marginBottom: '12px' }} />
-            <p>Aucune activite enregistree.</p>
+            <p>{t('admin.noActivity')}</p>
           </div>
         ) : (
           <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
@@ -237,7 +239,7 @@ export default function AdminVendorLogs() {
                 </div>
                 <div style={{ fontSize: '12px', color: 'var(--text-secondary)', marginTop: '6px', display: 'flex', alignItems: 'center', gap: '8px', flexWrap: 'wrap' }}>
                   <span><FiGlobe size={11} /> {log.ip_address}</span>
-                  <span>{log.isp || 'Inconnu'}</span>
+                  <span>{log.isp || t('admin.unknown')}</span>
                   {(log.city || log.country) && (
                     <span style={{ color: 'var(--text-muted)' }}>— {[log.city, log.region, log.country].filter(Boolean).join(', ')}</span>
                   )}
@@ -247,28 +249,28 @@ export default function AdminVendorLogs() {
                 </div>
                 {expanded === log.id && (
                   <div style={{ marginTop: '10px', padding: '12px', background: 'var(--bg-secondary)', borderRadius: '8px', fontSize: '13px', color: 'var(--text-secondary)', lineHeight: '1.8' }}>
-                    <div><strong>IP :</strong> {log.ip_address}
+                    <div><strong>{t('admin.ipLabel')}</strong> {log.ip_address}
                       {log.is_vpn === 1 && <span style={{ marginLeft: '8px', color: '#ef4444' }}>⚠ VPN</span>}
                       {log.is_vpn !== 1 && log.is_datacenter === 1 && <span style={{ marginLeft: '8px', color: '#f59e0b' }}>Hebergement</span>}
                     </div>
-                    <div><strong>Operateur :</strong> {log.isp || 'Inconnu'}</div>
+                    <div><strong>{t('admin.operatorLabel')}</strong> {log.isp || t('admin.unknown')}</div>
                     {(log.city || log.region || log.country) && (
-                      <div><strong>Localisation IP :</strong> {[log.city, log.region, log.country].filter(Boolean).join(', ')}</div>
+                      <div><strong>{t('admin.locationLabel')}</strong> {[log.city, log.region, log.country].filter(Boolean).join(', ')}</div>
                     )}
                     {log.latitude && log.longitude && (
                       <div style={{ marginTop: '6px', padding: '8px 10px', background: 'rgba(16,185,129,0.08)', borderRadius: '6px', border: '1px solid rgba(16,185,129,0.2)' }}>
-                        <strong style={{ color: '#10b981' }}>📍 Coordonnees GPS :</strong>
+                        <strong style={{ color: '#10b981' }}>📍 {t('admin.gpsCoordsLabel')}</strong>
                         <div style={{ fontFamily: 'monospace', fontSize: '14px', fontWeight: 700, color: 'var(--text)', margin: '4px 0' }}>
                           {parseFloat(log.latitude).toFixed(6)}, {parseFloat(log.longitude).toFixed(6)}
                         </div>
                         <a href={`https://www.google.com/maps?q=${log.latitude},${log.longitude}`} target="_blank" rel="noopener noreferrer"
                           style={{ display: 'inline-block', background: '#10b981', color: '#fff', padding: '4px 12px', borderRadius: '6px', textDecoration: 'none', fontSize: '12px', marginTop: '4px' }}>
-                          Ouvrir dans Google Maps →
+                          {t('admin.openInGoogleMaps')}
                         </a>
                       </div>
                     )}
-                    <div style={{ fontSize: '12px', wordBreak: 'break-word', marginTop: '6px' }}><strong>Appareil :</strong> {log.user_agent || 'Inconnu'}</div>
-                    {log.product_id && <div><strong>Produit :</strong> #{log.product_id}</div>}
+                    <div style={{ fontSize: '12px', wordBreak: 'break-word', marginTop: '6px' }}><strong>{t('admin.deviceLabel')}</strong> {log.user_agent || t('admin.unknown')}</div>
+                    {log.product_id && <div><strong>{t('admin.productLabel')}</strong> #{log.product_id}</div>}
                     {log.details && <div style={{ marginTop: '4px', fontStyle: 'italic' }}>"{log.details}"</div>}
                   </div>
                 )}

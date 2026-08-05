@@ -2,69 +2,71 @@ import { useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import { FiArrowLeft } from 'react-icons/fi';
 import { motion } from 'framer-motion';
+import { useLanguage } from '../context/LanguageContext';
 
 export default function Legal() {
-  useEffect(() => { document.title = 'Mentions légales & CGV - Occasion & Garantie'; }, []);
+  const { t } = useLanguage();
+  useEffect(() => { document.title = t('about.legalMetaTitle'); }, [t]);
 
   return (
     <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }}>
       <div className="container legal-page">
-        <Link to="/" className="back-link"><FiArrowLeft size={14} /> Retour à l'accueil</Link>
-        <h1>Mentions légales & Conditions générales</h1>
-        <p className="legal-date">Dernière mise à jour : juillet 2026</p>
+        <Link to="/" className="back-link"><FiArrowLeft size={14} /> {t('about.backHome')}</Link>
+        <h1>{t('about.legalTitle')}</h1>
+        <p className="legal-date">{t('about.lastUpdate')}</p>
 
         <section>
-          <h2>1. Informations légales</h2>
-          <p><strong>Plateforme :</strong> Occasion & Garantie</p>
-          <p><strong>Site web :</strong> www.occasionetgarantie.store</p>
-          <p><strong>Contact :</strong> contact@contact.occasionetgarantie.store</p>
-          <p><strong>Téléphone :</strong> +212 669-017295</p>
-          <p><strong>Adresse :</strong> Casablanca, Maroc</p>
+          <h2>{t('about.legal1')}</h2>
+          <p><strong>{t('about.legalPlatform')}</strong> Occasion & Garantie</p>
+          <p><strong>{t('about.legalWebsite')}</strong> www.occasionetgarantie.store</p>
+          <p><strong>{t('about.legalContact')}</strong> contact@contact.occasionetgarantie.store</p>
+          <p><strong>{t('about.legalPhone')}</strong> +212 669-017295</p>
+          <p><strong>{t('about.legalAddress')}</strong> Casablanca, Maroc</p>
         </section>
 
         <section>
-          <h2>2. Objet</h2>
-          <p>Les présentes conditions générales régissent l'utilisation de la plateforme Occasion & Garantie, marketplace de vente de produits électroniques d'occasion.</p>
+          <h2>{t('about.legal2')}</h2>
+          <p>{t('about.legal2Body')}</p>
         </section>
 
         <section>
-          <h2>3. Inscription et compte</h2>
+          <h2>{t('about.legal3')}</h2>
           <ul>
-            <li>L'inscription est gratuite et ouverte à toute personne physique majeure</li>
-            <li>L'utilisateur s'engage à fournir des informations exactes</li>
-            <li>Chaque compte est personnel et non transférable</li>
-            <li>L'utilisateur est responsable de la confidentialité de ses identifiants</li>
+            <li>{t('about.legal3Li1')}</li>
+            <li>{t('about.legal3Li2')}</li>
+            <li>{t('about.legal3Li3')}</li>
+            <li>{t('about.legal3Li4')}</li>
           </ul>
         </section>
 
         <section>
-          <h2>4. Produits et annonces</h2>
+          <h2>{t('about.legal4')}</h2>
           <ul>
-            <li>Seuls les produits électroniques et tech sont autorisés</li>
-            <li>Le vendeur est seul responsable du contenu et de la conformité de ses annonces</li>
-            <li>Les produits doivent être décrits de manière précise et honnête</li>
-            <li>La plateforme se réserve le droit de refuser ou supprimer toute annonce non conforme</li>
+            <li>{t('about.legal4Li1')}</li>
+            <li>{t('about.legal4Li2')}</li>
+            <li>{t('about.legal4Li3')}</li>
+            <li>{t('about.legal4Li4')}</li>
           </ul>
         </section>
 
         <section>
-          <h2>5. Transactions</h2>
-          <p>Occasion & Garantie met en relation acheteurs et vendeurs mais n'est pas partie aux transactions. Les modalités de paiement et de livraison sont convenues directement entre les parties.</p>
+          <h2>{t('about.legal5')}</h2>
+          <p>{t('about.legal5Body')}</p>
         </section>
 
         <section>
-          <h2>6. Responsabilité</h2>
-          <p>La plateforme ne peut être tenue responsable des litiges entre acheteurs et vendeurs. Nous nous engageons à mettre en œuvre tous les moyens pour assurer le bon fonctionnement de la plateforme.</p>
+          <h2>{t('about.legal6')}</h2>
+          <p>{t('about.legal6Body')}</p>
         </section>
 
         <section>
-          <h2>7. Propriété intellectuelle</h2>
-          <p>Tous les contenus présents sur la plateforme (logos, textes, images) sont protégés par le droit d'auteur. Toute reproduction sans autorisation est interdite.</p>
+          <h2>{t('about.legal7')}</h2>
+          <p>{t('about.legal7Body')}</p>
         </section>
 
         <section>
-          <h2>8. Modification des CGV</h2>
-          <p>Nous nous réservons le droit de modifier les présentes conditions à tout moment. Les utilisateurs seront informés de toute modification significative.</p>
+          <h2>{t('about.legal8')}</h2>
+          <p>{t('about.legal8Body')}</p>
         </section>
       </div>
     </motion.div>

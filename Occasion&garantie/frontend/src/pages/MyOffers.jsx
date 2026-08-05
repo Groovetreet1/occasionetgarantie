@@ -4,22 +4,24 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { FiX, FiCheck, FiSend, FiShoppingBag, FiMessageCircle, FiClock } from 'react-icons/fi';
 import api from '../api/axios';
 import { useAuth } from '../context/AuthContext';
-
-const statusConfig = {
-  en_attente: { label: 'En attente du vendeur', color: '#f59e0b', bg: 'rgba(245,158,11,0.1)' },
-  contre_offre: { label: 'Contre-offre', color: '#3b82f6', bg: 'rgba(59,130,246,0.1)' },
-  acceptee: { label: 'Acceptée', color: '#10b981', bg: 'rgba(16,185,129,0.1)' },
-  refusee: { label: 'Refusée', color: '#ef4444', bg: 'rgba(239,68,68,0.1)' },
-  annulee: { label: 'Annulée', color: '#64748b', bg: 'rgba(100,116,139,0.1)' },
-};
+import { useLanguage } from '../context/LanguageContext';
 
 export default function MyOffers() {
   const { user } = useAuth();
+  const { t } = useLanguage();
   const navigate = useNavigate();
   const [offers, setOffers] = useState([]);
   const [loading, setLoading] = useState(true);
   const [counterTarget, setCounterTarget] = useState(null);
   const [counterPrice, setCounterPrice] = useState('');
+
+  const statusConfig = {
+    en_attente: { label: t('seller.statusPendingVendor'), color: '#f59e0b', bg: 'rgba(245,158,11,0.1)' },
+    contre_offre: { label: t('seller.statusCounterOffer'), color: '#3b82f6', bg: 'rgba(59,130,246,0.1)' },
+    acceptee: { label: t('seller.statusAccepted'), color: '#10b981', bg: 'rgba(16,185,129,0.1)' },
+    refusee: { label: t('seller.statusRefused'), color: '#ef4444', bg: 'rgba(239,68,68,0.1)' },
+    annulee: { label: t('seller.statusCancelled'), color: '#64748b', bg: 'rgba(100,116,139,0.1)' },
+  };
 
   useEffect(() => {
     api.get('/negotiations/mine')
@@ -34,21 +36,21 @@ export default function MyOffers() {
       setOffers(prev => prev.map(o => o.id === id ? { ...o, status } : o));
       if (data.conversation_id) navigate(`/messenger/${data.conversation_id}`);
     } catch (err) {
-      alert(err.response?.data?.message || 'Erreur');
+      alert(err.response?.data?.message || t('seller.error'));
     }
   };
 
   const submitCounter = async () => {
     if (!counterTarget) return;
     const price = parseFloat(counterPrice);
-    if (!price || price <= 0) { alert('Entrez un prix valide.'); return; }
+    if (!price || price <= 0) { alert(t('seller.validPrice')); return; }
     try {
       await api.put(`/negotiations/${counterTarget.id}`, { status: 'contre_offre', price });
       setOffers(prev => prev.map(o => o.id === counterTarget.id ? { ...o, status: 'contre_offre', counter_price: price, counter_by: user.id } : o));
       setCounterTarget(null);
       setCounterPrice('');
     } catch (err) {
-      alert(err.response?.data?.message || 'Erreur');
+      alert(err.response?.data?.message || t('seller.error'));
     }
   };
 
@@ -60,11 +62,11 @@ export default function MyOffers() {
     <div className="seller-page">
       <div className="seller-page-header">
         <div>
-          <h1>Mes offres</h1>
-          <p className="text-secondary">Suivez et répondez à vos négociations de prix</p>
+          <h1>{t('seller.myOffers')}</h1>
+          <p className="text-secondary">{t('seller.trackOffers')}</p>
         </div>
         <Link to="/products" className="btn btn-primary" style={{ textDecoration: 'none' }}>
-          <FiShoppingBag size={16} /> Parcourir les produits
+          <FiShoppingBag size={16} /> {t('seller.browseProducts')}
         </Link>
       </div>
 
@@ -72,9 +74,9 @@ export default function MyOffers() {
         {offers.length === 0 ? (
           <div className="empty-state" style={{ marginTop: 24 }}>
             <FiShoppingBag size={48} />
-            <p>Aucune offre pour le moment. Proposez un prix sur un produit !</p>
+            <p>{t('seller.noOffers')}</p>
             <Link to="/products" className="btn btn-primary" style={{ textDecoration: 'none' }}>
-              Voir les produits
+              {t('seller.viewProducts')}
             </Link>
           </div>
         ) : offers.map(o => {
@@ -96,9 +98,9 @@ export default function MyOffers() {
               <div style={{ flex: 1, minWidth: 200 }}>
                 <Link to={`/products/${o.product_slug}`} style={{ fontWeight: 600, fontSize: 14, color: 'var(--text)', textDecoration: 'none' }}>{o.product_name}</Link>
                 <div style={{ fontSize: 12, color: 'var(--text-secondary)', marginTop: 4 }}>
-                  Votre offre : <strong style={{ color: 'var(--primary)' }}>{Number(o.offered_price)} DH</strong>
+                  {t('seller.yourOffer')} <strong style={{ color: 'var(--primary)' }}>{Number(o.offered_price)} DH</strong>
                   {o.counter_price != null && Number(o.counter_price) !== Number(o.offered_price) && (
-                    <> · Contre-offre : <strong>{Number(o.counter_price)} DH</strong></>
+                    <> · {t('seller.counterOfferInline')} <strong>{Number(o.counter_price)} DH</strong></>
                   )}
                 </div>
                 {o.message && <div style={{ fontSize: 12, color: 'var(--text-muted)', marginTop: 4 }}>« {o.message} »</div>}
@@ -111,30 +113,30 @@ export default function MyOffers() {
               <div style={{ display: 'flex', gap: 6, flexWrap: 'wrap' }}>
                 {o.status === 'acceptee' && o.conversation_id && (
                   <Link to={`/messenger/${o.conversation_id}`} className="btn" style={{ fontSize: 12, padding: '6px 12px', background: '#10b981', color: '#fff', border: 'none', textDecoration: 'none' }}>
-                    <FiMessageCircle size={13} style={{ verticalAlign: 'middle', marginRight: 3 }} /> Ouvrir le chat
+                    <FiMessageCircle size={13} style={{ verticalAlign: 'middle', marginRight: 3 }} /> {t('seller.openChat')}
                   </Link>
                 )}
                 {canRespond(o) && (
                   <>
                     <button onClick={() => respond(o.id, 'acceptee')} className="btn" style={{ fontSize: 12, padding: '6px 12px', background: '#10b981', color: '#fff', border: 'none' }}>
-                      <FiCheck size={13} style={{ verticalAlign: 'middle', marginRight: 3 }} /> Accepter
+                      <FiCheck size={13} style={{ verticalAlign: 'middle', marginRight: 3 }} /> {t('seller.accept')}
                     </button>
                     <button onClick={() => { setCounterTarget(o); setCounterPrice(''); }} className="btn" style={{ fontSize: 12, padding: '6px 12px', background: 'var(--primary)', color: '#fff', border: 'none' }}>
-                      <FiSend size={13} style={{ verticalAlign: 'middle', marginRight: 3 }} /> Contre-proposer
+                      <FiSend size={13} style={{ verticalAlign: 'middle', marginRight: 3 }} /> {t('seller.counterPropose')}
                     </button>
                     <button onClick={() => respond(o.id, 'refusee')} className="btn" style={{ fontSize: 12, padding: '6px 12px', background: 'transparent', color: '#ef4444', border: '1.5px solid #ef4444' }}>
-                      <FiX size={13} style={{ verticalAlign: 'middle', marginRight: 3 }} /> Refuser
+                      <FiX size={13} style={{ verticalAlign: 'middle', marginRight: 3 }} /> {t('seller.refuse')}
                     </button>
                   </>
                 )}
                 {o.status === 'en_attente' && (
                   <button onClick={() => respond(o.id, 'annulee')} className="btn" style={{ fontSize: 12, padding: '6px 12px', background: 'transparent', color: '#64748b', border: '1.5px solid #64748b' }}>
-                    <FiX size={13} style={{ verticalAlign: 'middle', marginRight: 3 }} /> Annuler
+                    <FiX size={13} style={{ verticalAlign: 'middle', marginRight: 3 }} /> {t('seller.cancel')}
                   </button>
                 )}
                 {pending && (
                   <span style={{ fontSize: 12, color: 'var(--text-muted)', display: 'flex', alignItems: 'center', gap: 4 }}>
-                    <FiClock size={13} /> En attente...
+                    <FiClock size={13} /> {t('seller.pendingDots')}
                   </span>
                 )}
               </div>
@@ -152,22 +154,22 @@ export default function MyOffers() {
               style={{ background: 'var(--bg-card)', borderRadius: 16, padding: 24, maxWidth: 400, width: '100%', boxShadow: '0 20px 60px rgba(0,0,0,0.3)' }}
               onClick={(e) => e.stopPropagation()}>
               <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 12 }}>
-                <h3 style={{ fontSize: 17, fontWeight: 700 }}>Contre-proposer un prix</h3>
+                <h3 style={{ fontSize: 17, fontWeight: 700 }}>{t('seller.counterPriceTitle')}</h3>
                 <button onClick={() => setCounterTarget(null)} style={{ background: 'none', border: 'none', color: 'var(--text-muted)', cursor: 'pointer', padding: 4 }}><FiX size={18} /></button>
               </div>
               <p style={{ fontSize: 13, color: 'var(--text-secondary)', marginBottom: 12 }}>
-                Contre-offre du vendeur : <strong>{Number(counterTarget.counter_price)} DH</strong> — {counterTarget.product_name}
+                {t('seller.vendorCounterOffer')} <strong>{Number(counterTarget.counter_price)} DH</strong> — {counterTarget.product_name}
               </p>
               <input
-                type="number" min="0" placeholder="Votre prix (DH)" value={counterPrice}
+                type="number" min="0" placeholder={t('seller.yourPricePlaceholder')} value={counterPrice}
                 onChange={e => setCounterPrice(e.target.value)}
                 autoFocus
                 style={{ width: '100%', padding: '12px 14px', borderRadius: 10, border: '1px solid var(--border)', background: 'var(--bg-secondary)', color: 'var(--text)', fontSize: 14, fontFamily: 'var(--font)', marginBottom: 16, boxSizing: 'border-box' }}
               />
               <div style={{ display: 'flex', gap: 10 }}>
-                <button className="btn btn-outline" onClick={() => setCounterTarget(null)} style={{ flex: 1, justifyContent: 'center' }}>Annuler</button>
+                <button className="btn btn-outline" onClick={() => setCounterTarget(null)} style={{ flex: 1, justifyContent: 'center' }}>{t('seller.cancel')}</button>
                 <button className="form-submit" onClick={submitCounter} style={{ flex: 1, justifyContent: 'center' }}>
-                  <FiSend size={15} /> Envoyer
+                  <FiSend size={15} /> {t('seller.send')}
                 </button>
               </div>
             </motion.div>

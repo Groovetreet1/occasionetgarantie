@@ -4,15 +4,17 @@ import { FiMapPin, FiPhone, FiMail, FiClock, FiCheckCircle, FiUsers, FiAward, Fi
 import { BsWhatsapp } from 'react-icons/bs';
 import api from '../api/axios';
 import { useAuth } from '../context/AuthContext';
+import { useLanguage } from '../context/LanguageContext';
 
-function yearsSince(dateStr) {
+function yearsSince(dateStr, t) {
   const years = (new Date() - new Date(dateStr)) / (365.25 * 86400000);
-  if (years < 1) return 'moins d\'un an';
-  return `+${Math.floor(years)} ans`;
+  if (years < 1) return t('about.lessThanYear');
+  return t('about.years', { years: Math.floor(years) });
 }
 
 export default function About() {
   const { user } = useAuth();
+  const { t } = useLanguage();
   const [siteStats, setSiteStats] = useState(null);
   const [cfMsg, setCfMsg] = useState('');
   const [cfLoading, setCfLoading] = useState(false);
@@ -32,7 +34,7 @@ export default function About() {
       setCfMsg('');
     } catch (err) {
       const data = err.response?.data || {};
-      alert((data.message || 'Erreur lors de l\'envoi.') + (data.detail ? ` (${data.detail})` : ''));
+      alert((data.message || t('products.sendError') + '.') + (data.detail ? ` (${data.detail})` : ''));
     } finally { setCfLoading(false); }
   };
 
@@ -40,9 +42,9 @@ export default function About() {
     <>
       <section className="about-hero">
         <div className="container" style={{ textAlign: 'center', paddingTop: '120px', paddingBottom: '60px' }}>
-          <h1 style={{ fontSize: '32px', fontWeight: 700, marginBottom: '16px' }}>Qui sommes-nous ?</h1>
+          <h1 style={{ fontSize: '32px', fontWeight: 700, marginBottom: '16px' }}>{t('about.heroTitle')}</h1>
           <p style={{ color: 'var(--text-secondary)', fontSize: '16px', lineHeight: 1.7, maxWidth: '600px', margin: '0 auto' }}>
-            Occasion & Garantie est votre destination de confiance pour l'achat de produits technologiques reconditionnés au Maroc.
+            {t('about.heroDesc')}
           </p>
         </div>
       </section>
@@ -51,37 +53,37 @@ export default function About() {
         <div className="container">
           <div className="about-grid">
             <div>
-              <h2 style={{ fontSize: '24px', fontWeight: 700, marginBottom: '16px' }}>Notre histoire</h2>
+              <h2 style={{ fontSize: '24px', fontWeight: 700, marginBottom: '16px' }}>{t('about.historyTitle')}</h2>
               <p style={{ color: 'var(--text-secondary)', lineHeight: 1.8, marginBottom: '16px' }}>
-                Basés à Casablanca, nous sommes une équipe passionnée de technologie qui a compris qu'il est possible d'allier qualité et prix abordables.
+                {t('about.historyText1')}
               </p>
               <p style={{ color: 'var(--text-secondary)', lineHeight: 1.8, marginBottom: '16px' }}>
-                Chaque produit que nous proposons est minutieusement vérifié, testé et garanti. Nous croyons que tout le monde mérite d'accéder aux meilleures technologies sans se ruiner.
+                {t('about.historyText2')}
               </p>
               <p style={{ color: 'var(--text-secondary)', lineHeight: 1.8 }}>
-                Notre mission est simple : vous offrir des produits d'exception à prix réduits, avec une garantie qui vous protège.
+                {t('about.historyText3')}
               </p>
             </div>
             <div className="about-stats-box">
               <div style={{ textAlign: 'center', padding: '20px', background: 'var(--bg-secondary)', borderRadius: 'var(--radius)' }}>
                 <FiUsers size={28} style={{ color: 'var(--primary)', marginBottom: '8px' }} />
                 <div style={{ fontSize: '22px', fontWeight: 700, color: 'var(--primary)' }}>{siteStats ? `+${siteStats.totalUsers}` : '...'}</div>
-                <div style={{ fontSize: '12px', color: 'var(--text-muted)' }}>Inscrits</div>
+                <div style={{ fontSize: '12px', color: 'var(--text-muted)' }}>{t('about.statMembers')}</div>
               </div>
               <div style={{ textAlign: 'center', padding: '20px', background: 'var(--bg-secondary)', borderRadius: 'var(--radius)' }}>
                 <FiAward size={28} style={{ color: 'var(--primary)', marginBottom: '8px' }} />
-                <div style={{ fontSize: '22px', fontWeight: 700, color: 'var(--primary)' }}>{yearsSince('2023-01-01')}</div>
-                <div style={{ fontSize: '12px', color: 'var(--text-muted)' }}>D'expérience</div>
+                <div style={{ fontSize: '22px', fontWeight: 700, color: 'var(--primary)' }}>{yearsSince('2023-01-01', t)}</div>
+                <div style={{ fontSize: '12px', color: 'var(--text-muted)' }}>{t('about.statExperience')}</div>
               </div>
               <div style={{ textAlign: 'center', padding: '20px', background: 'var(--bg-secondary)', borderRadius: 'var(--radius)' }}>
                 <FiCheckCircle size={28} style={{ color: 'var(--primary)', marginBottom: '8px' }} />
                 <div style={{ fontSize: '22px', fontWeight: 700, color: 'var(--primary)' }}>{siteStats ? `+${siteStats.totalProducts}` : '...'}</div>
-                <div style={{ fontSize: '12px', color: 'var(--text-muted)' }}>Annonces</div>
+                <div style={{ fontSize: '12px', color: 'var(--text-muted)' }}>{t('about.statAds')}</div>
               </div>
               <div style={{ textAlign: 'center', padding: '20px', background: 'var(--bg-secondary)', borderRadius: 'var(--radius)' }}>
                 <FiStar size={28} style={{ color: 'var(--primary)', marginBottom: '8px' }} />
                 <div style={{ fontSize: '22px', fontWeight: 700, color: 'var(--primary)' }}>{siteStats ? `${siteStats.avgRating}/5` : '...'}</div>
-                <div style={{ fontSize: '12px', color: 'var(--text-muted)' }}>Note vendeurs</div>
+                <div style={{ fontSize: '12px', color: 'var(--text-muted)' }}>{t('about.statSellerRating')}</div>
               </div>
             </div>
           </div>
@@ -91,34 +93,34 @@ export default function About() {
       <section style={{ padding: '60px 0' }}>
         <div className="container">
           <div style={{ textAlign: 'center', marginBottom: '40px' }}>
-            <h2 style={{ fontSize: '24px', fontWeight: 700, marginBottom: '8px' }}>Notre équipe</h2>
-            <p style={{ color: 'var(--text-secondary)' }}>Les passionnés derrière Occasion & Garantie, au service de la communauté tech au Maghreb.</p>
+            <h2 style={{ fontSize: '24px', fontWeight: 700, marginBottom: '8px' }}>{t('about.teamTitle')}</h2>
+            <p style={{ color: 'var(--text-secondary)' }}>{t('about.teamSubtitle')}</p>
           </div>
           <div className="about-team-grid">
             {[
               {
                 name: 'Elmahfoudy Abdellah',
-                role: 'CEO & Fondateur',
+                roleKey: 'about.team1Role',
                 flag: '🇲🇦',
                 country: 'Maroc',
                 img: '/team/abdellah.jpg',
-                desc: 'Visionnaire et fondateur d\'Occasion & Garantie, Abdellah pilote la stratégie globale de la plateforme. Passionné de tech et d\'entrepreneuriat, il s\'est donné pour mission de rendre la technologie reconditionnée accessible, fiable et abordable pour tous les Marocains.',
+                descKey: 'about.team1Desc',
               },
               {
                 name: 'Najem-Eddine',
-                role: 'Chef des Opérations',
+                roleKey: 'about.team2Role',
                 flag: '🇩🇿',
                 country: 'Algérie',
                 img: '/team/najem.jpg',
-                desc: 'Originaire d\'Algérie, Najem-Eddine orchestre toute la logistique et le contrôle qualité. Garant du respect des standards sur chaque produit, il veille à ce que chaque téléphone soit testé, vérifié et certifié avant d\'arriver entre vos mains.',
+                descKey: 'about.team2Desc',
               },
               {
                 name: 'Elhamidy Mehdi',
-                role: 'Chef du Support Client',
+                roleKey: 'about.team3Role',
                 flag: '🇲🇦',
                 country: 'Maroc',
                 img: '/team/mehdi.jpg',
-                desc: 'Mehdi est la voix de la plateforme. Toujours à l\'écoute, il gère l\'assistance, les réclamations et la satisfaction client. Son objectif : une réponse rapide et une expérience sans stress pour chaque utilisateur, du premier clic à l\'après-vente.',
+                descKey: 'about.team3Desc',
               },
             ].map((m) => (
               <div key={m.name} className="about-team-card">
@@ -126,9 +128,9 @@ export default function About() {
                   {m.img ? <img src={m.img} alt={m.name} /> : <span>{m.name.split(' ').map(w => w[0]).join('')}</span>}
                 </div>
                 <h3>{m.name}</h3>
-                <div className="about-team-role">{m.role}</div>
+                <div className="about-team-role">{t(m.roleKey)}</div>
                 <div className="about-team-country">{m.flag} {m.country}</div>
-                <p>{m.desc}</p>
+                <p>{t(m.descKey)}</p>
               </div>
             ))}
           </div>
@@ -137,22 +139,22 @@ export default function About() {
 
       <section style={{ padding: '60px 0', background: 'var(--bg-secondary)' }}>
         <div className="container" style={{ textAlign: 'center' }}>
-          <h2 style={{ fontSize: '24px', fontWeight: 700, marginBottom: '40px' }}>Ce que nous offrons</h2>
+          <h2 style={{ fontSize: '24px', fontWeight: 700, marginBottom: '40px' }}>{t('about.offerTitle')}</h2>
           <div className="about-offer-grid">
             <div className="feature-card">
               <div className="feature-icon"><FiCheckCircle size={24} /></div>
-              <h3>Produits vérifiés</h3>
-              <p>Chaque article est minutieusement testé avant mise en vente. Qualité irréprochable.</p>
+              <h3>{t('about.offerVerified')}</h3>
+              <p>{t('about.offerVerifiedDesc')}</p>
             </div>
             <div className="feature-card">
               <div className="feature-icon"><FiStar size={24} /></div>
-              <h3>Avis clients</h3>
-              <p>Notez les vendeurs après chaque achat. La satisfaction client est notre priorité.</p>
+              <h3>{t('about.offerReviews')}</h3>
+              <p>{t('about.offerReviewsDesc')}</p>
             </div>
             <div className="feature-card">
               <div className="feature-icon"><FiUsers size={24} /></div>
-              <h3>Confiance</h3>
-              <p>Achetez et vendez en toute confiance entre particuliers sur notre plateforme.</p>
+              <h3>{t('about.offerTrust')}</h3>
+              <p>{t('about.offerTrustDesc')}</p>
             </div>
           </div>
         </div>
@@ -161,65 +163,65 @@ export default function About() {
       <section id="contact" style={{ padding: '60px 0' }}>
         <div className="container">
           <div style={{ textAlign: 'center', marginBottom: '40px' }}>
-            <h2 style={{ fontSize: '24px', fontWeight: 700, marginBottom: '8px' }}>Contactez-nous</h2>
-            <p style={{ color: 'var(--text-secondary)' }}>Une question ? Besoin d'aide ? Nous sommes là pour vous.</p>
+            <h2 style={{ fontSize: '24px', fontWeight: 700, marginBottom: '8px' }}>{t('about.contactTitle')}</h2>
+            <p style={{ color: 'var(--text-secondary)' }}>{t('about.contactSubtitle')}</p>
           </div>
           <div className="about-contact-grid">
             <div style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
               <div style={{ display: 'flex', alignItems: 'center', gap: '14px', padding: '16px', background: 'var(--bg-card)', border: '1px solid var(--border)', borderRadius: 'var(--radius-lg)' }}>
                 <FiMapPin size={20} style={{ color: 'var(--primary)', flexShrink: 0 }} />
                 <div>
-                  <div style={{ fontSize: '13px', fontWeight: 600 }}>Adresse</div>
-                  <div style={{ fontSize: '13px', color: 'var(--text-secondary)' }}>Casablanca, Maroc</div>
+                  <div style={{ fontSize: '13px', fontWeight: 600 }}>{t('about.contactAddress')}</div>
+                  <div style={{ fontSize: '13px', color: 'var(--text-secondary)' }}>{t('about.contactAddressValue')}</div>
                 </div>
               </div>
               <div style={{ display: 'flex', alignItems: 'center', gap: '14px', padding: '16px', background: 'var(--bg-card)', border: '1px solid var(--border)', borderRadius: 'var(--radius-lg)' }}>
                 <FiPhone size={20} style={{ color: 'var(--primary)', flexShrink: 0 }} />
                 <div>
-                  <div style={{ fontSize: '13px', fontWeight: 600 }}>Téléphone</div>
+                  <div style={{ fontSize: '13px', fontWeight: 600 }}>{t('about.contactPhone')}</div>
                   <div style={{ fontSize: '13px', color: 'var(--text-secondary)' }}>+212 669-017295</div>
                 </div>
               </div>
               <div style={{ display: 'flex', alignItems: 'center', gap: '14px', padding: '16px', background: 'var(--bg-card)', border: '1px solid var(--border)', borderRadius: 'var(--radius-lg)' }}>
                 <FiMail size={20} style={{ color: 'var(--primary)', flexShrink: 0 }} />
                 <div>
-                  <div style={{ fontSize: '13px', fontWeight: 600 }}>Email</div>
+                  <div style={{ fontSize: '13px', fontWeight: 600 }}>{t('about.contactEmail')}</div>
                   <div style={{ fontSize: '13px', color: 'var(--text-secondary)' }}>contact@contact.occasionetgarantie.store</div>
                 </div>
               </div>
               <div style={{ display: 'flex', alignItems: 'center', gap: '14px', padding: '16px', background: 'var(--bg-card)', border: '1px solid var(--border)', borderRadius: 'var(--radius-lg)' }}>
                 <FiClock size={20} style={{ color: 'var(--primary)', flexShrink: 0 }} />
                 <div>
-                  <div style={{ fontSize: '13px', fontWeight: 600 }}>Horaires</div>
-                  <div style={{ fontSize: '13px', color: 'var(--text-secondary)' }}>Lun-Sam : 9h00 - 19h00</div>
+                  <div style={{ fontSize: '13px', fontWeight: 600 }}>{t('about.contactHours')}</div>
+                  <div style={{ fontSize: '13px', color: 'var(--text-secondary)' }}>{t('about.contactHoursValue')}</div>
                 </div>
               </div>
               <a href="https://wa.me/212669017295?text=Bonjour%20!" target="_blank" rel="noopener noreferrer" className="btn btn-primary" style={{ justifyContent: 'center', padding: '14px', fontSize: '15px', gap: '8px' }}>
-                <BsWhatsapp size={20} /> Nous écrire sur WhatsApp
+                <BsWhatsapp size={20} /> {t('about.whatsapp')}
               </a>
             </div>
             <form onSubmit={handleContactSubmit} style={{ background: 'var(--bg-card)', border: '1px solid var(--border)', borderRadius: 'var(--radius-lg)', padding: '24px', display: 'flex', flexDirection: 'column', gap: '14px' }}>
-              <h3 style={{ fontSize: '16px', fontWeight: 600 }}>Envoyez-nous un message</h3>
+              <h3 style={{ fontSize: '16px', fontWeight: 600 }}>{t('about.messageTitle')}</h3>
               {cfDone ? (
                 <div style={{ textAlign: 'center', padding: '20px', color: 'var(--success)' }}>
                   <FiSend size={32} style={{ marginBottom: '8px' }} />
-                  <p>Message envoye ! Nous vous repondrons dans les plus brefs delais.</p>
-                  <button type="button" className="btn btn-ghost" onClick={() => setCfDone(false)} style={{ marginTop: '8px' }}>Envoyer un autre message</button>
+                  <p>{t('about.messageSent')}</p>
+                  <button type="button" className="btn btn-ghost" onClick={() => setCfDone(false)} style={{ marginTop: '8px' }}>{t('about.sendAnother')}</button>
                 </div>
               ) : user ? (
                 <>
                   <div style={{ fontSize: '13px', color: 'var(--text-secondary)', padding: '8px 14px', background: 'var(--bg-secondary)', borderRadius: 'var(--radius)', border: '1px solid var(--border)' }}>
-                    Envoyé depuis <strong>{user.fullName || user.full_name}</strong> &lt;{user.email}&gt;
+                    {t('about.sentFrom')} <strong>{user.fullName || user.full_name}</strong> &lt;{user.email}&gt;
                   </div>
-                  <textarea rows={4} placeholder="Votre message" value={cfMsg} onChange={e => setCfMsg(e.target.value)} required style={{ width: '100%', padding: '10px 14px', background: 'var(--bg-secondary)', border: '1px solid var(--border)', borderRadius: 'var(--radius)', color: 'var(--text-primary)', fontSize: '14px', fontFamily: 'inherit', outline: 'none', resize: 'vertical' }} />
+                  <textarea rows={4} placeholder={t('about.messagePlaceholder')} value={cfMsg} onChange={e => setCfMsg(e.target.value)} required style={{ width: '100%', padding: '10px 14px', background: 'var(--bg-secondary)', border: '1px solid var(--border)', borderRadius: 'var(--radius)', color: 'var(--text-primary)', fontSize: '14px', fontFamily: 'inherit', outline: 'none', resize: 'vertical' }} />
                   <button type="submit" className="btn btn-primary" style={{ justifyContent: 'center' }} disabled={cfLoading}>
-                    {cfLoading ? 'Envoi...' : 'Envoyer'}
+                    {cfLoading ? t('about.sending') : t('about.send')}
                   </button>
                 </>
               ) : (
                 <div style={{ textAlign: 'center', padding: '20px', color: 'var(--text-secondary)' }}>
-                  <p>Vous devez etre connecte pour envoyer un message.</p>
-                  <Link to="/login" className="btn btn-primary" style={{ marginTop: '12px', display: 'inline-flex' }}>Se connecter</Link>
+                  <p>{t('about.loginRequired')}</p>
+                  <Link to="/login" className="btn btn-primary" style={{ marginTop: '12px', display: 'inline-flex' }}>{t('about.login')}</Link>
                 </div>
               )}
             </form>
