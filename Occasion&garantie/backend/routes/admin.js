@@ -547,13 +547,22 @@ router.get('/vendor-logs', authenticate, adminOnly, async (req, res) => {
     try { await pool.query('ALTER TABLE vendor_activity_log ADD COLUMN latitude DECIMAL(10,7) DEFAULT NULL'); } catch (e) { if (e.errno !== 1060 && e.code !== 'ER_DUP_FIELDNAME') console.log('latitude col:', e.message); }
     try { await pool.query('ALTER TABLE vendor_activity_log ADD COLUMN longitude DECIMAL(10,7) DEFAULT NULL'); } catch (e) { if (e.errno !== 1060 && e.code !== 'ER_DUP_FIELDNAME') console.log('longitude col:', e.message); }
 
+    const page = Math.max(1, parseInt(req.query.page) || 1);
+    const limit = Math.min(100, Math.max(1, parseInt(req.query.limit) || 50));
+    const offset = (page - 1) * limit;
+
+    const [[{ total }]] = await pool.query(
+      `SELECT COUNT(*) AS total FROM vendor_activity_log`
+    );
+
     const [rows] = await pool.query(
       `SELECT l.*, u.full_name, u.store_name, u.email, u.phone
        FROM vendor_activity_log l
        LEFT JOIN users u ON l.user_id = u.id
-       ORDER BY l.created_at DESC LIMIT 200`
+       ORDER BY l.created_at DESC LIMIT ? OFFSET ?`,
+      [limit, offset]
     );
-    res.json(rows);
+    res.json({ logs: rows, total, totalPages: Math.max(1, Math.ceil(total / limit)), page, limit });
   } catch (err) {
     res.status(500).json({ message: 'Erreur serveur.' });
   }

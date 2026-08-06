@@ -33,19 +33,27 @@ export default function AdminVendorLogs() {
   const [reindexMsg, setReindexMsg] = useState('');
   const [mapReady, setMapReady] = useState(false);
   const [leafletError, setLeafletError] = useState(false);
+  const [page, setPage] = useState(1);
+  const [limit, setLimit] = useState(50);
+  const [total, setTotal] = useState(0);
+  const [totalPages, setTotalPages] = useState(0);
   const mapRef = useRef(null);
   const mapContainerRef = useRef(null);
   const LRef = useRef(null);
 
   const load = () => {
     setLoading(true);
-    api.get('/admin/vendor-logs')
-      .then(res => setLogs(res.data))
+    api.get(`/admin/vendor-logs?page=${page}&limit=${limit}`)
+      .then(res => {
+        setLogs(res.data.logs || []);
+        setTotal(res.data.total || 0);
+        setTotalPages(res.data.totalPages || 1);
+      })
       .catch(() => {})
       .finally(() => setLoading(false));
   };
 
-  useEffect(() => { load(); }, []);
+  useEffect(() => { load(); }, [page, limit]);
 
   useEffect(() => {
     let cancelled = false;
@@ -127,6 +135,7 @@ export default function AdminVendorLogs() {
     try {
       const res = await api.post('/admin/vendor-logs/reindex');
       setReindexMsg(t('admin.reindexDone', { done: res.data.reindexed, total: res.data.total }));
+      setPage(1);
       load();
     } catch (e) {
       setReindexMsg(`${t('admin.reindexError')} ${e.response?.data?.error || e.message}`);
@@ -276,6 +285,37 @@ export default function AdminVendorLogs() {
                 )}
               </div>
             ))}
+          </div>
+        )}
+        {!loading && logs.length > 0 && (
+          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '16px 0', flexWrap: 'wrap', gap: '12px' }}>
+            <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+              <span style={{ fontSize: 13, color: 'var(--text-muted)' }}>{t('admin.show')}</span>
+              <select value={limit} onChange={e => { setLimit(Number(e.target.value)); setPage(1); }}
+                style={{ padding: '6px 10px', borderRadius: 8, border: '1px solid var(--border)', background: 'var(--bg-card)', color: 'var(--text)', fontSize: 13, cursor: 'pointer' }}>
+                <option value={10}>10</option>
+                <option value={50}>50</option>
+                <option value={100}>100</option>
+              </select>
+              <span style={{ fontSize: 13, color: 'var(--text-muted)' }}>{total} {total > 1 ? t('admin.requestPlural') : t('admin.requestSingular')}</span>
+            </div>
+            <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
+              <button onClick={() => setPage(p => Math.max(1, p - 1))} disabled={page <= 1}
+                style={{ padding: '6px 14px', borderRadius: 8, border: '1px solid var(--border)', background: 'var(--bg-card)', color: 'var(--text)', cursor: page <= 1 ? 'not-allowed' : 'pointer', opacity: page <= 1 ? 0.4 : 1, fontSize: 13 }}>← {t('admin.previous')}</button>
+              {Array.from({ length: Math.min(totalPages, 10) }, (_, i) => {
+                const start = Math.max(1, page - 5);
+                const p = start + i;
+                if (p > totalPages) return null;
+                return (
+                  <button key={p} onClick={() => setPage(p)}
+                    style={{ width: 32, height: 32, borderRadius: 8, border: p === page ? 'none' : '1px solid var(--border)', background: p === page ? '#3b82f6' : 'var(--bg-card)', color: p === page ? '#fff' : 'var(--text)', cursor: 'pointer', fontWeight: p === page ? 700 : 400, fontSize: 13 }}>
+                    {p}
+                  </button>
+                );
+              })}
+              <button onClick={() => setPage(p => Math.min(totalPages, p + 1))} disabled={page >= totalPages}
+                style={{ padding: '6px 14px', borderRadius: 8, border: '1px solid var(--border)', background: 'var(--bg-card)', color: 'var(--text)', cursor: page >= totalPages ? 'not-allowed' : 'pointer', opacity: page >= totalPages ? 0.4 : 1, fontSize: 13 }}>{t('admin.next')} →</button>
+            </div>
           </div>
         )}
       </div>
