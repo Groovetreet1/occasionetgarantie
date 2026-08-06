@@ -318,10 +318,10 @@ input, textarea, select, button { font-family: inherit; }
   background: linear-gradient(135deg, var(--primary), #fbbf24);
   -webkit-background-clip: text; -webkit-text-fill-color: transparent;
   background-clip: text; letter-spacing: -0.5px;
-  flex-shrink: 0; justify-self: start;
+  flex-shrink: 0; justify-self: start; grid-column: 1;
 }
 .navbar-logo span { -webkit-text-fill-color: var(--text-primary); }
-.navbar-desktop-nav { display: flex; align-items: center; gap: 2px; justify-self: center; }
+.navbar-desktop-nav { display: flex; align-items: center; gap: 2px; justify-self: center; grid-column: 2; }
 .navbar-desktop-nav a {
   padding: 8px 18px; border-radius: 8px; color: var(--text-secondary);
   font-size: 14px; font-weight: 500; transition: var(--transition);
@@ -2807,8 +2807,15 @@ select.form-control, .form-group select { cursor: pointer; appearance: auto; }
   flex-direction: row-reverse;
 }
 [dir='rtl'] .navbar-actions {
-  flex-direction: row-reverse;
+  flex-direction: row;
 }
+/* In Arabic, arrange actions so: profil (first/left) -> langue -> thème -> notif -> hamburger */
+[dir='rtl'] .navbar-actions .navbar-user-trigger,
+[dir='rtl'] .navbar-actions .navbar-auth { order: 4; }
+[dir='rtl'] .navbar-actions .language-toggle { order: 3; }
+[dir='rtl'] .navbar-actions .theme-picker { order: 2; }
+[dir='rtl'] .navbar-actions .navbar-notif { order: 1; }
+[dir='rtl'] .navbar-actions .navbar-hamburger { order: 5; }
 [dir='rtl'] .navbar-mobile-panel {
   left: 0; right: 0;
   transform: translateX(-100%);
