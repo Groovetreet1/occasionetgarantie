@@ -102,7 +102,5 @@
     brandFeat3Desc: 'Donnez une seconde vie a votre telephone et recevez une estimation instantanee.',
     brandFeat4Title: 'Livraison partout au Maroc',
     brandFeat4Desc: 'De Casablanca a Dakhla, recevez votre commande en quelques jours.',
-    brandQuote: 'J\'ai vendu mon iPhone en 48h et le paiement etait securise de bout en bout.',
-    brandQuoteAuthor: 'Yassine, vendeur verifie a Rabat',
   },
 };

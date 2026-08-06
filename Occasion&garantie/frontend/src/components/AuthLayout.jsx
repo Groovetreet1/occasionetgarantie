@@ -1,5 +1,5 @@
 import { Link } from 'react-router-dom';
-import { FiShield, FiRefreshCw, FiSmartphone, FiTruck, FiStar } from 'react-icons/fi';
+import { FiShield, FiRefreshCw, FiSmartphone, FiTruck } from 'react-icons/fi';
 import { useLanguage } from '../context/LanguageContext';
 
 export default function AuthLayout({ title, subtitle, children, footer }) {
@@ -44,11 +44,6 @@ export default function AuthLayout({ title, subtitle, children, footer }) {
         </div>
 
         <div className="auth-split-brand-bottom">
-          <div className="auth-split-brand-quote">
-            <FiStar size={16} className="auth-split-quote-icon" />
-            <p>{t('auth.brandQuote')}</p>
-            <span>{t('auth.brandQuoteAuthor')}</span>
-          </div>
           <div className="auth-split-brand-copy">
             &copy; {new Date().getFullYear()} Occasion &amp; Garantie · Maroc
           </div>
