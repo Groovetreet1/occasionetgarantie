@@ -1,7 +1,7 @@
 import { useEffect, useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Link } from 'react-router-dom';
-import { FiArrowLeft, FiSmartphone, FiClock, FiRefreshCw, FiCheck, FiX, FiPhone, FiDollarSign, FiTrash2 } from 'react-icons/fi';
+import { Link, useLocation } from 'react-router-dom';
+import { FiArrowLeft, FiSmartphone, FiClock, FiRefreshCw, FiCheck, FiX, FiPhone, FiDollarSign, FiTrash2, FiShoppingBag } from 'react-icons/fi';
 import ConfirmModal from '../components/ConfirmModal';
 import { useLanguage } from '../context/LanguageContext';
 import api from '../api/axios';
@@ -18,6 +18,8 @@ const statusStyles = {
 
 export default function RepriseList() {
   const { t } = useLanguage();
+  const location = useLocation();
+  const isAdminArea = location.pathname.startsWith('/admin');
   const [reprises, setReprises] = useState([]);
   const [loading, setLoading] = useState(true);
   const [actionLoading, setActionLoading] = useState(null);
@@ -87,7 +89,11 @@ export default function RepriseList() {
       <div className="container" style={{ position: 'relative', zIndex: 1 }}>
         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 24, flexWrap: 'wrap', gap: 12 }}>
           <div>
-            <Link to="/" className="btn btn-ghost" style={{ marginBottom: 8 }}><FiArrowLeft /> {t('reprise.homeLink')}</Link>
+            {isAdminArea ? (
+              <Link to="/admin" className="btn btn-ghost" style={{ marginBottom: 8 }}><FiArrowLeft /> {t('admin.dashboardTitle')}</Link>
+            ) : (
+              <Link to="/" className="btn btn-ghost" style={{ marginBottom: 8 }}><FiArrowLeft /> {t('reprise.homeLink')}</Link>
+            )}
             <h1 style={{ fontSize: 28, fontWeight: 800, display: 'flex', alignItems: 'center', gap: 10 }}>
               <FiSmartphone size={28} style={{ color: 'var(--primary)' }} /> {t('reprise.pageTitle')}
             </h1>
@@ -161,6 +167,12 @@ export default function RepriseList() {
                           {r.full_name || t('reprise.anonymous')}
                           {r.imei ? t('reprise.imeiInfo', { imei: r.imei }) : ''}
                         </div>
+                        {isVendor && (
+                          <div style={{ fontSize: 11, color: 'var(--text-secondary)', marginTop: 4, display: 'flex', alignItems: 'center', gap: 4 }}>
+                            <FiShoppingBag size={12} />
+                            {r.vendor_store_name ? t('reprise.handledBy', { store: r.vendor_store_name }) : t('reprise.handledByNone')}
+                          </div>
+                        )}
                         <div style={{ fontSize: 11, color: 'var(--text-muted)', marginTop: 2 }}>
                           <FiClock size={11} /> {new Date(r.created_at).toLocaleDateString('fr-FR')} {t('reprise.at')} {new Date(r.created_at).toLocaleTimeString('fr-FR', { hour: '2-digit', minute: '2-digit' })}
                         </div>

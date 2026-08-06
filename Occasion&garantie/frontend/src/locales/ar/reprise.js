@@ -65,6 +65,8 @@
     statusRefused: 'مرفوض',
     statusConverted: 'محوَّل',
     homeLink: 'الرئيسية',
+    handledBy: 'حساب البائع: {{store}}',
+    handledByNone: 'لا يوجد حساب مخصص',
     pageTitle: 'طلبات إعادة الشراء',
     refresh: 'تحديث',
     errorLabel: 'خطأ:',

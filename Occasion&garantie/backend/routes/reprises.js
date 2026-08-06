@@ -259,18 +259,21 @@ router.get('/', authenticate, async (req, res) => {
 
     let selectCols = `r.id, r.user_id, r.product_id, r.brand, r.model, r.imei, r.status, r.estimated_price, r.vendor_id, r.vendor_notes, r.client_notes, r.created_at, r.updated_at, CASE WHEN r.photos IS NOT NULL THEN JSON_LENGTH(r.photos) ELSE 0 END AS photo_count,
                u.full_name, u.email, u.phone, u.store_name,
+               v.full_name AS vendor_full_name, v.store_name AS vendor_store_name,
                p.name AS product_name, p.images AS product_images`;
 
     if (req.user.role === 'admin') {
       query = `SELECT ${selectCols}
                FROM reprises r
                JOIN users u ON r.user_id = u.id
+               LEFT JOIN users v ON r.vendor_id = v.id
                LEFT JOIN products p ON r.product_id = p.id`;
       params = [];
     } else if (req.user.role === 'seller') {
       query = `SELECT ${selectCols}
                FROM reprises r
                JOIN users u ON r.user_id = u.id
+               LEFT JOIN users v ON r.vendor_id = v.id
                LEFT JOIN products p ON r.product_id = p.id
                WHERE r.vendor_id = ? OR r.user_id = ? OR (r.vendor_id IS NULL AND r.product_id IS NOT NULL AND EXISTS (SELECT 1 FROM products WHERE id = r.product_id AND seller_id = ?))`;
       params = [req.user.id, req.user.id, req.user.id];
@@ -278,6 +281,7 @@ router.get('/', authenticate, async (req, res) => {
       query = `SELECT ${selectCols}
                FROM reprises r
                JOIN users u ON r.user_id = u.id
+               LEFT JOIN users v ON r.vendor_id = v.id
                LEFT JOIN products p ON r.product_id = p.id
                WHERE r.user_id = ?`;
       params = [req.user.id];

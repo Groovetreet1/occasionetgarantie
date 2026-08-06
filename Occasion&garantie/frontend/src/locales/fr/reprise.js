@@ -65,6 +65,8 @@
     statusRefused: 'Refuse',
     statusConverted: 'Converti',
     homeLink: 'Accueil',
+    handledBy: 'Compte vendeur: {{store}}',
+    handledByNone: 'Aucun compte assigne',
     pageTitle: 'Demandes de reprise',
     refresh: 'Actualiser',
     errorLabel: 'Erreur:',

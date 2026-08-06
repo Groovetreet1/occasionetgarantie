@@ -112,6 +112,7 @@ export default function App() {
             <Route path="products/new" element={<AdminProductForm />} />
             <Route path="products/edit/:id" element={<AdminProductForm />} />
             <Route path="products" element={<AdminDashboard />} />
+            <Route path="reprises" element={<RepriseList />} />
           </Route>
           <Route path="/vendre" element={<AnimatedPage><SellPage /></AnimatedPage>} />
           <Route path="/reprise" element={<AnimatedPage><RepriseForm /></AnimatedPage>} />

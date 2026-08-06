@@ -25,7 +25,7 @@ export default function AdminLayout() {
     { to: '/admin/products/pending', icon: FiCheckSquare, label: t('admin.approveProducts') },
     { to: '/admin/store-products', icon: FiTrendingUp, label: t('admin.officialStore') },
     { to: '/admin/tickets', icon: FiHeadphones, label: t('admin.ticketsSupport') },
-    { to: '/reprise/list', icon: FiSmartphone, label: t('admin.reprises') },
+    { to: '/admin/reprises', icon: FiSmartphone, label: t('admin.reprises') },
     { to: '/admin/managed-vendors', icon: FiUserCheck, label: t('admin.vendorAccounts') },
     { to: '/admin/vendor-logs', icon: FiMonitor, label: t('admin.vendorJournal') },
     { to: '/admin/users', icon: FiUsers, label: t('admin.users') },
