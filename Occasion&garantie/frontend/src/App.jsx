@@ -3,6 +3,7 @@ import { Routes, Route, Navigate, useLocation, useNavigate } from 'react-router-
 import api from './api/axios';
 import { motion } from 'framer-motion';
 import Navbar from './components/Navbar';
+import GoMobilePopup from './components/GoMobilePopup';
 import Footer from './components/Footer';
 import SupportFloat from './components/SupportFloat';
 import ErrorBoundary from './components/ErrorBoundary';
@@ -134,6 +135,7 @@ export default function App() {
       </ErrorBoundary>
       {!location.pathname.startsWith('/messenger') && !location.pathname.startsWith('/login') && !location.pathname.startsWith('/signup') && <SupportFloat />}
       {!location.pathname.startsWith('/admin') && !location.pathname.startsWith('/messenger') && !location.pathname.startsWith('/login') && !location.pathname.startsWith('/signup') && <Footer />}
+      <GoMobilePopup />
       {suspended && <SuspendedModal reason={suspended} onClose={() => setSuspended(null)} />}
     </>
   );

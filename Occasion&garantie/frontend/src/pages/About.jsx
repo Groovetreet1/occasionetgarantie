@@ -5,6 +5,7 @@ import { BsWhatsapp } from 'react-icons/bs';
 import api from '../api/axios';
 import { useAuth } from '../context/AuthContext';
 import { useLanguage } from '../context/LanguageContext';
+import GoMobileTicker from '../components/GoMobileTicker';
 
 function yearsSince(dateStr, t) {
   const years = (new Date() - new Date(dateStr)) / (365.25 * 86400000);
@@ -48,6 +49,8 @@ export default function About() {
           </p>
         </div>
       </section>
+
+      <GoMobileTicker />
 
       <section style={{ padding: '60px 0' }}>
         <div className="container">

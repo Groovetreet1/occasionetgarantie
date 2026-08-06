@@ -5,6 +5,7 @@ import { FiSearch, FiSliders, FiPackage, FiX, FiArrowRight, FiShield, FiShopping
 import { motion } from 'framer-motion';
 import api from '../api/axios';
 import HomeProductCard from '../components/HomeProductCard';
+import GoMobileFadeBar from '../components/GoMobileFadeBar';
 import { useLanguage } from '../context/LanguageContext';
 
 const STATE_LABELS = {
@@ -108,6 +109,8 @@ export default function Products() {
           </motion.form>
         </div>
       </div>
+
+      <GoMobileFadeBar />
 
       <div className="products-page-body container">
         {storeProducts.length > 0 && !search && (
