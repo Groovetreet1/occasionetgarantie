@@ -110,4 +110,7 @@ export const frCommon = {
     supportStoreName: 'Changement de nom de store',
     supportStoreNameDesc: 'Demander la modification du nom de votre boutique.',
   },
+  ad: {
+    growSales: 'Augmentez vos ventes !',
+  },
 };

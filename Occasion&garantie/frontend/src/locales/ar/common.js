@@ -110,4 +110,7 @@ export const arCommon = {
     supportStoreName: 'تغيير اسم المتجر',
     supportStoreNameDesc: 'طلب تعديل اسم متجرك.',
   },
+  ad: {
+    growSales: 'زود مبيعاتك!',
+  },
 };

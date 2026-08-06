@@ -3,6 +3,7 @@ import { Routes, Route, Navigate, useLocation, useNavigate } from 'react-router-
 import api from './api/axios';
 import { motion } from 'framer-motion';
 import Navbar from './components/Navbar';
+import GoMobileBar from './components/GoMobileBar';
 import Footer from './components/Footer';
 import SupportFloat from './components/SupportFloat';
 import ErrorBoundary from './components/ErrorBoundary';
@@ -85,6 +86,7 @@ export default function App() {
 
   return (
     <>
+      <GoMobileBar />
       <Navbar />
       <ErrorBoundary>
       <Routes>
