@@ -320,6 +320,7 @@ input, textarea, select, button { font-family: inherit; }
 .gomobile-ticker__item strong { color: #ffde59; }
 .gomobile-ticker__item a { color: #ffde59; text-decoration: none; font-weight: bold; }
 .gomobile-ticker__item a:hover { text-decoration: underline; }
+.gomobile-ticker-wrap:hover .gomobile-ticker { animation-play-state: paused; cursor: pointer; }
 @keyframes gomobile-ticker {
   0% { transform: translateX(100%); }
   100% { transform: translateX(-100%); }
@@ -341,6 +342,7 @@ input, textarea, select, button { font-family: inherit; }
 .fade-text:nth-child(1) { animation-delay: 0s; }
 .fade-text:nth-child(2) { animation-delay: 4s; }
 .fade-text:nth-child(3) { animation-delay: 8s; }
+.gomobile-fade-bar:hover .fade-text { animation-play-state: paused; cursor: pointer; }
 @keyframes fadeInOut {
   0% { opacity: 0; transform: translateY(10px); }
   10%, 25% { opacity: 1; transform: translateY(0); }
