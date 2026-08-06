@@ -28,5 +28,6 @@
     cancel: 'Annuler',
     empty: 'Aucun produit dans cette catégorie',
     toProducts: 'Vers les produits',
+    themeTitle: 'Choisissez un fond',
   },
 };

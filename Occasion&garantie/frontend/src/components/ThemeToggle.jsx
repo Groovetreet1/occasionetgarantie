@@ -1,9 +1,11 @@
 import { useState, useRef, useEffect } from 'react';
 import { FiCheck } from 'react-icons/fi';
 import { useTheme } from '../context/ThemeContext';
+import { useLanguage } from '../context/LanguageContext';
 
 export default function ThemeToggle() {
   const { theme, setTheme, themes } = useTheme();
+  const { t } = useLanguage();
   const [open, setOpen] = useState(false);
   const ref = useRef(null);
 
@@ -15,7 +17,7 @@ export default function ThemeToggle() {
     return () => document.removeEventListener('mousedown', handler);
   }, []);
 
-  const currentTheme = themes.find((t) => t.id === theme) || themes[0];
+  const currentTheme = themes.find((th) => th.id === theme) || themes[0];
 
   return (
     <div className="theme-picker" ref={ref}>
@@ -34,18 +36,30 @@ export default function ThemeToggle() {
       </button>
       {open && (
         <div className="theme-menu">
-          <div className="theme-menu-title">Choisissez un fond</div>
+          <div className="theme-menu-title">{t('nav.themeTitle')}</div>
           <div className="theme-menu-grid">
-            {themes.map((t) => (
+            {themes.map((th) => (
               <button
-                key={t.id}
-                className={`theme-swatch ${t.id === theme ? 'active' : ''}`}
-                onClick={() => { setTheme(t.id); setOpen(false); }}
-                title={t.label}
+                key={th.id}
+                className={`theme-swatch ${th.id === theme ? 'active' : ''}`}
+                onClick={() => { setTheme(th.id); setOpen(false); }}
+                title={th.label}
               >
-                <span className="theme-swatch-dot" style={{ background: t.color, borderColor: t.text }} />
-                <span className="theme-swatch-label">{t.label}</span>
-                {t.id === theme && <FiCheck className="theme-swatch-check" size={12} />}
+                <span
+                  className="theme-swatch-preview"
+                  style={{
+                    background: th.color,
+                    borderColor: th.id === theme ? th.accent : undefined,
+                  }}
+                >
+                  <span className="theme-preview-card" style={{ background: th.card }}>
+                    <span className="theme-preview-line" style={{ background: th.text }} />
+                    <span className="theme-preview-line short" style={{ background: th.text }} />
+                    <span className="theme-preview-btn" style={{ background: th.accent }} />
+                  </span>
+                </span>
+                <span className="theme-swatch-label">{th.label}</span>
+                {th.id === theme && <FiCheck className="theme-swatch-check" size={12} />}
               </button>
             ))}
           </div>
