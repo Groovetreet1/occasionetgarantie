@@ -133,7 +133,7 @@ export default function App() {
         </Routes>
       </ErrorBoundary>
       {!location.pathname.startsWith('/messenger') && !location.pathname.startsWith('/login') && !location.pathname.startsWith('/signup') && <SupportFloat />}
-      {!location.pathname.startsWith('/messenger') && !location.pathname.startsWith('/login') && !location.pathname.startsWith('/signup') && <Footer />}
+      {!location.pathname.startsWith('/admin') && !location.pathname.startsWith('/messenger') && !location.pathname.startsWith('/login') && !location.pathname.startsWith('/signup') && <Footer />}
       {suspended && <SuspendedModal reason={suspended} onClose={() => setSuspended(null)} />}
     </>
   );
