@@ -390,46 +390,6 @@ input, textarea, select, button { font-family: inherit; }
   .fade-text { padding: 0 8px; font-size: 13px; }
 }
 
-/* ============ GoMobile popup ============ */
-.gomobile-popup-overlay {
-  position: fixed; inset: 0; z-index: 20000;
-  background: rgba(15, 23, 42, 0.55); backdrop-filter: blur(3px);
-  display: flex; align-items: center; justify-content: center; padding: 20px;
-}
-.gomobile-popup-card {
-  position: relative; width: 100%; max-width: 420px;
-  background: #fff; border-radius: 20px; overflow: hidden;
-  box-shadow: 0 24px 60px rgba(0, 0, 0, 0.3);
-  text-align: center; padding: 40px 28px 32px;
-  font-family: var(--font);
-}
-.gomobile-popup-brand {
-  display: inline-flex; align-items: center; gap: 8px;
-  color: #004aad; font-weight: 800; font-size: 18px; margin-bottom: 16px;
-}
-.gomobile-popup-card h3 { margin: 0 0 10px; font-size: 20px; color: #0f172a; }
-.gomobile-popup-card p { margin: 0 0 22px; font-size: 14px; line-height: 1.7; color: #475569; }
-.gomobile-popup-cta {
-  display: inline-block; background: linear-gradient(90deg, #004aad, #007bff);
-  color: #fff; text-decoration: none; font-weight: 700; font-size: 14px;
-  padding: 12px 28px; border-radius: 12px; transition: transform 0.2s, box-shadow 0.2s;
-  box-shadow: 0 8px 20px rgba(0, 74, 173, 0.3);
-}
-.gomobile-popup-cta:hover { transform: translateY(-2px); box-shadow: 0 12px 26px rgba(0, 74, 173, 0.4); }
-.gomobile-popup-close {
-  position: absolute; top: 12px; right: 14px; width: 32px; height: 32px;
-  border: none; background: rgba(15, 23, 42, 0.06); color: #334155;
-  font-size: 20px; line-height: 1; border-radius: 50%; cursor: pointer;
-  display: flex; align-items: center; justify-content: center;
-  transition: background 0.2s, color 0.2s;
-}
-.gomobile-popup-close:hover { background: rgba(15, 23, 42, 0.12); color: #0f172a; }
-[dir='rtl'] .gomobile-popup-close { right: auto; left: 14px; }
-@media (max-width: 480px) {
-  .gomobile-popup-card { padding: 32px 20px 26px; }
-  .gomobile-popup-card h3 { font-size: 18px; }
-}
-
 /* ============ GoMobile bottom banner ============ */
 .gomobile-banner {
   position: fixed; left: 50%; bottom: 20px; transform: translateX(-50%);

@@ -117,8 +117,6 @@ export const frCommon = {
     smsWhatsapp: 'Solutions SMS et WhatsApp avec',
     reachClients: 'Atteignez vos clients instantanément !',
     voiceMessaging: 'Voice Messaging pour votre business.',
-    popupTitle: 'Boostez votre business avec GoMobile',
-    popupText: 'SMS, WhatsApp Business API et Voice Messaging pour atteindre vos clients instantanément.',
     popupCta: 'Découvrir GoMobile',
     bannerTitle: 'Boostez vos ventes avec GoMobile',
     bannerText: 'SMS, WhatsApp Business API et Voice Messaging.',
