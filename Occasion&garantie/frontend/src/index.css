@@ -433,37 +433,37 @@ input, textarea, select, button { font-family: inherit; }
 /* ============ GoMobile bottom banner ============ */
 .gomobile-banner {
   position: fixed; left: 50%; bottom: 20px; transform: translateX(-50%);
-  z-index: 19000; width: min(680px, calc(100vw - 24px));
-  display: flex; align-items: center; gap: 14px; padding: 14px 46px 14px 16px;
-  background: #fff; border-radius: 16px;
-  box-shadow: 0 16px 44px rgba(0, 0, 0, 0.28);
+  z-index: 19000; width: min(860px, calc(100vw - 24px));
+  display: flex; align-items: center; gap: 18px; padding: 20px 54px 20px 20px;
+  background: #fff; border-radius: 18px;
+  box-shadow: 0 18px 52px rgba(0, 0, 0, 0.3);
   border: 1px solid rgba(0, 74, 173, 0.15);
   font-family: var(--font);
 }
 .gomobile-banner-brand {
-  display: flex; align-items: center; gap: 8px; color: #004aad;
-  font-weight: 800; font-size: 15px; white-space: nowrap; flex-shrink: 0;
+  display: flex; align-items: center; gap: 10px; color: #004aad;
+  font-weight: 800; font-size: 19px; white-space: nowrap; flex-shrink: 0;
 }
-.gomobile-banner-body { flex: 1; min-width: 0; display: flex; flex-direction: column; gap: 2px; }
-.gomobile-banner-body strong { color: #0f172a; font-size: 14px; }
-.gomobile-banner-body span { color: #475569; font-size: 12px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.gomobile-banner-body { flex: 1; min-width: 0; display: flex; flex-direction: column; gap: 3px; }
+.gomobile-banner-body strong { color: #0f172a; font-size: 18px; }
+.gomobile-banner-body span { color: #475569; font-size: 15px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
 .gomobile-banner-cta {
   flex-shrink: 0; background: linear-gradient(90deg, #004aad, #007bff); color: #fff;
-  text-decoration: none; font-weight: 700; font-size: 13px; white-space: nowrap;
-  padding: 10px 18px; border-radius: 10px; transition: transform 0.2s, box-shadow 0.2s;
+  text-decoration: none; font-weight: 700; font-size: 16px; white-space: nowrap;
+  padding: 14px 26px; border-radius: 12px; transition: transform 0.2s, box-shadow 0.2s;
   box-shadow: 0 6px 16px rgba(0, 74, 173, 0.3);
 }
 .gomobile-banner-cta:hover { transform: translateY(-1px); }
 .gomobile-banner-close {
-  position: absolute; top: 8px; right: 10px; width: 28px; height: 28px;
+  position: absolute; top: 10px; right: 12px; width: 32px; height: 32px;
   border: none; background: rgba(15, 23, 42, 0.06); color: #334155;
-  font-size: 18px; line-height: 1; border-radius: 50%; cursor: pointer;
+  font-size: 20px; line-height: 1; border-radius: 50%; cursor: pointer;
   display: flex; align-items: center; justify-content: center; transition: background 0.2s;
 }
 .gomobile-banner-close:hover { background: rgba(15, 23, 42, 0.14); }
-[dir='rtl'] .gomobile-banner-close { right: auto; left: 10px; }
+[dir='rtl'] .gomobile-banner-close { right: auto; left: 12px; }
 @media (max-width: 480px) {
-  .gomobile-banner { flex-wrap: wrap; gap: 10px; padding: 12px 44px 12px 14px; }
+  .gomobile-banner { flex-wrap: wrap; gap: 12px; padding: 14px 48px 14px 16px; }
   .gomobile-banner-cta { width: 100%; text-align: center; }
 }
 

@@ -4,8 +4,6 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { useAuth } from '../context/AuthContext';
 import { useLanguage } from '../context/LanguageContext';
 
-const STORE_KEY = 'gm_ad_banner_closed';
-const HOURS = 6;
 const DELAY_MS = 8000;
 
 export default function GoMobileBanner() {
@@ -21,18 +19,11 @@ export default function GoMobileBanner() {
       || location.pathname === '/login'
       || location.pathname === '/signup') return;
 
-    const closedAt = parseInt(localStorage.getItem(STORE_KEY) || '0', 10) || 0;
-    const now = Date.now();
-    if (closedAt && now - closedAt < HOURS * 3600 * 1000) return;
-
     const timer = setTimeout(() => setOpen(true), DELAY_MS);
     return () => clearTimeout(timer);
   }, [location.pathname, user?.premium]);
 
-  const close = () => {
-    localStorage.setItem(STORE_KEY, String(Date.now()));
-    setOpen(false);
-  };
+  const close = () => setOpen(false);
 
   return (
     <AnimatePresence>
