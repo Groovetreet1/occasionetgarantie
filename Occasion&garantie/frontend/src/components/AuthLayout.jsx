@@ -18,7 +18,7 @@ export default function AuthLayout({ title, subtitle, children, footer }) {
         <div className="auth-split-brand-glow" />
         <div className="auth-split-brand-top">
           <Link to="/" className="auth-split-logo">
-            <span className="auth-split-logo-badge">O&amp;G</span>
+            <img src="/logo.png" alt="Occasion & Garantie" className="auth-split-logo-img" />
             <span className="auth-split-logo-text">Occasion &amp; Garantie</span>
           </Link>
         </div>
@@ -53,7 +53,7 @@ export default function AuthLayout({ title, subtitle, children, footer }) {
       <div className="auth-split-form">
         <div className="auth-split-form-inner">
           <div className="auth-split-mobile-brand">
-            <span className="auth-split-logo-badge">O&amp;G</span>
+            <img src="/logo.png" alt="Occasion & Garantie" className="auth-split-logo-img" />
             <span className="auth-split-logo-text">Occasion &amp; Garantie</span>
           </div>
           <div className="auth-split-heading">

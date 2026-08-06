@@ -11,7 +11,7 @@ export default function Footer() {
         <div className="footer-grid">
           <div className="footer-brand">
             <div className="footer-logo">
-              <span className="footer-logo-badge">O&amp;G</span>
+              <img src="/logo.png" alt="Occasion & Garantie" className="footer-logo-img" />
               <h3>Occasion &amp; Garantie</h3>
             </div>
             <p>{t('footer.tagline')}</p>
