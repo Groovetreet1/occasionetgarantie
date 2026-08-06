@@ -20,7 +20,7 @@ const categories = [
 
 export default function Navbar() {
   const { user, logout } = useAuth();
-  const { t } = useLanguage();
+  const { t, dir } = useLanguage();
   const navigate = useNavigate();
   const location = useLocation();
   const isProductsActive = location.pathname.startsWith('/products');
@@ -305,7 +305,7 @@ export default function Navbar() {
 
       <div className={`navbar-mobile-panel${menuOpen ? ' open' : ''}`} ref={panelRef}>
         <NavLink to="/" end onClick={closeMenu}>{t('nav.home')}</NavLink>
-        <button onClick={() => setMobileProdsOpen(o => !o)} style={{
+        <button onClick={() => setMobileProdsOpen(o => !o)} className="navbar-mobile-prods-btn" style={{
           background: 'none', border: 'none', color: 'inherit', cursor: 'pointer', width: '100%',
           padding: '10px', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 6,
           fontSize: 14, fontFamily: 'var(--font)', fontWeight: 500,
@@ -317,15 +317,15 @@ export default function Navbar() {
           const isActive = location.search === `?category=${cat.slug}`;
           return (
             <Link key={cat.slug} to={`/products?category=${cat.slug}`} onClick={closeMenu}
-              style={{ display: 'block', fontSize: 14, padding: '10px', opacity: 0.7, fontWeight: 500 }}
+              style={{ display: 'block', fontSize: 14, padding: '10px', opacity: 0.7, fontWeight: 500, textAlign: 'center' }}
               className={isActive ? 'active' : ''}>
-              <cat.icon size={14} style={{ marginRight: 6 }} /> {cat.name}
+              <cat.icon size={14} style={{ marginInlineEnd: 6, verticalAlign: 'middle' }} /> {cat.name}
             </Link>
           );
         })}
-        <Link to="/products" onClick={closeMenu} style={{ display: 'block', fontSize: 14, padding: '10px', opacity: 0.6, fontWeight: 500 }}>{t('nav.allProducts')} →</Link>
-        <Link to="/boutique" onClick={closeMenu} style={{ display: 'block', fontSize: 14, padding: '10px', fontWeight: 600, color: '#d97706' }}>
-          <FiShield size={14} style={{ verticalAlign: 'middle', marginRight: 4 }} /> {t('nav.officialStore')}
+        <Link to="/products" onClick={closeMenu} style={{ display: 'block', fontSize: 14, padding: '10px', opacity: 0.6, fontWeight: 500, textAlign: 'center' }}>{t('nav.allProducts')} {dir === 'rtl' ? '←' : '→'}</Link>
+        <Link to="/boutique" onClick={closeMenu} style={{ display: 'block', fontSize: 14, padding: '10px', fontWeight: 600, color: '#d97706', textAlign: 'center' }}>
+          <FiShield size={14} style={{ verticalAlign: 'middle', marginInlineEnd: 4 }} /> {t('nav.officialStore')}
         </Link>
         <NavLink to="/about" onClick={closeMenu}>{t('nav.about')}</NavLink>
         {user?.role == 'seller' ? (

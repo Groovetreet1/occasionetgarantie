@@ -2716,9 +2716,16 @@ select.form-control, .form-group select { cursor: pointer; appearance: auto; }
 [dir='rtl'] .navbar-actions {
   flex-direction: row-reverse;
 }
+[dir='rtl'] .navbar-mobile-panel {
+  left: auto; right: 0;
+  transform: translateX(-100%);
+}
+[dir='rtl'] .navbar-mobile-panel.open {
+  transform: translateX(0);
+}
 [dir='rtl'] .navbar-mobile-panel a,
 [dir='rtl'] .navbar-mobile-panel button {
-  text-align: right;
+  text-align: center;
 }
 [dir='rtl'] .navbar-dropdown-menu {
   right: auto;
@@ -2731,6 +2738,10 @@ select.form-control, .form-group select { cursor: pointer; appearance: auto; }
 [dir='rtl'] .navbar-prods-menu {
   left: auto;
   right: 0;
+}
+[dir='rtl'] .theme-menu {
+  right: auto;
+  left: 0;
 }
 [dir='rtl'] .brands-scroll-track {
   animation-direction: reverse;
