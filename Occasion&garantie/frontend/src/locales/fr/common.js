@@ -120,5 +120,7 @@ export const frCommon = {
     popupTitle: 'Boostez votre business avec GoMobile',
     popupText: 'SMS, WhatsApp Business API et Voice Messaging pour atteindre vos clients instantanément.',
     popupCta: 'Découvrir GoMobile',
+    bannerTitle: 'Boostez vos ventes avec GoMobile',
+    bannerText: 'SMS, WhatsApp Business API et Voice Messaging.',
   },
 };
