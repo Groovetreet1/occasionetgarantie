@@ -311,31 +311,65 @@ input, textarea, select, button { font-family: inherit; }
 
 /* ============ GoMobile ticker bar ============ */
 .gomobile-ticker-wrap {
-  background-color: #004aad; color: #fff;
-  padding: 10px 0; overflow: hidden; white-space: nowrap; box-sizing: border-box;
+  background: linear-gradient(90deg, #00337f 0%, #004aad 45%, #007bff 100%);
+  color: #fff;
+  padding: 0; overflow: hidden; white-space: nowrap; box-sizing: border-box;
   font-family: var(--font); font-size: 15px;
+  display: flex; align-items: stretch;
+  box-shadow: 0 4px 18px rgba(0, 74, 173, 0.28);
+  border-block: 1px solid rgba(255, 255, 255, 0.12);
+  min-height: 54px;
 }
-.gomobile-ticker { display: inline-flex; white-space: nowrap; animation: gomobile-ticker 25s linear infinite; }
-.gomobile-ticker__item { display: inline-block; padding: 0 50px; }
+.gomobile-ticker-brand {
+  display: flex; align-items: center; gap: 8px; padding: 0 18px; flex-shrink: 0;
+  background: rgba(255, 255, 255, 0.12); border-inline-end: 1px solid rgba(255, 255, 255, 0.25);
+  font-weight: 800; font-size: 16px; letter-spacing: 0.3px;
+  position: relative; z-index: 2;
+}
+.gomobile-ticker-brand svg { flex-shrink: 0; }
+.gomobile-ticker-brand span { white-space: nowrap; }
+.gomobile-ticker-track { position: relative; flex: 1; overflow: hidden; display: flex; align-items: center; }
+.gomobile-ticker {
+  display: inline-flex; white-space: nowrap; padding: 0 8px; align-items: center; height: 100%;
+  animation: gomobile-ticker 28s linear infinite;
+  will-change: transform;
+}
+.gomobile-ticker__item { display: inline-block; padding: 0 52px; }
 .gomobile-ticker__item strong { color: #ffde59; }
 .gomobile-ticker__item a { color: #ffde59; text-decoration: none; font-weight: bold; }
 .gomobile-ticker__item a:hover { text-decoration: underline; }
 .gomobile-ticker-wrap:hover .gomobile-ticker { animation-play-state: paused; cursor: pointer; }
 @keyframes gomobile-ticker {
-  0% { transform: translateX(100%); }
-  100% { transform: translateX(-100%); }
+  0% { transform: translateX(0); }
+  100% { transform: translateX(-50%); }
 }
-@media (max-width: 600px) { .gomobile-ticker-wrap { font-size: 13px; } }
+@media (max-width: 600px) {
+  .gomobile-ticker-wrap { font-size: 13px; min-height: 46px; }
+  .gomobile-ticker-brand { padding: 0 12px; font-size: 14px; }
+  .gomobile-ticker__item { padding: 0 34px; }
+}
 
 /* ============ GoMobile fade bar ============ */
 .gomobile-fade-bar {
-  background-color: #333333; color: #fff; text-align: center;
-  padding: 12px; position: relative; height: 45px; overflow: hidden;
+  background: linear-gradient(120deg, #1f1f1f 0%, #2e2e2e 40%, #3b3b3b 100%);
+  color: #fff; text-align: center;
+  padding: 0; position: relative; height: 56px; overflow: hidden;
   font-family: var(--font); box-sizing: border-box;
+  display: flex; align-items: center; justify-content: center;
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.08);
+  border-block: 1px solid rgba(255, 255, 255, 0.08);
+}
+.gomobile-fade-brand {
+  position: absolute; left: 18px; top: 50%; transform: translateY(-50%);
+  display: flex; align-items: center; gap: 8px; font-weight: 800; font-size: 14px;
+  color: #4CAF50; letter-spacing: 0.3px; z-index: 2;
 }
 .fade-text {
-  position: absolute; width: 100%; left: 0; opacity: 0; animation: fadeInOut 12s infinite;
+  position: absolute; width: 100%; left: 0; right: 0; margin: 0 auto; opacity: 0;
+  animation: fadeInOut 12s infinite;
   top: 50%; transform: translateY(-50%);
+  font-size: 15px; font-weight: 600;
+  max-width: 720px; padding: 0 100px;
 }
 .fade-text a { color: #4CAF50; text-decoration: none; font-weight: bold; }
 .fade-text a:hover { text-decoration: underline; }
@@ -344,11 +378,15 @@ input, textarea, select, button { font-family: inherit; }
 .fade-text:nth-child(3) { animation-delay: 8s; }
 .gomobile-fade-bar:hover .fade-text { animation-play-state: paused; cursor: pointer; }
 @keyframes fadeInOut {
-  0% { opacity: 0; transform: translateY(10px); }
+  0% { opacity: 0; transform: translateY(14px); }
   10%, 25% { opacity: 1; transform: translateY(0); }
-  35%, 100% { opacity: 0; transform: translateY(-10px); }
+  35%, 100% { opacity: 0; transform: translateY(-14px); }
 }
-@media (max-width: 600px) { .gomobile-fade-bar { font-size: 13px; height: 42px; } }
+@media (max-width: 600px) {
+  .gomobile-fade-bar { font-size: 13px; height: 48px; }
+  .gomobile-fade-brand { left: 10px; font-size: 12px; }
+  .fade-text { padding: 0 8px; font-size: 13px; }
+}
 
 .navbar-inner {
   width: 100%; padding: 0 28px;
