@@ -9,6 +9,7 @@ import TrustBar from '../components/TrustBar';
 import NewsletterSection from '../components/NewsletterSection';
 import PromoPopup from '../components/PromoPopup';
 import GoMobileTicker from '../components/GoMobileTicker';
+import GoMobileFadeBar from '../components/GoMobileFadeBar';
 import { useLanguage } from '../context/LanguageContext';
 
 const fadeUp = { hidden: { opacity: 0, y: 40 }, show: { opacity: 1, y: 0, transition: { duration: 0.5 } } };
@@ -225,6 +226,8 @@ export default function Home() {
           </div>
         </motion.section>
       )}
+
+      <GoMobileFadeBar />
 
       <motion.section className="section" variants={fadeUp} initial="hidden" whileInView="show" viewport={{ once: true }}>
         <div className="container">

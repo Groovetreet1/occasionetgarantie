@@ -114,5 +114,8 @@ export const frCommon = {
     boostSales: 'Boostez vos ventes avec',
     solutionsList: 'Solutions SMS, WhatsApp Business API et Voice Messaging sur',
     darijaBoost: "Zid f les ventes dialek m3a GoMobile ! Twasel m3a l'kliyane dialek b SMS w WhatsApp.",
+    smsWhatsapp: 'Solutions SMS et WhatsApp avec',
+    reachClients: 'Atteignez vos clients instantanément !',
+    voiceMessaging: 'Voice Messaging pour votre business.',
   },
 };

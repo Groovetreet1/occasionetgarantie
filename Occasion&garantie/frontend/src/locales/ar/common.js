@@ -114,5 +114,8 @@ export const arCommon = {
     boostSales: 'عزز مبيعاتك مع',
     solutionsList: 'حلول SMS و WhatsApp Business API و Voice Messaging على',
     darijaBoost: '📱 زيد ف لڤونتات ديالك مع GoMobile! تواصل مع الكليان ديالك ب SMS و WhatsApp.',
+    smsWhatsapp: 'حلول SMS و WhatsApp مع',
+    reachClients: 'تواصل مع زبنائك فورًا!',
+    voiceMessaging: 'رسائل صوتية لأعمالك.',
   },
 };
