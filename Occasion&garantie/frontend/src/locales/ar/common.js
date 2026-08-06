@@ -111,6 +111,8 @@ export const arCommon = {
     supportStoreNameDesc: 'طلب تعديل اسم متجرك.',
   },
   ad: {
-    growSales: 'زود مبيعاتك!',
+    boostSales: 'عزز مبيعاتك مع',
+    solutionsList: 'حلول SMS و WhatsApp Business API و Voice Messaging على',
+    darijaBoost: '📱 زيد ف لڤونتات ديالك مع GoMobile! تواصل مع الكليان ديالك ب SMS و WhatsApp.',
   },
 };

@@ -111,6 +111,8 @@ export const frCommon = {
     supportStoreNameDesc: 'Demander la modification du nom de votre boutique.',
   },
   ad: {
-    growSales: 'Augmentez vos ventes !',
+    boostSales: 'Boostez vos ventes avec',
+    solutionsList: 'Solutions SMS, WhatsApp Business API et Voice Messaging sur',
+    darijaBoost: "Zid f les ventes dialek m3a GoMobile ! Twasel m3a l'kliyane dialek b SMS w WhatsApp.",
   },
 };

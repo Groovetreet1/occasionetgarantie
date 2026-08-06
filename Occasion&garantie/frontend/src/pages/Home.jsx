@@ -8,6 +8,7 @@ import HomeProductCard from '../components/HomeProductCard';
 import TrustBar from '../components/TrustBar';
 import NewsletterSection from '../components/NewsletterSection';
 import PromoPopup from '../components/PromoPopup';
+import GoMobileTicker from '../components/GoMobileTicker';
 import { useLanguage } from '../context/LanguageContext';
 
 const fadeUp = { hidden: { opacity: 0, y: 40 }, show: { opacity: 1, y: 0, transition: { duration: 0.5 } } };
@@ -262,6 +263,8 @@ export default function Home() {
           </div>
         </div>
       </motion.section>
+
+      <GoMobileTicker />
 
       <NewsletterSection />
     </motion.div>
