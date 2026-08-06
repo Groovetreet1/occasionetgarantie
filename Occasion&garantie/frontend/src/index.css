@@ -426,6 +426,25 @@ input, textarea, select, button { font-family: inherit; }
   .gomobile-banner { flex-wrap: wrap; gap: 12px; padding: 14px 48px 14px 16px; }
   .gomobile-banner-cta { width: 100%; text-align: center; }
 }
+@media (max-width: 720px) {
+  .gomobile-banner {
+    left: 0; right: 0; bottom: 0; transform: none; width: 100%;
+    border-radius: 20px 20px 0 0;
+    gap: 14px; padding: 22px 20px calc(20px + env(safe-area-inset-bottom, 16px));
+    align-items: stretch; flex-direction: column;
+    box-shadow: 0 -8px 40px rgba(0, 0, 0, 0.22);
+  }
+  .gomobile-banner::before {
+    content: ''; width: 44px; height: 5px; background: rgba(15, 23, 42, 0.18);
+    border-radius: 4px; margin: -10px auto 2px; flex-shrink: 0;
+  }
+  .gomobile-banner-brand { font-size: 17px; justify-content: center; gap: 8px; }
+  .gomobile-banner-body { align-items: center; text-align: center; }
+  .gomobile-banner-body strong { font-size: 16px; }
+  .gomobile-banner-body span { font-size: 13px; white-space: normal; text-align: center; }
+  .gomobile-banner-cta { width: 100%; text-align: center; padding: 15px; font-size: 15px; }
+  .gomobile-banner-close { top: 12px; right: 12px; }
+}
 
 .navbar-inner {
   width: 100%; padding: 0 28px;
