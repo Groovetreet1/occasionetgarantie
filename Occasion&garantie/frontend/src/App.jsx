@@ -1,7 +1,7 @@
 import { useEffect } from 'react';
 import { Routes, Route, Navigate, useLocation, useNavigate } from 'react-router-dom';
 import api from './api/axios';
-import { AnimatePresence, motion } from 'framer-motion';
+import { motion } from 'framer-motion';
 import Navbar from './components/Navbar';
 import Footer from './components/Footer';
 import SupportFloat from './components/SupportFloat';
@@ -9,6 +9,7 @@ import ErrorBoundary from './components/ErrorBoundary';
 import SuspendedModal from './components/SuspendedModal';
 import { useAuth } from './context/AuthContext';
 import AdminRoute from './components/AdminRoute';
+import AdminLayout from './components/AdminLayout';
 import SellerRoute from './components/SellerRoute';
 import Home from './pages/Home';
 import Products from './pages/Products';
@@ -61,7 +62,7 @@ const pageTransition = {
 
 function AnimatedPage({ children }) {
   return (
-    <motion.div initial="initial" animate="in" exit="out" variants={pageVariants} transition={pageTransition}>
+    <motion.div initial="initial" animate="in" variants={pageVariants} transition={pageTransition}>
       {children}
     </motion.div>
   );
@@ -86,9 +87,8 @@ export default function App() {
     <>
       <Navbar />
       <ErrorBoundary>
-      <AnimatePresence mode="wait">
-        <Routes location={location} key={location.pathname}>
-          <Route path="/" element={<AnimatedPage><Home /></AnimatedPage>} />
+      <Routes>
+        <Route path="/" element={<AnimatedPage><Home /></AnimatedPage>} />
           <Route path="/products" element={<AnimatedPage><Products /></AnimatedPage>} />
           <Route path="/products/:slug" element={<AnimatedPage><ProductDetail /></AnimatedPage>} />
           <Route path="/about" element={<AnimatedPage><About /></AnimatedPage>} />
@@ -99,19 +99,20 @@ export default function App() {
           <Route path="/reset-password" element={<AnimatedPage><ResetPassword /></AnimatedPage>} />
           <Route path="/profile" element={<AnimatedPage><Profile /></AnimatedPage>} />
           <Route path="/offres" element={<AnimatedPage><MyOffers /></AnimatedPage>} />
-          <Route path="/admin" element={<AnimatedPage><AdminRoute><AdminDashboardPage /></AdminRoute></AnimatedPage>} />
-          <Route path="/admin/premium" element={<AnimatedPage><AdminRoute><AdminPremium /></AdminRoute></AnimatedPage>} />
-          <Route path="/admin/credits" element={<AnimatedPage><AdminRoute><AdminCreditPurchases /></AdminRoute></AnimatedPage>} />
-
-          <Route path="/admin/users" element={<AnimatedPage><AdminRoute><AdminUsers /></AdminRoute></AnimatedPage>} />
-          <Route path="/admin/tickets" element={<AnimatedPage><AdminRoute><AdminTickets /></AdminRoute></AnimatedPage>} />
-          <Route path="/admin/vendor-logs" element={<AnimatedPage><AdminRoute><AdminVendorLogs /></AdminRoute></AnimatedPage>} />
-          <Route path="/admin/managed-vendors" element={<AnimatedPage><AdminRoute><AdminManagedVendors /></AdminRoute></AnimatedPage>} />
-          <Route path="/admin/products/pending" element={<AnimatedPage><AdminRoute><AdminPendingProducts /></AdminRoute></AnimatedPage>} />
-          <Route path="/admin/store-products" element={<AnimatedPage><AdminRoute><AdminStoreProducts /></AdminRoute></AnimatedPage>} />
-          <Route path="/admin/products/new" element={<AnimatedPage><AdminRoute><AdminProductForm /></AdminRoute></AnimatedPage>} />
-          <Route path="/admin/products/edit/:id" element={<AnimatedPage><AdminRoute><AdminProductForm /></AdminRoute></AnimatedPage>} />
-          <Route path="/admin/products" element={<AnimatedPage><AdminRoute><AdminDashboard /></AdminRoute></AnimatedPage>} />
+          <Route path="/admin" element={<AdminRoute><AdminLayout /></AdminRoute>}>
+            <Route index element={<AdminDashboardPage />} />
+            <Route path="premium" element={<AdminPremium />} />
+            <Route path="credits" element={<AdminCreditPurchases />} />
+            <Route path="users" element={<AdminUsers />} />
+            <Route path="tickets" element={<AdminTickets />} />
+            <Route path="vendor-logs" element={<AdminVendorLogs />} />
+            <Route path="managed-vendors" element={<AdminManagedVendors />} />
+            <Route path="products/pending" element={<AdminPendingProducts />} />
+            <Route path="store-products" element={<AdminStoreProducts />} />
+            <Route path="products/new" element={<AdminProductForm />} />
+            <Route path="products/edit/:id" element={<AdminProductForm />} />
+            <Route path="products" element={<AdminDashboard />} />
+          </Route>
           <Route path="/vendre" element={<AnimatedPage><SellPage /></AnimatedPage>} />
           <Route path="/reprise" element={<AnimatedPage><RepriseForm /></AnimatedPage>} />
           <Route path="/reprise/list" element={<AnimatedPage><RepriseList /></AnimatedPage>} />
@@ -129,7 +130,6 @@ export default function App() {
           <Route path="/boutique/:slug" element={<AnimatedPage><StoreProductDetail /></AnimatedPage>} />
           <Route path="*" element={<AnimatedPage><NotFound /></AnimatedPage>} />
         </Routes>
-      </AnimatePresence>
       </ErrorBoundary>
       {!location.pathname.startsWith('/messenger') && !location.pathname.startsWith('/login') && !location.pathname.startsWith('/signup') && <SupportFloat />}
       {!location.pathname.startsWith('/messenger') && !location.pathname.startsWith('/login') && !location.pathname.startsWith('/signup') && <Footer />}

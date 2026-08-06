@@ -1,12 +1,8 @@
 import { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
-import { FiCreditCard, FiClock, FiPackage, FiUsers, FiArrowLeft, FiTrendingUp, FiPlus, FiHeadphones, FiShield, FiMonitor, FiSmartphone, FiUserCheck } from 'react-icons/fi';
+import { FiCreditCard, FiPackage, FiUsers, FiArrowLeft, FiHeadphones, FiShield } from 'react-icons/fi';
 import api from '../api/axios';
 import { useLanguage } from '../context/LanguageContext';
-
-function CardWrapper({ link, children, ...rest }) {
-  return link ? <Link to={link} {...rest}>{children}</Link> : <div {...rest}>{children}</div>;
-}
 
 export default function AdminDashboardPage() {
   const { t } = useLanguage();
@@ -50,44 +46,6 @@ export default function AdminDashboardPage() {
     }).catch(() => {}).finally(() => setLoading(false));
   }, []);
 
-  const sections = [
-    { title: t('admin.creditPurchases'), icon: FiCreditCard, color: '#3b82f6', bg: 'rgba(59,130,246,0.1)', items: [
-      { label: t('admin.totalRequests'), value: stats.credits },
-      { label: t('admin.pending'), value: stats.pendingCredits, highlight: true },
-    ], link: '/admin/credits' },
-
-    { title: t('admin.premiumRequests'), icon: FiShield, color: '#ec4899', bg: 'rgba(236,72,153,0.1)', items: [
-      { label: t('admin.totalRequests'), value: stats.premium },
-      { label: t('admin.pending'), value: stats.pendingPremium, highlight: true },
-    ], link: '/admin/premium' },
-    { title: t('admin.products'), icon: FiPackage, color: '#059669', bg: 'rgba(5,150,105,0.1)', items: [
-      { label: t('admin.totalProducts'), value: stats.products },
-      { label: t('admin.vendorProducts'), value: stats.vendorProducts, highlight: true },
-      { label: t('admin.pending'), value: stats.pendingProducts, highlight: stats.pendingProducts > 0 },
-    ], link: '/admin/products/pending' },
-    { title: t('admin.officialStore'), icon: FiShield, color: '#d97706', bg: 'rgba(217,119,6,0.1)', items: [
-      { label: t('admin.storeProducts'), value: stats.storeProducts },
-      { label: t('admin.storeRequests'), value: stats.storeContacts, highlight: stats.storeContacts > 0 },
-    ], link: '/admin/store-products' },
-    { title: t('admin.ticketsSupport'), icon: FiHeadphones, color: '#f59e0b', bg: 'rgba(245,158,11,0.1)', items: [
-      { label: t('admin.total'), value: stats.tickets },
-      { label: t('admin.pending'), value: stats.pendingTickets, highlight: true },
-      { label: t('admin.replied'), value: stats.repliedTickets },
-    ], link: '/admin/tickets' },
-    { title: t('admin.reprises'), icon: FiSmartphone, color: '#10b981', bg: 'rgba(16,185,129,0.1)', items: [
-      { label: t('admin.pending'), value: stats.pendingReprises ?? '...' },
-    ], link: '/reprise/list' },
-    { title: t('admin.vendorAccounts'), icon: FiUserCheck, color: '#06b6d4', bg: 'rgba(6,182,212,0.1)', items: [
-      { label: t('admin.manageAccounts'), value: t('admin.createDelete') },
-    ], link: '/admin/managed-vendors' },
-    { title: t('admin.vendorJournal'), icon: FiMonitor, color: '#6366f1', bg: 'rgba(99,102,241,0.1)', items: [
-      { label: t('admin.activity'), value: t('admin.ipIspUa') },
-    ], link: '/admin/vendor-logs' },
-    { title: t('admin.users'), icon: FiUsers, color: '#dc2626', bg: 'rgba(220,38,38,0.1)', items: [
-      { label: t('admin.totalUsers'), value: stats.users },
-    ], link: '/admin/users' },
-  ];
-
   if (loading) return <section className="admin-dashboard"><div className="container" style={{ padding: '60px 0' }}><div className="spinner" /></div></section>;
 
   return (
@@ -101,44 +59,40 @@ export default function AdminDashboardPage() {
           </div>
         </div>
 
-        <div style={{ display: 'grid', gap: '20px', gridTemplateColumns: 'repeat(auto-fill, minmax(280px, 1fr))' }}>
-          {sections.map(section => {
-            const Icon = section.icon;
-            return (
-              <CardWrapper key={section.title} link={section.link} style={{ textDecoration: 'none', color: 'inherit' }}>
-                <div style={{
-                  background: 'var(--bg-card)',
-                  border: '1px solid var(--border)',
-                  borderRadius: 'var(--radius-lg)',
-                  padding: '24px',
-                  transition: 'transform 0.2s, box-shadow 0.2s',
-                  cursor: section.link ? 'pointer' : 'default',
-                }}
-                  onMouseEnter={e => { if (section.link) { e.currentTarget.style.transform = 'translateY(-2px)'; e.currentTarget.style.boxShadow = '0 8px 24px rgba(0,0,0,0.12)'; } }}
-                  onMouseLeave={e => { if (section.link) { e.currentTarget.style.transform = ''; e.currentTarget.style.boxShadow = ''; } }}>
-                  <div style={{ display: 'flex', alignItems: 'center', gap: '12px', marginBottom: '16px' }}>
-                    <div style={{ width: 44, height: 44, borderRadius: '12px', background: section.bg, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-                      <Icon size={22} color={section.color} />
-                    </div>
-                    <div>
-                      <div style={{ fontSize: '16px', fontWeight: 700 }}>{section.title}</div>
-                    </div>
-                  </div>
-                  <div style={{ display: 'flex', gap: '16px', flexWrap: 'wrap' }}>
-                    {section.items.map(item => (
-                      <div key={item.label} style={{ flex: 1, minWidth: 80 }}>
-                        <div style={{ fontSize: '24px', fontWeight: 800, color: item.highlight && item.value > 0 ? section.color : 'var(--text-primary)' }}>{item.value}</div>
-                        <div style={{ fontSize: '12px', color: 'var(--text-muted)' }}>{item.label}</div>
-                      </div>
-                    ))}
-                  </div>
-                </div>
-              </CardWrapper>
-            );
-          })}
+        <div style={{ display: 'grid', gap: '16px', gridTemplateColumns: 'repeat(auto-fill, minmax(200px, 1fr))', marginBottom: '32px' }}>
+          <div style={{ background: 'var(--bg-card)', border: '1px solid var(--border)', borderRadius: 'var(--radius-lg)', padding: '20px' }}>
+            <div style={{ fontSize: '12px', color: 'var(--text-muted)', marginBottom: '6px' }}>{t('admin.pending')}</div>
+            <div style={{ fontSize: '28px', fontWeight: 800, color: stats.pendingProducts > 0 ? '#059669' : 'var(--text-primary)' }}>{stats.pendingProducts}</div>
+            <div style={{ fontSize: '12px', color: 'var(--text-secondary)' }}>{t('admin.approveProducts')}</div>
+          </div>
+          <div style={{ background: 'var(--bg-card)', border: '1px solid var(--border)', borderRadius: 'var(--radius-lg)', padding: '20px' }}>
+            <div style={{ fontSize: '12px', color: 'var(--text-muted)', marginBottom: '6px' }}>{t('admin.pending')}</div>
+            <div style={{ fontSize: '28px', fontWeight: 800, color: stats.pendingCredits > 0 ? '#3b82f6' : 'var(--text-primary)' }}>{stats.pendingCredits}</div>
+            <div style={{ fontSize: '12px', color: 'var(--text-secondary)' }}>{t('admin.creditPurchases')}</div>
+          </div>
+          <div style={{ background: 'var(--bg-card)', border: '1px solid var(--border)', borderRadius: 'var(--radius-lg)', padding: '20px' }}>
+            <div style={{ fontSize: '12px', color: 'var(--text-muted)', marginBottom: '6px' }}>{t('admin.pending')}</div>
+            <div style={{ fontSize: '28px', fontWeight: 800, color: stats.pendingPremium > 0 ? '#ec4899' : 'var(--text-primary)' }}>{stats.pendingPremium}</div>
+            <div style={{ fontSize: '12px', color: 'var(--text-secondary)' }}>{t('admin.premiumRequests')}</div>
+          </div>
+          <div style={{ background: 'var(--bg-card)', border: '1px solid var(--border)', borderRadius: 'var(--radius-lg)', padding: '20px' }}>
+            <div style={{ fontSize: '12px', color: 'var(--text-muted)', marginBottom: '6px' }}>{t('admin.pending')}</div>
+            <div style={{ fontSize: '28px', fontWeight: 800, color: stats.pendingTickets > 0 ? '#f59e0b' : 'var(--text-primary)' }}>{stats.pendingTickets}</div>
+            <div style={{ fontSize: '12px', color: 'var(--text-secondary)' }}>{t('admin.ticketsSupport')}</div>
+          </div>
+          <div style={{ background: 'var(--bg-card)', border: '1px solid var(--border)', borderRadius: 'var(--radius-lg)', padding: '20px' }}>
+            <div style={{ fontSize: '12px', color: 'var(--text-muted)', marginBottom: '6px' }}>{t('admin.pending')}</div>
+            <div style={{ fontSize: '28px', fontWeight: 800, color: stats.pendingReprises > 0 ? '#10b981' : 'var(--text-primary)' }}>{stats.pendingReprises ?? '...'}</div>
+            <div style={{ fontSize: '12px', color: 'var(--text-secondary)' }}>{t('admin.reprises')}</div>
+          </div>
+          <div style={{ background: 'var(--bg-card)', border: '1px solid var(--border)', borderRadius: 'var(--radius-lg)', padding: '20px' }}>
+            <div style={{ fontSize: '12px', color: 'var(--text-muted)', marginBottom: '6px' }}>{t('admin.totalUsers')}</div>
+            <div style={{ fontSize: '28px', fontWeight: 800 }}>{stats.users}</div>
+            <div style={{ fontSize: '12px', color: 'var(--text-secondary)' }}>{t('admin.users')}</div>
+          </div>
         </div>
 
-        <div style={{ marginTop: '32px', background: 'var(--bg-card)', border: '1px solid var(--border)', borderRadius: 'var(--radius-lg)', padding: '24px' }}>
+        <div style={{ background: 'var(--bg-card)', border: '1px solid var(--border)', borderRadius: 'var(--radius-lg)', padding: '24px' }}>
           <h2 style={{ fontSize: '18px', fontWeight: 700, marginBottom: '16px' }}>{t('admin.quickActions')}</h2>
           <div style={{ display: 'flex', gap: '12px', flexWrap: 'wrap' }}>
             <Link to="/admin/credits" className="btn btn-outline"><FiCreditCard size={16} /> {t('admin.creditPurchases')}</Link>
