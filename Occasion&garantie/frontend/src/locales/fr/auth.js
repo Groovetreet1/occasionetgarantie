@@ -89,5 +89,20 @@
     resetPasswordButton: 'Reinitialiser le mot de passe',
 
     genericError: 'Erreur.',
+
+    // Auth split brand panel
+    brandEyebrow: 'Marketplace Marocaine',
+    brandHeadline: 'Achetez et vendez votre high-tech en toute confiance',
+    brandSubheadline: 'Occasion & Garantie rassemble acheteurs et vendeurs de produits electroniques au Maroc, avec des garanties reelles et un paiement securise.',
+    brandFeat1Title: 'Garantie incluse',
+    brandFeat1Desc: 'Chaque produit est couvert par une garantie verifiable des l\'achat.',
+    brandFeat2Title: 'Vendeurs verifies',
+    brandFeat2Desc: 'Identite, stock et historique controles par notre equipe.',
+    brandFeat3Title: 'Reprise & reconditionnement',
+    brandFeat3Desc: 'Donnez une seconde vie a votre telephone et recevez une estimation instantanee.',
+    brandFeat4Title: 'Livraison partout au Maroc',
+    brandFeat4Desc: 'De Casablanca a Dakhla, recevez votre commande en quelques jours.',
+    brandQuote: 'J\'ai vendu mon iPhone en 48h et le paiement etait securise de bout en bout.',
+    brandQuoteAuthor: 'Yassine, vendeur verifie a Rabat',
   },
 };
