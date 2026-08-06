@@ -249,6 +249,18 @@ export default function Navbar() {
                       exit={{ opacity: 0, y: -8 }}
                       transition={{ duration: 0.15 }}
                     >
+                      <div className="navbar-user-card">
+                        {user.avatar ? (
+                          <img src={typeof user.avatar === 'string' && user.avatar.startsWith('http') ? user.avatar : `${API_BASE}/uploads/avatars/${user.avatar}`} alt="" className="navbar-user-card-avatar" />
+                        ) : (
+                          <span className="navbar-user-card-fallback"><FiUser size={20} /></span>
+                        )}
+                        <div className="navbar-user-card-info">
+                          <div className="navbar-user-card-name">{user.store_name || user.fullName || user.full_name || user.email}</div>
+                          <div className="navbar-user-card-email">{user.email}</div>
+                        </div>
+                      </div>
+                      <div className="navbar-user-card-divider" />
                       <NavLink to="/profile" onClick={() => setDropdownOpen(false)}>
                         <FiUser size={14} /> {t('nav.myProfile')}
                       </NavLink>
