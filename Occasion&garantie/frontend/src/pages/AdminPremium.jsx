@@ -3,6 +3,7 @@ import { Link } from 'react-router-dom';
 import { FiCheck, FiX, FiClock, FiArrowLeft, FiStar, FiEye, FiThumbsDown } from 'react-icons/fi';
 import api from '../api/axios';
 import ConfirmModal from '../components/ConfirmModal';
+import DeleteButton from '../components/DeleteButton';
 import { AnimatedCheck, AnimatedX, AnimatedTrash, AnimatedThumbsDown } from '../components/AnimatedIcon';
 import { useLanguage } from '../context/LanguageContext';
 
@@ -165,22 +166,7 @@ export default function AdminPremium() {
                         ) : (
                           <span style={{ color: 'var(--success)', fontSize: '12px', fontWeight: 600 }}>{t('admin.confirmed')}</span>
                         )}
-                        <button
-                          onClick={() => setDeleteTarget(p.id)}
-                          disabled={actionId === p.id}
-                          title={t('admin.delete')}
-                          style={{
-                            width: '34px', height: '34px', flexShrink: 0,
-                            display: 'inline-flex', alignItems: 'center', justifyContent: 'center',
-                            borderRadius: '50%', background: '#dc2626', color: '#fff',
-                            border: 'none', cursor: 'pointer', boxShadow: '0 4px 12px rgba(220,38,38,0.35)',
-                            transition: 'transform .15s ease, box-shadow .15s ease'
-                          }}
-                          onMouseEnter={e => { e.currentTarget.style.transform = 'scale(1.08)'; e.currentTarget.style.boxShadow = '0 6px 16px rgba(220,38,38,0.45)'; }}
-                          onMouseLeave={e => { e.currentTarget.style.transform = 'scale(1)'; e.currentTarget.style.boxShadow = '0 4px 12px rgba(220,38,38,0.35)'; }}
-                        >
-                          <AnimatedTrash size={16} />
-                        </button>
+                        <DeleteButton onClick={() => setDeleteTarget(p.id)} disabled={actionId === p.id} title={t('admin.delete')} size={16} />
                       </div>
                     </td>
                   </tr>

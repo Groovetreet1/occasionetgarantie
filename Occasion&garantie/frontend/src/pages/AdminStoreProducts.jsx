@@ -1,7 +1,8 @@
 import { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
-import { FiPlus, FiEdit2, FiTrash2, FiPackage, FiArrowLeft, FiStar, FiShield, FiShoppingBag, FiDollarSign, FiEye, FiPhone, FiMessageCircle, FiClock } from 'react-icons/fi';
+import { FiPlus, FiEdit2, FiPackage, FiArrowLeft, FiStar, FiShield, FiShoppingBag, FiDollarSign, FiEye, FiPhone, FiMessageCircle, FiClock } from 'react-icons/fi';
 import api from '../api/axios';
+import DeleteButton from '../components/DeleteButton';
 import { useLanguage } from '../context/LanguageContext';
 
 const stateLabels = { neuf: 'Neuf', comme_neuf: 'Comme neuf', tres_bon: 'Très bon', bon: 'Bon', acceptable: 'Acceptable' };
@@ -231,10 +232,7 @@ export default function AdminStoreProducts() {
                           <Link to={`/seller/products/edit/${p.id}`} style={{ padding: 6, borderRadius: 6, background: 'rgba(5,150,105,0.1)', color: '#059669', display: 'flex', alignItems: 'center' }}>
                             <FiEdit2 size={14} />
                           </Link>
-                          <button onClick={() => handleDelete(p.id)} disabled={actionId === p.id}
-                            style={{ padding: 6, borderRadius: 6, background: 'rgba(220,38,38,0.1)', color: '#dc2626', border: 'none', cursor: 'pointer', display: 'flex', alignItems: 'center' }}>
-                            <FiTrash2 size={14} />
-                          </button>
+                          <DeleteButton onClick={() => handleDelete(p.id)} disabled={actionId === p.id} size={14} />
                         </div>
                       </td>
                     </tr>

@@ -1924,7 +1924,12 @@ select.form-control, .form-group select { cursor: pointer; appearance: auto; }
   border: 1px solid var(--border); background: var(--bg-card); color: inherit; cursor: pointer; text-decoration: none; transition: var(--transition);
 }
 .btn-icon:hover { border-color: var(--primary); color: var(--primary); }
-.btn-icon-danger:hover { border-color: #ef4444; color: #ef4444; }
+.btn-icon-danger {
+  background: #dc2626; color: #fff; border-color: #dc2626; border-radius: 50%;
+  box-shadow: 0 4px 12px rgba(220,38,38,0.35);
+  transition: transform .15s ease, box-shadow .15s ease;
+}
+.btn-icon-danger:hover { border-color: #dc2626; color: #fff; transform: scale(1.08); box-shadow: 0 6px 16px rgba(220,38,38,0.45); }
 .badge { font-size: 11px; font-weight: 600; padding: 4px 10px; border-radius: 99px; }
 .badge-active { background: #dcfce7; color: #166534; }
 .badge-inactive { background: #fef2f2; color: #991b1b; }

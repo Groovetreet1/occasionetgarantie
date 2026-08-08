@@ -1,8 +1,9 @@
 import { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
-import { FiArrowLeft, FiUser, FiPlus, FiCopy, FiTrash2, FiKey, FiX } from 'react-icons/fi';
+import { FiArrowLeft, FiUser, FiPlus, FiCopy, FiKey, FiX, FiTrash2 } from 'react-icons/fi';
 import api from '../api/axios';
 import ConfirmModal from '../components/ConfirmModal';
+import DeleteButton from '../components/DeleteButton';
 import { useLanguage } from '../context/LanguageContext';
 
 export default function AdminManagedVendors() {
@@ -188,9 +189,7 @@ export default function AdminManagedVendors() {
                         <button onClick={() => setResetPwTarget(v)} disabled={resettingId === v.id} className="btn btn-ghost" style={{ color: '#3b82f6', padding: '4px 8px' }} title={t('admin.resetPasswordTitle')}>
                           <FiKey size={15} />
                         </button>
-                        <button onClick={() => setDeleteTarget(v.id)} disabled={deleting === v.id} className="btn btn-ghost" style={{ color: '#ef4444', padding: '4px 8px' }} title={t('admin.delete')}>
-                          <FiTrash2 size={16} />
-                        </button>
+                        <DeleteButton onClick={() => setDeleteTarget(v.id)} disabled={deleting === v.id} title={t('admin.delete')} size={14} />
                       </div>
                     </td>
                   </tr>

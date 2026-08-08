@@ -1,8 +1,9 @@
 import { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
-import { FiPlus, FiEdit2, FiTrash2, FiPackage, FiArrowLeft } from 'react-icons/fi';
+import { FiPlus, FiEdit2, FiPackage, FiArrowLeft } from 'react-icons/fi';
 import api from '../api/axios';
 import ConfirmModal from '../components/ConfirmModal';
+import DeleteButton from '../components/DeleteButton';
 import { useLanguage } from '../context/LanguageContext';
 const stateLabels = { neuf: 'Neuf', comme_neuf: 'Comme neuf', tres_bon: 'Très bon', bon: 'Bon', acceptable: 'Acceptable' };
 const formatPrice = (p) => new Intl.NumberFormat('fr-FR', { style: 'currency', currency: 'MAD' }).format(p).replace('MAD', '').trim() + ' DH';
@@ -86,7 +87,7 @@ export default function AdminDashboard() {
                     <td style={{ padding: '12px 8px' }}>
                       <div style={{ display: 'flex', gap: '6px' }}>
                         <Link to={`/admin/products/edit/${p.id}`} className="btn btn-secondary" style={{ padding: '6px 12px', fontSize: '12px' }}><FiEdit2 size={14} /></Link>
-                        <button onClick={() => setDeleteTarget(p.id)} className="btn" style={{ padding: '6px 12px', fontSize: '12px', background: 'rgba(239,68,68,0.15)', color: 'var(--error)', border: 'none' }}><FiTrash2 size={14} /></button>
+                        <DeleteButton onClick={() => setDeleteTarget(p.id)} />
                       </div>
                     </td>
                   </tr>

@@ -35,7 +35,6 @@ export default function AdminLayout() {
     <div className={`admin-shell ${collapsed ? 'collapsed' : ''}`}>
       <aside className="admin-sidebar">
         <div className="admin-sidebar-head">
-          {!collapsed && <span className="admin-sidebar-brand">OG Admin</span>}
           <button
             className="admin-sidebar-toggle"
             onClick={() => setCollapsed(c => !c)}

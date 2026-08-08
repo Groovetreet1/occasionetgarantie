@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react';
 import { FiStar, FiEdit2, FiTrash2 } from 'react-icons/fi';
+import DeleteButton from './DeleteButton';
 import api from '../api/axios';
 import { useLanguage } from '../context/LanguageContext';
 import ConfirmModal from './ConfirmModal';
@@ -160,7 +161,7 @@ export default function SellerRating({ sellerId, currentUserId }) {
                   {currentUserId && r.user_id === currentUserId && !editId && (
                     <div style={{ display: 'flex', gap: '4px' }}>
                       <button onClick={() => startEdit(r)} style={{ background: 'none', border: 'none', cursor: 'pointer', color: 'var(--text-muted)', padding: '2px' }} title={t('seller.edit')}><FiEdit2 size={12} /></button>
-                      <button onClick={() => setDeleteTargetId(r.id)} style={{ background: 'none', border: 'none', cursor: 'pointer', color: 'var(--error)', padding: '2px' }} title={t('seller.delete')}><FiTrash2 size={12} /></button>
+                      <DeleteButton onClick={() => setDeleteTargetId(r.id)} title={t('seller.delete')} size={12} />
                     </div>
                   )}
                 </div>

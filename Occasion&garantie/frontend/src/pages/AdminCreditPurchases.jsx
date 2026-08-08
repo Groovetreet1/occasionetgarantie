@@ -1,8 +1,9 @@
 import { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
-import { FiCheck, FiX, FiClock, FiArrowLeft, FiCreditCard, FiThumbsDown, FiTrash2, FiEye } from 'react-icons/fi';
+import { FiCheck, FiX, FiClock, FiArrowLeft, FiCreditCard, FiThumbsDown, FiEye } from 'react-icons/fi';
 import api from '../api/axios';
 import ConfirmModal from '../components/ConfirmModal';
+import DeleteButton from '../components/DeleteButton';
 import { useLanguage } from '../context/LanguageContext';
 
 const API_BASE = import.meta.env.VITE_API_URL || '';
@@ -145,10 +146,7 @@ export default function AdminCreditPurchases() {
                           {p.status === 'confirme' ? t('admin.confirmedStatus') : t('admin.rejectedStatus')}
                         </span>
                       )}
-                      <button onClick={() => setDeleteTarget(p.id)} disabled={actionId === p.id}
-                        style={{ marginLeft: '8px', background: 'none', border: 'none', color: 'var(--text-muted)', cursor: 'pointer', padding: '4px', verticalAlign: 'middle' }} title={t('admin.delete')}>
-                        <FiTrash2 size={14} />
-                      </button>
+                      <DeleteButton onClick={() => setDeleteTarget(p.id)} disabled={actionId === p.id} title={t('admin.delete')} />
                     </td>
                   </tr>
                 ))}
