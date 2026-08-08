@@ -49,9 +49,64 @@ const DEFAULT_META = {
       name: 'Occasion & Garantie',
       url: SITE_URL,
       inLanguage: 'fr-MA',
+      potentialAction: {
+        '@type': 'SearchAction',
+        target: `${SITE_URL}/products?search={search_term_string}`,
+        'query-input': 'required name=search_term_string',
+      },
     },
   ],
 };
+
+const CITIES = [
+  { slug: 'casablanca', name: 'Casablanca' },
+  { slug: 'rabat', name: 'Rabat' },
+  { slug: 'marrakech', name: 'Marrakech' },
+  { slug: 'fes', name: 'Fes' },
+  { slug: 'tanger', name: 'Tanger' },
+  { slug: 'agadir', name: 'Agadir' },
+  { slug: 'meknes', name: 'Meknes' },
+  { slug: 'oujda', name: 'Oujda' },
+  { slug: 'kenitra', name: 'Kenitra' },
+  { slug: 'tetouan', name: 'Tetouan' },
+];
+
+function cityFaq(cityName) {
+  return [
+    {
+      '@type': 'Question',
+      name: `Ou acheter un telephone d'occasion a ${cityName} en toute securite ?`,
+      acceptedAnswer: {
+        '@type': 'Answer',
+        text: `Chez Occasion & Garantie, chaque telephone d'occasion a ${cityName} est verifie, teste et garanti. Achetez en ligne avec livraison rapide et retour facile.`,
+      },
+    },
+    {
+      '@type': 'Question',
+      name: `Quels produits electroniques d'occasion puis-je trouver a ${cityName} ?`,
+      acceptedAnswer: {
+        '@type': 'Answer',
+        text: `Smartphones (iPhone, Samsung, Xiaomi...), tablettes, ordinateurs portables, accessoires et gaming d'occasion, tous testes avant d'etre mis en vente a ${cityName}.`,
+      },
+    },
+    {
+      '@type': 'Question',
+      name: `Comment vendre mon telephone a ${cityName} ?`,
+      acceptedAnswer: {
+        '@type': 'Answer',
+        text: `Publiez votre annonce gratuitement en quelques minutes sur Occasion & Garantie. Zero commission, paiement securise et visibilite aupres des acheteurs a ${cityName} et dans tout le Maroc.`,
+      },
+    },
+    {
+      '@type': 'Question',
+      name: 'Y a-t-il une garantie sur les produits d\'occasion achetes chez Occasion & Garantie ?',
+      acceptedAnswer: {
+        '@type': 'Answer',
+        text: 'Oui. La plupart des annonces incluent une garantie, et chaque produit de la Boutique Officielle est couvert. Satisfait ou rembourse.',
+      },
+    },
+  ];
+}
 
 const STATIC_PAGES = {
   '/about': {
@@ -212,6 +267,36 @@ async function buildMeta(req) {
     };
   }
 
+  if (segments[0] === 'ville' && segments[1]) {
+    const city = CITIES.find((c) => c.slug === segments[1].toLowerCase());
+    if (city) {
+      const canonical = `${SITE_URL}/ville/${city.slug}`;
+      return {
+        ...DEFAULT_META,
+        title: `Telephones et electronique d'occasion a ${city.name} - Occasion & Garantie`,
+        description: `Achetez et vendez des telephones et produits electroniques d'occasion a ${city.name} avec garantie. Smartphones iPhone, Samsung, Xiaomi, tablettes et PC au meilleur prix au Maroc.`,
+        keywords: `${city.name}, telephone occasion, electronique, occasion, maroc, garantie, smartphone, iphone, samsung, xiaomi`,
+        image: `${SITE_URL}/logo.png`,
+        canonical,
+        jsonLd: [
+          {
+            '@context': 'https://schema.org',
+            '@type': 'BreadcrumbList',
+            itemListElement: [
+              { '@type': 'ListItem', position: 1, name: 'Accueil', item: SITE_URL },
+              { '@type': 'ListItem', position: 2, name: `Occasion a ${city.name}`, item: canonical },
+            ],
+          },
+          {
+            '@context': 'https://schema.org',
+            '@type': 'FAQPage',
+            mainEntity: cityFaq(city.name),
+          },
+        ],
+      };
+    }
+  }
+
   if (STATIC_PAGES[pathname]) {
     return {
       ...DEFAULT_META,
@@ -272,6 +357,8 @@ async function buildSitemap() {
 
   add('/', null);
   ['products', 'boutique', 'about', 'vendre', 'reprise', 'privacy', 'legal'].forEach((p) => add(`/${p}`, null));
+
+  CITIES.forEach((c) => add(`/ville/${c.slug}`, null));
 
   const [cats] = await pool.query('SELECT slug FROM categories');
   cats.forEach((c) => add(`/products?category=${encodeURIComponent(c.slug)}`, null));

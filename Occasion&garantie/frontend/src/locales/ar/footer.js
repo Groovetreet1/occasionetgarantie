@@ -3,6 +3,7 @@
     tagline: 'منتجات استثنائية بأسعار مخفضة. اشترِ وبع بكل ثقة.',
     navigation: 'التنقل',
     categories: 'الفئات',
+    cities: 'مدننا',
     contact: 'اتصل بنا',
     myAccount: 'حسابي',
     allProducts: 'جميع المنتجات',

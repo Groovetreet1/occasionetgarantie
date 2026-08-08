@@ -3,6 +3,7 @@
     tagline: 'Des produits d’exception à prix réduits. Achetez et vendez en toute confiance.',
     navigation: 'Navigation',
     categories: 'Catégories',
+    cities: 'Nos villes',
     contact: 'Contact',
     myAccount: 'Mon compte',
     allProducts: 'Tous les produits',

@@ -49,6 +49,7 @@ import NotificationsPage from './pages/NotificationsPage';
 import Legal from './pages/Legal';
 import StorePage from './pages/StorePage';
 import StoreProductDetail from './pages/StoreProductDetail';
+import CityPage from './pages/CityPage';
 
 const pageVariants = {
   initial: { opacity: 0, y: 12 },
@@ -130,6 +131,7 @@ export default function App() {
           <Route path="/legal" element={<AnimatedPage><Legal /></AnimatedPage>} />
           <Route path="/boutique" element={<AnimatedPage><StorePage /></AnimatedPage>} />
           <Route path="/boutique/:slug" element={<AnimatedPage><StoreProductDetail /></AnimatedPage>} />
+          <Route path="/ville/:slug" element={<AnimatedPage><CityPage /></AnimatedPage>} />
           <Route path="*" element={<AnimatedPage><NotFound /></AnimatedPage>} />
         </Routes>
       </ErrorBoundary>

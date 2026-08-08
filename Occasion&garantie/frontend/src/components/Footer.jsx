@@ -41,6 +41,16 @@ export default function Footer() {
           </div>
 
           <div className="footer-col">
+            <h4>{t('footer.cities')}</h4>
+            <Link to="/ville/casablanca">Casablanca</Link>
+            <Link to="/ville/rabat">Rabat</Link>
+            <Link to="/ville/marrakech">Marrakech</Link>
+            <Link to="/ville/tanger">Tanger</Link>
+            <Link to="/ville/fes">Fès</Link>
+            <Link to="/ville/agadir">Agadir</Link>
+          </div>
+
+          <div className="footer-col">
             <h4>{t('footer.contact')}</h4>
             <a className="footer-contact" href="mailto:contact@contact.occasionetgarantie.store"><FiMail size={13} /> contact@contact.occasionetgarantie.store</a>
             <a className="footer-contact" href="tel:+212669017295"><FiPhone size={13} /> +212 669-017295</a>
