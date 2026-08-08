@@ -1,6 +1,6 @@
 import { useEffect, useState, useRef } from 'react';
 import { Link } from 'react-router-dom';
-import { FiTrash2, FiArrowLeft, FiUsers as FiUsersIcon, FiShield, FiEdit3, FiSave, FiX, FiCheck, FiLock, FiUnlock, FiMoreVertical } from 'react-icons/fi';
+import { FiTrash2, FiArrowLeft, FiUsers as FiUsersIcon, FiShield, FiEdit3, FiSave, FiX, FiCheck, FiLock, FiUnlock, FiMoreVertical, FiStar } from 'react-icons/fi';
 import api from '../api/axios';
 import ConfirmModal from '../components/ConfirmModal';
 import { useLanguage } from '../context/LanguageContext';
@@ -91,6 +91,20 @@ export default function AdminUsers() {
     }
   };
 
+  const handleTogglePremium = async (user) => {
+    const makePremium = !user.premium;
+    const confirmed = makePremium
+      ? confirm(t('admin.makePremiumConfirm', { name: user.full_name }))
+      : confirm(t('admin.removePremiumConfirm', { name: user.full_name }));
+    if (!confirmed) return;
+    try {
+      await api.put(`/admin/users/${user.id}/premium`, { premium: makePremium });
+      fetchUsers(page, limit);
+    } catch (err) {
+      alert(err.response?.data?.message || t('admin.error'));
+    }
+  };
+
   useEffect(() => {
     const handler = (e) => { if (menuRef.current && !menuRef.current.contains(e.target)) setOpenMenu(null); };
     document.addEventListener('mousedown', handler);
@@ -152,15 +166,24 @@ export default function AdminUsers() {
                     </td>
                     <td style={{ padding: '10px 6px', fontWeight: 700 }}>{Number(u.credit_balance || 0).toLocaleString()}</td>
                     <td style={{ padding: '10px 6px', fontSize: '11px' }}>
-                      {u.suspended ? (
-                        <span style={{ color: '#dc2626', fontWeight: 600, background: 'rgba(220,38,38,0.1)', padding: '2px 8px', borderRadius: 8, display: 'inline-flex', alignItems: 'center', gap: 3 }}>
-                          <FiLock size={11} /> {t('admin.suspended')}
-                        </span>
-                      ) : (
-                        <span style={{ color: '#059669', fontWeight: 600, display: 'inline-flex', alignItems: 'center', gap: 3 }}>
-                          <FiCheck size={12} /> {t('admin.active')}
-                        </span>
-                      )}
+                      <div style={{ display: 'flex', flexDirection: 'column', gap: 4 }}>
+                        {u.premium ? (
+                          <span style={{ color: '#d97706', fontWeight: 700, background: 'rgba(217,119,6,0.12)', padding: '2px 8px', borderRadius: 8, display: 'inline-flex', alignItems: 'center', gap: 3, width: 'fit-content' }}>
+                            <FiStar size={11} /> {t('admin.premium')}
+                          </span>
+                        ) : (
+                          <span style={{ color: 'var(--text-muted)', padding: '2px 8px', fontSize: '11px' }}>-</span>
+                        )}
+                        {u.suspended ? (
+                          <span style={{ color: '#dc2626', fontWeight: 600, background: 'rgba(220,38,38,0.1)', padding: '2px 8px', borderRadius: 8, display: 'inline-flex', alignItems: 'center', gap: 3, width: 'fit-content' }}>
+                            <FiLock size={11} /> {t('admin.suspended')}
+                          </span>
+                        ) : (
+                          <span style={{ color: '#059669', fontWeight: 600, display: 'inline-flex', alignItems: 'center', gap: 3 }}>
+                            <FiCheck size={12} /> {t('admin.active')}
+                          </span>
+                        )}
+                      </div>
                     </td>
                     <td style={{ padding: '10px 6px', fontSize: '11px', color: 'var(--text-secondary)' }}>{formatDate(u.created_at)}</td>
                     <td style={{ padding: '10px 6px', position: 'relative' }}>
@@ -196,6 +219,21 @@ export default function AdminUsers() {
                                   onMouseEnter={e => e.currentTarget.style.background = 'rgba(5,150,105,0.08)'}
                                   onMouseLeave={e => e.currentTarget.style.background = 'none'}>
                                   <FiUnlock size={14} /> {t('admin.unsuspend')}
+                                </button>
+                              )}
+                              {!u.premium ? (
+                                <button onClick={() => { setOpenMenu(null); handleTogglePremium(u); }}
+                                  style={{ display: 'flex', alignItems: 'center', gap: 8, width: '100%', padding: '8px 12px', fontSize: '12px', background: 'none', border: 'none', color: '#d97706', cursor: 'pointer', borderRadius: 8 }}
+                                  onMouseEnter={e => e.currentTarget.style.background = 'rgba(245,158,11,0.08)'}
+                                  onMouseLeave={e => e.currentTarget.style.background = 'none'}>
+                                  <FiStar size={14} /> {t('admin.makePremium')}
+                                </button>
+                              ) : (
+                                <button onClick={() => { setOpenMenu(null); handleTogglePremium(u); }}
+                                  style={{ display: 'flex', alignItems: 'center', gap: 8, width: '100%', padding: '8px 12px', fontSize: '12px', background: 'none', border: 'none', color: '#d97706', cursor: 'pointer', borderRadius: 8 }}
+                                  onMouseEnter={e => e.currentTarget.style.background = 'rgba(245,158,11,0.08)'}
+                                  onMouseLeave={e => e.currentTarget.style.background = 'none'}>
+                                  <FiStar size={14} /> {t('admin.removePremium')}
                                 </button>
                               )}
                               <div style={{ height: 1, background: 'var(--border)', margin: '4px 6px' }} />

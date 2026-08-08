@@ -405,6 +405,21 @@ router.put('/users/:id/unsuspend', authenticate, adminOnly, async (req, res) => 
   }
 });
 
+router.put('/users/:id/premium', authenticate, adminOnly, async (req, res) => {
+  try {
+    const userId = Number(req.params.id);
+    const { premium, expiresAt } = req.body;
+    await pool.query('UPDATE users SET premium = ?, premium_expires_at = ? WHERE id = ?', [
+      premium ? 1 : 0,
+      premium ? (expiresAt || null) : null,
+      userId
+    ]);
+    res.json({ message: premium ? 'Compte premium active.' : 'Premium retire du compte.' });
+  } catch (err) {
+    res.status(500).json({ message: 'Erreur premium.', error: err.message });
+  }
+});
+
 // ---- Admin stats ----
 router.get('/products', authenticate, adminOnly, async (req, res) => {
   try {
