@@ -479,4 +479,4 @@ navigator.geolocation.getCurrentPosition(
 
 ---
 
-*Documentation générée par opencode - Août 2026*
+*Documentation technique - Août 2026*
