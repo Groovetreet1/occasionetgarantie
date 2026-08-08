@@ -119,6 +119,21 @@ export default function Messenger() {
   }, [messages]);
 
   useEffect(() => {
+    if (!msgMenuFor) return;
+    const handler = (e) => {
+      if (!e.target.closest(`[data-msg-menu="${msgMenuFor}"]`)) {
+        setMsgMenuFor(null);
+      }
+    };
+    document.addEventListener('mousedown', handler);
+    document.addEventListener('touchstart', handler);
+    return () => {
+      document.removeEventListener('mousedown', handler);
+      document.removeEventListener('touchstart', handler);
+    };
+  }, [msgMenuFor]);
+
+  useEffect(() => {
     if (!showMobileList && activeConv && messages.length > 0) {
       forceScrollBottom();
     }
@@ -435,6 +450,7 @@ export default function Messenger() {
                           <AudioPlayer src={audioSrc(msg.audio)} duration={msg.duration} />
                           <button
                             className={`messenger-msg-menu-btn${msgMenuFor === msg.id ? ' open' : ''}`}
+                            data-msg-menu={msg.id}
                             onClick={() => setMsgMenuFor(msgMenuFor === msg.id ? null : msg.id)}
                             title={t('messenger.messageOptions')}
                           >
@@ -450,7 +466,7 @@ export default function Messenger() {
                           )}
                         </div>
                         {msgMenuFor === msg.id && (
-                          <div className="messenger-msg-menu">
+                          <div className="messenger-msg-menu" data-msg-menu={msg.id}>
                             {isMine && (
                               <button className="messenger-msg-menu-item" onClick={() => { setMsgMenuFor(null); setDeleteMsgTarget(msg); }}>
                                 <FiTrash2 size={14} /> {t('common.delete')}
