@@ -8,13 +8,31 @@ import {
 } from 'react-icons/fi';
 import { useLanguage } from '../context/LanguageContext';
 
+const SIDEBAR_KEY = 'admin-sidebar';
+
+function readSidebarPreference() {
+  try {
+    return localStorage.getItem(SIDEBAR_KEY) === '1';
+  } catch (err) {
+    return false;
+  }
+}
+
+function writeSidebarPreference(collapsed) {
+  try {
+    localStorage.setItem(SIDEBAR_KEY, collapsed ? '1' : '0');
+  } catch (err) {
+    /* storage unavailable: keep state in memory only */
+  }
+}
+
 export default function AdminLayout() {
-  const [collapsed, setCollapsed] = useState(() => localStorage.getItem('admin-sidebar') === '1');
+  const [collapsed, setCollapsed] = useState(readSidebarPreference);
   const { t, dir } = useLanguage();
   const location = useLocation();
 
   useEffect(() => {
-    localStorage.setItem('admin-sidebar', collapsed ? '1' : '0');
+    writeSidebarPreference(collapsed);
   }, [collapsed]);
 
   const nav = [
