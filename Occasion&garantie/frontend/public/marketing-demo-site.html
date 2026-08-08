@@ -1,0 +1,1232 @@
+﻿<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=1920,initial-scale=1">
+<title>Occasion & Garantie - Demo interactive du site (PRO)</title>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+<style>
+:root{
+  --bg:#05060b;--gold:#d9a83c;--gold-l:#f2cf7a;--gold-d:#a87b1e;
+  --p:#f59e0b;--p-h:#d97706;--green:#10b981;--red:#ef4444;--blue:#2563eb;
+  --site-bg:#f8f9fc;--card:#fff;--text:#1e293b;--mut:#64748b;--border:#e2e8f0;
+  --line:rgba(255,255,255,.09);
+}
+*{margin:0;padding:0;box-sizing:border-box}
+html,body{width:100%;height:100%;overflow:hidden;background:var(--bg);font-family:'Inter',sans-serif;color:#fff}
+.slides{position:relative;width:100%;height:100%}
+.slide{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;padding:34px;opacity:0;pointer-events:none;transform:translateY(30px) scale(.99);transition:opacity .6s cubic-bezier(.4,0,.2,1),transform .6s cubic-bezier(.4,0,.2,1)}
+.slide.on{opacity:1;pointer-events:auto;transform:none}
+.s-inner{width:100%;max-width:1280px;text-align:center}
+.s-eyebrow{display:inline-block;font-size:10.5px;font-weight:700;letter-spacing:3px;text-transform:uppercase;color:var(--gold);padding:6px 17px;border:1px solid rgba(217,168,60,.3);border-radius:100px;background:rgba(217,168,60,.07);margin-bottom:9px}
+.s-inner h2{font-size:29px;font-weight:800;letter-spacing:-1px;margin-bottom:5px}
+.s-inner h2 .grad{background:linear-gradient(120deg,var(--gold),var(--gold-l));-webkit-background-clip:text;background-clip:text;-webkit-text-fill-color:transparent}
+.s-cap{font-size:13px;color:#a6aec6;min-height:17px;margin-bottom:15px}
+.s-cap b{color:var(--gold-l);font-weight:600}
+.browser{width:1220px;max-width:100%;height:700px;margin:0 auto;background:#0c0e16;border:1px solid #22253a;border-radius:18px;overflow:hidden;box-shadow:0 40px 120px rgba(0,0,0,.55);position:relative;text-align:left}
+.b-top{height:40px;display:flex;align-items:center;gap:8px;padding:0 16px;background:#10131e;border-bottom:1px solid #22253a}
+.dot{width:12px;height:12px;border-radius:50%}
+.dot.r{background:#ff5f57}.dot.y{background:#febc2e}.dot.g{background:#28c840}
+.b-url{flex:1;margin-left:8px;background:#1a1e2d;border:1px solid #262b3f;color:#8a90a8;font-size:12px;padding:6px 14px;border-radius:8px;display:flex;align-items:center;gap:8px;white-space:nowrap;overflow:hidden}
+.b-url::before{content:'🔒';font-size:11px}
+.screen{position:relative;height:calc(100% - 40px);background:var(--site-bg);overflow:hidden}
+.cam{transform:scale(.88);transition:transform 1s cubic-bezier(.22,1,.36,1);transform-origin:center}
+.cam.in{transform:scale(1)}
+.split{display:flex;height:100%}
+.brand{width:55%;background:linear-gradient(160deg,#171512 0%,#241f18 45%,#2c2416 100%);color:#faf7f0;padding:30px 40px 26px;position:relative;display:flex;flex-direction:column;justify-content:space-between;overflow:hidden}
+.brand::before{content:'';position:absolute;inset:0;background:radial-gradient(ellipse 90% 60% at 85% 15%,rgba(245,158,11,.22) 0%,transparent 55%),radial-gradient(ellipse 70% 55% at 10% 95%,rgba(16,185,129,.16) 0%,transparent 55%);pointer-events:none}
+.brand::after{content:'';position:absolute;inset:0;background-image:radial-gradient(rgba(255,255,255,.08) 1px,transparent 1px);background-size:26px 26px;opacity:.5;pointer-events:none}
+.brand .logo{display:flex;align-items:center;gap:10px;font-weight:800;font-size:15px;position:relative;z-index:2}
+.brand .logo .lg{width:34px;height:34px;border-radius:10px;background:linear-gradient(135deg,var(--p),var(--p-h));color:#fff;display:flex;align-items:center;justify-content:center;font-size:14px;font-weight:800}
+.brand .mid{position:relative;z-index:2;max-width:430px}
+.eyebrow{display:inline-block;font-size:11px;font-weight:700;letter-spacing:2.5px;text-transform:uppercase;color:#f59e0b;margin-bottom:8px}
+.brand h2{font-size:24px;font-weight:800;line-height:1.25;margin-bottom:7px}
+.brand h2 em{font-style:normal;background:linear-gradient(120deg,#f59e0b,#fbbf24);-webkit-background-clip:text;background-clip:text;-webkit-text-fill-color:transparent}
+.brand p{font-size:12px;color:rgba(250,247,240,.65);line-height:1.6;margin-bottom:18px}
+.feat-g{display:grid;grid-template-columns:1fr 1fr;gap:12px 18px}
+.feat{display:flex;gap:10px;align-items:flex-start}
+.feat .ic{width:36px;height:36px;border-radius:10px;background:rgba(245,158,11,.14);display:flex;align-items:center;justify-content:center;font-size:16px;flex-shrink:0}
+.feat b{font-size:12px;font-weight:700;display:block}
+.feat span{font-size:10.5px;color:rgba(250,247,240,.55);line-height:1.4;display:block;margin-top:2px}
+.brand .foot{font-size:10px;color:rgba(250,247,240,.4);position:relative;z-index:2}
+.form-side{flex:1;display:flex;align-items:center;justify-content:center;padding:26px 30px;background:radial-gradient(ellipse 80% 60% at 50% 0%,rgba(245,158,11,.05) 0%,transparent 60%),var(--site-bg);position:relative}
+.form-inner{width:100%;max-width:400px}
+.f-heading{text-align:center;margin-bottom:18px}
+.f-heading h1{font-size:22px;font-weight:800;color:var(--text)}
+.f-heading p{font-size:13px;color:var(--mut);margin-top:3px}
+.fcard{background:var(--card);border:1px solid var(--border);border-radius:16px;padding:22px;box-shadow:0 10px 40px rgba(30,41,59,.08)}
+.seller-badge{display:flex;align-items:center;gap:8px;background:rgba(245,158,11,.1);color:var(--p-h);padding:8px 13px;border-radius:10px;font-weight:700;font-size:12px;margin-bottom:13px}
+.fi{text-align:left;margin-bottom:12px}
+.fi .lbl{font-size:12px;font-weight:600;color:var(--text);display:block;margin-bottom:5px}
+.fi .lbl em{color:var(--red);font-style:normal}
+.in{display:flex;align-items:center;gap:8px;background:#f0f1f5;border:1px solid var(--border);border-radius:10px;padding:9px 12px;font-size:13px;color:var(--text);min-height:41px;transition:transform .35s cubic-bezier(.34,1.56,.64,1),border-color .3s,box-shadow .3s,background .3s;cursor:pointer}
+.in .ic{opacity:.55;font-size:15px}
+.in .ph{color:#9fb0c3}
+.in .val{font-weight:600}
+.in .caret{width:1.5px;height:15px;background:var(--p);animation:blink 1s infinite}
+@keyframes blink{0%,100%{opacity:1}50%{opacity:0}}
+.in.foc{border-color:var(--p);background:#fff;box-shadow:0 0 0 3px rgba(245,158,11,.14)}
+.in.zoom{transform:scale(1.07);border-color:var(--p);background:#fff;box-shadow:0 6px 20px rgba(245,158,11,.22),0 0 0 3px rgba(245,158,11,.14);z-index:5}
+.hidden{display:none!important}
+.code-opt{display:flex;gap:10px;margin-bottom:12px}
+.co{flex:1;display:flex;align-items:center;gap:8px;font-size:12.5px;font-weight:600;color:var(--mut);padding:8px 12px;border:1.5px solid var(--border);border-radius:10px;text-align:center;cursor:pointer;transition:all .25s}
+.co .radio{width:15px;height:15px;border-radius:50%;border:2px solid #cbd5e1;flex-shrink:0;display:flex;align-items:center;justify-content:center}
+.co .radio::after{content:'';width:7px;height:7px;border-radius:50%;background:var(--p);opacity:0;transform:scale(0);transition:all .2s}
+.co.on{border-color:var(--p);color:var(--p-h);background:rgba(245,158,11,.07)}
+.co.on .radio{border-color:var(--p)}
+.co.on .radio::after{opacity:1;transform:scale(1)}
+.terms{font-size:11px;color:var(--mut);line-height:1.5;margin-bottom:12px;text-align:left}
+.terms button{background:none;border:none;color:var(--p-h);text-decoration:underline;cursor:pointer;font-family:inherit;font-size:11px;padding:0}
+.btn{display:block;width:100%;font-size:14px;font-weight:700;color:#fff;background:linear-gradient(135deg,var(--p),var(--p-h));border:none;border-radius:10px;padding:12px;cursor:pointer;box-shadow:0 8px 22px rgba(245,158,11,.3);transition:all .25s;font-family:inherit}
+.btn.loading{opacity:.75;pointer-events:none}
+.f-foot{margin-top:13px;font-size:12px;color:var(--mut);text-align:center}
+.f-foot b{color:var(--p-h);cursor:pointer;font-weight:600}
+.modal{position:absolute;inset:0;background:rgba(15,23,42,.45);z-index:45;display:none;align-items:center;justify-content:center;backdrop-filter:blur(4px)}
+.modal.show{display:flex}
+.mbox{width:520px;max-height:85%;background:#fff;border-radius:18px;box-shadow:0 30px 80px rgba(15,23,42,.35);display:flex;flex-direction:column;overflow:hidden;animation:modalIn .4s cubic-bezier(.34,1.56,.64,1)}
+@keyframes modalIn{0%{transform:scale(.85);opacity:0}100%{transform:scale(1);opacity:1}}
+.mbox-head{padding:18px 24px 11px;text-align:center;border-bottom:1px solid var(--border)}
+.mbox-head .ti{width:44px;height:44px;border-radius:12px;background:rgba(245,158,11,.12);display:flex;align-items:center;justify-content:center;font-size:21px;margin:0 auto 8px}
+.mbox-head h3{font-size:16px;font-weight:800;color:var(--text)}
+.mbox-body{flex:1;overflow-y:auto;padding:14px 24px;font-size:12px;color:var(--mut);line-height:1.65}
+.mbox-body h4{font-size:12.5px;font-weight:800;color:var(--text);margin:13px 0 5px}
+.mbox-body h4:first-child{margin-top:0}
+.mbox-foot{padding:13px 24px;border-top:1px solid var(--border);display:flex;gap:10px}
+.mbox-foot .btn{flex:1;width:auto}
+.btn-ghost{background:#fff;color:var(--text);border:1.5px solid var(--border);box-shadow:none}
+.vpage{position:absolute;inset:0;background:var(--site-bg);display:none;flex-direction:column;align-items:center;justify-content:center;z-index:35}
+.vpage.show{display:flex}
+.vcard{width:390px;background:var(--card);border:1px solid var(--border);border-radius:16px;padding:24px;box-shadow:0 10px 40px rgba(30,41,59,.08)}
+.vcard .vic{width:50px;height:50px;border-radius:14px;background:rgba(245,158,11,.12);display:flex;align-items:center;justify-content:center;font-size:23px;margin:0 auto 11px}
+.vcard h3{font-size:19px;font-weight:800;color:var(--text);text-align:center}
+.vcard .vsub{font-size:13px;color:var(--mut);text-align:center;margin-top:3px}
+.vcard .vnote{font-size:12.5px;color:var(--mut);text-align:center;margin:13px 0}
+.vcard .vnote b{color:var(--text)}
+.code-in{text-align:center;font-size:25px!important;letter-spacing:10px;justify-content:center}
+.small-link{display:block;text-align:center;margin-top:13px;font-size:12px;color:var(--p-h);cursor:pointer;background:none;border:none;font-family:inherit}
+.succ{position:absolute;inset:0;background:var(--site-bg);display:none;flex-direction:column;align-items:center;justify-content:center;z-index:36}
+.succ.show{display:flex}
+.succ .ck{width:82px;height:82px;border-radius:50%;background:var(--green);display:flex;align-items:center;justify-content:center;font-size:37px;color:#fff;box-shadow:0 0 0 0 rgba(16,185,129,.4)}
+.succ h3{font-size:22px;font-weight:800;color:var(--text);margin-top:17px}
+.succ p{font-size:13px;color:var(--mut);margin-top:6px}
+@keyframes pop{0%{transform:scale(0)}100%{transform:scale(1)}}
+.sms-pop{position:absolute;top:16px;right:16px;z-index:70;width:340px;background:#fff;border-radius:16px;box-shadow:0 20px 60px rgba(15,23,42,.35);border:1px solid var(--border);overflow:hidden;display:none;animation:smsIn .5s cubic-bezier(.34,1.56,.64,1)}
+.sms-pop.show{display:block}
+@keyframes smsIn{0%{transform:translateY(-30px) scale(.92);opacity:0}100%{transform:translateY(0) scale(1);opacity:1}}
+.sms-head{display:flex;align-items:center;gap:11px;padding:13px 16px;background:linear-gradient(135deg,#171512,#2c2416);color:#faf7f0}
+.sms-head .av{width:38px;height:38px;border-radius:50%;background:linear-gradient(135deg,var(--p),var(--p-h));display:flex;align-items:center;justify-content:center;font-size:17px}
+.sms-head b{font-size:13px;display:block}
+.sms-head span{font-size:10.5px;color:rgba(250,247,240,.55)}
+.sms-body{padding:14px 16px;font-size:13px;color:var(--text);line-height:1.6}
+.sms-code{display:inline-block;font-weight:800;font-size:16px;letter-spacing:3px;color:var(--p-h);background:rgba(245,158,11,.1);padding:3px 12px;border-radius:8px;margin:0 3px}
+.sms-time{font-size:10.5px;color:var(--mut);margin-top:8px;display:flex;justify-content:flex-end;gap:6px}
+.cur{position:fixed;z-index:300;width:34px;height:34px;pointer-events:none;top:0;left:0;display:none}
+.cur.show{display:block}
+.cur .arrow{position:absolute;left:0;top:0;width:20px;height:20px;clip-path:polygon(0 0,100% 60%,60% 60%,38% 100%,22% 72%,0 84%);background:#1e293b;filter:drop-shadow(0 2px 3px rgba(0,0,0,.4))}
+.cur .ring{position:absolute;left:-6px;top:-6px;width:34px;height:34px;border-radius:50%;border:2px solid var(--p);opacity:0}
+.cur.click .ring{animation:rip .45s ease-out}
+@keyframes rip{0%{opacity:1;transform:scale(.5)}100%{opacity:0;transform:scale(1.6)}}
+.ripple{position:absolute;width:30px;height:30px;border-radius:50%;background:rgba(245,158,11,.45);transform:scale(0);z-index:59;pointer-events:none}
+.ripple.act{animation:rip2 .5s ease-out forwards}
+@keyframes rip2{0%{transform:scale(0);opacity:1}100%{transform:scale(3);opacity:0}}
+.toast{position:absolute;bottom:24px;left:50%;transform:translateX(-50%) translateY(20px);background:#1e293b;color:#fff;font-size:13px;font-weight:600;padding:13px 22px;border-radius:12px;box-shadow:0 14px 40px rgba(30,41,59,.4);display:flex;align-items:center;gap:10px;z-index:40;opacity:0;transition:all .35s}
+.toast.show{opacity:1;transform:translateX(-50%) translateY(0)}
+.dash{display:flex;height:100%}
+.side{width:195px;background:#fff;border-right:1px solid var(--border);padding:13px 10px}
+.side .s-i{display:flex;align-items:center;gap:10px;font-size:12px;color:var(--mut);font-weight:500;padding:9px 12px;border-radius:9px;cursor:pointer}
+.side .s-i.on{background:rgba(245,158,11,.12);color:var(--p-h);font-weight:700}
+.main{flex:1;padding:20px;overflow:hidden;position:relative}
+.scroll-y{overflow-y:auto;height:100%;padding-right:6px}
+.scroll-y::-webkit-scrollbar{width:8px}
+.scroll-y::-webkit-scrollbar-thumb{background:#d8dee9;border-radius:8px}
+.m-title{font-size:17px;font-weight:800;color:var(--text);margin-bottom:3px}
+.m-sub{font-size:12px;color:var(--mut);margin-bottom:13px}
+.grid-2{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+.stat-c{background:#fff;border:1px solid var(--border);border-radius:14px;padding:15px;display:flex;align-items:center;gap:13px;box-shadow:0 4px 16px rgba(30,41,59,.05)}
+.stat-c .ic{width:41px;height:41px;border-radius:12px;display:flex;align-items:center;justify-content:center;font-size:18px;flex-shrink:0}
+.stat-c b{font-size:20px;font-weight:800;color:var(--text);display:block;line-height:1.1}
+.stat-c span{font-size:11px;color:var(--mut)}
+.banner{display:flex;align-items:center;gap:9px;background:rgba(245,158,11,.1);border:1px solid rgba(245,158,11,.3);color:var(--p-h);font-size:12px;font-weight:600;padding:10px 15px;border-radius:11px;margin-bottom:13px}
+.banner.green{background:rgba(16,185,129,.1);border-color:rgba(16,185,129,.3);color:#059669}
+.banner b{font-weight:800}
+.prow{display:flex;align-items:center;gap:13px;background:#fff;border:1px solid var(--border);border-radius:13px;padding:10px 14px;margin-top:9px}
+.hero{padding:24px 24px 11px;text-align:center;background:linear-gradient(135deg,#f0f1f5 0%,#e8e9ee 50%,#f8f9fc 100%);border-bottom:1px solid var(--border)}
+.hero h1{font-size:26px;font-weight:800;color:var(--text)}
+.hero h1 em{font-style:normal;background:linear-gradient(135deg,#1e293b 0%,var(--p) 100%);-webkit-background-clip:text;background-clip:text;-webkit-text-fill-color:transparent}
+.searchbar{display:flex;align-items:center;gap:10px;background:#fff;border:1.5px solid var(--border);border-radius:13px;padding:11px 16px;margin:15px auto 0;max-width:520px;box-shadow:0 8px 24px rgba(30,41,59,.08);text-align:left;font-size:13.5px;color:var(--mut);transition:border-color .25s,transform .3s}
+.searchbar.foc{border-color:var(--p);box-shadow:0 0 0 4px rgba(245,158,11,.14);transform:scale(1.03)}
+.cats{display:flex;gap:8px;justify-content:center;flex-wrap:wrap;margin:13px 0 4px}
+.cat{font-size:11.5px;font-weight:600;color:var(--mut);padding:6px 14px;border-radius:100px;background:#fff;border:1px solid var(--border);cursor:pointer}
+.cat.on{background:rgba(245,158,11,.12);border-color:var(--p);color:var(--p-h)}
+.sect-h{display:flex;align-items:center;justify-content:space-between;padding:0 24px;margin:13px 0 10px}
+.sect-h b{font-size:15px;font-weight:800;color:var(--text)}
+.sect-h span{font-size:11.5px;color:var(--p-h);font-weight:600;cursor:pointer}
+.pgrid{display:grid;grid-template-columns:repeat(4,1fr);gap:13px;padding:0 24px}
+.pc{background:#fff;border:1px solid var(--border);border-radius:13px;overflow:hidden;cursor:pointer;transition:all .25s}
+.pc:hover{transform:translateY(-3px);box-shadow:0 12px 32px rgba(30,41,59,.12);border-color:var(--p)}
+.pc .im{height:110px;display:flex;align-items:center;justify-content:center;font-size:41px;background:linear-gradient(135deg,#fef3c7,#fde68a)}
+.pc .bd{padding:10px 13px}
+.pc .bd b{font-size:12px;font-weight:700;color:var(--text);display:block}
+.pc .bd .pr{font-size:14px;font-weight:800;color:var(--p-h);margin-top:3px}
+.pc .bd .pr s{font-size:10.5px;color:#94a3b8;font-weight:500}
+.pc .bd .ok{display:inline-flex;align-items:center;gap:3px;font-size:9.5px;font-weight:700;color:#059669;background:rgba(16,185,129,.1);padding:3px 7px;border-radius:100px;margin-top:5px}
+.detail{position:absolute;inset:0;background:#f8f9fc;z-index:25;overflow-y:auto;padding:20px 24px;display:none}
+.detail.show{display:block}
+.back-btn{display:inline-flex;align-items:center;gap:8px;font-size:13px;color:var(--mut);cursor:pointer;margin-bottom:13px;font-weight:600}
+.d-grid{display:grid;grid-template-columns:1.1fr 1fr;gap:24px}
+.d-img{height:310px;border-radius:15px;background:linear-gradient(135deg,#fef3c7,#fde68a);display:flex;align-items:center;justify-content:center;font-size:118px;position:relative}
+.badges{position:absolute;top:14px;left:14px;display:flex;gap:7px}
+.bd2{font-size:10.5px;font-weight:700;padding:5px 11px;border-radius:100px;color:#fff;display:inline-flex;align-items:center;gap:4px}
+.bd2.g{background:var(--green)}.bd2.o{background:var(--p-h)}
+.d-name{font-size:21px;font-weight:800;color:var(--text)}
+.d-brand{font-size:11px;color:var(--mut);text-transform:uppercase;letter-spacing:1px;margin-top:2px}
+.d-price{display:flex;align-items:baseline;gap:10px;margin:10px 0}
+.d-price b{font-size:27px;font-weight:800;color:var(--p-h)}
+.d-price s{font-size:15px;color:#94a3b8}
+.d-price .disc{font-size:11px;font-weight:700;color:var(--green);background:rgba(16,185,129,.1);padding:4px 9px;border-radius:8px}
+.specs{display:grid;grid-template-columns:1fr 1fr;gap:7px;margin:12px 0}
+.spec{background:#fff;border:1px solid var(--border);border-radius:9px;padding:8px 11px;font-size:11px}
+.spec b{display:block;color:var(--text);font-weight:700}.spec span{color:var(--mut)}
+.d-cta{display:flex;gap:9px;margin-top:6px}
+.btn.offer{flex:1;background:linear-gradient(135deg,var(--p),var(--p-h));color:#fff;font-weight:700;font-size:13.5px;border:none;border-radius:10px;padding:12px;cursor:pointer;box-shadow:0 8px 20px rgba(245,158,11,.3)}
+.btn.msg{flex:1;background:#fff;color:var(--text);border:1.5px solid var(--border);font-weight:600;font-size:13.5px;border-radius:10px;padding:12px;cursor:pointer}
+.vcard2{margin-top:14px;background:#fff;border:1px solid var(--border);border-radius:11px;padding:12px 14px;display:flex;align-items:center;gap:11px}
+.vcard2 .av{width:40px;height:40px;border-radius:50%;background:linear-gradient(135deg,var(--p),var(--p-h));color:#fff;display:flex;align-items:center;justify-content:center;font-weight:800;flex-shrink:0}
+.vcard2 b{font-size:12.5px;color:var(--text);display:block}
+.vcard2 .vk{font-size:10px;font-weight:700;color:#059669;display:inline-flex;align-items:center;gap:3px;background:rgba(16,185,129,.1);padding:2px 7px;border-radius:100px}
+.mess{display:flex;height:100%}
+.mess-list{width:280px;background:#fff;border-right:1px solid var(--border)}
+.mess-list .ml-h{padding:18px 18px 14px;border-bottom:1px solid var(--border);display:flex;align-items:center;gap:9px}
+.mess-list .ml-h b{font-size:15px;font-weight:800;color:var(--text)}
+.conv{display:flex;gap:11px;padding:13px 16px;cursor:pointer;border-bottom:1px solid #f1f5f9;transition:background .2s}
+.conv:hover{background:#f8fafc}
+.conv.on{background:rgba(245,158,11,.07);border-left:3px solid var(--p)}
+.conv .av{width:40px;height:40px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-weight:800;color:#fff;flex-shrink:0}
+.conv .c-t b{font-size:12.5px;color:var(--text);display:block}
+.conv .c-t span{font-size:11px;color:var(--mut);display:block;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:150px}
+.mess-main{flex:1;display:flex;flex-direction:column;background:#f8fafc}
+.mess-top{height:56px;display:flex;align-items:center;gap:11px;padding:0 18px;background:#fff;border-bottom:1px solid var(--border)}
+.mess-top .av{width:36px;height:36px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-weight:800;color:#fff}
+.mess-top b{font-size:13px;color:var(--text);display:block}
+.mess-top span{font-size:10.5px;color:#059669;font-weight:600}
+.mess-body{flex:1;overflow-y:auto;padding:18px;display:flex;flex-direction:column;gap:12px}
+.bubble{max-width:66%;padding:11px 15px;border-radius:14px;font-size:13px;line-height:1.5}
+.bubble.me{align-self:flex-end;background:linear-gradient(135deg,var(--p),var(--p-h));color:#fff;border-bottom-right-radius:4px}
+.bubble.them{align-self:flex-start;background:#fff;border:1px solid var(--border);color:var(--text);border-bottom-left-radius:4px}
+.bubble .bt{display:block;font-size:10px;opacity:.7;margin-top:5px}
+.typing{display:inline-flex;gap:4px;align-items:center;background:#fff;border:1px solid var(--border);padding:12px 16px;border-radius:14px;align-self:flex-start}
+.typing i{width:6px;height:6px;border-radius:50%;background:var(--mut);animation:tp 1.2s infinite}
+.typing i:nth-child(2){animation-delay:.2s}.typing i:nth-child(3){animation-delay:.4s}
+@keyframes tp{0%,60%,100%{transform:translateY(0);opacity:.4}30%{transform:translateY(-4px);opacity:1}}
+.mess-input{display:flex;align-items:center;gap:10px;padding:12px 16px;background:#fff;border-top:1px solid var(--border)}
+.mess-input .mi{flex:1;background:#f1f5f9;border:1px solid var(--border);border-radius:100px;padding:11px 18px;font-size:13px;color:var(--mut);display:flex;align-items:center;gap:8px;transition:all .25s}
+.mess-input .mi .ph{color:#9fb0c3}
+.mess-input .mi.foc{border-color:var(--p);background:#fff;box-shadow:0 0 0 3px rgba(245,158,11,.12)}
+.mess-send{width:40px;height:40px;border-radius:50%;background:linear-gradient(135deg,var(--p),var(--p-h));color:#fff;display:flex;align-items:center;justify-content:center;font-size:16px;cursor:pointer;box-shadow:0 6px 16px rgba(245,158,11,.3)}
+.support-btn{position:absolute;bottom:24px;right:24px;width:54px;height:54px;border-radius:50%;background:linear-gradient(135deg,var(--p),var(--p-h));color:#fff;display:flex;align-items:center;justify-content:center;font-size:24px;cursor:pointer;z-index:50;box-shadow:0 12px 30px rgba(245,158,11,.4);transition:transform .25s}
+.support-btn:hover{transform:scale(1.1) rotate(8deg)}
+.support-pop{position:absolute;bottom:90px;right:24px;width:380px;max-height:86%;background:#fff;border-radius:16px;box-shadow:0 30px 80px rgba(15,23,42,.4);z-index:51;display:none;flex-direction:column;overflow:hidden;animation:popIn .35s cubic-bezier(.34,1.56,.64,1)}
+.support-pop.show{display:flex}
+@keyframes popIn{0%{transform:translateY(20px) scale(.95);opacity:0}100%{transform:translateY(0) scale(1);opacity:1}}
+.sp-h{display:flex;align-items:center;gap:10px;padding:15px 18px;background:linear-gradient(135deg,#171512,#2c2416);color:#faf7f0}
+.sp-h b{font-size:14px}
+.sp-h .x{margin-left:auto;background:none;border:none;color:rgba(250,247,240,.7);cursor:pointer;font-size:17px}
+.sp-b{flex:1;overflow-y:auto;padding:16px}
+.sp-q{font-size:13px;color:var(--mut);margin-bottom:10px}
+.sp-opt{display:flex;align-items:center;gap:12px;padding:13px;border-radius:12px;background:#f1f5f9;border:1.5px solid var(--border);cursor:pointer;transition:all .2s;margin-bottom:8px}
+.sp-opt .ic{width:38px;height:38px;border-radius:10px;display:flex;align-items:center;justify-content:center;flex-shrink:0;font-size:17px}
+.sp-opt b{font-size:13.5px;color:var(--text);display:block}
+.sp-opt span{font-size:11px;color:var(--mut);display:block;margin-top:2px}
+.sp-back{display:flex;align-items:center;gap:6px;background:none;border:none;color:var(--mut);cursor:pointer;font-size:12px;margin-bottom:12px;font-family:inherit}
+.sp-done{text-align:center;padding:20px 10px}
+.sp-done .dk{width:60px;height:60px;border-radius:50%;background:var(--green);color:#fff;display:flex;align-items:center;justify-content:center;font-size:28px;margin:0 auto 14px}
+.sp-done h4{font-size:15px;color:var(--text);font-weight:800}
+.sp-done p{font-size:12.5px;color:var(--mut);margin-top:5px}
+.ticket-num{display:inline-block;font-size:15px;font-weight:800;color:var(--p-h);background:rgba(245,158,11,.1);padding:6px 16px;border-radius:10px;margin-top:12px}
+.cred-card{background:#fff;border:1px solid var(--border);border-radius:14px;padding:16px;display:flex;align-items:center;gap:14px;margin-bottom:14px}
+.cred-card .cc-ic{width:46px;height:46px;border-radius:12px;background:rgba(37,99,235,.1);display:flex;align-items:center;justify-content:center;font-size:21px}
+.cred-card b{font-size:15px;color:var(--text)}
+.cred-card span{font-size:11px;color:var(--mut);display:block;margin-top:2px}
+.amount-row{display:flex;gap:8px;margin:12px 0}
+.amt{flex:1;padding:10px;border-radius:10px;border:1.5px solid var(--border);background:#fff;cursor:pointer;font-weight:700;font-size:13.5px;color:var(--text);transition:all .2s;text-align:center}
+.amt small{font-weight:500;font-size:11px;color:var(--mut)}
+.amt.on{border-color:var(--p);background:rgba(245,158,11,.07);color:var(--p-h)}
+.amt.on small{color:var(--p-h)}
+.bank-box{background:#f1f5f9;border-radius:12px;padding:14px 16px;margin-bottom:12px}
+.bank-row{display:flex;justify-content:space-between;align-items:center;font-size:12.5px;margin-bottom:9px}
+.bank-row span{color:var(--mut)}.bank-row b{color:var(--text)}
+.copy-badge{display:inline-flex;align-items:center;gap:5px;font-size:10.5px;font-weight:700;color:var(--p-h);background:rgba(245,158,11,.1);padding:3px 9px;border-radius:100px;cursor:pointer}
+.rcard{width:256px;background:rgba(255,255,255,.04);border:1px solid var(--line);border-radius:18px;padding:24px 22px;text-align:left;transition:transform .3s,border-color .3s}
+.rcard:hover{transform:translateY(-6px);border-color:rgba(217,168,60,.35)}
+.rcard .n{font-size:32px}
+.rcard b{font-size:14.5px;display:block;margin:9px 0 5px}
+.rcard p{font-size:12px;color:#a6aec6;line-height:1.6}
+.ctl{position:fixed;left:50%;bottom:18px;transform:translateX(-50%);z-index:400;display:flex;align-items:center;gap:13px;background:rgba(10,11,20,.75);border:1px solid var(--line);padding:9px 19px;border-radius:100px;backdrop-filter:blur(16px)}
+.dots{display:flex;gap:7px}
+.dot2{width:9px;height:9px;border-radius:50%;background:rgba(255,255,255,.18);cursor:pointer;transition:all .35s}
+.dot2.on{background:var(--gold);width:30px;border-radius:6px}
+.ctl .btn2{font-size:13px;font-weight:600;color:var(--gold);background:rgba(217,168,60,.12);border:1px solid rgba(217,168,60,.3);padding:7px 15px;border-radius:100px;cursor:pointer}
+.ctl .cnt{font-size:12px;color:#8a90a8;letter-spacing:1px}
+.progress{position:fixed;top:0;left:0;height:3px;background:linear-gradient(90deg,var(--gold),var(--p),var(--green));z-index:500;width:0;transition:width .4s}
+.aubtn{position:fixed;top:16px;right:16px;z-index:600;width:46px;height:46px;border-radius:50%;border:1px solid rgba(217,168,60,.4);background:rgba(10,11,20,.75);color:var(--gold);font-size:20px;cursor:pointer;display:flex;align-items:center;justify-content:center;box-shadow:0 8px 28px rgba(0,0,0,.45);backdrop-filter:blur(16px);transition:all .3s}
+.aubtn:hover{transform:scale(1.08);background:rgba(217,168,60,.18)}
+.aubtn.off{opacity:.45;filter:grayscale(1)}
+.aubtn.pulse{animation:pulseN 1.6s ease-in-out infinite}
+@keyframes pulseN{0%,100%{box-shadow:0 0 0 0 rgba(217,168,60,.45)}50%{box-shadow:0 0 0 9px rgba(217,168,60,0)}}
+.vcard{animation:modalIn .5s cubic-bezier(.34,1.56,.64,1)}
+.succ.show .ck,.sp-done .dk{animation:pop .5s cubic-bezier(.34,1.56,.64,1) .1s both}
+.btn2-cta:hover{transform:translateY(-2px)}
+#slide8 .rcard{animation:cardUp .6s cubic-bezier(.34,1.56,.64,1) both}
+@keyframes cardUp{0%{opacity:0;transform:translateY(26px)}100%{opacity:1;transform:translateY(0)}}
+#slide8 .btn2-cta{animation:modalIn .5s cubic-bezier(.34,1.56,.64,1) .5s both}
+.b-fav{width:20px;height:20px;border-radius:6px;object-fit:cover;margin-right:2px}
+.b-name{font-size:12px;color:#8a90a8;font-weight:600;margin-right:8px}
+.lg-img{width:30px;height:30px;border-radius:9px;object-fit:cover}
+.b-nav{display:flex;align-items:center;gap:22px;padding:0 24px;height:52px;background:#fff;border-bottom:1px solid var(--border)}
+.bn-logo{display:flex;align-items:center;gap:9px;font-weight:800;font-size:13.5px;color:var(--text)}
+.bn-logo img{width:26px;height:26px;border-radius:7px;object-fit:cover}
+.bn-links{display:flex;gap:16px;font-size:12px;color:var(--mut);font-weight:600}
+.bn-links span.on{color:var(--p-h);position:relative}
+.bn-links span.on::after{content:'';position:absolute;left:0;right:0;bottom:-17px;height:2px;background:var(--p)}
+.bn-act{margin-left:auto;font-size:15px}
+.b-page{padding:18px 24px}
+.b-head h1{font-size:21px;font-weight:800;color:var(--text);display:flex;align-items:center;gap:8px}
+.b-head p{font-size:12px;color:var(--mut);margin:3px 0 14px}
+.cat-badge{position:absolute;top:8px;left:8px;background:var(--p);color:#fff;font-size:9.5px;font-weight:700;padding:3px 8px;border-radius:6px}
+.off-badge{position:absolute;top:8px;right:8px;background:#d97706;color:#fff;font-size:9.5px;font-weight:700;padding:3px 8px;border-radius:6px}
+.store-banner{background:rgba(245,158,11,.08);border:1px solid rgba(245,158,11,.2);border-radius:12px;padding:10px 16px;display:flex;align-items:center;gap:8px;margin-bottom:18px;font-size:13px;color:#d97706;font-weight:600}
+.d-tags{display:flex;gap:7px;margin:8px 0 10px}
+.tg{font-size:11px;font-weight:600;padding:5px 12px;border-radius:100px}
+.tg.st{background:rgba(245,158,11,.1);color:var(--p-h)}
+.tg.v{background:rgba(16,185,129,.1);color:#059669;display:inline-flex;align-items:center;gap:3px}
+.tg.br{background:#eef2ff;color:#4338ca}
+.d-desc{font-size:13px;color:var(--mut);line-height:1.6;margin:10px 0}
+.b-int{margin-top:16px;border-top:1px solid var(--border);padding-top:16px}
+.b-int h3{font-size:16px;font-weight:700;color:var(--text)}
+.b-int>p{font-size:12.5px;color:var(--mut);margin:3px 0 13px}
+.r-ok{margin-top:13px;text-align:center;padding:16px;background:rgba(16,185,129,.1);border-radius:12px;color:#059669;font-weight:700;font-size:13.5px;display:flex;align-items:center;justify-content:center;gap:9px}
+.ck-s{width:26px;height:26px;border-radius:50%;background:#10b981;color:#fff;display:flex;align-items:center;justify-content:center;font-size:13px;flex-shrink:0}
+.adm-top{display:flex;align-items:center;justify-content:space-between;margin-bottom:14px}
+.adm-title{font-size:19px;font-weight:800;color:var(--text);display:flex;align-items:center;gap:8px}
+.adm-sub{font-size:11px;color:var(--mut);font-weight:600;background:#f1f5f9;padding:4px 10px;border-radius:100px}
+.adm-user{font-size:12px;color:var(--mut);font-weight:600;background:#fff;border:1px solid var(--border);padding:7px 14px;border-radius:100px}
+.adm-stats{display:grid;grid-template-columns:repeat(4,1fr);gap:12px;margin-bottom:16px}
+.adm-tabs{display:flex;gap:0;border-bottom:2px solid var(--border);margin-bottom:14px}
+.at{padding:10px 20px;font-size:13px;font-weight:600;color:var(--mut);cursor:pointer;border-bottom:2px solid transparent;margin-bottom:-2px}
+.at.on{color:var(--p-h);border-bottom-color:var(--p)}
+.tbl-wrap{background:#fff;border:1px solid var(--border);border-radius:14px;overflow:auto}
+.tbl{width:100%;border-collapse:collapse;font-size:12.5px}
+.tbl thead th{padding:11px 14px;text-align:left;color:var(--mut);text-transform:uppercase;font-size:10px;letter-spacing:.5px;border-bottom:1px solid var(--border)}
+.tbl tbody td{padding:11px 14px;border-bottom:1px solid #f1f5f9;color:var(--text);vertical-align:middle}
+.tbl .phn{color:#2563eb;font-weight:600}
+.tbl .ms{font-size:12px;color:var(--mut);max-width:210px}
+.tp{display:flex;align-items:center;gap:9px;font-weight:600}
+.tp-img{width:34px;height:34px;border-radius:8px;background:linear-gradient(135deg,#fef3c7,#fde68a);display:flex;align-items:center;justify-content:center;font-size:16px}
+.st-badge{font-size:10.5px;font-weight:700;padding:4px 11px;border-radius:100px;background:rgba(16,185,129,.12);color:#059669}
+.st-sel{padding:5px 10px;border-radius:7px;border:1px solid var(--border);font-size:11.5px;font-weight:600;cursor:pointer;background:rgba(217,119,6,.08);color:#d97706}
+.prof-tabs{display:flex;gap:8px;margin:16px 0}
+.pt{flex:1;padding:11px;border-radius:10px;border:1.5px solid var(--border);background:#fff;color:var(--mut);font-weight:600;font-size:13px;cursor:pointer}
+.pt.on{background:var(--p);color:#fff;border-color:var(--p);box-shadow:0 6px 16px rgba(245,158,11,.3)}
+.prof-card{background:#fff;border:1px solid var(--border);border-radius:16px;padding:22px;box-shadow:0 10px 40px rgba(30,41,59,.08);max-width:520px;margin:0 auto}
+.prof-card h3{font-size:15px;color:var(--text);margin-bottom:15px;display:flex;align-items:center;gap:8px}
+.avatar{width:88px;height:88px;border-radius:50%;margin:0 auto 16px;position:relative;background:linear-gradient(135deg,var(--p),var(--p-h));color:#fff;font-weight:800;font-size:26px;display:flex;align-items:center;justify-content:center;border:3px solid #fff;box-shadow:0 8px 24px rgba(30,41,59,.15)}
+.ava-cam{position:absolute;bottom:0;left:50%;transform:translateX(-50%);background:rgba(15,23,42,.7);color:#fff;font-size:11px;padding:3px 9px;border-radius:100px}
+.p-row{display:flex;gap:9px}
+.btn-sm{padding:0 18px;border-radius:10px;border:1.5px solid var(--border);background:#fff;color:var(--text);font-weight:600;font-size:12.5px;cursor:pointer;white-space:nowrap}
+.alert{padding:11px 15px;border-radius:10px;font-size:12.5px;font-weight:600;margin-top:12px;text-align:center}
+.alert-success{background:rgba(16,185,129,.1);color:#059669;border:1px solid rgba(16,185,129,.25)}
+.p-wrap{padding:20px 24px;max-width:560px;margin:0 auto}
+.p-back{font-size:12.5px;color:var(--mut);font-weight:600;cursor:pointer;margin-bottom:10px}
+.p-head{text-align:center}
+.p-head h1{font-size:23px;font-weight:800;color:var(--text)}
+.p-head p{font-size:12.5px;color:var(--mut);margin-top:2px}
+.fi small{display:block;font-size:10.5px;color:var(--mut);margin-top:4px}
+#slide8 .rcard{animation:cardUp .6s cubic-bezier(.34,1.56,.64,1) both}
+#slide8 .btn2-cta{animation:modalIn .5s cubic-bezier(.34,1.56,.64,1) .5s both}</style>
+</head>
+<body><!-- SLIDE 1 : SIGNUP + OTP -->
+<div class="slide" id="slide1">
+ <div class="s-inner">
+  <div class="s-eyebrow">Étape 1 · Création de compte vendeur</div>
+  <h2>Vendez votre téléphone <span class="grad">en 2 minutes</span></h2>
+  <div class="s-cap">Votre compte est vérifié par <b>SMS OTP</b> — comme sur le vrai site occasionetgarantie.store</div>
+  <div class="browser">
+   <div class="b-top"><img class="b-fav" src="marketing-demo-logo.png" alt=""><span class="b-name">Occasion &amp; Garantie</span><span class="dot r"></span><span class="dot y"></span><span class="dot g"></span><div class="b-url">www.occasionetgarantie.store/signup</div></div>
+   <div class="screen" id="scr1">
+    <div class="cam" id="cam1">
+     <div class="split">
+      <div class="brand">
+       <div class="logo"><img class="lg-img" src="marketing-demo-logo.png" alt="">Occasion &amp; Garantie</div>
+       <div class="mid">
+        <div class="eyebrow">Vendeurs vérifiés</div>
+        <h2>Vendez vos téléphones <em>en toute sécurité</em></h2>
+        <p>La plateforme n°1 au Maroc pour acheter et vendre des téléphones d'occasion avec garantie.</p>
+        <div class="feat-g">
+         <div class="feat"><div class="ic">🛡️</div><div><b>Garantie incluse</b><span>12 mois sur chaque produit</span></div></div>
+         <div class="feat"><div class="ic">🔄</div><div><b>Vendeurs vérifiés</b><span>Identité validée par SMS</span></div></div>
+         <div class="feat"><div class="ic">📱</div><div><b>Reprise &amp; reconditionnement</b><span>Donnez une 2ème vie à votre téléphone</span></div></div>
+         <div class="feat"><div class="ic">🚚</div><div><b>Livraison partout au Maroc</b><span>Toutes les villes couvertes</span></div></div>
+        </div>
+       </div>
+       <div class="foot">© 2026 Occasion &amp; Garantie · Casablanca, Maroc</div>
+      </div>
+      <div class="form-side">
+       <div class="form-inner">
+        <div class="f-heading"><h1>Créer un compte vendeur</h1><p>Commencez à vendre vos téléphones gratuitement</p></div>
+        <div class="fcard">
+         <div class="seller-badge">📈 Compte Vendeur</div>
+         <div class="fi"><label class="lbl">Nom complet <em>*</em></label><div class="in" id="i-name"><span class="ic">✏️</span><span class="ph">Votre nom</span><span class="val hidden"></span><span class="caret"></span></div></div>
+         <div class="fi"><label class="lbl">Adresse e-mail <em>*</em></label><div class="in" id="i-mail"><span class="ic">✉️</span><span class="ph">exemple@email.com</span><span class="val hidden"></span><span class="caret"></span></div></div>
+         <div class="fi"><label class="lbl">Mot de passe <em>*</em></label><div class="in" id="i-pass"><span class="ic">🔒</span><span class="ph">Minimum 6 caractères</span><span class="val hidden"></span><span class="caret"></span></div></div>
+         <div class="fi"><label class="lbl">Téléphone <em>*</em></label><div class="in" id="i-phone"><span class="ic">📞</span><span class="ph">+212 6XX XXX XXX</span><span class="val hidden"></span><span class="caret"></span></div></div>
+         <div class="fi"><label class="lbl">Recevoir le code par</label><div class="code-opt" id="code-opt"><div class="co on" data-v="SMS"><span class="radio"></span>📩 SMS</div><div class="co" data-v="Email"><span class="radio"></span>✉️ E-mail</div></div></div>
+         <div class="fi"><label class="lbl">Nom de la boutique <em>*</em></label><div class="in" id="i-store"><span class="ic">🏪</span><span class="ph">Ex: PhoneStore Casablanca</span><span class="val hidden"></span><span class="caret"></span></div></div>
+         <div class="terms">En cliquant sur le bouton, vous acceptez nos <button id="btn-terms">Conditions Générales</button> et notre politique de confidentialité.</div>
+         <button class="btn" id="btn-signup">Créer mon compte vendeur</button>
+        </div>
+        <div class="f-foot">Déjà un compte ? <b>Se connecter</b></div>
+       </div>
+      </div>
+     </div>
+    </div>
+    <div class="modal" id="terms-modal"><div class="mbox">
+     <div class="mbox-head"><div class="ti">📄</div><h3>Conditions Générales d'Utilisation</h3></div>
+     <div class="mbox-body">
+      <h4>1. Objet</h4>Occasion &amp; Garantie est une plateforme qui met en relation des vendeurs et des acheteurs de téléphones d'occasion au Maroc.
+      <h4>2. Compte vendeur</h4>La création d'un compte vendeur est gratuite. L'identité est vérifiée par code SMS. La première publication d'annonces est libre.
+      <h4>3. Paiement &amp; commission</h4>Le paiement s'effectue en espèces ou par virement bancaire, directement entre l'acheteur et le vendeur. Une commission est appliquée après la période gratuite (3 premiers mois : 0% de déduction).
+      <h4>4. Vérification &amp; garantie</h4>Chaque vendeur est vérifié. Les téléphones vendus incluent une garantie de 12 mois.
+     </div>
+     <div class="mbox-foot"><button class="btn btn-ghost" id="btn-terms-close">Fermer</button><button class="btn" id="btn-terms-ok">J'accepte</button></div>
+    </div></div>
+    <div class="sms-pop" id="sms-pop">
+     <div class="sms-head"><div class="av">📩</div><div><b>Occasion &amp; Garantie</b><span>SMS · maintenant</span></div></div>
+     <div class="sms-body">Votre code de vérification est <span class="sms-code">483 209</span>. Il est valable 5 minutes. Ne le partagez avec personne. 💬 #OG</div>
+     <div class="sms-time">Répondu il y a 1 s <span>OK</span></div>
+    </div>
+    <div class="vpage" id="verify-page">
+     <div class="vcard">
+      <div class="vic">🔢</div>
+      <h3>Vérification</h3>
+      <div class="vsub">Entrez le code reçu par SMS</div>
+      <div class="vnote">Code envoyé au <b>+212 6XX XXX XXX</b></div>
+      <div class="in code-in" id="i-code"><span class="ph hidden">000000</span><span class="val"></span><span class="caret"></span></div>
+      <button class="btn" id="btn-verify" style="margin-top:13px">Vérifier mon compte</button>
+      <button class="small-link" id="btn-resend">Renvoyer le code</button>
+     </div>
+    </div>
+    <div class="succ" id="succ-page"><div class="ck">✓</div><h3>Compte vérifié !</h3><p>Bienvenue sur Occasion &amp; Garantie 🎉</p></div>
+   </div>
+  </div>
+ </div>
+</div>
+
+<!-- SLIDE 2 : CREATION PRODUIT -->
+<div class="slide" id="slide2">
+ <div class="s-inner">
+  <div class="s-eyebrow">Étape 2 · Publication d'une annonce</div>
+  <h2>Publiez votre produit <span class="grad">en quelques clics</span></h2>
+  <div class="s-cap">Le formulaire réel du vendeur : <b>nom, marque, prix, catégorie, état, ville</b></div>
+  <div class="browser">
+   <div class="b-top"><img class="b-fav" src="marketing-demo-logo.png" alt=""><span class="b-name">Occasion &amp; Garantie</span><span class="dot r"></span><span class="dot y"></span><span class="dot g"></span><div class="b-url">www.occasionetgarantie.store/seller/products/new</div></div>
+   <div class="screen" id="scr2">
+    <div class="dash">
+     <div class="side">
+      <div class="s-i on">📊 Tableau de bord</div>
+      <div class="s-i">📦 Mes produits</div>
+      <div class="s-i">💰 Acheter des crédits</div>
+      <div class="s-i">📈 Statistiques</div>
+      <div class="s-i">👤 Mon profil</div>
+     </div>
+     <div class="main">
+      <div class="scroll-y">
+       <div class="m-title">Créer une annonce</div>
+       <div class="m-sub">Remplissez les informations de votre téléphone</div>
+       <div class="grid-2">
+        <div class="fi"><label class="lbl">Nom du produit <em>*</em></label><div class="in" id="p-name"><span class="ic">📱</span><span class="ph">Ex: iPhone 13 128Go</span><span class="val hidden"></span><span class="caret"></span></div></div>
+        <div class="fi"><label class="lbl">Marque <em>*</em></label><div class="in" id="p-brand"><span class="ic">🏷️</span><span class="ph">Ex: Apple, Samsung</span><span class="val hidden"></span><span class="caret"></span></div></div>
+        <div class="fi"><label class="lbl">Prix (DH) <em>*</em></label><div class="in" id="p-price"><span class="ic">💵</span><span class="ph">Ex: 4500</span><span class="val hidden"></span><span class="caret"></span></div></div>
+        <div class="fi"><label class="lbl">Ancien prix (DH)</label><div class="in" id="p-old"><span class="ic">🏷️</span><span class="ph">Ex: 6000</span><span class="val hidden"></span><span class="caret"></span></div></div>
+       </div>
+       <div class="fi"><label class="lbl">Catégorie <em>*</em></label><div class="in" id="p-cat"><span class="ic">🗂️</span><span class="ph">Choisir une catégorie</span><span class="val hidden"></span><span class="caret"></span></div></div>
+       <div class="fi"><label class="lbl">État <em>*</em></label><div class="code-opt" id="p-state"><div class="co on">Neuf</div><div class="co">Comme neuf</div><div class="co">Très bon état</div></div></div>
+       <div class="fi"><label class="lbl">Ville <em>*</em></label><div class="in" id="p-city"><span class="ic">📍</span><span class="ph">Votre ville</span><span class="val hidden"></span><span class="caret"></span></div></div>
+       <div class="fi"><label class="lbl">Description <em>*</em></label><div class="in" id="p-desc"><span class="ic">📝</span><span class="ph">Décrivez l'état du produit...</span><span class="val hidden"></span><span class="caret"></span></div></div>
+       <button class="btn" id="btn-publish">Publier l'annonce</button>
+      </div>
+     </div>
+    </div>
+    <div class="toast" id="toast-pub">✅ Annonce publiée ! Votre produit est maintenant visible</div>
+   </div>
+  </div>
+ </div>
+</div>
+
+<!-- SLIDE 3 : CLIENT + MESSENGER -->
+<div class="slide" id="slide3">
+ <div class="s-inner">
+  <div class="s-eyebrow">Étape 3 · L'acheteur vous contacte</div>
+  <h2>L'acheteur <span class="grad">vous envoie un message</span></h2>
+  <div class="s-cap">De la recherche produit jusqu'à la conversation <b>Messenger</b> avec le client</div>
+  <div class="browser">
+   <div class="b-top"><img class="b-fav" src="marketing-demo-logo.png" alt=""><span class="b-name">Occasion &amp; Garantie</span><span class="dot r"></span><span class="dot y"></span><span class="dot g"></span><div class="b-url" id="url3">www.occasionetgarantie.store/products</div></div>
+   <div class="screen" id="scr3">
+    <div id="home3">
+     <div class="hero">
+      <h1>Occasion &amp; <em>Garantie</em></h1>
+      <div class="searchbar" id="search3"><span>🔍</span><span class="ph">Que cherchez-vous ?</span><span class="val hidden"></span><span class="caret"></span></div>
+      <div class="cats"><div class="cat">Tout</div><div class="cat on">Smartphones</div><div class="cat">Tablettes</div><div class="cat">Ordinateurs</div><div class="cat">Accessoires</div></div>
+     </div>
+     <div class="sect-h"><b>Dernières annonces</b><span>4 téléphones disponibles ›</span></div>
+     <div class="pgrid">
+      <div class="pc" id="pc-iphone"><div class="im">📱</div><div class="bd"><b>iPhone 13 128Go</b><div class="pr">4 900 DH <s>6 500 DH</s></div><span class="ok">✓ Vendeur vérifié</span></div></div>
+      <div class="pc"><div class="im">📱</div><div class="bd"><b>Samsung S22 Ultra</b><div class="pr">6 200 DH</div><span class="ok">✓ Vendeur vérifié</span></div></div>
+      <div class="pc"><div class="im">📱</div><div class="bd"><b>iPhone 12 Pro</b><div class="pr">4 100 DH <s>5 200 DH</s></div><span class="ok">✓ Vendeur vérifié</span></div></div>
+      <div class="pc"><div class="im">📱</div><div class="bd"><b>Redmi Note 12</b><div class="pr">2 300 DH</div><span class="ok">✓ Vendeur vérifié</span></div></div>
+     </div>
+    </div>
+    <div class="detail" id="detail3">
+     <div class="back-btn" id="back3">← Retour aux annonces</div>
+     <div class="d-grid">
+      <div class="d-img">📱<div class="badges"><span class="bd2 g">✓ Vérifié</span><span class="bd2 o">-25%</span></div></div>
+      <div>
+       <div class="d-brand">Apple · Smartphone</div>
+       <div class="d-name">iPhone 13 128Go</div>
+       <div class="d-price"><b>4 900 DH</b><s>6 500 DH</s><span class="disc">Économisez 1 600 DH</span></div>
+       <div class="specs">
+        <div class="spec"><b>État</b><span>Comme neuf</span></div>
+        <div class="spec"><b>Batterie</b><span>88%</span></div>
+        <div class="spec"><b>Garantie</b><span>12 mois ✓</span></div>
+        <div class="spec"><b>Livraison</b><span>Tout le Maroc</span></div>
+       </div>
+       <div class="d-cta"><button class="btn offer">💬 Proposer un prix</button><button class="btn msg" id="btn-msg">Envoyer un message</button></div>
+       <div class="vcard2"><div class="av">YB</div><div><b>Yassine Boutique</b><span class="vk">✓ Vendeur vérifié</span></div></div>
+      </div>
+     </div>
+    </div>
+    <div class="mess hidden" id="mess3">
+     <div class="mess-list">
+      <div class="ml-h">💬 <b>Messages</b></div>
+      <div class="conv on"><div class="av" style="background:linear-gradient(135deg,#f59e0b,#d97706)">YB</div><div class="c-t"><b>Yassine Boutique</b><span>Oui, toujours disponible ! 😊</span></div></div>
+      <div class="conv"><div class="av" style="background:linear-gradient(135deg,#10b981,#059669)">SM</div><div class="c-t"><b>Salma M.</b><span>Livraison à Rabat ?</span></div></div>
+      <div class="conv"><div class="av" style="background:linear-gradient(135deg,#2563eb,#1d4ed8)">OM</div><div class="c-t"><b>Omar T.</b><span>Merci pour votre réponse</span></div></div>
+     </div>
+     <div class="mess-main">
+      <div class="mess-top"><div class="av" style="background:linear-gradient(135deg,#f59e0b,#d97706)">YB</div><div><b>Yassine Boutique</b><span>● en ligne</span></div></div>
+      <div class="mess-body" id="mess-body">
+       <div class="bubble them">Bonjour Karim 👋 Bienvenue sur Occasion &amp; Garantie ! Que puis-je pour vous ?<span class="bt">Aujourd'hui · 14:32</span></div>
+      </div>
+      <div class="mess-input"><div class="mi" id="m-input"><span class="ic">📝</span><span class="ph">Écrivez un message...</span><span class="val hidden"></span><span class="caret"></span></div><div class="mess-send" id="m-send">➤</div></div>
+     </div>
+    </div>
+   </div>
+  </div>
+ </div>
+</div>
+
+<!-- SLIDE 4 : SUPPORT / RECLAMATION -->
+<div class="slide" id="slide4">
+ <div class="s-inner">
+  <div class="s-eyebrow">Étape 4 · Support &amp; Réclamations</div>
+  <h2>Un support client <span class="grad">toujours disponible</span></h2>
+  <div class="s-cap">Bouton flottant <b>Support</b> · choix du motif · ticket suivi par e-mail</div>
+  <div class="browser">
+   <div class="b-top"><img class="b-fav" src="marketing-demo-logo.png" alt=""><span class="b-name">Occasion &amp; Garantie</span><span class="dot r"></span><span class="dot y"></span><span class="dot g"></span><div class="b-url">www.occasionetgarantie.store/seller/stats</div></div>
+   <div class="screen" id="scr4">
+    <div class="dash">
+     <div class="side">
+      <div class="s-i">📊 Tableau de bord</div>
+      <div class="s-i">📦 Mes produits</div>
+      <div class="s-i">💰 Acheter des crédits</div>
+      <div class="s-i on">📈 Statistiques</div>
+      <div class="s-i">👤 Mon profil</div>
+     </div>
+     <div class="main">
+      <div class="m-title">Statistiques</div>
+      <div class="m-sub">Performances de votre boutique</div>
+      <div class="grid-2">
+       <div class="stat-c"><div class="ic" style="background:rgba(245,158,11,.12)">👁️</div><div><b>1 240</b><span>Vues ce mois</span></div></div>
+       <div class="stat-c"><div class="ic" style="background:rgba(16,185,129,.12)">💬</div><div><b>38</b><span>Messages reçus</span></div></div>
+       <div class="stat-c"><div class="ic" style="background:rgba(37,99,235,.12)">💰</div><div><b>4</b><span>Ventes ce mois</span></div></div>
+       <div class="stat-c"><div class="ic" style="background:rgba(217,168,60,.15)">📈</div><div><b>+32%</b><span>Croissance</span></div></div>
+      </div>
+     </div>
+    </div>
+    <div class="support-btn" id="s-btn">🛟</div>
+    <div class="support-pop" id="s-pop">
+     <div class="sp-h"><div>🛟</div><b>Centre d'aide</b><button class="x" id="s-close">✕</button></div>
+     <div class="sp-b">
+      <div id="s-step-1">
+       <div class="sp-q">Comment pouvons-nous vous aider ?</div>
+       <div class="sp-opt" data-ch="0"><div class="ic" style="background:rgba(220,38,38,.1)">⚠️</div><div><b>Réclamation</b><span>Signaler un problème</span></div></div>
+       <div class="sp-opt" data-ch="1"><div class="ic" style="background:rgba(124,58,237,.1)">🚫</div><div><b>Compte suspendu</b><span>Réactiver mon compte</span></div></div>
+       <div class="sp-opt" data-ch="2"><div class="ic" style="background:rgba(16,185,129,.1)">❓</div><div><b>Demande d'information</b><span>Poser une question</span></div></div>
+       <div class="sp-opt" data-ch="3"><div class="ic" style="background:rgba(59,130,246,.1)">🏪</div><div><b>Changer le nom de ma boutique</b><span>Modifier mon store</span></div></div>
+      </div>
+      <div id="s-step-2" class="hidden">
+       <button class="sp-back" id="s-back">← Retour</button>
+       <div class="fi"><label class="lbl">Votre nom <em>*</em></label><div class="in" id="s-name"><span class="ic">👤</span><span class="ph">Votre nom complet</span><span class="val hidden"></span><span class="caret"></span></div></div>
+       <div class="fi"><label class="lbl">Votre email <em>*</em></label><div class="in" id="s-mail"><span class="ic">✉️</span><span class="ph">exemple@email.com</span><span class="val hidden"></span><span class="caret"></span></div></div>
+       <div class="fi"><label class="lbl">Décrivez votre demande <em>*</em></label><div class="in" id="s-desc"><span class="ic">📝</span><span class="ph">Décrivez votre problème...</span><span class="val hidden"></span><span class="caret"></span></div></div>
+       <button class="btn" id="s-send">Envoyer le message</button>
+      </div>
+      <div id="s-step-3" class="hidden">
+       <div class="sp-done"><div class="dk">✓</div><h4>Message envoyé avec succès !</h4><p>Votre demande a bien été enregistrée.<br>Nous vous répondrons par email.</p><div class="ticket-num">Ticket #OG-4827</div></div>
+      </div>
+     </div>
+    </div>
+   </div>
+  </div>
+ </div>
+</div>
+
+<!-- SLIDE 5 : CREDITS -->
+<div class="slide" id="slide5">
+ <div class="s-inner">
+  <div class="s-eyebrow">Étape 5 · Acheter des crédits</div>
+  <h2>Boostez vos annonces avec <span class="grad">des crédits</span></h2>
+  <div class="s-cap"><b>1000 crédits = 100 DH</b> · paiement par virement bancaire direct</div>
+  <div class="browser">
+   <div class="b-top"><img class="b-fav" src="marketing-demo-logo.png" alt=""><span class="b-name">Occasion &amp; Garantie</span><span class="dot r"></span><span class="dot y"></span><span class="dot g"></span><div class="b-url">www.occasionetgarantie.store/seller/stats</div></div>
+   <div class="screen" id="scr5">
+    <div class="dash">
+     <div class="side">
+      <div class="s-i">📊 Tableau de bord</div>
+      <div class="s-i">📦 Mes produits</div>
+      <div class="s-i on">💰 Acheter des crédits</div>
+      <div class="s-i">📈 Statistiques</div>
+      <div class="s-i">👤 Mon profil</div>
+     </div>
+     <div class="main">
+      <div class="scroll-y">
+       <div class="cred-card"><div class="cc-ic">💰</div><div><b>Solde crédits : 1 200</b><span>Commandeurs : 1000 crédits = 100 DH</span></div></div>
+       <div class="m-title">Acheter des crédits</div>
+       <div class="m-sub">Choisissez un montant à recharger</div>
+       <div class="amount-row">
+        <div class="amt" data-a="100">100 DH<br><small>1 000 crédits</small></div>
+        <div class="amt on" data-a="200">200 DH<br><small>2 000 crédits</small></div>
+        <div class="amt" data-a="500">500 DH<br><small>5 000 crédits</small></div>
+       </div>
+       <button class="btn" id="btn-buy" style="max-width:300px">Payer maintenant</button>
+      </div>
+     </div>
+    </div>
+    <div class="modal" id="pay-modal"><div class="mbox">
+     <div class="mbox-head"><div class="ti">🔒</div><h3>Virement bancaire</h3></div>
+     <div class="mbox-body">
+      <div class="banner green" style="margin-bottom:12px">💰 Vous recevrez <b>2 000 crédits</b> après validation</div>
+      <div class="bank-box">
+       <div class="bank-row"><span>Montant</span><b>200,00 DH</b></div>
+       <div class="bank-row"><span>Banque</span><b>CIH Bank</b><span class="copy-badge">📋 Copier</span></div>
+       <div class="bank-row"><span>Titulaire</span><b>OCCASION &amp; GARANTIE</b></div>
+       <div class="bank-row"><span>RIB</span><b>230 780 0000 123 456 789 02</b><span class="copy-badge">📋 Copier</span></div>
+      </div>
+      <div class="fi"><label class="lbl">Envoyer la capture du virement</label><div class="in" id="up-scan"><span class="ic">📎</span><span class="ph">Joindre une capture (JPG/PNG)</span><span class="val hidden"></span><span class="caret"></span></div></div>
+     </div>
+     <div class="mbox-foot"><button class="btn" id="btn-pay-send">Envoyer la capture</button></div>
+    </div></div>
+    <div class="succ" id="pay-succ"><div class="ck">✓</div><h3>Capture envoyée !</h3><p>En attente de confirmation admin.<br>Vos crédits seront ajoutés sous 24h.</p></div>
+   </div>
+  </div>
+ </div>
+</div>
+
+<!-- SLIDE 6 : BOUTIQUE + RESERVATION + ADMIN -->
+<div class="slide" id="slide6">
+ <div class="s-inner">
+  <div class="s-eyebrow">Étape 6 · Boutique Officielle</div>
+  <h2>La <span class="grad">Boutique Officielle</span> vend &amp; livre</h2>
+  <div class="s-cap">Le client réserve un produit → <b>l'admin vérifie le stock et valide la vente</b></div>
+  <div class="browser">
+   <div class="b-top"><img class="b-fav" src="marketing-demo-logo.png" alt=""><span class="b-name">Occasion &amp; Garantie</span><span class="dot r"></span><span class="dot y"></span><span class="dot g"></span><div class="b-url" id="url6">www.occasionetgarantie.store/boutique</div></div>
+   <div class="screen" id="scr6">
+    <div id="b-store">
+     <div class="b-nav">
+      <div class="bn-logo"><img src="marketing-demo-logo.png" alt="">Occasion &amp; Garantie</div>
+      <div class="bn-links"><span>Accueil</span><span>Produits</span><span class="on">Boutique Officielle</span><span>Reprise</span><span>Vendre</span></div>
+      <div class="bn-act">👤</div>
+     </div>
+     <div class="b-page">
+      <div class="b-head"><h1>🛡️ Boutique Officielle</h1><p>Produits vendus et expédiés directement par Occasion &amp; Garantie</p></div>
+      <div class="pgrid" style="padding:0">
+       <div class="pc" id="bc-pro"><div class="im"><span class="cat-badge">Smartphones</span><span class="off-badge">⭐ Officiel</span>📱</div><div class="bd"><b>iPhone 13 Pro</b><div class="pr">7 900 DH <s>9 200 DH</s></div><span class="ok">✓ Vérifié &amp; garanti</span></div></div>
+       <div class="pc"><div class="im"><span class="cat-badge">Ordinateurs</span><span class="off-badge">⭐ Officiel</span>💻</div><div class="bd"><b>MacBook Air M1</b><div class="pr">6 500 DH</div><span class="ok">✓ Vérifié &amp; garanti</span></div></div>
+       <div class="pc"><div class="im"><span class="cat-badge">Tablettes</span><span class="off-badge">⭐ Officiel</span>📲</div><div class="bd"><b>iPad 9 64Go</b><div class="pr">3 200 DH <s>3 900 DH</s></div><span class="ok">✓ Vérifié &amp; garanti</span></div></div>
+       <div class="pc"><div class="im"><span class="cat-badge">Smartphones</span><span class="off-badge">⭐ Officiel</span>📱</div><div class="bd"><b>Samsung S23</b><div class="pr">6 900 DH</div><span class="ok">✓ Vérifié &amp; garanti</span></div></div>
+      </div>
+     </div>
+    </div>
+    <div class="detail" id="bd-detail">
+     <div class="back-btn">← Retour à la boutique</div>
+     <div class="store-banner">🛡️ Boutique Officielle Occasion &amp; Garantie</div>
+     <div class="d-grid">
+      <div class="d-img">📱<div class="badges"><span class="bd2 g">✓ Vérifié</span><span class="bd2 o">-14%</span></div></div>
+      <div>
+       <div class="d-brand">Smartphones · Apple</div>
+       <div class="d-name">iPhone 13 Pro</div>
+       <div class="d-price"><b>7 900 DH</b><s>9 200 DH</s><span class="disc">Économisez 1 300 DH</span></div>
+       <div class="d-tags"><span class="tg st">Comme neuf</span><span class="tg v">✓ Vérifié</span><span class="tg br">Apple</span></div>
+       <p class="d-desc">iPhone 13 Pro reconditionné et testé par nos experts. Garantie officielle 12 mois incluse.</p>
+       <div class="specs">
+        <div class="spec"><b>Écran</b><span>6.1" OLED 120Hz</span></div>
+        <div class="spec"><b>Processeur</b><span>A15 Bionic</span></div>
+        <div class="spec"><b>RAM</b><span>6 Go</span></div>
+        <div class="spec"><b>Stockage</b><span>128 Go</span></div>
+        <div class="spec"><b>Batterie</b><span>88%</span></div>
+        <div class="spec"><b>Appareil</b><span>12 MP × 3</span></div>
+       </div>
+       <div class="b-int">
+        <h3>Vous êtes intéressé ?</h3>
+        <p>Laissez vos coordonnées, nous vous contacterons.</p>
+        <div class="fi"><label class="lbl">Votre nom <em>*</em></label><div class="in" id="r-name"><span class="ic">👤</span><span class="ph">Votre nom</span><span class="val hidden"></span><span class="caret"></span></div></div>
+        <div class="fi"><label class="lbl">Votre téléphone <em>*</em></label><div class="in" id="r-phone"><span class="ic">📞</span><span class="ph">Votre téléphone</span><span class="val hidden"></span><span class="caret"></span></div></div>
+        <div class="fi"><label class="lbl">Message (optionnel)</label><div class="in" id="r-msg"><span class="ic">📝</span><span class="ph">Message (optionnel)</span><span class="val hidden"></span><span class="caret"></span></div></div>
+        <button class="btn" id="r-send">Envoyer ma demande</button>
+        <div class="r-ok hidden" id="r-ok"><div class="ck-s">✓</div>Message envoyé ! Nous vous contacterons dans les plus brefs délais.</div>
+       </div>
+      </div>
+     </div>
+    </div>
+    <div class="detail" id="bd-admin">
+     <div class="adm-top"><div class="adm-title">🛡️ Boutique Officielle <span class="adm-sub">Dashboard Admin</span></div><div class="adm-user">👤 Admin</div></div>
+     <div class="adm-stats">
+      <div class="stat-c"><div class="ic" style="background:rgba(59,130,246,.12)">📦</div><div><b>8</b><span>Produits</span></div></div>
+      <div class="stat-c"><div class="ic" style="background:rgba(217,168,60,.15)">⭐</div><div><b>3</b><span>En vedette</span></div></div>
+      <div class="stat-c"><div class="ic" style="background:rgba(16,185,129,.12)">🛍️</div><div><b>8</b><span>En stock</span></div></div>
+      <div class="stat-c"><div class="ic" style="background:rgba(220,38,38,.12)">💸</div><div><b>0</b><span>Vendus</span></div></div>
+     </div>
+     <div class="adm-tabs"><div class="at">📦 Produits (8)</div><div class="at on">📩 Demandes (1)</div></div>
+     <div class="tbl-wrap">
+      <table class="tbl">
+       <thead><tr><th>Client</th><th>Téléphone</th><th>Produit</th><th>Message</th><th>Stock</th><th>Statut</th></tr></thead>
+       <tbody>
+        <tr>
+         <td style="font-weight:600">Karim Amrani</td>
+         <td class="phn">+212 661 22 33 44</td>
+         <td><div class="tp"><div class="tp-img">📱</div><div><b>iPhone 13 Pro</b></div></div></td>
+         <td class="ms">Je souhaite réserver ce produit...</td>
+         <td><span class="st-badge" id="ad-stock">Disponible</span></td>
+         <td><select class="st-sel" id="ad-status"><option value="en_attente" selected>En attente</option><option value="contacte">Contacté</option><option value="termine">Terminé</option></select></td>
+        </tr>
+       </tbody>
+      </table>
+     </div>
+     <div class="toast" id="toast-admin">💬 Karim a été contacté — vente en cours</div>
+     <div class="succ" id="admin-succ"><div class="ck">✓</div><h3>Vente finalisée !</h3><p>iPhone 13 Pro marqué « Vendu » — livraison organisée avec Karim.</p></div>
+    </div>
+    <div class="sms-pop" id="sms-admin">
+     <div class="sms-head"><div class="av">📩</div><div><b>Occasion &amp; Garantie</b><span>SMS · maintenant</span></div></div>
+     <div class="sms-body">Paiement <b>#12</b> Karim Amrani +212 661 22 33 44 — <span style="color:#2563eb;font-weight:600">200 DH confirmés</span> 🔗 Lien de la capture</div>
+     <div class="sms-time">Reçu à l'instant <span>OK</span></div>
+    </div>
+   </div>
+  </div>
+ </div>
+</div>
+
+<!-- SLIDE 7 : PROFIL -->
+<div class="slide" id="slide7">
+ <div class="s-inner">
+  <div class="s-eyebrow">Étape 7 · Mon Profil</div>
+  <h2>Gérez <span class="grad">votre profil</span> en toute sécurité</h2>
+  <div class="s-cap">Modifier le <b>nom</b>, changer de <b>numéro</b> (vérifié par SMS) et de <b>mot de passe</b></div>
+  <div class="browser">
+   <div class="b-top"><img class="b-fav" src="marketing-demo-logo.png" alt=""><span class="b-name">Occasion &amp; Garantie</span><span class="dot r"></span><span class="dot y"></span><span class="dot g"></span><div class="b-url">www.occasionetgarantie.store/profile</div></div>
+   <div class="screen" id="scr7">
+    <div class="p-wrap">
+     <div class="p-back">← Accueil</div>
+     <div class="p-head"><h1>Mon Profil</h1><p>Gérer vos informations personnelles</p></div>
+     <div class="prof-tabs"><button class="pt on" id="tab-prof">👤 Profil</button><button class="pt" id="tab-pwd">🔒 Mot de passe</button><button class="pt">🗑️ Supprimer</button></div>
+     <div class="prof-card" id="pane-prof">
+      <div class="avatar">YE<div class="ava-cam">📷</div></div>
+      <div class="fi"><label class="lbl">Nom complet</label><div class="in" id="p-name2"><span class="ic">👤</span><span class="ph hidden"></span><span class="val">Yassine El Amrani</span><span class="caret"></span></div></div>
+      <div class="fi"><label class="lbl">Adresse e-mail</label><div class="in" style="opacity:.6"><span class="ic">✉️</span><span class="val" style="font-weight:500">yassine@phonestore.ma</span></div><small>L'email ne peut pas être modifié.</small></div>
+      <div class="fi"><label class="lbl">Téléphone</label><div class="p-row"><div class="in" style="flex:1;opacity:.6"><span class="ic">📞</span><span class="val" id="p-phone" style="font-weight:500">+212 612 345 678</span></div><button class="btn-sm" id="btn-change-phone">Changer</button></div></div>
+      <div class="fi"><label class="lbl">Boutique</label><div class="in" style="opacity:.6"><span class="ic">🏪</span><span class="val" style="font-weight:500">PhoneStore Casablanca</span></div><small>Pour modifier le nom de votre boutique, contactez le support.</small></div>
+      <button class="btn" id="btn-save-prof">Enregistrer le profil</button>
+      <div class="alert alert-success hidden" id="al-prof">✓ Profil mis à jour avec succès.</div>
+     </div>
+     <div class="prof-card hidden" id="pane-pwd">
+      <h3>🔒 Changer le mot de passe</h3>
+      <div class="fi"><label class="lbl">Ancien mot de passe</label><div class="in" id="pw-old"><span class="ic">🔑</span><span class="ph">Votre mot de passe actuel</span><span class="val hidden"></span><span class="caret"></span></div></div>
+      <div class="fi"><label class="lbl">Nouveau mot de passe</label><div class="in" id="pw-new"><span class="ic">🔒</span><span class="ph">Au moins 6 caractères</span><span class="val hidden"></span><span class="caret"></span></div></div>
+      <div class="fi"><label class="lbl">Confirmer le mot de passe</label><div class="in" id="pw-conf"><span class="ic">🔒</span><span class="ph">Répétez le nouveau mot de passe</span><span class="val hidden"></span><span class="caret"></span></div></div>
+      <button class="btn" id="btn-save-pwd">Modifier le mot de passe</button>
+      <div class="alert alert-success hidden" id="al-pwd">✓ Mot de passe modifié avec succès.</div>
+     </div>
+    </div>
+    <div class="modal" id="phone-modal"><div class="mbox" style="width:420px">
+     <div class="mbox-head"><div class="ti">📞</div><h3>Changer de numéro</h3></div>
+     <div class="mbox-body">
+      <div id="ph-form">
+       <div class="fi"><label class="lbl">Nouveau numéro</label><div class="in" id="ph-new"><span class="ic">📞</span><span class="ph">+212 6XX XXX XXX</span><span class="val hidden"></span><span class="caret"></span></div></div>
+       <button class="btn" id="ph-send">Envoyer le code</button>
+      </div>
+      <div id="ph-verify" class="hidden">
+       <div class="vnote">Un code a été envoyé au <b id="ph-num">+212 700 11 22 33</b></div>
+       <div class="in code-in" id="ph-code"><span class="val"></span><span class="caret"></span></div>
+       <button class="btn" id="ph-verify-btn" style="margin-top:13px">Vérifier le numéro</button>
+      </div>
+     </div>
+    </div></div>
+    <div class="sms-pop" id="sms-phone">
+     <div class="sms-head"><div class="av">📩</div><div><b>Occasion &amp; Garantie</b><span>SMS · maintenant</span></div></div>
+     <div class="sms-body">Votre code de vérification est <span class="sms-code">261 903</span>. Il est valable 5 minutes. Ne le partagez avec personne.</div>
+     <div class="sms-time">Reçu à l'instant <span>OK</span></div>
+    </div>
+    <div class="succ" id="ph-succ"><div class="ck">✓</div><h3>Numéro mis à jour !</h3><p>+212 700 11 22 33</p></div>
+   </div>
+  </div>
+ </div>
+</div>
+
+<!-- SLIDE 8 : RECAP -->
+<div class="slide" id="slide8">
+ <div class="s-inner" style="max-width:1100px">
+  <div class="s-eyebrow">Récapitulatif</div>
+  <h2>Occasion &amp; Garantie en <span class="grad">6 étapes</span></h2>
+  <div class="s-cap">De la création du compte jusqu'à la vente — le site gère tout</div>
+  <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:16px;margin:26px 0 24px;text-align:left">
+   <div class="rcard"><div class="n">1️⃣</div><b>Compte vérifié</b><p>Inscription en 2 min, identité validée par SMS OTP.</p></div>
+   <div class="rcard"><div class="n">2️⃣</div><b>Annonce publiée</b><p>Produit, prix, état et ville — visible immédiatement.</p></div>
+   <div class="rcard"><div class="n">3️⃣</div><b>Messagerie</b><p>L'acheteur vous contacte, négociation directe.</p></div>
+   <div class="rcard"><div class="n">4️⃣</div><b>Vente directe</b><p>Paiement espèces ou virement entre acheteur et vendeur.</p></div>
+   <div class="rcard"><div class="n">5️⃣</div><b>Boutique Officielle</b><p>Le client réserve, l'admin vérifie le stock et finalise la vente.</p></div>
+   <div class="rcard"><div class="n">6️⃣</div><b>Profil sécurisé</b><p>Nom, téléphone (SMS) et mot de passe modifiables à tout moment.</p></div>
+  </div>
+  <div style="display:flex;gap:12px;justify-content:center">
+   <a href="https://www.occasionetgarantie.store" target="_blank" class="btn2-cta" style="display:inline-flex;align-items:center;gap:9px;background:linear-gradient(135deg,var(--gold),var(--p));color:#0b0c14;font-weight:800;font-size:15px;padding:15px 34px;border-radius:14px;text-decoration:none;box-shadow:0 18px 50px rgba(217,168,60,.4)">🌐 Découvrir occasionetgarantie.store</a>
+  </div>
+ </div>
+</div><!-- CONTROLS -->
+<div class="ctl">
+ <div class="btn2" id="btn-prev">← Précédent</div>
+ <div class="dots" id="dots"></div>
+ <div class="cnt" id="cnt"></div>
+ <div class="btn2" id="btn-next">Suivant →</div>
+</div>
+<div class="progress" id="progress"></div>
+<button class="aubtn pulse" id="btn-audio" title="Narration darija : activée">🔊</button>
+<script>
+(function(){
+const $$=s=>document.querySelector(s);
+const delay=ms=>new Promise(r=>setTimeout(r,ms));
+const cursor=document.createElement("div");
+cursor.className="cur show";
+cursor.innerHTML="<div class='arrow'></div><div class='ring'></div>";
+document.body.appendChild(cursor);
+let scr=null;
+const scrR=()=>scr.getBoundingClientRect();
+const active=()=>document.querySelector(".slide.on").id;
+function cap(html){const c=document.querySelector(".slide.on .s-cap");if(c)c.innerHTML=html;}
+async function gopos(x,y,dur){
+  dur=dur||280;
+  cursor.style.transition="left "+dur+"ms cubic-bezier(.4,0,.2,1),top "+dur+"ms cubic-bezier(.4,0,.2,1)";
+  const a=scrR();
+  cursor.style.left=(a.left+x)+"px";
+  cursor.style.top=(a.top+y)+"px";
+  await delay(dur+30);
+}
+function ripple(x,y){
+  const rp=document.createElement("div");
+  rp.className="ripple act";
+  const a=scrR();
+  rp.style.left=(x-15)+"px";rp.style.top=(y-15)+"px";
+  scr.appendChild(rp);
+  setTimeout(()=>rp.remove(),520);
+}
+async function tap(el,fn){
+  const b=el.getBoundingClientRect(),a=scrR();
+  const x=b.left-a.left+b.width/2, y=b.top-a.top+b.height/2;
+  await gopos(x,y,320);
+  await delay(110);
+  cursor.classList.add("click");
+  ripple(x,y);
+  await delay(90);
+  if(fn)fn();
+  await delay(230);
+  cursor.classList.remove("click");
+}
+async function typeTo(el,text,o){
+  o=o||{};const speed=o.speed||65,hold=o.hold||380;
+  const b=el.getBoundingClientRect(),a=scrR();
+  const x=b.left-a.left+26, y=b.top-a.top+b.height/2;
+  await gopos(x,y,280);
+  el.classList.add("foc","zoom");
+  await delay(140);
+  const ph=el.querySelector(".ph"),val=el.querySelector(".val");
+  if(ph)ph.classList.add("hidden");
+  if(val){val.classList.remove("hidden");val.textContent="";}
+  for(let i=0;i<text.length;i++){val.textContent=text.slice(0,i+1);await delay(speed);}
+  await delay(hold);
+  el.classList.remove("zoom");
+}
+/* ===== SLIDE 1 : SIGNUP + OTP ===== */
+async function T0(){
+  const id=slides[0].id;
+  await delay(600); if(active()!==id)return;
+  scr=$$("#scr1");
+  const cam=$$("#cam1");
+  cam.classList.add("in");
+  await delay(1200); if(active()!==id)return;
+  cap("On renseigne <b>nom, email et mot de passe</b>");
+  await typeTo($$("#i-name"),"Yassine El Amrani",{speed:75});
+  await typeTo($$("#i-mail"),"yassine@phonestore.ma",{speed:60});
+  await typeTo($$("#i-pass"),"••••••••",{speed:90});
+  cap("Le <b>téléphone</b> permet de recevoir le code de vérification");
+  await typeTo($$("#i-phone"),"+212 612 345 678",{speed:70});
+  const cos=document.querySelectorAll("#code-opt .co");
+  cap("Le code sera envoyé par <b>SMS</b>");
+  await tap(cos[0],()=>{cos.forEach(c=>c.classList.remove("on"));cos[0].classList.add("on");});
+  await typeTo($$("#i-store"),"PhoneStore Casablanca",{speed:65});
+  cap("Les <b>Conditions Générales</b> sont accessibles en un clic");
+  await tap($$("#btn-terms"),()=>{$$("#terms-modal").classList.add("show");});
+  await delay(1400); if(active()!==id)return;
+  await tap($$("#btn-terms-ok"),()=>{$$("#terms-modal").classList.remove("show");});
+  cap("On soumet le formulaire...");
+  const bs=$$("#btn-signup");
+  await tap(bs,()=>bs.classList.add("loading"));
+  await delay(1000); if(active()!==id)return;
+  cap("📩 Le code <b>OTP</b> arrive par SMS sur le téléphone");
+  $$("#sms-pop").classList.add("show");
+  await delay(2800); if(active()!==id)return;
+  cap("On colle le code reçu dans l'écran de vérification");
+  $$("#sms-pop").classList.remove("show");
+  cam.classList.remove("in");
+  await delay(700);
+  $$("#verify-page").classList.add("show");
+  await typeTo($$("#i-code"),"483 209",{speed:170,hold:600});
+  cap("Le compte est <b>validé instantanément</b> ✅");
+  await tap($$("#btn-verify"),()=>{$$("#verify-page").classList.remove("show");$$("#succ-page").classList.add("show");});
+  await delay(2300);
+  run[0].done=true;
+}
+/* ===== SLIDE 2 : CREATION PRODUIT ===== */
+async function T1(){
+  const id=slides[1].id;
+  await delay(600); if(active()!==id)return;
+  scr=$$("#scr2");
+  cap("On remplit le formulaire <b>réel</b> du vendeur");
+  await typeTo($$("#p-name"),"iPhone 13 128Go",{speed:70});
+  await typeTo($$("#p-brand"),"Apple",{speed:70});
+  await typeTo($$("#p-price"),"4900",{speed:70});
+  await typeTo($$("#p-old"),"6500",{speed:70});
+  await tap($$("#p-cat"),()=>{
+    const ph=$$("#p-cat").querySelector(".ph"),v=$$("#p-cat").querySelector(".val");
+    ph.classList.add("hidden");v.classList.remove("hidden");v.textContent="Smartphones";
+  });
+  const sts=document.querySelectorAll("#p-state .co");
+  cap("On précise l'<b>état</b> du produit");
+  await tap(sts[1],()=>{sts.forEach(c=>c.classList.remove("on"));sts[1].classList.add("on");});
+  await typeTo($$("#p-city"),"Casablanca",{speed:60});
+  cap("Une description claire <b>rassure l'acheteur</b>");
+  await typeTo($$("#p-desc"),"Très bon état, batterie 88%, aucun problème. Livré avec chargeur et facture.",{speed:45,hold:500});
+  cap("L'annonce est publiée instantanément 🚀");
+  await tap($$("#btn-publish"),()=>{$$("#toast-pub").classList.add("show");});
+  await delay(2400);
+  run[1].done=true;
+}
+/* ===== SLIDE 3 : CLIENT + MESSENGER ===== */
+async function T2(){
+  const id=slides[2].id;
+  await delay(600); if(active()!==id)return;
+  scr=$$("#scr3");
+  cap("L'acheteur cherche un <b>iPhone</b>");
+  await typeTo($$("#search3"),"iPhone",{speed:120,hold:600});
+  cap("Il ouvre la fiche du produit");
+  await tap($$("#pc-iphone"),()=>{$$("#home3").style.display="none";$$("#detail3").classList.add("show");});
+  await delay(1400); if(active()!==id)return;
+  cap("L'acheteur clique sur <b>Envoyer un message</b>");
+  await tap($$("#btn-msg"),()=>{
+    $$("#detail3").classList.remove("show");
+    $$("#mess3").classList.remove("hidden");
+    $$("#url3").textContent="www.occasionetgarantie.store/messenger";
+  });
+  await delay(1100);
+  cap("Il écrit son message au <b>vendeur</b>");
+  await typeTo($$("#m-input"),"Salam, est-ce que l'iPhone 13 est toujours disponible ?",{speed:55,hold:700});
+  cap("Envoi du message ➤");
+  await tap($$("#m-send"),()=>{
+    const mb=$$("#mess-body");
+    const d=document.createElement("div");
+    d.className="bubble me";
+    d.innerHTML="Salam, est-ce que l'iPhone 13 est toujours disponible ?<span class='bt'>Maintenant · 14:33</span>";
+    mb.appendChild(d);
+    mb.scrollTop=mb.scrollHeight;
+  });
+  await delay(900);
+  cap("Le vendeur est <b>en ligne</b> et répond...");
+  const ty=document.createElement("div");
+  ty.className="typing";ty.innerHTML="<i></i><i></i><i></i>";
+  const mb=$$("#mess-body");
+  mb.appendChild(ty);mb.scrollTop=mb.scrollHeight;
+  await delay(1600); if(active()!==id)return;
+  ty.remove();
+  const d2=document.createElement("div");
+  d2.className="bubble them";
+  d2.innerHTML="Oui, toujours disponible ! 😊 État comme neuf, batterie 88%. Vous êtes de quelle ville ?<span class='bt'>Maintenant · 14:34</span>";
+  mb.appendChild(d2);mb.scrollTop=mb.scrollHeight;
+  await delay(2500);
+  run[2].done=true;
+}
+/* ===== SLIDE 4 : SUPPORT / RECLAMATION ===== */
+async function T3(){
+  const id=slides[3].id;
+  await delay(600); if(active()!==id)return;
+  scr=$$("#scr4");
+  cap("Le bouton flottant <b>Support</b> est disponible partout");
+  await tap($$("#s-btn"),()=>{$$("#s-pop").classList.add("show");});
+  await delay(900);
+  cap("On choisit le motif : <b>Réclamation</b>");
+  const opts=document.querySelectorAll("#s-step-1 .sp-opt");
+  await tap(opts[0],()=>{$$("#s-step-1").classList.add("hidden");$$("#s-step-2").classList.remove("hidden");});
+  cap("Le formulaire se remplit en 30 secondes");
+  await typeTo($$("#s-name"),"Karim Amrani",{speed:70});
+  await typeTo($$("#s-mail"),"karim@email.com",{speed:60});
+  await typeTo($$("#s-desc"),"Bonjour, j'ai acheté un iPhone 12 Pro et l'écran présente une fissure non signalée. Je souhaite un échange ou un remboursement. Merci.",{speed:40,hold:600});
+  cap("Envoi de la réclamation...");
+  await tap($$("#s-send"),()=>{$$("#s-step-2").classList.add("hidden");$$("#s-step-3").classList.remove("hidden");});
+  cap("✅ Un <b>ticket</b> est créé et suivi par email");
+  await delay(2600);
+  run[3].done=true;
+}
+/* ===== SLIDE 5 : CREDITS ===== */
+async function T4(){
+  const id=slides[4].id;
+  await delay(600); if(active()!==id)return;
+  scr=$$("#scr5");
+  cap("Le vendeur recharge ses <b>crédits</b> pour booster ses annonces");
+  const amts=document.querySelectorAll(".amt");
+  await tap(amts[1],()=>{amts.forEach(a=>a.classList.remove("on"));amts[1].classList.add("on");});
+  await delay(700);
+  await tap($$("#btn-buy"),()=>{$$("#pay-modal").classList.add("show");});
+  cap("Paiement par <b>virement bancaire</b> direct : banque, titulaire et RIB");
+  await delay(1900);
+  await tap($$("#up-scan"),()=>{
+    const ph=$$("#up-scan").querySelector(".ph"),v=$$("#up-scan").querySelector(".val");
+    ph.classList.add("hidden");v.classList.remove("hidden");v.textContent="virement-cih-200dh.png";
+  });
+  cap("On envoie la <b>capture du virement</b>");
+  await tap($$("#btn-pay-send"),()=>{$$("#pay-modal").classList.remove("show");$$("#pay-succ").classList.add("show");});
+  await delay(2400);
+  run[4].done=true;
+}
+/* ===== SLIDE 6 : BOUTIQUE OFFICIELLE ===== */
+async function T5(){
+  const id=slides[5].id;
+  await delay(600); if(active()!==id)return;
+  scr=$$("#scr6");
+  cap("Le client parcourt la <b>Boutique Officielle</b> d'Occasion & Garantie");
+  await gopos(70,150,550);
+  await delay(1600); if(active()!==id)return;
+  cap("Un produit l'intéresse → il ouvre sa fiche");
+  await tap($$("#bc-pro"),()=>{$$("#b-store").style.display="none";$$("#bd-detail").classList.add("show");});
+  await delay(1500); if(active()!==id)return;
+  cap("Le client laisse ses coordonnées pour <b>réserver</b>");
+  await typeTo($$("#r-name"),"Karim Amrani",{speed:70});
+  await typeTo($$("#r-phone"),"+212 661 22 33 44",{speed:65});
+  await typeTo($$("#r-msg"),"Je souhaite réserver ce produit, est-il disponible ?",{speed:45,hold:500});
+  cap("Envoi de la demande de réservation");
+  await tap($$("#r-send"),()=>{$$("#r-ok").classList.remove("hidden");});
+  await delay(2200); if(active()!==id)return;
+  cap("📩 La demande arrive chez l'<b>admin</b> (Dashboard Boutique)");
+  $$("#bd-detail").classList.remove("show");
+  $$("#bd-admin").classList.add("show");
+  $$("#url6").textContent="www.occasionetgarantie.store/admin/store-products";
+  await delay(1300); if(active()!==id)return;
+  cap("💳 Le client a réglé <b>200 DH d'acompte</b> — l'admin reçoit le SMS");
+  $$("#sms-admin").classList.add("show");
+  await delay(2600); if(active()!==id)return;
+  $$("#sms-admin").classList.remove("show");
+  cap("L'admin contacte le client et organise la livraison");
+  await tap($$("#ad-status"),()=>{$$("#ad-status").value="contacte";$$("#toast-admin").classList.add("show");});
+  await delay(2300); if(active()!==id)return;
+  cap("Stock validé → la <b>vente est finalisée</b> 🎉");
+  await tap($$("#ad-status"),()=>{
+    $$("#ad-status").value="termine";
+    $$("#toast-admin").classList.remove("show");
+    $$("#ad-stock").textContent="Vendu";
+    $$("#ad-stock").style.background="#fee2e2";
+    $$("#ad-stock").style.color="#b91c1c";
+    $$("#admin-succ").classList.add("show");
+  });
+  await delay(2500);
+  run[5].done=true;
+}
+/* ===== SLIDE 7 : PROFIL SECURISE ===== */
+async function T6(){
+  const id=slides[6].id;
+  await delay(600); if(active()!==id)return;
+  scr=$$("#scr7");
+  cap("Le profil reprend les <b>informations réelles</b> du compte");
+  await gopos(70,180,550);
+  await delay(1400); if(active()!==id)return;
+  cap("On modifie le <b>nom complet</b>");
+  await typeTo($$("#p-name2"),"Yassine El Amrani",{speed:75,hold:450});
+  cap("Enregistrement des modifications");
+  await tap($$("#btn-save-prof"),()=>{$$("#al-prof").classList.remove("hidden");});
+  await delay(2300); if(active()!==id)return;
+  cap("On change le <b>numéro de téléphone</b>");
+  await tap($$("#btn-change-phone"),()=>{$$("#phone-modal").classList.add("show");});
+  await delay(1000); if(active()!==id)return;
+  await typeTo($$("#ph-new"),"+212 700 11 22 33",{speed:65});
+  cap("📩 Un code de vérification arrive par <b>SMS</b>");
+  await tap($$("#ph-send"),()=>{
+    $$("#ph-form").classList.add("hidden");
+    $$("#ph-verify").classList.remove("hidden");
+  });
+  $$("#sms-phone").classList.add("show");
+  await delay(2400); if(active()!==id)return;
+  cap("On vérifie le code reçu");
+  $$("#sms-phone").classList.remove("show");
+  await typeTo($$("#ph-code"),"261 903",{speed:160,hold:650});
+  cap("Le numéro est <b>mis à jour</b> ✅");
+  await tap($$("#ph-verify-btn"),()=>{
+    $$("#phone-modal").classList.remove("show");
+    $$("#ph-succ").classList.add("show");
+    $$("#p-phone").textContent="+212 700 11 22 33";
+  });
+  await delay(2300); if(active()!==id)return;
+  cap("On sécurise le compte : <b>mot de passe</b>");
+  $$("#ph-succ").classList.remove("show");
+  await tap($$("#tab-pwd"),()=>{
+    $$("#tab-prof").classList.remove("on");
+    $$("#tab-pwd").classList.add("on");
+    $$("#pane-prof").classList.add("hidden");
+    $$("#pane-pwd").classList.remove("hidden");
+  });
+  await delay(800); if(active()!==id)return;
+  await typeTo($$("#pw-old"),"••••••••",{speed:80});
+  await typeTo($$("#pw-new"),"••••••••••••",{speed:80});
+  await typeTo($$("#pw-conf"),"••••••••••••",{speed:80});
+  cap("Le mot de passe est <b>modifié</b> 🔒");
+  await tap($$("#btn-save-pwd"),()=>{$$("#al-pwd").classList.remove("hidden");});
+  await delay(2300);
+  run[6].done=true;
+}
+/* ===== SLIDE 8 : RECAP ===== */
+async function T7(){
+  const id=slides[7].id;
+  await delay(500); if(active()!==id)return;
+  const cs=document.querySelectorAll("#slide8 .rcard");
+  cs.forEach((c,i)=>{c.style.animationDelay=(i*0.13)+"s";});
+  await delay(2600);
+  run[7].done=true;
+}
+/* ===== NARRATION DARIJA (MP3) ===== */
+const narr=[
+  {id:"slide1",file:"slide1.mp3",txt:"أهلا بيك ف أوكازيون و ضمانة. هنا كاتسجل حسابك ف دقايق: سميتك، الإيميل، والرقم ديالك. وملي تكمل، غادي يوصلك كود بالسيمس، دخلو باش يتأكد الحساب، وتبدا تبيع و تشري بثقة."},
+  {id:"slide2",file:"slide2.mp3",txt:"باش تبيع شي حاجة مستعملة، كتعمر الإعلان: النوع، الثمن، الحالة، والمدينة. وتزيد وصف واضح باش يجذب المشترين. مرة تضغط على نشر، الإعلان ديالك كيبان فالحال لكل الناس."},
+  {id:"slide3",file:"slide3.mp3",txt:"المشتري كيلقى الإعلان ديالك، وكملي يبعت ليك ميساج مباشرة عبر الماسنجر. تاخد إشعار، كتجاوب عليه، وتتفاوضو على الثمن — كلشي داخل الموقع، بلا أرقام ولا تعقيد."},
+  {id:"slide4",file:"slide4.mp3",txt:"إيلا صابك شي مشكل، الدعم موجود. كتختار الموضوع، كتعمر الفورم بوصف المشكل، وكتصيفط. غادي توصلك رقم تذكرة خاص بيك، وحتتبع الحالة حتى تتحل."},
+  {id:"slide5",file:"slide5.mp3",txt:"هنا كتشحن كراديت ديالك باش تروج للإعلانات. كتختار الباقة، كتصيفط النقلة المصرفية، وكتصور الوصل. بعد التأكيد، الكراديت كيدخل مباشرة، وإعلاناتك كيبانو لبزاف دالناس."},
+  {id:"slide6",file:"slide6.mp3",txt:"البوتيك الرسمي ديالنا: كتشري منتوج محقق و مضمون، مباشرة من أوكازيون و ضمانة. كتحجز المنتوج بمعلوماتك، والإدارة كتأكد المخزون وتتصل بيك، وتتم السالا بالتوصيل للدار."},
+  {id:"slide7",file:"slide7.mp3",txt:"فالبروفيل ديالك كتسير كلشي: تبدل الاسم، تبدل رقم التليفون مع تأكيد بالكود عبر السيمس، وتبدل كلمة السر. الحساب ديالك محمي، وأنت لي مسير على معلوماتك."},
+  {id:"slide8",file:"slide8.mp3",txt:"وها هي أوكازيون و ضمانة ف ست خطوات: تسجل حسابك، تنشر الإعلان، تتفاوض فالماسنجر، تبيع مباشرة، أو تبيع من البوتيك الرسمي، وكلشي مسيطر من البروفيل ديالك."}
+];
+const btnAudio=$$("#btn-audio");
+const audioEl=new Audio();
+audioEl.preload="auto";
+let audioOn=true,arVoice=null;
+function pickVoice(){
+  if(!("speechSynthesis"in window))return;
+  const vs=speechSynthesis.getVoices();
+  arVoice=vs.find(v=>/^ar/i.test(v.lang)&&/MA|SA|EG|AE/i.test(v.name))
+       || vs.find(v=>/^ar/i.test(v.lang))
+       || null;
+}
+if("speechSynthesis"in window){
+  pickVoice();
+  speechSynthesis.onvoiceschanged=pickVoice;
+}
+function stopNarration(){ audioEl.pause(); audioEl.currentTime=0; if("speechSynthesis"in window)speechSynthesis.cancel(); }
+function speakFb(id){
+  const n=narr.find(x=>x.id===id);
+  if(!n||!audioOn||!("speechSynthesis"in window))return;
+  pickVoice();
+  const u=new SpeechSynthesisUtterance(n.txt);
+  if(arVoice){u.voice=arVoice;u.lang=arVoice.lang;}else{u.lang="ar";}
+  u.rate=0.95;
+  speechSynthesis.resume();
+  speechSynthesis.speak(u);
+}
+let armed=false;
+function armUnmute(){
+  if(armed)return;armed=true;
+  const go=()=>{
+    audioEl.muted=false;
+    audioEl.currentTime=0;
+    audioEl.play().catch(()=>{});
+    if("speechSynthesis"in window)speechSynthesis.cancel();
+    document.removeEventListener("pointerdown",go);
+    document.removeEventListener("keydown",go);
+    document.removeEventListener("touchstart",go);
+  };
+  document.addEventListener("pointerdown",go);
+  document.addEventListener("keydown",go);
+  document.addEventListener("touchstart",go);
+}
+function speakSlide(id){
+  stopNarration();
+  if(!audioOn)return;
+  const n=narr.find(x=>x.id===id);
+  if(!n)return;
+  audioEl.onerror=()=>{audioEl.onerror=null;speakFb(id);};
+  audioEl.src="audio/"+n.file;
+  const p=audioEl.play();
+  if(p&&p.then){
+    p.then(()=>{}).catch(()=>{
+      audioEl.muted=true;
+      audioEl.play().catch(()=>{});
+      speakFb(id);
+      armUnmute();
+    });
+  }
+}
+btnAudio.addEventListener("click",()=>{
+  audioOn=!audioOn;
+  stopNarration();
+  btnAudio.classList.toggle("off",!audioOn);
+  btnAudio.classList.toggle("pulse",audioOn);
+  btnAudio.title=audioOn?"Narration darija : activée":"Narration darija : coupée";
+  btnAudio.textContent=audioOn?"🔊":"🔇";
+  if(audioOn)speakSlide(document.querySelector(".slide.on").id);
+});
+/* ===== NAVIGATION ===== */
+const slides=Array.from(document.querySelectorAll(".slide"));
+const run={};
+let idx=0,busy=false;
+function syncUI(){
+  document.querySelectorAll(".dot2").forEach((d,i)=>d.classList.toggle("on",i===idx));
+  $$("#cnt").textContent=(idx+1)+" / "+slides.length;
+  $$("#progress").style.width=((idx+1)/slides.length*100)+"%";
+  $$("#btn-prev").style.visibility=idx===0?"hidden":"visible";
+  $$("#btn-next").style.visibility=idx===slides.length-1?"hidden":"visible";
+}
+const fns=[T0,T1,T2,T3,T4,T5,T6,T7];
+const pristine=slides.map(s=>s.innerHTML);
+function goTo(n){
+  if(busy)return;busy=true;
+  idx=Math.max(0,Math.min(slides.length-1,n));
+  slides.forEach((s,i)=>s.classList.toggle("on",i===idx));
+  slides[idx].innerHTML=pristine[idx];
+  scr=slides[idx].querySelector(".screen");
+  syncUI();
+  speakSlide(slides[idx].id);
+  run[idx]={started:true,done:false};
+  Promise.resolve(fns[idx]()).catch(e=>console.error(e));
+  busy=false;
+}
+const dw=$$("#dots");
+slides.forEach((s,i)=>{const d=document.createElement("div");d.className="dot2";d.onclick=()=>goTo(i);dw.appendChild(d);});
+$$("#btn-prev").onclick=()=>goTo(idx-1);
+$$("#btn-next").onclick=()=>goTo(idx+1);
+document.addEventListener("keydown",e=>{
+  if(e.key==="ArrowRight")goTo(idx+1);
+  if(e.key==="ArrowLeft")goTo(idx-1);
+});
+goTo(0);
+})();
+</script>
+</body>
+</html>

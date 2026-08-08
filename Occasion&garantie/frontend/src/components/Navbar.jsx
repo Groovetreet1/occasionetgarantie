@@ -304,6 +304,7 @@ export default function Navbar() {
               </div>
             ) : (
               <motion.div className="navbar-auth" initial={{ opacity: 0 }} animate={{ opacity: 1 }}>
+                <a href="/marketing-demo-embedded.html" target="_blank" rel="noopener noreferrer" className="navbar-demo">▶ Demo</a>
                 <Link to="/login" className="navbar-login">{t('nav.login')}</Link>
                 <Link to="/signup" className="navbar-signup">{t('nav.signup')}</Link>
               </motion.div>
@@ -383,6 +384,7 @@ export default function Navbar() {
           </>
         ) : (
           <>
+            <a href="/marketing-demo-embedded.html" target="_blank" rel="noopener noreferrer" className="navbar-mobile-demo">▶ Demo</a>
             <NavLink to="/login" onClick={closeMenu}>{t('nav.login')}</NavLink>
             <Link to="/signup" className="navbar-mobile-signup" onClick={closeMenu}>{t('nav.signup')}</Link>
           </>
