@@ -71,6 +71,7 @@
     defaultRejectReason: 'الدفع غير صالح. يرجى إعادة المحاولة بتحويل صحيح بقيمة 50 درهماً.',
     cancel: 'إلغاء',
     rejectRequest: 'رفض الطلب',
+    deletedRequest: 'تم حذف الطلب',
     deleteProductTitle: 'حذف هذا المنتج؟',
     deleteRequestTitle: 'حذف هذا الطلب؟',
     irreversible: 'هذا الإجراء لا يمكن التراجع عنه.',

@@ -1,8 +1,9 @@
 import { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
-import { FiCheck, FiX, FiClock, FiArrowLeft, FiStar, FiEye, FiThumbsDown, FiTrash2 } from 'react-icons/fi';
+import { FiCheck, FiX, FiClock, FiArrowLeft, FiStar, FiEye, FiThumbsDown } from 'react-icons/fi';
 import api from '../api/axios';
 import ConfirmModal from '../components/ConfirmModal';
+import { AnimatedCheck, AnimatedX, AnimatedTrash, AnimatedThumbsDown } from '../components/AnimatedIcon';
 import { useLanguage } from '../context/LanguageContext';
 
 const API_BASE = import.meta.env.VITE_API_URL || '';
@@ -15,6 +16,12 @@ export default function AdminPremium() {
   const [rejectModal, setRejectModal] = useState(null);
   const [confirmTarget, setConfirmTarget] = useState(null);
   const [deleteTarget, setDeleteTarget] = useState(null);
+  const [success, setSuccess] = useState(null);
+
+  const flashSuccess = (kind) => {
+    setSuccess(kind);
+    setTimeout(() => setSuccess(null), 1600);
+  };
 
   useEffect(() => {
     api.get('/admin/premium-payments')
@@ -31,6 +38,7 @@ export default function AdminPremium() {
     try {
       await api.post(`/admin/premium-payments/${id}/confirm`);
       setPayments(payments.map(p => p.id === id ? { ...p, status: 'actif' } : p));
+      flashSuccess('confirm');
     } catch (err) {
       alert(err.response?.data?.message || t('admin.error'));
     } finally {
@@ -44,6 +52,7 @@ export default function AdminPremium() {
       const res = await api.post(`/admin/premium-payments/${id}/reject`, { reason });
       setPayments(payments.map(p => p.id === id ? { ...p, status: 'rejete', rejection_reason: reason } : p));
       setRejectModal(null);
+      flashSuccess('reject');
     } catch (err) {
       alert(err.response?.data?.message || t('admin.error'));
     } finally {
@@ -59,6 +68,7 @@ export default function AdminPremium() {
     try {
       await api.delete(`/admin/premium-payments/${id}`);
       setPayments(payments.filter(p => p.id !== id));
+      flashSuccess('delete');
     } catch (err) {
       alert(err.response?.data?.message || t('admin.error'));
     } finally {
@@ -130,43 +140,48 @@ export default function AdminPremium() {
                       )}
                     </td>
                     <td style={{ padding: '12px 8px' }}>
-                      {p.status === 'en_attente' ? (
-                        <div style={{ display: 'flex', gap: '6px' }}>
-                          <button
-                            onClick={() => setConfirmTarget(p.id)}
-                            disabled={actionId === p.id}
-                            className="btn btn-primary"
-                            style={{ padding: '6px 14px', fontSize: '12px' }}
-                          >
-                            {actionId === p.id ? '...' : <><FiCheck size={14} /> {t('admin.confirm')}</>}
-                          </button>
-                          <button
-                            onClick={() => setRejectModal(p)}
-                            disabled={actionId === p.id}
-                            className="btn"
-                            style={{ padding: '6px 14px', fontSize: '12px', background: 'rgba(239,68,68,0.15)', color: 'var(--error)', border: 'none' }}
-                          >
-                            <FiThumbsDown size={14} /> {t('admin.reject')}
-                          </button>
-                        </div>
-                      ) : p.status === 'rejete' ? (
-                        <span style={{ color: 'var(--error)', fontSize: '12px', fontWeight: 600 }} title={p.rejection_reason}>{t('admin.rejected')}</span>
-                      ) : (
-                        <span style={{ color: 'var(--success)', fontSize: '12px', fontWeight: 600 }}>{t('admin.confirmed')}</span>
-                      )}
-                      <button
-                        onClick={() => setDeleteTarget(p.id)}
-                        disabled={actionId === p.id}
-                        style={{
-                          marginLeft: '8px',
-                          background: 'none', border: 'none',
-                          color: 'var(--text-muted)', cursor: 'pointer',
-                          padding: '4px', verticalAlign: 'middle'
-                        }}
-                        title={t('admin.delete')}
-                      >
-                        <FiTrash2 size={14} />
-                      </button>
+                      <div style={{ display: 'flex', alignItems: 'center', gap: '6px', flexWrap: 'wrap' }}>
+                        {p.status === 'en_attente' ? (
+                          <>
+                            <button
+                              onClick={() => setConfirmTarget(p.id)}
+                              disabled={actionId === p.id}
+                              className="btn btn-primary"
+                              style={{ padding: '6px 14px', fontSize: '12px' }}
+                            >
+                              {actionId === p.id ? '...' : <><FiCheck size={14} /> {t('admin.confirm')}</>}
+                            </button>
+                            <button
+                              onClick={() => setRejectModal(p)}
+                              disabled={actionId === p.id}
+                              className="btn"
+                              style={{ padding: '6px 14px', fontSize: '12px', background: 'rgba(239,68,68,0.15)', color: 'var(--error)', border: 'none' }}
+                            >
+                              <FiThumbsDown size={14} /> {t('admin.reject')}
+                            </button>
+                          </>
+                        ) : p.status === 'rejete' ? (
+                          <span style={{ color: 'var(--error)', fontSize: '12px', fontWeight: 600 }} title={p.rejection_reason}>{t('admin.rejected')}</span>
+                        ) : (
+                          <span style={{ color: 'var(--success)', fontSize: '12px', fontWeight: 600 }}>{t('admin.confirmed')}</span>
+                        )}
+                        <button
+                          onClick={() => setDeleteTarget(p.id)}
+                          disabled={actionId === p.id}
+                          title={t('admin.delete')}
+                          style={{
+                            width: '34px', height: '34px', flexShrink: 0,
+                            display: 'inline-flex', alignItems: 'center', justifyContent: 'center',
+                            borderRadius: '50%', background: '#dc2626', color: '#fff',
+                            border: 'none', cursor: 'pointer', boxShadow: '0 4px 12px rgba(220,38,38,0.35)',
+                            transition: 'transform .15s ease, box-shadow .15s ease'
+                          }}
+                          onMouseEnter={e => { e.currentTarget.style.transform = 'scale(1.08)'; e.currentTarget.style.boxShadow = '0 6px 16px rgba(220,38,38,0.45)'; }}
+                          onMouseLeave={e => { e.currentTarget.style.transform = 'scale(1)'; e.currentTarget.style.boxShadow = '0 4px 12px rgba(220,38,38,0.35)'; }}
+                        >
+                          <AnimatedTrash size={16} />
+                        </button>
+                      </div>
                     </td>
                   </tr>
                 ))}
@@ -187,7 +202,10 @@ export default function AdminPremium() {
             padding: '32px', maxWidth: '480px', width: '100%',
             border: '1px solid var(--border)'
           }} onClick={e => e.stopPropagation()}>
-            <h2 style={{ fontSize: '20px', fontWeight: 700, marginBottom: '8px' }}>{t('admin.rejectPremiumTitle')}</h2>
+            <div style={{ width: 56, height: 56, borderRadius: '50%', background: 'rgba(239,68,68,0.12)', display: 'flex', alignItems: 'center', justifyContent: 'center', margin: '0 auto 16px' }}>
+              <AnimatedThumbsDown size={24} color="#dc2626" />
+            </div>
+            <h2 style={{ fontSize: '20px', fontWeight: 700, marginBottom: '8px', textAlign: 'center' }}>{t('admin.rejectPremiumTitle')}</h2>
             <p style={{ color: 'var(--text-secondary)', fontSize: '14px', marginBottom: '20px' }}>
               {t('admin.clientLabel')} <strong>{rejectModal.full_name}</strong> &middot; {Number(rejectModal.amount).toLocaleString()} DH
             </p>
@@ -218,8 +236,37 @@ export default function AdminPremium() {
         message={t('admin.irreversible')}
         confirmText={t('admin.delete')}
         confirmColor="#dc2626"
-        icon={<FiTrash2 size={26} color="#dc2626" />}
+        icon={<AnimatedTrash size={26} color="#dc2626" />}
       />
+
+      {success && (
+        <div style={{
+          position: 'fixed', inset: 0, zIndex: 100000,
+          display: 'flex', alignItems: 'center', justifyContent: 'center',
+          background: 'rgba(0,0,0,0.5)', padding: '20px'
+        }}>
+          <div style={{
+            background: 'var(--bg-card)', borderRadius: 20, padding: '36px 44px',
+            display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '12px',
+            boxShadow: '0 25px 80px rgba(0,0,0,0.35)'
+          }}>
+            <div style={{
+              width: 72, height: 72, borderRadius: '50%',
+              background: success === 'reject' ? 'rgba(220,38,38,0.12)' : 'rgba(5,150,105,0.12)',
+              display: 'flex', alignItems: 'center', justifyContent: 'center'
+            }}>
+              {success === 'reject'
+                ? <AnimatedX size={34} color="#dc2626" />
+                : <AnimatedCheck size={34} color="#059669" />}
+            </div>
+            <p style={{ fontSize: 16, fontWeight: 700, color: 'var(--text-primary)', margin: 0 }}>
+              {success === 'confirm' ? t('admin.confirmed')
+                : success === 'reject' ? t('admin.rejected')
+                : t('admin.deletedRequest')}
+            </p>
+          </div>
+        </div>
+      )}
     </section>
   );
 }

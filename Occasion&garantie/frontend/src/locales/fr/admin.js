@@ -71,6 +71,7 @@
     defaultRejectReason: 'Paiement non valide. Veuillez réessayer avec un virement correct de 50 DH.',
     cancel: 'Annuler',
     rejectRequest: 'Rejeter la demande',
+    deletedRequest: 'Demande supprimée',
     deleteProductTitle: 'Supprimer ce produit ?',
     deleteRequestTitle: 'Supprimer cette demande ?',
     irreversible: 'Cette action est irréversible.',
