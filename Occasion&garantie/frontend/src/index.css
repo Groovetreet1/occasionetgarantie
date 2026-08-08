@@ -471,7 +471,7 @@ input, textarea, select, button { font-family: inherit; }
   content: ''; position: absolute; bottom: 2px; left: 50%; transform: translateX(-50%);
   width: 20px; height: 2px; background: var(--primary); border-radius: 1px;
 }
-.navbar-actions { display: flex; align-items: center; gap: 12px; flex-shrink: 0; justify-self: end; }
+.navbar-actions { display: flex; align-items: center; gap: 12px; flex-shrink: 0; justify-self: end; grid-column: 3; }
 .navbar-auth { display: flex; align-items: center; gap: 8px; }
 .navbar-login {
   padding: 8px 18px; border-radius: 8px; color: var(--text-secondary);
