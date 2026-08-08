@@ -107,6 +107,61 @@ export default function Products() {
             <input type="text" placeholder={t('products.searchPlaceholder')} value={search} onChange={e => setSearch(e.target.value)} />
             <button type="submit">{t('products.searchBtn')}</button>
           </motion.form>
+
+          <motion.div initial="hidden" animate="show" variants={fadeUp} className="products-hero-toolbar">
+            <button className={`btn ${hasFilters ? 'btn-primary' : 'btn-outline'}`} onClick={() => setShowFilters(o => !o)}>
+              <FiSliders size={14} /> {t('products.filters')}{hasFilters ? ` (${[category !== 'Tous', stateFilter !== 'Tous', !!ville, !!priceMin || !!priceMax].filter(Boolean).length})` : ''}
+            </button>
+            {hasFilters && (
+              <button className="btn-filter-reset" onClick={resetFilters}>{t('products.reset')}</button>
+            )}
+            <span className="products-count">{filtered.length} {filtered.length > 1 ? t('products.results') : t('products.result')}</span>
+          </motion.div>
+
+          {showFilters && (
+            <motion.div initial={{ opacity: 0, y: -8 }} animate={{ opacity: 1, y: 0 }} className="filters-panel">
+              <div className="filters-header">
+                <span className="filters-title">{t('products.filtersTitle')}</span>
+                <button className="filters-close" onClick={() => setShowFilters(false)}><FiX size={18} /></button>
+              </div>
+              <div className="filters-body">
+                <div className="filter-group">
+                  <label className="filter-label">{t('products.filterCategory')}</label>
+                  <div className="filter-chips">
+                    {CATEGORIES.map(c => (
+                      <button key={c} className={`filter-chip${category === c ? ' active' : ''}`} onClick={() => setCategory(c)}>{c === 'Tous' ? t('products.all') : c}</button>
+                    ))}
+                  </div>
+                </div>
+                <div className="filter-group">
+                  <label className="filter-label">{t('products.filterState')}</label>
+                  <div className="filter-chips">
+                    <button className={`filter-chip${stateFilter === 'Tous' ? ' active' : ''}`} onClick={() => setStateFilter('Tous')}>{t('products.all')}</button>
+                    {Object.entries(STATE_LABELS).map(([val, label]) => (
+                      <button key={val} className={`filter-chip${stateFilter === val ? ' active' : ''}`} onClick={() => setStateFilter(val)}>{t(label)}</button>
+                    ))}
+                  </div>
+                </div>
+                <div className="filter-group">
+                  <label className="filter-label">{t('products.filterCity')}</label>
+                  <div className="filter-chips">
+                    <button className={`filter-chip${ville === '' ? ' active' : ''}`} onClick={() => setVille('')}>{t('products.allCities')}</button>
+                    {cities.map(c => (
+                      <button key={c} className={`filter-chip${ville === c ? ' active' : ''}`} onClick={() => setVille(c)}>{c}</button>
+                    ))}
+                  </div>
+                </div>
+                <div className="filter-group">
+                  <label className="filter-label">{t('products.filterPrice')}</label>
+                  <div className="filter-price-row">
+                    <input type="number" placeholder={t('products.priceMin')} value={priceMin} onChange={e => setPriceMin(e.target.value)} className="filter-price-input" min="0" />
+                    <span style={{ color: 'var(--text-muted)' }}>—</span>
+                    <input type="number" placeholder={t('products.priceMax')} value={priceMax} onChange={e => setPriceMax(e.target.value)} className="filter-price-input" min="0" />
+                  </div>
+                </div>
+              </div>
+            </motion.div>
+          )}
         </div>
       </div>
 
@@ -141,68 +196,9 @@ export default function Products() {
           </motion.div>
         )}
 
-        <motion.div className="products-categories" initial="hidden" animate="show" variants={fadeUp}>
-          {CATEGORIES.map(c => (
-            <button key={c} className={`cat-pill ${category === c ? 'active' : ''}`} onClick={() => { setCategory(c); setVisibleCount(12); }}>
-              {c === 'Tous' ? t('products.all') : c}
-            </button>
-          ))}
-        </motion.div>
-
         <div className="products-toolbar">
-          <button className={`btn ${hasFilters ? 'btn-primary' : 'btn-outline'}`} onClick={() => setShowFilters(o => !o)}>
-            <FiSliders size={14} /> {t('products.filters')}{hasFilters ? ` (${[category !== 'Tous', stateFilter !== 'Tous', !!ville, !!priceMin || !!priceMax].filter(Boolean).length})` : ''}
-          </button>
-          {hasFilters && (
-            <button className="btn-filter-reset" onClick={resetFilters}>{t('products.reset')}</button>
-          )}
           <span className="products-count">{filtered.length} {filtered.length > 1 ? t('products.results') : t('products.result')}</span>
         </div>
-
-        {showFilters && (
-          <motion.div initial={{ opacity: 0, y: -8 }} animate={{ opacity: 1, y: 0 }} className="filters-panel">
-            <div className="filters-header">
-              <span className="filters-title">{t('products.filtersTitle')}</span>
-              <button className="filters-close" onClick={() => setShowFilters(false)}><FiX size={18} /></button>
-            </div>
-            <div className="filters-body">
-              <div className="filter-group">
-                <label className="filter-label">{t('products.filterCategory')}</label>
-                <div className="filter-chips">
-                  {CATEGORIES.map(c => (
-                    <button key={c} className={`filter-chip${category === c ? ' active' : ''}`} onClick={() => setCategory(c)}>{c === 'Tous' ? t('products.all') : c}</button>
-                  ))}
-                </div>
-              </div>
-              <div className="filter-group">
-                <label className="filter-label">{t('products.filterState')}</label>
-                <div className="filter-chips">
-                  <button className={`filter-chip${stateFilter === 'Tous' ? ' active' : ''}`} onClick={() => setStateFilter('Tous')}>{t('products.all')}</button>
-                  {Object.entries(STATE_LABELS).map(([val, label]) => (
-                    <button key={val} className={`filter-chip${stateFilter === val ? ' active' : ''}`} onClick={() => setStateFilter(val)}>{t(label)}</button>
-                  ))}
-                </div>
-              </div>
-              <div className="filter-group">
-                <label className="filter-label">{t('products.filterCity')}</label>
-                <div className="filter-chips">
-                  <button className={`filter-chip${ville === '' ? ' active' : ''}`} onClick={() => setVille('')}>{t('products.allCities')}</button>
-                  {cities.map(c => (
-                    <button key={c} className={`filter-chip${ville === c ? ' active' : ''}`} onClick={() => setVille(c)}>{c}</button>
-                  ))}
-                </div>
-              </div>
-              <div className="filter-group">
-                <label className="filter-label">{t('products.filterPrice')}</label>
-                <div className="filter-price-row">
-                  <input type="number" placeholder={t('products.priceMin')} value={priceMin} onChange={e => setPriceMin(e.target.value)} className="filter-price-input" min="0" />
-                  <span style={{ color: 'var(--text-muted)' }}>—</span>
-                  <input type="number" placeholder={t('products.priceMax')} value={priceMax} onChange={e => setPriceMax(e.target.value)} className="filter-price-input" min="0" />
-                </div>
-              </div>
-            </div>
-          </motion.div>
-        )}
 
         {loading ? (
           <div className="products-loading"><div className="spinner" /></div>

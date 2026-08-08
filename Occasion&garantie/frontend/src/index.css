@@ -813,6 +813,10 @@ input, textarea, select, button { font-family: inherit; }
 }
 .products-page-search button:hover { opacity: 0.9; }
 
+.products-hero-toolbar { display: flex; align-items: center; justify-content: center; gap: 10px; margin-top: 14px; flex-wrap: wrap; }
+.products-hero-toolbar .btn { padding: 8px 16px; font-size: 13px; }
+.products-hero-toolbar .products-count { margin-left: 0; }
+
 .products-page-body { padding: 28px 0 80px; }
 
 /* Category pills */
@@ -836,7 +840,9 @@ input, textarea, select, button { font-family: inherit; }
 .filters-panel {
   background: var(--bg-card); border: 1px solid var(--border);
   border-radius: var(--radius-lg); padding: 20px; margin-bottom: 24px;
+  text-align: left;
 }
+.products-page-hero .filters-panel { max-width: 560px; margin: 14px auto 0; }
 .filters-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 16px; }
 .filters-title { font-weight: 700; font-size: 15px; }
 .filters-close { background: none; border: none; color: var(--text-muted); cursor: pointer; padding: 4px; border-radius: 6px; }
@@ -1010,6 +1016,7 @@ input, textarea, select, button { font-family: inherit; }
   .products-categories { gap: 6px; margin-bottom: 14px; }
   .cat-pill { font-size: 12px; padding: 5px 14px; }
   .products-page-search { max-width: 100%; }
+  .products-hero-toolbar { gap: 6px; margin-top: 12px; }
 }
 @media (max-width: 480px) {
   .product-grid-modern { grid-template-columns: repeat(2, 1fr); gap: 8px; }
