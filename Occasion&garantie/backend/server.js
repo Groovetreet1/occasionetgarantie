@@ -199,6 +199,12 @@ const seo = require('./services/seo');
   app.use(express.static(path.join(__dirname, 'public')));
   app.get('/favicon.ico', (req, res) => res.redirect(301, '/favicon.png'));
 
+  app.get('/demo', (req, res) => res.redirect('/demo/marketing-demo-embedded.html'));
+  app.get('/demo/full', (req, res) => res.redirect('/demo/marketing-demo-site.html'));
+  app.use('/demo', express.static(path.join(__dirname, 'demo')));
+  app.get('/marketing-demo-embedded.html', (req, res) => res.redirect('/demo'));
+  app.get('/marketing-demo-site.html', (req, res) => res.redirect('/demo/full'));
+
   app.use('/api/auth', authLimiter, authRoutes);
   app.use('/api/products', productRoutes);
   app.use('/api/categories', categoryRoutes);

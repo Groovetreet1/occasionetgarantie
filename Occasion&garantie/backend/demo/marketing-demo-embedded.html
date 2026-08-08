@@ -1,0 +1,36 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Occasion &amp; Garantie — Démo interactive</title>
+<style>
+:root{--gold:#d9a83c;--p:#f59e0b;--bg:#05060b;--line:rgba(255,255,255,.09)}
+*{margin:0;padding:0;box-sizing:border-box}
+html,body{height:100%;background:var(--bg);font-family:'Inter',-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;color:#fff;overflow:hidden}
+.d-head{position:relative;z-index:3;height:56px;display:flex;align-items:center;gap:12px;padding:0 16px;background:rgba(10,11,20,.95);border-bottom:1px solid var(--line);backdrop-filter:blur(10px)}
+.d-logo{width:30px;height:30px;border-radius:8px;object-fit:cover;flex:none}
+.d-name{font-weight:800;font-size:14px;letter-spacing:.2px;white-space:nowrap;display:flex;align-items:center;gap:8px}
+.d-name b{color:var(--gold)}
+.d-name .d-tag{font-weight:600;color:#8a90a8;font-size:11.5px;border:1px solid var(--line);border-radius:100px;padding:3px 9px}
+.d-spacer{flex:1}
+.d-cta{display:inline-flex;align-items:center;gap:7px;font-size:12.5px;font-weight:700;color:#0b0c14;background:linear-gradient(135deg,var(--gold),var(--p));padding:8px 15px;border-radius:100px;text-decoration:none;box-shadow:0 6px 20px rgba(217,168,60,.35);white-space:nowrap;transition:filter .2s,transform .2s}
+.d-cta:hover{filter:brightness(1.09);transform:translateY(-1px)}
+iframe{position:absolute;inset:56px 0 0;width:100%;height:calc(100% - 56px);border:0;display:block;background:var(--bg)}
+@media (max-width:560px){
+  .d-name .d-tag{display:none}
+  .d-head{padding:0 12px;gap:9px}
+  .d-cta{padding:7px 12px;font-size:12px}
+}
+</style>
+</head>
+<body>
+<header class="d-head">
+  <img class="d-logo" src="marketing-demo-logo.png" alt="Occasion & Garantie">
+  <div class="d-name">Occasion &amp; <b>Garantie</b> <span class="d-tag">Démo interactive</span></div>
+  <div class="d-spacer"></div>
+  <a class="d-cta" href="https://www.occasionetgarantie.store" target="_blank" rel="noopener">Voir le site →</a>
+</header>
+<iframe allow="autoplay" title="Démo interactive Occasion & Garantie" src="marketing-demo-site.html"></iframe>
+</body>
+</html>

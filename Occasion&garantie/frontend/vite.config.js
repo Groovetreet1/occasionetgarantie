@@ -13,7 +13,8 @@ export default defineConfig({
     port: 4001,
     proxy: {
       '/api': 'http://localhost:5000',
-      '/uploads': 'http://localhost:5000'
+      '/uploads': 'http://localhost:5000',
+      '/demo': 'http://localhost:5000'
     }
   },
   build: {
