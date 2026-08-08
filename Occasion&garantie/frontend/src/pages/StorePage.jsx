@@ -43,7 +43,7 @@ export default function StorePage() {
                 <div className="product-card-image" style={{ position: 'relative', background: 'var(--bg-secondary)', aspectRatio: '1/1', display: 'flex', alignItems: 'center', justifyContent: 'center', overflow: 'hidden' }}>
                   {p.image ? <img src={p.image} alt={p.name} style={{ width: '100%', height: '100%', objectFit: 'contain', transition: 'transform 0.3s' }} /> : <FiShoppingBag size={48} style={{ opacity: 0.15 }} />}
                   <span style={{ position: 'absolute', top: 8, left: 8, background: 'var(--primary)', color: '#fff', fontSize: 10, fontWeight: 700, padding: '2px 8px', borderRadius: 6 }}>{p.category_name}</span>
-                  {p.featured && <span style={{ position: 'absolute', top: 8, right: 8, background: '#d97706', color: '#fff', fontSize: 10, fontWeight: 700, padding: '2px 8px', borderRadius: 6 }}><FiStar size={10} style={{ marginRight: 2 }} /> {t('shop.official')}</span>}
+                  {!!p.featured && <span style={{ position: 'absolute', top: 8, right: 8, background: '#d97706', color: '#fff', fontSize: 10, fontWeight: 700, padding: '2px 8px', borderRadius: 6 }}><FiStar size={10} style={{ marginRight: 2 }} /> {t('shop.official')}</span>}
                 </div>
                 <div className="product-card-info" style={{ padding: '12px' }}>
                   <h3 style={{ fontSize: 14, fontWeight: 600, margin: 0, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{p.name}</h3>
