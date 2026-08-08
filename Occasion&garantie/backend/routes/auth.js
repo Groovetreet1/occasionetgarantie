@@ -243,7 +243,7 @@ router.post('/login', [
     logVendorAction({ userId: user.id, action: 'connexion', ip, userAgent: req.headers['user-agent'], latitude, longitude });
     res.json({
       token,
-      user: { id: user.id, fullName: user.full_name, email: user.email, phone: user.phone, role: user.role, phoneVerified: true }
+      user: { id: user.id, fullName: user.full_name, email: user.email, phone: user.phone, role: user.role, phoneVerified: true, premium: !!user.premium, premium_expires_at: user.premium_expires_at }
     });
   } catch (err) {
     res.status(500).json({ message: 'Erreur serveur.' });
