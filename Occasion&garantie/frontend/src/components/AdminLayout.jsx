@@ -52,17 +52,7 @@ export default function AdminLayout() {
   return (
     <div className={`admin-shell ${collapsed ? 'collapsed' : ''}`}>
       <aside className="admin-sidebar">
-        <div className="admin-sidebar-head">
-          <button
-            className="admin-sidebar-toggle"
-            onClick={() => setCollapsed(c => !c)}
-            aria-label="Toggle sidebar"
-          >
-            {collapsed
-              ? <FiChevronsRight size={18} style={{ transform: dir === 'rtl' ? 'rotate(180deg)' : 'none' }} />
-              : <FiChevronsLeft size={18} style={{ transform: dir === 'rtl' ? 'rotate(180deg)' : 'none' }} />}
-          </button>
-        </div>
+        <div className="admin-sidebar-head" />
         <nav className="admin-sidebar-nav">
           {nav.map(item => {
             const Icon = item.icon;
@@ -81,6 +71,15 @@ export default function AdminLayout() {
           })}
         </nav>
       </aside>
+      <button
+        className="admin-sidebar-toggle"
+        onClick={() => setCollapsed(c => !c)}
+        aria-label="Toggle sidebar"
+      >
+        {collapsed
+          ? <FiChevronsRight size={18} style={{ transform: dir === 'rtl' ? 'rotate(180deg)' : 'none' }} />
+          : <FiChevronsLeft size={18} style={{ transform: dir === 'rtl' ? 'rotate(180deg)' : 'none' }} />}
+      </button>
       <main className="admin-main">
         <AnimatePresence mode="wait">
           <motion.div
