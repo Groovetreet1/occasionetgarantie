@@ -3,6 +3,7 @@ import { Link } from 'react-router-dom';
 import { FiArrowLeft, FiShoppingBag, FiChevronRight, FiShield, FiStar } from 'react-icons/fi';
 import api from '../api/axios';
 import { useLanguage } from '../context/LanguageContext';
+import usePageMeta from '../utils/usePageMeta';
 
 const stateLabels = { neuf: 'products.stateNeuf', comme_neuf: 'products.stateCommeNeuf', tres_bon: 'products.stateTresBon', bon: 'products.stateBon', acceptable: 'products.stateAcceptableFull' };
 const formatPrice = (p) => new Intl.NumberFormat('fr-FR', { style: 'currency', currency: 'MAD' }).format(p).replace('MAD', '').trim() + ' DH';
@@ -16,6 +17,12 @@ export default function StorePage() {
   useEffect(() => {
     api.get('/store/products?limit=50').then(r => setProducts(r.data.products)).catch(() => {}).finally(() => setLoading(false));
   }, []);
+  usePageMeta({
+    title: "Boutique Officielle - Electronique d'occasion - Occasion & Garantie",
+    description: "La Boutique Officielle Occasion & Garantie : produits electroniques d'occasion verifies, testes et garantis, disponibles au Maroc.",
+    keywords: 'boutique officielle, occasion, garantie, maroc, smartphone, electronique',
+    canonical: 'https://www.occasionetgarantie.store/boutique',
+  });
 
   return (
     <section className="products-section" style={{ paddingTop: '100px', paddingBottom: '60px' }}>

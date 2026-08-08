@@ -18,6 +18,7 @@ const chatRoutes = require('./routes/chat');
 const contactRoutes = require('./routes/contact');
 const pool = require('./config/db');
 const { ensureTables } = require('./services/tracker');
+const seo = require('./services/seo');
 
 (async () => {
   await ensureTables();
@@ -165,6 +166,34 @@ const { ensureTables } = require('./services/tracker');
   app.use(cors({ origin: process.env.CLIENT_URL || 'http://localhost:5173' }));
   app.use(express.json({ limit: '10mb' }));
   app.use('/api/', limiter);
+
+  app.get('/robots.txt', (req, res) => {
+    res.type('text/plain').send(`User-agent: *\nAllow: /\n\nSitemap: ${seo.SITE_URL}/sitemap.xml\n`);
+  });
+
+  app.get('/sitemap.xml', async (req, res) => {
+    try {
+      const xml = await seo.buildSitemap();
+      res.type('application/xml').send(xml);
+    } catch (err) {
+      console.error('sitemap failed:', err.message);
+      res.type('application/xml').send('<?xml version="1.0" encoding="UTF-8"?><urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9"></urlset>');
+    }
+  });
+
+  app.use(async (req, res, next) => {
+    if (req.method !== 'GET') return next();
+    if (req.path.startsWith('/api') || req.path.startsWith('/uploads') || req.path.includes('.')) return next();
+    if (!seo.isCrawler(req.get('user-agent'))) return next();
+    try {
+      const meta = await seo.buildMeta(req);
+      const html = seo.renderSeoHtml(meta);
+      if (html) return res.type('html').send(html);
+    } catch (err) {
+      console.error('SEO prerender failed:', err.message);
+    }
+    next();
+  });
 
   app.use('/uploads', express.static(path.join(__dirname, 'uploads')));
   app.use(express.static(path.join(__dirname, 'public')));

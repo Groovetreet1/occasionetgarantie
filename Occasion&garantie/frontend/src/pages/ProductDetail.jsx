@@ -5,6 +5,7 @@ import api from '../api/axios';
 import { useAuth } from '../context/AuthContext';
 import { useLanguage } from '../context/LanguageContext';
 import SellerRating from '../components/SellerRating';
+import usePageMeta, { formatDh } from '../utils/usePageMeta';
 
 const stateLabels = {
   neuf: 'products.stateNeuf',
@@ -98,6 +99,33 @@ export default function ProductDetail() {
       alert(err.response?.data?.message || t('products.errorGeneric'));
     }
   };
+
+  usePageMeta({
+    title: product
+      ? `${product.name} - ${formatDh(product.price)} | Occasion & Garantie`
+      : "Occasion & Garantie - Acheter et vendre de l'electronique d'occasion au Maroc",
+    description: product
+      ? `${product.name}${product.brand ? ` (${product.brand})` : ''} d'occasion a ${formatDh(product.price)}${product.ville ? ` a ${product.ville}` : ''} au Maroc avec garantie. Achetez en toute securite sur Occasion & Garantie.`
+      : undefined,
+    keywords: product ? `${product.name}, ${product.brand || ''}, ${product.category_name || ''}, occasion, ${product.ville || 'maroc'}, garantie` : undefined,
+    image: product?.image || undefined,
+    canonical: product ? `https://www.occasionetgarantie.store/products/${product.slug}` : undefined,
+    jsonLd: product ? [{
+      '@context': 'https://schema.org',
+      '@type': 'Product',
+      name: product.name,
+      image: product.image,
+      description: (product.description || '').slice(0, 300),
+      brand: product.brand ? { '@type': 'Brand', name: product.brand } : undefined,
+      offers: {
+        '@type': 'Offer',
+        priceCurrency: 'MAD',
+        price: Number(product.price),
+        availability: 'https://schema.org/InStock',
+        itemCondition: product.state === 'neuf' ? 'https://schema.org/NewCondition' : 'https://schema.org/UsedCondition',
+      },
+    }] : undefined,
+  });
 
   if (loading) return <div className="auth-page"><div className="spinner" /></div>;
 

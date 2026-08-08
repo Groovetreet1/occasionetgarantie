@@ -11,6 +11,7 @@ import PromoPopup from '../components/PromoPopup';
 import GoMobileTicker from '../components/GoMobileTicker';
 import GoMobileFadeBar from '../components/GoMobileFadeBar';
 import { useLanguage } from '../context/LanguageContext';
+import usePageMeta from '../utils/usePageMeta';
 
 const fadeUp = { hidden: { opacity: 0, y: 40 }, show: { opacity: 1, y: 0, transition: { duration: 0.5 } } };
 const stagger = { hidden: {}, show: { transition: { staggerChildren: 0.1 } } };
@@ -100,6 +101,21 @@ export default function Home() {
     document.addEventListener('mousedown', handleClickOutside);
     return () => document.removeEventListener('mousedown', handleClickOutside);
   }, []);
+
+  usePageMeta({
+    title: "Occasion & Garantie - Acheter et vendre de l'electronique d'occasion au Maroc",
+    description: "Occasion & Garantie : marketplace marocaine de produits electroniques d'occasion. Achetez et vendez smartphones, tablettes, PC, gaming et accessoires tech en toute securite.",
+    keywords: 'occasion, garantie, maroc, casablanca, smartphone, iphone, samsung, xiaomi, tablette, pc, gaming, electronique, reconditionne',
+    image: '/logo.png',
+    canonical: 'https://www.occasionetgarantie.store/',
+    jsonLd: [{
+      '@context': 'https://schema.org',
+      '@type': 'WebSite',
+      name: 'Occasion & Garantie',
+      url: 'https://www.occasionetgarantie.store/',
+      inLanguage: 'fr-MA',
+    }],
+  });
 
   const trimmed = searchTerm.trim();
   useEffect(() => {

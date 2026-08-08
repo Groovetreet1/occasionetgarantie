@@ -4,6 +4,7 @@ import { FiArrowLeft, FiShoppingBag, FiCheck, FiMonitor, FiCpu, FiHardDrive, FiB
 import api from '../api/axios';
 import { useAuth } from '../context/AuthContext';
 import { useLanguage } from '../context/LanguageContext';
+import usePageMeta, { formatDh } from '../utils/usePageMeta';
 
 const stateLabels = { neuf: 'products.stateNeuf', comme_neuf: 'products.stateCommeNeuf', tres_bon: 'products.stateTresBon', bon: 'products.stateBon', acceptable: 'products.stateAcceptableFull' };
 const specIcons = { Ecran: FiMonitor, Processeur: FiCpu, RAM: FiHardDrive, Stockage: FiHardDrive, Batterie: FiBattery, Appareil: FiCamera, Couleur: FiDroplet, GPU: FiMonitor, OS: FiMonitor };
@@ -62,6 +63,33 @@ export default function StoreProductDetail() {
   const closeLightbox = () => setSelectedImage(null);
   const prevImage = () => setLightboxIndex(i => (i - 1 + allImages.length) % allImages.length);
   const nextImage = () => setLightboxIndex(i => (i + 1) % allImages.length);
+
+  usePageMeta({
+    title: product
+      ? `${product.name} - ${formatDh(product.price)} de la Boutique Officielle | Occasion & Garantie`
+      : 'Boutique Officielle - Occasion & Garantie',
+    description: product
+      ? `${product.name}${product.brand ? ` (${product.brand})` : ''} d'occasion a ${formatDh(product.price)}${product.ville ? ` a ${product.ville}` : ''} au Maroc. Produit verifie, teste et garanti par la Boutique Officielle Occasion & Garantie.`
+      : undefined,
+    keywords: product ? `${product.name}, ${product.brand || ''}, boutique officielle, occasion, garantie, maroc` : undefined,
+    image: product?.image || undefined,
+    canonical: product ? `https://www.occasionetgarantie.store/boutique/${product.slug}` : undefined,
+    jsonLd: product ? [{
+      '@context': 'https://schema.org',
+      '@type': 'Product',
+      name: product.name,
+      image: product.image,
+      description: (product.description || '').slice(0, 300),
+      brand: product.brand ? { '@type': 'Brand', name: product.brand } : undefined,
+      offers: {
+        '@type': 'Offer',
+        priceCurrency: 'MAD',
+        price: Number(product.price),
+        availability: 'https://schema.org/InStock',
+        itemCondition: product.state === 'neuf' ? 'https://schema.org/NewCondition' : 'https://schema.org/UsedCondition',
+      },
+    }] : undefined,
+  });
 
   if (loading) return <div className="auth-page"><div className="spinner" /></div>;
   if (!product) return <div className="auth-page"><div className="empty-state"><div className="icon"><FiShoppingBag size={48} /></div><h2>{t('shop.notFound')}</h2><Link to="/boutique" className="btn btn-primary" style={{ marginTop: 16 }}><FiArrowLeft /> {t('shop.backToStore')}</Link></div></div>;

@@ -6,6 +6,7 @@ import api from '../api/axios';
 import { useAuth } from '../context/AuthContext';
 import { useLanguage } from '../context/LanguageContext';
 import GoMobileTicker from '../components/GoMobileTicker';
+import usePageMeta from '../utils/usePageMeta';
 
 function yearsSince(dateStr, t) {
   const years = (new Date() - new Date(dateStr)) / (365.25 * 86400000);
@@ -24,6 +25,13 @@ export default function About() {
   useEffect(() => {
     api.get('/public/stats').then(r => setSiteStats(r.data)).catch(() => {});
   }, []);
+
+  usePageMeta({
+    title: "A propos - Occasion & Garantie | L'electronique d'occasion au Maroc",
+    description: "Decouvrez Occasion & Garantie : la plateforme marocaine dediee a l'achat et la vente de produits electroniques d'occasion avec garantie.",
+    keywords: 'a propos, occasion et garantie, maroc, plateforme',
+    canonical: 'https://www.occasionetgarantie.store/about',
+  });
 
   const handleContactSubmit = async (e) => {
     e.preventDefault();

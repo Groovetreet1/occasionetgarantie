@@ -7,6 +7,7 @@ import api from '../api/axios';
 import HomeProductCard from '../components/HomeProductCard';
 import GoMobileFadeBar from '../components/GoMobileFadeBar';
 import { useLanguage } from '../context/LanguageContext';
+import usePageMeta from '../utils/usePageMeta';
 
 const STATE_LABELS = {
   neuf: 'products.stateNeuf', comme_neuf: 'products.stateCommeNeuf', tres_bon: 'products.stateTresBon',
@@ -93,6 +94,20 @@ export default function Products() {
       .catch(() => {})
       .finally(() => setLoading(false));
   };
+
+  const metaCategory = category !== 'Tous' ? category : null;
+  const metaSearch = !metaCategory && search ? search : null;
+  const metaLabel = metaCategory || metaSearch || null;
+  usePageMeta({
+    title: metaLabel
+      ? `${metaLabel.charAt(0).toUpperCase() + metaLabel.slice(1)} d'occasion au Maroc - Occasion & Garantie`
+      : "Tous les produits electroniques d'occasion au Maroc - Occasion & Garantie",
+    description: metaLabel
+      ? `Achetez des ${metaLabel.toLowerCase()} d'occasion au Maroc avec garantie sur Occasion & Garantie.`
+      : "Parcourez des centaines de smartphones, tablettes, PC et accessoires d'occasion au Maroc. Achetez en toute securite avec garantie.",
+    keywords: metaLabel ? `${metaLabel}, occasion, maroc, garantie, electronique` : 'occasion, maroc, smartphone, tablette, pc, accessoires, gaming',
+    canonical: `https://www.occasionetgarantie.store/products${window.location.search}`,
+  });
 
   return (
     <section className="products-page">

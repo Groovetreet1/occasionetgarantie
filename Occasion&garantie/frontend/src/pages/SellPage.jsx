@@ -5,6 +5,7 @@ import { FiTrendingUp, FiSmartphone, FiDollarSign, FiShield, FiUsers, FiCheckCir
 import { useAuth } from '../context/AuthContext';
 import { useLanguage } from '../context/LanguageContext';
 import api from '../api/axios';
+import usePageMeta from '../utils/usePageMeta';
 
 const fadeUp = { hidden: { opacity: 0, y: 40 }, show: { opacity: 1, y: 0, transition: { duration: 0.5 } } };
 const stagger = { hidden: {}, show: { transition: { staggerChildren: 0.1 } } };
@@ -49,6 +50,13 @@ export default function SellPage() {
       setLoading(false);
     }
   };
+
+  usePageMeta({
+    title: "Vendre votre electronique d'occasion au Maroc - Occasion & Garantie",
+    description: "Vendez vos smartphones, tablettes, PC et accessoires d'occasion au Maroc en toute securite sur Occasion & Garantie. Inscription gratuite.",
+    keywords: 'vendre, occasion, maroc, smartphone, electronique',
+    canonical: 'https://www.occasionetgarantie.store/vendre',
+  });
 
   return (
     <motion.div initial="hidden" animate="show" className="sell-page">
