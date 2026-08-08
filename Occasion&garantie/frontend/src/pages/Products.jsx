@@ -107,19 +107,60 @@ export default function Products() {
             <input type="text" placeholder={t('products.searchPlaceholder')} value={search} onChange={e => setSearch(e.target.value)} />
             <button type="submit">{t('products.searchBtn')}</button>
           </motion.form>
+        </div>
+      </div>
 
-          <motion.div initial="hidden" animate="show" variants={fadeUp} className="products-hero-toolbar">
-            <button className={`btn ${hasFilters ? 'btn-primary' : 'btn-outline'}`} onClick={() => setShowFilters(o => !o)}>
-              <FiSliders size={14} /> {t('products.filters')}{hasFilters ? ` (${[category !== 'Tous', stateFilter !== 'Tous', !!ville, !!priceMin || !!priceMax].filter(Boolean).length})` : ''}
-            </button>
-            {hasFilters && (
-              <button className="btn-filter-reset" onClick={resetFilters}>{t('products.reset')}</button>
-            )}
-            <span className="products-count">{filtered.length} {filtered.length > 1 ? t('products.results') : t('products.result')}</span>
+      <GoMobileFadeBar />
+
+      <div className="products-page-body container">
+        {storeProducts.length > 0 && !search && (
+          <motion.div initial="hidden" animate="show" variants={fadeUp} style={{ marginBottom: 32, padding: '20px 24px', background: 'rgba(245,158,11,0.04)', border: '1px solid rgba(245,158,11,0.12)', borderRadius: 'var(--radius-lg)' }}>
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 16 }}>
+              <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+                <FiShield style={{ color: '#d97706' }} />
+                <span style={{ fontWeight: 700, fontSize: 16 }}>{t('products.storeOfficial')}</span>
+                <span style={{ fontSize: 12, color: 'var(--text-secondary)' }}>{t('products.storeSoldBy')}</span>
+              </div>
+              <Link to="/boutique" style={{ fontSize: 13, color: '#d97706', fontWeight: 600, textDecoration: 'none' }}>{t('products.viewAll')} <FiArrowRight size={14} style={{ verticalAlign: 'middle' }} /></Link>
+            </div>
+            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(160px, 1fr))', gap: 12 }}>
+              {storeProducts.slice(0, 6).map(p => (
+                <Link key={p.id} to={`/boutique/${p.slug}`} style={{ textDecoration: 'none', background: 'var(--bg-card)', borderRadius: 'var(--radius)', overflow: 'hidden', border: '1px solid var(--border)', transition: 'transform 0.2s', display: 'block' }}
+                  onMouseEnter={e => e.currentTarget.style.transform = 'translateY(-2px)'}
+                  onMouseLeave={e => e.currentTarget.style.transform = 'none'}>
+                  <div style={{ aspectRatio: '1/1', background: 'var(--bg-secondary)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                    {p.image ? <img src={p.image} alt={p.name} style={{ width: '100%', height: '100%', objectFit: 'contain' }} /> : <FiShoppingBag size={32} style={{ opacity: 0.2 }} />}
+                  </div>
+                  <div style={{ padding: 10 }}>
+                    <div style={{ fontSize: 13, fontWeight: 600, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{p.name}</div>
+                    <div style={{ fontSize: 15, fontWeight: 700, color: 'var(--primary)', marginTop: 4 }}>{new Intl.NumberFormat('fr-FR', { style: 'currency', currency: 'MAD' }).format(p.price).replace('MAD', '').trim()} DH</div>
+                  </div>
+                </Link>
+              ))}
+            </div>
           </motion.div>
+        )}
 
-          {showFilters && (
-            <motion.div initial={{ opacity: 0, y: -8 }} animate={{ opacity: 1, y: 0 }} className="filters-panel">
+        <div className="products-toolbar">
+          <button className={`btn ${hasFilters ? 'btn-primary' : 'btn-outline'}`} onClick={() => setShowFilters(true)}>
+            <FiSliders size={14} /> {t('products.filters')}{hasFilters ? ` (${[category !== 'Tous', stateFilter !== 'Tous', !!ville, !!priceMin || !!priceMax].filter(Boolean).length})` : ''}
+          </button>
+          {hasFilters && (
+            <button className="btn-filter-reset" onClick={resetFilters}>{t('products.reset')}</button>
+          )}
+          <span className="products-count">{filtered.length} {filtered.length > 1 ? t('products.results') : t('products.result')}</span>
+        </div>
+
+        {showFilters && (
+          <div className="filters-overlay" onClick={() => setShowFilters(false)}>
+            <motion.div
+              className="filters-popup"
+              initial={{ opacity: 0, y: 12, scale: 0.97 }}
+              animate={{ opacity: 1, y: 0, scale: 1 }}
+              exit={{ opacity: 0, y: 12, scale: 0.97 }}
+              transition={{ duration: 0.18 }}
+              onClick={e => e.stopPropagation()}
+            >
               <div className="filters-header">
                 <span className="filters-title">{t('products.filtersTitle')}</span>
                 <button className="filters-close" onClick={() => setShowFilters(false)}><FiX size={18} /></button>
@@ -161,44 +202,8 @@ export default function Products() {
                 </div>
               </div>
             </motion.div>
-          )}
-        </div>
-      </div>
-
-      <GoMobileFadeBar />
-
-      <div className="products-page-body container">
-        {storeProducts.length > 0 && !search && (
-          <motion.div initial="hidden" animate="show" variants={fadeUp} style={{ marginBottom: 32, padding: '20px 24px', background: 'rgba(245,158,11,0.04)', border: '1px solid rgba(245,158,11,0.12)', borderRadius: 'var(--radius-lg)' }}>
-            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 16 }}>
-              <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
-                <FiShield style={{ color: '#d97706' }} />
-                <span style={{ fontWeight: 700, fontSize: 16 }}>{t('products.storeOfficial')}</span>
-                <span style={{ fontSize: 12, color: 'var(--text-secondary)' }}>{t('products.storeSoldBy')}</span>
-              </div>
-              <Link to="/boutique" style={{ fontSize: 13, color: '#d97706', fontWeight: 600, textDecoration: 'none' }}>{t('products.viewAll')} <FiArrowRight size={14} style={{ verticalAlign: 'middle' }} /></Link>
-            </div>
-            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(160px, 1fr))', gap: 12 }}>
-              {storeProducts.slice(0, 6).map(p => (
-                <Link key={p.id} to={`/boutique/${p.slug}`} style={{ textDecoration: 'none', background: 'var(--bg-card)', borderRadius: 'var(--radius)', overflow: 'hidden', border: '1px solid var(--border)', transition: 'transform 0.2s', display: 'block' }}
-                  onMouseEnter={e => e.currentTarget.style.transform = 'translateY(-2px)'}
-                  onMouseLeave={e => e.currentTarget.style.transform = 'none'}>
-                  <div style={{ aspectRatio: '1/1', background: 'var(--bg-secondary)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-                    {p.image ? <img src={p.image} alt={p.name} style={{ width: '100%', height: '100%', objectFit: 'contain' }} /> : <FiShoppingBag size={32} style={{ opacity: 0.2 }} />}
-                  </div>
-                  <div style={{ padding: 10 }}>
-                    <div style={{ fontSize: 13, fontWeight: 600, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{p.name}</div>
-                    <div style={{ fontSize: 15, fontWeight: 700, color: 'var(--primary)', marginTop: 4 }}>{new Intl.NumberFormat('fr-FR', { style: 'currency', currency: 'MAD' }).format(p.price).replace('MAD', '').trim()} DH</div>
-                  </div>
-                </Link>
-              ))}
-            </div>
-          </motion.div>
+          </div>
         )}
-
-        <div className="products-toolbar">
-          <span className="products-count">{filtered.length} {filtered.length > 1 ? t('products.results') : t('products.result')}</span>
-        </div>
 
         {loading ? (
           <div className="products-loading"><div className="spinner" /></div>
