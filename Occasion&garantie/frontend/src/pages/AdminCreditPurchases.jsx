@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
-import { FiCheck, FiX, FiClock, FiArrowLeft, FiCreditCard, FiThumbsDown, FiEye } from 'react-icons/fi';
+import { FiCheck, FiX, FiClock, FiArrowLeft, FiCreditCard, FiThumbsDown, FiEye, FiTrash2 } from 'react-icons/fi';
 import api from '../api/axios';
 import ConfirmModal from '../components/ConfirmModal';
 import DeleteButton from '../components/DeleteButton';
