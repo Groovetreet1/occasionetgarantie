@@ -4,6 +4,7 @@ import { FiArrowLeft, FiUser, FiPlus, FiCopy, FiKey, FiX, FiTrash2 } from 'react
 import api from '../api/axios';
 import ConfirmModal from '../components/ConfirmModal';
 import DeleteButton from '../components/DeleteButton';
+import CircleIconButton from '../components/CircleIconButton';
 import { useLanguage } from '../context/LanguageContext';
 
 export default function AdminManagedVendors() {
@@ -186,9 +187,9 @@ export default function AdminManagedVendors() {
                     <td style={{ fontSize: '12px', color: 'var(--text-muted)' }}>{new Date(v.created_at).toLocaleDateString('fr-FR')}</td>
                     <td>
                       <div style={{ display: 'flex', gap: 4 }}>
-                        <button onClick={() => setResetPwTarget(v)} disabled={resettingId === v.id} className="btn btn-ghost" style={{ color: '#3b82f6', padding: '4px 8px' }} title={t('admin.resetPasswordTitle')}>
+                        <CircleIconButton color="#3b82f6" size="md" onClick={() => setResetPwTarget(v)} disabled={resettingId === v.id} title={t('admin.resetPasswordTitle')}>
                           <FiKey size={15} />
-                        </button>
+                        </CircleIconButton>
                         <DeleteButton onClick={() => setDeleteTarget(v.id)} disabled={deleting === v.id} title={t('admin.delete')} size={14} />
                       </div>
                     </td>

@@ -3,6 +3,7 @@ import { Link } from 'react-router-dom';
 import { FiPlus, FiEdit2, FiPackage, FiArrowLeft, FiStar, FiShield, FiShoppingBag, FiDollarSign, FiEye, FiPhone, FiMessageCircle, FiClock } from 'react-icons/fi';
 import api from '../api/axios';
 import DeleteButton from '../components/DeleteButton';
+import CircleIconButton from '../components/CircleIconButton';
 import { useLanguage } from '../context/LanguageContext';
 
 const stateLabels = { neuf: 'Neuf', comme_neuf: 'Comme neuf', tres_bon: 'Très bon', bon: 'Bon', acceptable: 'Acceptable' };
@@ -226,11 +227,11 @@ export default function AdminStoreProducts() {
                       </td>
                       <td style={{ padding: '8px 6px' }}>
                         <div style={{ display: 'flex', gap: 4 }}>
-                          <Link to={`/boutique/${p.slug}`} target="_blank" style={{ padding: 6, borderRadius: 6, background: 'rgba(59,130,246,0.1)', color: '#3b82f6', display: 'flex', alignItems: 'center' }}>
-                            <FiEye size={14} />
+                          <Link to={`/boutique/${p.slug}`} target="_blank" title={t('admin.view')} style={{ display: 'flex', alignItems: 'center' }}>
+                            <CircleIconButton color="#3b82f6" size="md" title={t('admin.view')}><FiEye size={14} /></CircleIconButton>
                           </Link>
-                          <Link to={`/seller/products/edit/${p.id}`} style={{ padding: 6, borderRadius: 6, background: 'rgba(5,150,105,0.1)', color: '#059669', display: 'flex', alignItems: 'center' }}>
-                            <FiEdit2 size={14} />
+                          <Link to={`/seller/products/edit/${p.id}`} title={t('admin.edit')} style={{ display: 'flex', alignItems: 'center' }}>
+                            <CircleIconButton color="#059669" size="md" title={t('admin.edit')}><FiEdit2 size={14} /></CircleIconButton>
                           </Link>
                           <DeleteButton onClick={() => handleDelete(p.id)} disabled={actionId === p.id} size={14} />
                         </div>
