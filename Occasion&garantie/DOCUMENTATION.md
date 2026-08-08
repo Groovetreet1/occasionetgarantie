@@ -42,8 +42,12 @@ occasion-garantie/
     │   ├── components/
     │   │   ├── Navbar.jsx
     │   │   ├── AdminRoute.jsx
-    │   │   └── SellerRoute.jsx
-    │   └── pages/            # Toutes les pages
+    │   │   ├── SellerRoute.jsx
+    │   │   ├── GoMobileTicker.jsx   # شريط إعلاني متحرك GoMobile
+    │   │   ├── GoMobileFadeBar.jsx  # شريط إعلاني بتأثير الظهور/الاختفاء
+    │   │   └── GoMobileBanner.jsx   # بانر سفلي يظهر بعد 8 ثواني
+    │   ├── locales/            # الترجمات (fr / ar)
+    │   └── pages/              # Toutes les pages
     ├── index.css
     └── vite.config.js
 ```
@@ -224,6 +228,16 @@ git push origin main
 ### 5.6 جلسات الدخول (Session)
 - JWT صالح لمدة **6 ساعات**
 - عند انتهاء الجلسة أو خطأ 401 → إعادة توجيه تلقائي إلى `/login`
+
+### 5.7 الإعلانات (GoMobile Ads)
+- إعلانات للمستخدمين العاديين فقط (غير ظاهرة للمستخدمين `premium`)
+- غير ظاهرة في صفحات `/admin`, `/messenger`, `/login`, `/signup`
+- **GoMobileTicker** (شريط متحرك): أسفل قسم «Un téléphone à vendre ?» في الصفحة الرئيسية وأسفل الهيدر في صفحة «À propos»
+- **GoMobileFadeBar** (شريط بظهور/اختفاء): أسفل قسم «Boutique Officielle» في الرئيسية وأسفل الهيدر في صفحة «Products»
+- **GoMobileBanner** (بانر سفلي): يظهر بعد 8 ثواني في كل تنقّل، زر إغلاق ×، في الجوال يظهر كبطاقة تنزلق من الأسفل (bottom sheet)
+- ارتفاع الأشرطة 120px وعرضها محدود بـ `max-width: 1200px`
+- عند مرور الماوس تتوقف الحركة (pause on hover)
+- كل النصوص مترجمة في `locales/fr/common.js` و `locales/ar/common.js` ضمن كائن `ad`
 
 ---
 
@@ -453,6 +467,7 @@ navigator.geolocation.getCurrentPosition(
 | GPS لا يعمل | تأكد من HTTPS (المتصفحات تمنع GPS على HTTP) |
 | 401 عند تسجيل الدخول | تحقق من مدة صلاحية JWT (6h) |
 | خريطة لا تظهر | تحقق من اتصال OpenStreetMap (قد يكون محظورا) |
+| البانر السفلي لا يظهر | تأكد أن المستخدم ليس `premium` وأنه ليس في `/admin` أو `/login` |
 
 ---
 
@@ -464,4 +479,4 @@ navigator.geolocation.getCurrentPosition(
 
 ---
 
-*Documentation générée par opencode - Juillet 2026*
+*Documentation générée par opencode - Août 2026*
