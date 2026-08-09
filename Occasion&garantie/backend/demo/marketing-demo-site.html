@@ -368,9 +368,54 @@ html.v .aubtn{top:14px;right:14px;width:42px;height:42px;font-size:18px}
 html.v .ctl{max-width:96vw;bottom:12px;gap:10px;padding:8px 13px}
 html.v .ctl .btn2{padding:8px 13px;font-size:12px;white-space:nowrap}
 html.v .ctl .cnt{font-size:11px}
+
+.fi{display:inline-block;width:1em;height:1em;flex:none;fill:none;stroke:currentColor;stroke-width:2;stroke-linecap:round;stroke-linejoin:round;vertical-align:-0.14em}
+.pc .im .fi,.d-img .fi{width:1.35em;height:1.35em}
+.bn-act .fi{width:19px;height:19px}
+.mess-send .fi{width:17px;height:17px}
+.side .s-i .fi{width:14px;height:14px}
 </style>
 </head>
-<body><!-- SLIDE 1 : SIGNUP + OTP -->
+<body><svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" style="position:absolute;width:0;height:0;overflow:hidden" aria-hidden="true"><defs>
+<symbol id="fi-shield" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></symbol>
+<symbol id="fi-refresh-cw" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="23 4 23 10 17 10"/><polyline points="1 20 1 14 7 14"/><path d="M3.51 9a9 9 0 0 1 14.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0 0 20.49 15"/></symbol>
+<symbol id="fi-smartphone" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="5" y="2" width="14" height="20" rx="2" ry="2"/><line x1="12" y1="18" x2="12.01" y2="18"/></symbol>
+<symbol id="fi-truck" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="1" y="3" width="15" height="13"/><polygon points="16 8 20 8 23 11 23 16 16 16 16 8"/><circle cx="5.5" cy="18.5" r="2.5"/><circle cx="18.5" cy="18.5" r="2.5"/></symbol>
+<symbol id="fi-trending-up" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="23 6 13.5 15.5 8.5 10.5 1 18"/><polyline points="17 6 23 6 23 12"/></symbol>
+<symbol id="fi-edit-2" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M17 3a2.828 2.828 0 1 1 4 4L7.5 20.5 2 22l1.5-5.5L17 3z"/></symbol>
+<symbol id="fi-edit-3" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 20h9"/><path d="M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4L16.5 3.5z"/></symbol>
+<symbol id="fi-mail" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/><polyline points="22,6 12,13 2,6"/></symbol>
+<symbol id="fi-phone" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72 12.84 12.84 0 0 0 .7 2.81 2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45 12.84 12.84 0 0 0 2.81.7A2 2 0 0 1 22 16.92z"/></symbol>
+<symbol id="fi-send" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="22" y1="2" x2="11" y2="13"/><polygon points="22 2 15 22 11 13 2 9 22 2"/></symbol>
+<symbol id="fi-shopping-bag" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M6 2L3 6v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6l-3-4z"/><line x1="3" y1="6" x2="21" y2="6"/><path d="M16 10a4 4 0 0 1-8 0"/></symbol>
+<symbol id="fi-file-text" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/><polyline points="10 9 9 9 8 9"/></symbol>
+<symbol id="fi-message-circle" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 11.5a8.38 8.38 0 0 1-.9 3.8 8.5 8.5 0 0 1-7.6 4.7 8.38 8.38 0 0 1-3.8-.9L3 21l1.9-5.7a8.38 8.38 0 0 1-.9-3.8 8.5 8.5 0 0 1 4.7-7.6 8.38 8.38 0 0 1 3.8-.9h.5a8.48 8.48 0 0 1 8 8v.5z"/></symbol>
+<symbol id="fi-check-circle" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></symbol>
+<symbol id="fi-bar-chart-2" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="20" x2="18" y2="10"/><line x1="12" y1="20" x2="12" y2="4"/><line x1="6" y1="20" x2="6" y2="14"/></symbol>
+<symbol id="fi-package" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="16.5" y1="9.4" x2="7.5" y2="4.21"/><path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"/><polyline points="3.27 6.96 12 12.01 20.73 6.96"/><line x1="12" y1="22.08" x2="12" y2="12"/></symbol>
+<symbol id="fi-credit-card" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="1" y="4" width="22" height="16" rx="2" ry="2"/><line x1="1" y1="10" x2="23" y2="10"/></symbol>
+<symbol id="fi-user" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></symbol>
+<symbol id="fi-tag" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20.59 13.41l-7.17 7.17a2 2 0 0 1-2.83 0L2 12V2h10l8.59 8.59a2 2 0 0 1 0 2.83z"/><line x1="7" y1="7" x2="7.01" y2="7"/></symbol>
+<symbol id="fi-dollar-sign" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="1" x2="12" y2="23"/><path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/></symbol>
+<symbol id="fi-grid" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/></symbol>
+<symbol id="fi-map-pin" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/><circle cx="12" cy="10" r="3"/></symbol>
+<symbol id="fi-search" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></symbol>
+<symbol id="fi-eye" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></symbol>
+<symbol id="fi-headphones" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 18v-6a9 9 0 0 1 18 0v6"/><path d="M21 19a2 2 0 0 1-2 2h-1a2 2 0 0 1-2-2v-3a2 2 0 0 1 2-2h3zM3 19a2 2 0 0 0 2 2h1a2 2 0 0 0 2-2v-3a2 2 0 0 0-2-2H3z"/></symbol>
+<symbol id="fi-alert-triangle" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></symbol>
+<symbol id="fi-x-circle" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><line x1="15" y1="9" x2="9" y2="15"/><line x1="9" y1="9" x2="15" y2="15"/></symbol>
+<symbol id="fi-help-circle" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3"/><line x1="12" y1="17" x2="12.01" y2="17"/></symbol>
+<symbol id="fi-clipboard" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M16 4h2a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2h2"/><rect x="8" y="2" width="8" height="4" rx="1" ry="1"/></symbol>
+<symbol id="fi-paperclip" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21.44 11.05l-9.19 9.19a6 6 0 0 1-8.49-8.49l9.19-9.19a4 4 0 0 1 5.66 5.66l-9.2 9.19a2 2 0 0 1-2.83-2.83l8.49-8.48"/></symbol>
+<symbol id="fi-star" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></symbol>
+<symbol id="fi-monitor" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="3" width="20" height="14" rx="2" ry="2"/><line x1="8" y1="21" x2="16" y2="21"/><line x1="12" y1="17" x2="12" y2="21"/></symbol>
+<symbol id="fi-tablet" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="4" y="2" width="16" height="20" rx="2" ry="2"/><line x1="12" y1="18" x2="12.01" y2="18"/></symbol>
+<symbol id="fi-trash-2" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="3 6 5 6 21 6"/><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/><line x1="10" y1="11" x2="10" y2="17"/><line x1="14" y1="11" x2="14" y2="17"/></symbol>
+<symbol id="fi-camera" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z"/><circle cx="12" cy="13" r="4"/></symbol>
+<symbol id="fi-key" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 2l-2 2m-7.61 7.61a5.5 5.5 0 1 1-7.778 7.778 5.5 5.5 0 0 1 7.777-7.777zm0 0L15.5 7.5m0 0l3 3L22 7l-3-3m-3.5 3.5L19 4"/></symbol>
+<symbol id="fi-lock" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></symbol>
+<symbol id="fi-globe" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><line x1="2" y1="12" x2="22" y2="12"/><path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"/></symbol>
+</defs></svg><!-- SLIDE 1 : SIGNUP + OTP -->
 <div id="stage">
 <div class="slide" id="slide1">
  <div class="s-inner">
@@ -389,10 +434,10 @@ html.v .ctl .cnt{font-size:11px}
         <h2>Vendez vos téléphones <em>en toute sécurité</em></h2>
         <p>La plateforme n°1 au Maroc pour acheter et vendre des téléphones d'occasion avec garantie.</p>
         <div class="feat-g">
-         <div class="feat"><div class="ic">🛡️</div><div><b>Garantie incluse</b><span>12 mois sur chaque produit</span></div></div>
-         <div class="feat"><div class="ic">🔄</div><div><b>Vendeurs vérifiés</b><span>Identité validée par SMS</span></div></div>
-         <div class="feat"><div class="ic">📱</div><div><b>Reprise &amp; reconditionnement</b><span>Donnez une 2ème vie à votre téléphone</span></div></div>
-         <div class="feat"><div class="ic">🚚</div><div><b>Livraison partout au Maroc</b><span>Toutes les villes couvertes</span></div></div>
+         <div class="feat"><div class="ic"><svg class="fi" aria-hidden="true"><use href="#fi-shield"/></svg></div><div><b>Garantie incluse</b><span>12 mois sur chaque produit</span></div></div>
+         <div class="feat"><div class="ic"><svg class="fi" aria-hidden="true"><use href="#fi-refresh-cw"/></svg></div><div><b>Vendeurs vérifiés</b><span>Identité validée par SMS</span></div></div>
+         <div class="feat"><div class="ic"><svg class="fi" aria-hidden="true"><use href="#fi-smartphone"/></svg></div><div><b>Reprise &amp; reconditionnement</b><span>Donnez une 2ème vie à votre téléphone</span></div></div>
+         <div class="feat"><div class="ic"><svg class="fi" aria-hidden="true"><use href="#fi-truck"/></svg></div><div><b>Livraison partout au Maroc</b><span>Toutes les villes couvertes</span></div></div>
         </div>
        </div>
        <div class="foot">© 2026 Occasion &amp; Garantie · Casablanca, Maroc</div>
@@ -401,13 +446,13 @@ html.v .ctl .cnt{font-size:11px}
        <div class="form-inner">
         <div class="f-heading"><h1>Créer un compte vendeur</h1><p>Commencez à vendre vos téléphones gratuitement</p></div>
         <div class="fcard">
-         <div class="seller-badge">📈 Compte Vendeur</div>
-         <div class="fi"><label class="lbl">Nom complet <em>*</em></label><div class="in" id="i-name"><span class="ic">✏️</span><span class="ph">Votre nom</span><span class="val hidden"></span><span class="caret"></span></div></div>
-         <div class="fi"><label class="lbl">Adresse e-mail <em>*</em></label><div class="in" id="i-mail"><span class="ic">✉️</span><span class="ph">exemple@email.com</span><span class="val hidden"></span><span class="caret"></span></div></div>
-         <div class="fi"><label class="lbl">Mot de passe <em>*</em></label><div class="in" id="i-pass"><span class="ic">🔒</span><span class="ph">Minimum 6 caractères</span><span class="val hidden"></span><span class="caret"></span></div></div>
-         <div class="fi"><label class="lbl">Téléphone <em>*</em></label><div class="in" id="i-phone"><span class="ic">📞</span><span class="ph">+212 6XX XXX XXX</span><span class="val hidden"></span><span class="caret"></span></div></div>
-         <div class="fi"><label class="lbl">Recevoir le code par</label><div class="code-opt" id="code-opt"><div class="co on" data-v="SMS"><span class="radio"></span>📩 SMS</div><div class="co" data-v="Email"><span class="radio"></span>✉️ E-mail</div></div></div>
-         <div class="fi"><label class="lbl">Nom de la boutique <em>*</em></label><div class="in" id="i-store"><span class="ic">🏪</span><span class="ph">Ex: PhoneStore Casablanca</span><span class="val hidden"></span><span class="caret"></span></div></div>
+         <div class="seller-badge"><svg class="fi" aria-hidden="true"><use href="#fi-trending-up"/></svg> Compte Vendeur</div>
+         <div class="fi"><label class="lbl">Nom complet <em>*</em></label><div class="in" id="i-name"><span class="ic"><svg class="fi" aria-hidden="true"><use href="#fi-edit-2"/></svg></span><span class="ph">Votre nom</span><span class="val hidden"></span><span class="caret"></span></div></div>
+         <div class="fi"><label class="lbl">Adresse e-mail <em>*</em></label><div class="in" id="i-mail"><span class="ic"><svg class="fi" aria-hidden="true"><use href="#fi-mail"/></svg></span><span class="ph">exemple@email.com</span><span class="val hidden"></span><span class="caret"></span></div></div>
+         <div class="fi"><label class="lbl">Mot de passe <em>*</em></label><div class="in" id="i-pass"><span class="ic"><svg class="fi" aria-hidden="true"><use href="#fi-lock"/></svg></span><span class="ph">Minimum 6 caractères</span><span class="val hidden"></span><span class="caret"></span></div></div>
+         <div class="fi"><label class="lbl">Téléphone <em>*</em></label><div class="in" id="i-phone"><span class="ic"><svg class="fi" aria-hidden="true"><use href="#fi-phone"/></svg></span><span class="ph">+212 6XX XXX XXX</span><span class="val hidden"></span><span class="caret"></span></div></div>
+         <div class="fi"><label class="lbl">Recevoir le code par</label><div class="code-opt" id="code-opt"><div class="co on" data-v="SMS"><span class="radio"></span><svg class="fi" aria-hidden="true"><use href="#fi-send"/></svg> SMS</div><div class="co" data-v="Email"><span class="radio"></span><svg class="fi" aria-hidden="true"><use href="#fi-mail"/></svg> E-mail</div></div></div>
+         <div class="fi"><label class="lbl">Nom de la boutique <em>*</em></label><div class="in" id="i-store"><span class="ic"><svg class="fi" aria-hidden="true"><use href="#fi-shopping-bag"/></svg></span><span class="ph">Ex: PhoneStore Casablanca</span><span class="val hidden"></span><span class="caret"></span></div></div>
          <div class="terms">En cliquant sur le bouton, vous acceptez nos <button id="btn-terms">Conditions Générales</button> et notre politique de confidentialité.</div>
          <button class="btn" id="btn-signup">Créer mon compte vendeur</button>
         </div>
@@ -417,7 +462,7 @@ html.v .ctl .cnt{font-size:11px}
      </div>
     </div>
     <div class="modal" id="terms-modal"><div class="mbox">
-     <div class="mbox-head"><div class="ti">📄</div><h3>Conditions Générales d'Utilisation</h3></div>
+     <div class="mbox-head"><div class="ti"><svg class="fi" aria-hidden="true"><use href="#fi-file-text"/></svg></div><h3>Conditions Générales d'Utilisation</h3></div>
      <div class="mbox-body">
       <h4>1. Objet</h4>Occasion &amp; Garantie est une plateforme qui met en relation des vendeurs et des acheteurs de téléphones d'occasion au Maroc.
       <h4>2. Compte vendeur</h4>La création d'un compte vendeur est gratuite. L'identité est vérifiée par code SMS. La première publication d'annonces est libre.
@@ -427,13 +472,13 @@ html.v .ctl .cnt{font-size:11px}
      <div class="mbox-foot"><button class="btn btn-ghost" id="btn-terms-close">Fermer</button><button class="btn" id="btn-terms-ok">J'accepte</button></div>
     </div></div>
     <div class="sms-pop" id="sms-pop">
-     <div class="sms-head"><div class="av">📩</div><div><b>Occasion &amp; Garantie</b><span>SMS · maintenant</span></div></div>
-     <div class="sms-body">Votre code de vérification est <span class="sms-code">483 209</span>. Il est valable 5 minutes. Ne le partagez avec personne. 💬 #OG</div>
+     <div class="sms-head"><div class="av"><svg class="fi" aria-hidden="true"><use href="#fi-send"/></svg></div><div><b>Occasion &amp; Garantie</b><span>SMS · maintenant</span></div></div>
+     <div class="sms-body">Votre code de vérification est <span class="sms-code">483 209</span>. Il est valable 5 minutes. Ne le partagez avec personne. <svg class="fi" aria-hidden="true"><use href="#fi-message-circle"/></svg> #OG</div>
      <div class="sms-time">Répondu il y a 1 s <span>OK</span></div>
     </div>
     <div class="vpage" id="verify-page">
      <div class="vcard">
-      <div class="vic">🔢</div>
+      <div class="vic"><svg class="fi" aria-hidden="true"><use href="#fi-check-circle"/></svg></div>
       <h3>Vérification</h3>
       <div class="vsub">Entrez le code reçu par SMS</div>
       <div class="vnote">Code envoyé au <b>+212 6XX XXX XXX</b></div>
@@ -459,26 +504,26 @@ html.v .ctl .cnt{font-size:11px}
    <div class="screen" id="scr2">
     <div class="dash">
      <div class="side">
-      <div class="s-i on">📊 Tableau de bord</div>
-      <div class="s-i">📦 Mes produits</div>
-      <div class="s-i">💰 Acheter des crédits</div>
-      <div class="s-i">📈 Statistiques</div>
-      <div class="s-i">👤 Mon profil</div>
+      <div class="s-i on"><svg class="fi" aria-hidden="true"><use href="#fi-bar-chart-2"/></svg> Tableau de bord</div>
+      <div class="s-i"><svg class="fi" aria-hidden="true"><use href="#fi-package"/></svg> Mes produits</div>
+      <div class="s-i"><svg class="fi" aria-hidden="true"><use href="#fi-credit-card"/></svg> Acheter des crédits</div>
+      <div class="s-i"><svg class="fi" aria-hidden="true"><use href="#fi-trending-up"/></svg> Statistiques</div>
+      <div class="s-i"><svg class="fi" aria-hidden="true"><use href="#fi-user"/></svg> Mon profil</div>
      </div>
      <div class="main">
       <div class="scroll-y">
        <div class="m-title">Créer une annonce</div>
        <div class="m-sub">Remplissez les informations de votre téléphone</div>
        <div class="grid-2">
-        <div class="fi"><label class="lbl">Nom du produit <em>*</em></label><div class="in" id="p-name"><span class="ic">📱</span><span class="ph">Ex: iPhone 13 128Go</span><span class="val hidden"></span><span class="caret"></span></div></div>
-        <div class="fi"><label class="lbl">Marque <em>*</em></label><div class="in" id="p-brand"><span class="ic">🏷️</span><span class="ph">Ex: Apple, Samsung</span><span class="val hidden"></span><span class="caret"></span></div></div>
-        <div class="fi"><label class="lbl">Prix (DH) <em>*</em></label><div class="in" id="p-price"><span class="ic">💵</span><span class="ph">Ex: 4500</span><span class="val hidden"></span><span class="caret"></span></div></div>
-        <div class="fi"><label class="lbl">Ancien prix (DH)</label><div class="in" id="p-old"><span class="ic">🏷️</span><span class="ph">Ex: 6000</span><span class="val hidden"></span><span class="caret"></span></div></div>
+        <div class="fi"><label class="lbl">Nom du produit <em>*</em></label><div class="in" id="p-name"><span class="ic"><svg class="fi" aria-hidden="true"><use href="#fi-smartphone"/></svg></span><span class="ph">Ex: iPhone 13 128Go</span><span class="val hidden"></span><span class="caret"></span></div></div>
+        <div class="fi"><label class="lbl">Marque <em>*</em></label><div class="in" id="p-brand"><span class="ic"><svg class="fi" aria-hidden="true"><use href="#fi-tag"/></svg></span><span class="ph">Ex: Apple, Samsung</span><span class="val hidden"></span><span class="caret"></span></div></div>
+        <div class="fi"><label class="lbl">Prix (DH) <em>*</em></label><div class="in" id="p-price"><span class="ic"><svg class="fi" aria-hidden="true"><use href="#fi-dollar-sign"/></svg></span><span class="ph">Ex: 4500</span><span class="val hidden"></span><span class="caret"></span></div></div>
+        <div class="fi"><label class="lbl">Ancien prix (DH)</label><div class="in" id="p-old"><span class="ic"><svg class="fi" aria-hidden="true"><use href="#fi-tag"/></svg></span><span class="ph">Ex: 6000</span><span class="val hidden"></span><span class="caret"></span></div></div>
        </div>
-       <div class="fi"><label class="lbl">Catégorie <em>*</em></label><div class="in" id="p-cat"><span class="ic">🗂️</span><span class="ph">Choisir une catégorie</span><span class="val hidden"></span><span class="caret"></span></div></div>
+       <div class="fi"><label class="lbl">Catégorie <em>*</em></label><div class="in" id="p-cat"><span class="ic"><svg class="fi" aria-hidden="true"><use href="#fi-grid"/></svg></span><span class="ph">Choisir une catégorie</span><span class="val hidden"></span><span class="caret"></span></div></div>
        <div class="fi"><label class="lbl">État <em>*</em></label><div class="code-opt" id="p-state"><div class="co on">Neuf</div><div class="co">Comme neuf</div><div class="co">Très bon état</div></div></div>
-       <div class="fi"><label class="lbl">Ville <em>*</em></label><div class="in" id="p-city"><span class="ic">📍</span><span class="ph">Votre ville</span><span class="val hidden"></span><span class="caret"></span></div></div>
-       <div class="fi"><label class="lbl">Description <em>*</em></label><div class="in" id="p-desc"><span class="ic">📝</span><span class="ph">Décrivez l'état du produit...</span><span class="val hidden"></span><span class="caret"></span></div></div>
+       <div class="fi"><label class="lbl">Ville <em>*</em></label><div class="in" id="p-city"><span class="ic"><svg class="fi" aria-hidden="true"><use href="#fi-map-pin"/></svg></span><span class="ph">Votre ville</span><span class="val hidden"></span><span class="caret"></span></div></div>
+       <div class="fi"><label class="lbl">Description <em>*</em></label><div class="in" id="p-desc"><span class="ic"><svg class="fi" aria-hidden="true"><use href="#fi-edit-3"/></svg></span><span class="ph">Décrivez l'état du produit...</span><span class="val hidden"></span><span class="caret"></span></div></div>
        <button class="btn" id="btn-publish">Publier l'annonce</button>
       </div>
      </div>
@@ -501,21 +546,21 @@ html.v .ctl .cnt{font-size:11px}
     <div id="home3">
      <div class="hero">
       <h1>Occasion &amp; <em>Garantie</em></h1>
-      <div class="searchbar" id="search3"><span>🔍</span><span class="ph">Que cherchez-vous ?</span><span class="val hidden"></span><span class="caret"></span></div>
+      <div class="searchbar" id="search3"><span><svg class="fi" aria-hidden="true"><use href="#fi-search"/></svg></span><span class="ph">Que cherchez-vous ?</span><span class="val hidden"></span><span class="caret"></span></div>
       <div class="cats"><div class="cat">Tout</div><div class="cat on">Smartphones</div><div class="cat">Tablettes</div><div class="cat">Ordinateurs</div><div class="cat">Accessoires</div></div>
      </div>
      <div class="sect-h"><b>Dernières annonces</b><span>4 téléphones disponibles ›</span></div>
      <div class="pgrid">
-      <div class="pc" id="pc-iphone"><div class="im">📱</div><div class="bd"><b>iPhone 13 128Go</b><div class="pr">4 900 DH <s>6 500 DH</s></div><span class="ok">✓ Vendeur vérifié</span></div></div>
-      <div class="pc"><div class="im">📱</div><div class="bd"><b>Samsung S22 Ultra</b><div class="pr">6 200 DH</div><span class="ok">✓ Vendeur vérifié</span></div></div>
-      <div class="pc"><div class="im">📱</div><div class="bd"><b>iPhone 12 Pro</b><div class="pr">4 100 DH <s>5 200 DH</s></div><span class="ok">✓ Vendeur vérifié</span></div></div>
-      <div class="pc"><div class="im">📱</div><div class="bd"><b>Redmi Note 12</b><div class="pr">2 300 DH</div><span class="ok">✓ Vendeur vérifié</span></div></div>
+      <div class="pc" id="pc-iphone"><div class="im"><svg class="fi" aria-hidden="true"><use href="#fi-smartphone"/></svg></div><div class="bd"><b>iPhone 13 128Go</b><div class="pr">4 900 DH <s>6 500 DH</s></div><span class="ok">✓ Vendeur vérifié</span></div></div>
+      <div class="pc"><div class="im"><svg class="fi" aria-hidden="true"><use href="#fi-smartphone"/></svg></div><div class="bd"><b>Samsung S22 Ultra</b><div class="pr">6 200 DH</div><span class="ok">✓ Vendeur vérifié</span></div></div>
+      <div class="pc"><div class="im"><svg class="fi" aria-hidden="true"><use href="#fi-smartphone"/></svg></div><div class="bd"><b>iPhone 12 Pro</b><div class="pr">4 100 DH <s>5 200 DH</s></div><span class="ok">✓ Vendeur vérifié</span></div></div>
+      <div class="pc"><div class="im"><svg class="fi" aria-hidden="true"><use href="#fi-smartphone"/></svg></div><div class="bd"><b>Redmi Note 12</b><div class="pr">2 300 DH</div><span class="ok">✓ Vendeur vérifié</span></div></div>
      </div>
     </div>
     <div class="detail" id="detail3">
      <div class="back-btn" id="back3">← Retour aux annonces</div>
      <div class="d-grid">
-      <div class="d-img">📱<div class="badges"><span class="bd2 g">✓ Vérifié</span><span class="bd2 o">-25%</span></div></div>
+      <div class="d-img"><svg class="fi" aria-hidden="true"><use href="#fi-smartphone"/></svg><div class="badges"><span class="bd2 g">✓ Vérifié</span><span class="bd2 o">-25%</span></div></div>
       <div>
        <div class="d-brand">Apple · Smartphone</div>
        <div class="d-name">iPhone 13 128Go</div>
@@ -526,14 +571,14 @@ html.v .ctl .cnt{font-size:11px}
         <div class="spec"><b>Garantie</b><span>12 mois ✓</span></div>
         <div class="spec"><b>Livraison</b><span>Tout le Maroc</span></div>
        </div>
-       <div class="d-cta"><button class="btn offer">💬 Proposer un prix</button><button class="btn msg" id="btn-msg">Envoyer un message</button></div>
+       <div class="d-cta"><button class="btn offer"><svg class="fi" aria-hidden="true"><use href="#fi-message-circle"/></svg> Proposer un prix</button><button class="btn msg" id="btn-msg">Envoyer un message</button></div>
        <div class="vcard2"><div class="av">YB</div><div><b>Yassine Boutique</b><span class="vk">✓ Vendeur vérifié</span></div></div>
       </div>
      </div>
     </div>
     <div class="mess hidden" id="mess3">
      <div class="mess-list">
-      <div class="ml-h">💬 <b>Messages</b></div>
+      <div class="ml-h"><svg class="fi" aria-hidden="true"><use href="#fi-message-circle"/></svg> <b>Messages</b></div>
       <div class="conv on"><div class="av" style="background:linear-gradient(135deg,#f59e0b,#d97706)">YB</div><div class="c-t"><b>Yassine Boutique</b><span>Oui, toujours disponible ! 😊</span></div></div>
       <div class="conv"><div class="av" style="background:linear-gradient(135deg,#10b981,#059669)">SM</div><div class="c-t"><b>Salma M.</b><span>Livraison à Rabat ?</span></div></div>
       <div class="conv"><div class="av" style="background:linear-gradient(135deg,#2563eb,#1d4ed8)">OM</div><div class="c-t"><b>Omar T.</b><span>Merci pour votre réponse</span></div></div>
@@ -543,7 +588,7 @@ html.v .ctl .cnt{font-size:11px}
       <div class="mess-body" id="mess-body">
        <div class="bubble them">Bonjour Karim 👋 Bienvenue sur Occasion &amp; Garantie ! Que puis-je pour vous ?<span class="bt">Aujourd'hui · 14:32</span></div>
       </div>
-      <div class="mess-input"><div class="mi" id="m-input"><span class="ic">📝</span><span class="ph">Écrivez un message...</span><span class="val hidden"></span><span class="caret"></span></div><div class="mess-send" id="m-send">➤</div></div>
+      <div class="mess-input"><div class="mi" id="m-input"><span class="ic"><svg class="fi" aria-hidden="true"><use href="#fi-edit-3"/></svg></span><span class="ph">Écrivez un message...</span><span class="val hidden"></span><span class="caret"></span></div><div class="mess-send" id="m-send"><svg class="fi" aria-hidden="true"><use href="#fi-send"/></svg></div></div>
      </div>
     </div>
    </div>
@@ -562,39 +607,39 @@ html.v .ctl .cnt{font-size:11px}
    <div class="screen" id="scr4">
     <div class="dash">
      <div class="side">
-      <div class="s-i">📊 Tableau de bord</div>
-      <div class="s-i">📦 Mes produits</div>
-      <div class="s-i">💰 Acheter des crédits</div>
-      <div class="s-i on">📈 Statistiques</div>
-      <div class="s-i">👤 Mon profil</div>
+      <div class="s-i"><svg class="fi" aria-hidden="true"><use href="#fi-bar-chart-2"/></svg> Tableau de bord</div>
+      <div class="s-i"><svg class="fi" aria-hidden="true"><use href="#fi-package"/></svg> Mes produits</div>
+      <div class="s-i"><svg class="fi" aria-hidden="true"><use href="#fi-credit-card"/></svg> Acheter des crédits</div>
+      <div class="s-i on"><svg class="fi" aria-hidden="true"><use href="#fi-trending-up"/></svg> Statistiques</div>
+      <div class="s-i"><svg class="fi" aria-hidden="true"><use href="#fi-user"/></svg> Mon profil</div>
      </div>
      <div class="main">
       <div class="m-title">Statistiques</div>
       <div class="m-sub">Performances de votre boutique</div>
       <div class="grid-2">
-       <div class="stat-c"><div class="ic" style="background:rgba(245,158,11,.12)">👁️</div><div><b>1 240</b><span>Vues ce mois</span></div></div>
-       <div class="stat-c"><div class="ic" style="background:rgba(16,185,129,.12)">💬</div><div><b>38</b><span>Messages reçus</span></div></div>
-       <div class="stat-c"><div class="ic" style="background:rgba(37,99,235,.12)">💰</div><div><b>4</b><span>Ventes ce mois</span></div></div>
-       <div class="stat-c"><div class="ic" style="background:rgba(217,168,60,.15)">📈</div><div><b>+32%</b><span>Croissance</span></div></div>
+       <div class="stat-c"><div class="ic" style="background:rgba(245,158,11,.12)"><svg class="fi" aria-hidden="true"><use href="#fi-eye"/></svg></div><div><b>1 240</b><span>Vues ce mois</span></div></div>
+       <div class="stat-c"><div class="ic" style="background:rgba(16,185,129,.12)"><svg class="fi" aria-hidden="true"><use href="#fi-message-circle"/></svg></div><div><b>38</b><span>Messages reçus</span></div></div>
+       <div class="stat-c"><div class="ic" style="background:rgba(37,99,235,.12)"><svg class="fi" aria-hidden="true"><use href="#fi-credit-card"/></svg></div><div><b>4</b><span>Ventes ce mois</span></div></div>
+       <div class="stat-c"><div class="ic" style="background:rgba(217,168,60,.15)"><svg class="fi" aria-hidden="true"><use href="#fi-trending-up"/></svg></div><div><b>+32%</b><span>Croissance</span></div></div>
       </div>
      </div>
     </div>
-    <div class="support-btn" id="s-btn">🛟</div>
+    <div class="support-btn" id="s-btn"><svg class="fi" aria-hidden="true"><use href="#fi-headphones"/></svg></div>
     <div class="support-pop" id="s-pop">
-     <div class="sp-h"><div>🛟</div><b>Centre d'aide</b><button class="x" id="s-close">✕</button></div>
+     <div class="sp-h"><div><svg class="fi" aria-hidden="true"><use href="#fi-headphones"/></svg></div><b>Centre d'aide</b><button class="x" id="s-close">✕</button></div>
      <div class="sp-b">
       <div id="s-step-1">
        <div class="sp-q">Comment pouvons-nous vous aider ?</div>
-       <div class="sp-opt" data-ch="0"><div class="ic" style="background:rgba(220,38,38,.1)">⚠️</div><div><b>Réclamation</b><span>Signaler un problème</span></div></div>
-       <div class="sp-opt" data-ch="1"><div class="ic" style="background:rgba(124,58,237,.1)">🚫</div><div><b>Compte suspendu</b><span>Réactiver mon compte</span></div></div>
-       <div class="sp-opt" data-ch="2"><div class="ic" style="background:rgba(16,185,129,.1)">❓</div><div><b>Demande d'information</b><span>Poser une question</span></div></div>
-       <div class="sp-opt" data-ch="3"><div class="ic" style="background:rgba(59,130,246,.1)">🏪</div><div><b>Changer le nom de ma boutique</b><span>Modifier mon store</span></div></div>
+       <div class="sp-opt" data-ch="0"><div class="ic" style="background:rgba(220,38,38,.1)"><svg class="fi" aria-hidden="true"><use href="#fi-alert-triangle"/></svg></div><div><b>Réclamation</b><span>Signaler un problème</span></div></div>
+       <div class="sp-opt" data-ch="1"><div class="ic" style="background:rgba(124,58,237,.1)"><svg class="fi" aria-hidden="true"><use href="#fi-x-circle"/></svg></div><div><b>Compte suspendu</b><span>Réactiver mon compte</span></div></div>
+       <div class="sp-opt" data-ch="2"><div class="ic" style="background:rgba(16,185,129,.1)"><svg class="fi" aria-hidden="true"><use href="#fi-help-circle"/></svg></div><div><b>Demande d'information</b><span>Poser une question</span></div></div>
+       <div class="sp-opt" data-ch="3"><div class="ic" style="background:rgba(59,130,246,.1)"><svg class="fi" aria-hidden="true"><use href="#fi-shopping-bag"/></svg></div><div><b>Changer le nom de ma boutique</b><span>Modifier mon store</span></div></div>
       </div>
       <div id="s-step-2" class="hidden">
        <button class="sp-back" id="s-back">← Retour</button>
-       <div class="fi"><label class="lbl">Votre nom <em>*</em></label><div class="in" id="s-name"><span class="ic">👤</span><span class="ph">Votre nom complet</span><span class="val hidden"></span><span class="caret"></span></div></div>
-       <div class="fi"><label class="lbl">Votre email <em>*</em></label><div class="in" id="s-mail"><span class="ic">✉️</span><span class="ph">exemple@email.com</span><span class="val hidden"></span><span class="caret"></span></div></div>
-       <div class="fi"><label class="lbl">Décrivez votre demande <em>*</em></label><div class="in" id="s-desc"><span class="ic">📝</span><span class="ph">Décrivez votre problème...</span><span class="val hidden"></span><span class="caret"></span></div></div>
+       <div class="fi"><label class="lbl">Votre nom <em>*</em></label><div class="in" id="s-name"><span class="ic"><svg class="fi" aria-hidden="true"><use href="#fi-user"/></svg></span><span class="ph">Votre nom complet</span><span class="val hidden"></span><span class="caret"></span></div></div>
+       <div class="fi"><label class="lbl">Votre email <em>*</em></label><div class="in" id="s-mail"><span class="ic"><svg class="fi" aria-hidden="true"><use href="#fi-mail"/></svg></span><span class="ph">exemple@email.com</span><span class="val hidden"></span><span class="caret"></span></div></div>
+       <div class="fi"><label class="lbl">Décrivez votre demande <em>*</em></label><div class="in" id="s-desc"><span class="ic"><svg class="fi" aria-hidden="true"><use href="#fi-edit-3"/></svg></span><span class="ph">Décrivez votre problème...</span><span class="val hidden"></span><span class="caret"></span></div></div>
        <button class="btn" id="s-send">Envoyer le message</button>
       </div>
       <div id="s-step-3" class="hidden">
@@ -618,15 +663,15 @@ html.v .ctl .cnt{font-size:11px}
    <div class="screen" id="scr5">
     <div class="dash">
      <div class="side">
-      <div class="s-i">📊 Tableau de bord</div>
-      <div class="s-i">📦 Mes produits</div>
-      <div class="s-i on">💰 Acheter des crédits</div>
-      <div class="s-i">📈 Statistiques</div>
-      <div class="s-i">👤 Mon profil</div>
+      <div class="s-i"><svg class="fi" aria-hidden="true"><use href="#fi-bar-chart-2"/></svg> Tableau de bord</div>
+      <div class="s-i"><svg class="fi" aria-hidden="true"><use href="#fi-package"/></svg> Mes produits</div>
+      <div class="s-i on"><svg class="fi" aria-hidden="true"><use href="#fi-credit-card"/></svg> Acheter des crédits</div>
+      <div class="s-i"><svg class="fi" aria-hidden="true"><use href="#fi-trending-up"/></svg> Statistiques</div>
+      <div class="s-i"><svg class="fi" aria-hidden="true"><use href="#fi-user"/></svg> Mon profil</div>
      </div>
      <div class="main">
       <div class="scroll-y">
-       <div class="cred-card"><div class="cc-ic">💰</div><div><b>Solde crédits : 1 200</b><span>Commandeurs : 1000 crédits = 100 DH</span></div></div>
+       <div class="cred-card"><div class="cc-ic"><svg class="fi" aria-hidden="true"><use href="#fi-credit-card"/></svg></div><div><b>Solde crédits : 1 200</b><span>Commandeurs : 1000 crédits = 100 DH</span></div></div>
        <div class="m-title">Acheter des crédits</div>
        <div class="m-sub">Choisissez un montant à recharger</div>
        <div class="amount-row">
@@ -639,16 +684,16 @@ html.v .ctl .cnt{font-size:11px}
      </div>
     </div>
     <div class="modal" id="pay-modal"><div class="mbox">
-     <div class="mbox-head"><div class="ti">🔒</div><h3>Virement bancaire</h3></div>
+     <div class="mbox-head"><div class="ti"><svg class="fi" aria-hidden="true"><use href="#fi-lock"/></svg></div><h3>Virement bancaire</h3></div>
      <div class="mbox-body">
-      <div class="banner green" style="margin-bottom:12px">💰 Vous recevrez <b>2 000 crédits</b> après validation</div>
+      <div class="banner green" style="margin-bottom:12px"><svg class="fi" aria-hidden="true"><use href="#fi-credit-card"/></svg> Vous recevrez <b>2 000 crédits</b> après validation</div>
       <div class="bank-box">
        <div class="bank-row"><span>Montant</span><b>200,00 DH</b></div>
-       <div class="bank-row"><span>Banque</span><b>CIH Bank</b><span class="copy-badge">📋 Copier</span></div>
+       <div class="bank-row"><span>Banque</span><b>CIH Bank</b><span class="copy-badge"><svg class="fi" aria-hidden="true"><use href="#fi-clipboard"/></svg> Copier</span></div>
        <div class="bank-row"><span>Titulaire</span><b>OCCASION &amp; GARANTIE</b></div>
-       <div class="bank-row"><span>RIB</span><b>230 780 0000 123 456 789 02</b><span class="copy-badge">📋 Copier</span></div>
+       <div class="bank-row"><span>RIB</span><b>230 780 0000 123 456 789 02</b><span class="copy-badge"><svg class="fi" aria-hidden="true"><use href="#fi-clipboard"/></svg> Copier</span></div>
       </div>
-      <div class="fi"><label class="lbl">Envoyer la capture du virement</label><div class="in" id="up-scan"><span class="ic">📎</span><span class="ph">Joindre une capture (JPG/PNG)</span><span class="val hidden"></span><span class="caret"></span></div></div>
+      <div class="fi"><label class="lbl">Envoyer la capture du virement</label><div class="in" id="up-scan"><span class="ic"><svg class="fi" aria-hidden="true"><use href="#fi-paperclip"/></svg></span><span class="ph">Joindre une capture (JPG/PNG)</span><span class="val hidden"></span><span class="caret"></span></div></div>
      </div>
      <div class="mbox-foot"><button class="btn" id="btn-pay-send">Envoyer la capture</button></div>
     </div></div>
@@ -671,23 +716,23 @@ html.v .ctl .cnt{font-size:11px}
      <div class="b-nav">
       <div class="bn-logo"><img src="marketing-demo-logo.png" alt="">Occasion &amp; Garantie</div>
       <div class="bn-links"><span>Accueil</span><span>Produits</span><span class="on">Boutique Officielle</span><span>Reprise</span><span>Vendre</span></div>
-      <div class="bn-act">👤</div>
+      <div class="bn-act"><svg class="fi" aria-hidden="true"><use href="#fi-user"/></svg></div>
      </div>
      <div class="b-page">
-      <div class="b-head"><h1>🛡️ Boutique Officielle</h1><p>Produits vendus et expédiés directement par Occasion &amp; Garantie</p></div>
+      <div class="b-head"><h1><svg class="fi" aria-hidden="true"><use href="#fi-shield"/></svg> Boutique Officielle</h1><p>Produits vendus et expédiés directement par Occasion &amp; Garantie</p></div>
       <div class="pgrid" style="padding:0">
-       <div class="pc" id="bc-pro"><div class="im"><span class="cat-badge">Smartphones</span><span class="off-badge">⭐ Officiel</span>📱</div><div class="bd"><b>iPhone 13 Pro</b><div class="pr">7 900 DH <s>9 200 DH</s></div><span class="ok">✓ Vérifié &amp; garanti</span></div></div>
-       <div class="pc"><div class="im"><span class="cat-badge">Ordinateurs</span><span class="off-badge">⭐ Officiel</span>💻</div><div class="bd"><b>MacBook Air M1</b><div class="pr">6 500 DH</div><span class="ok">✓ Vérifié &amp; garanti</span></div></div>
-       <div class="pc"><div class="im"><span class="cat-badge">Tablettes</span><span class="off-badge">⭐ Officiel</span>📲</div><div class="bd"><b>iPad 9 64Go</b><div class="pr">3 200 DH <s>3 900 DH</s></div><span class="ok">✓ Vérifié &amp; garanti</span></div></div>
-       <div class="pc"><div class="im"><span class="cat-badge">Smartphones</span><span class="off-badge">⭐ Officiel</span>📱</div><div class="bd"><b>Samsung S23</b><div class="pr">6 900 DH</div><span class="ok">✓ Vérifié &amp; garanti</span></div></div>
+       <div class="pc" id="bc-pro"><div class="im"><span class="cat-badge">Smartphones</span><span class="off-badge"><svg class="fi" aria-hidden="true"><use href="#fi-star"/></svg> Officiel</span><svg class="fi" aria-hidden="true"><use href="#fi-smartphone"/></svg></div><div class="bd"><b>iPhone 13 Pro</b><div class="pr">7 900 DH <s>9 200 DH</s></div><span class="ok">✓ Vérifié &amp; garanti</span></div></div>
+       <div class="pc"><div class="im"><span class="cat-badge">Ordinateurs</span><span class="off-badge"><svg class="fi" aria-hidden="true"><use href="#fi-star"/></svg> Officiel</span><svg class="fi" aria-hidden="true"><use href="#fi-monitor"/></svg></div><div class="bd"><b>MacBook Air M1</b><div class="pr">6 500 DH</div><span class="ok">✓ Vérifié &amp; garanti</span></div></div>
+       <div class="pc"><div class="im"><span class="cat-badge">Tablettes</span><span class="off-badge"><svg class="fi" aria-hidden="true"><use href="#fi-star"/></svg> Officiel</span><svg class="fi" aria-hidden="true"><use href="#fi-tablet"/></svg></div><div class="bd"><b>iPad 9 64Go</b><div class="pr">3 200 DH <s>3 900 DH</s></div><span class="ok">✓ Vérifié &amp; garanti</span></div></div>
+       <div class="pc"><div class="im"><span class="cat-badge">Smartphones</span><span class="off-badge"><svg class="fi" aria-hidden="true"><use href="#fi-star"/></svg> Officiel</span><svg class="fi" aria-hidden="true"><use href="#fi-smartphone"/></svg></div><div class="bd"><b>Samsung S23</b><div class="pr">6 900 DH</div><span class="ok">✓ Vérifié &amp; garanti</span></div></div>
       </div>
      </div>
     </div>
     <div class="detail" id="bd-detail">
      <div class="back-btn">← Retour à la boutique</div>
-     <div class="store-banner">🛡️ Boutique Officielle Occasion &amp; Garantie</div>
+     <div class="store-banner"><svg class="fi" aria-hidden="true"><use href="#fi-shield"/></svg> Boutique Officielle Occasion &amp; Garantie</div>
      <div class="d-grid">
-      <div class="d-img">📱<div class="badges"><span class="bd2 g">✓ Vérifié</span><span class="bd2 o">-14%</span></div></div>
+      <div class="d-img"><svg class="fi" aria-hidden="true"><use href="#fi-smartphone"/></svg><div class="badges"><span class="bd2 g">✓ Vérifié</span><span class="bd2 o">-14%</span></div></div>
       <div>
        <div class="d-brand">Smartphones · Apple</div>
        <div class="d-name">iPhone 13 Pro</div>
@@ -705,9 +750,9 @@ html.v .ctl .cnt{font-size:11px}
        <div class="b-int">
         <h3>Vous êtes intéressé ?</h3>
         <p>Laissez vos coordonnées, nous vous contacterons.</p>
-        <div class="fi"><label class="lbl">Votre nom <em>*</em></label><div class="in" id="r-name"><span class="ic">👤</span><span class="ph">Votre nom</span><span class="val hidden"></span><span class="caret"></span></div></div>
-        <div class="fi"><label class="lbl">Votre téléphone <em>*</em></label><div class="in" id="r-phone"><span class="ic">📞</span><span class="ph">Votre téléphone</span><span class="val hidden"></span><span class="caret"></span></div></div>
-        <div class="fi"><label class="lbl">Message (optionnel)</label><div class="in" id="r-msg"><span class="ic">📝</span><span class="ph">Message (optionnel)</span><span class="val hidden"></span><span class="caret"></span></div></div>
+        <div class="fi"><label class="lbl">Votre nom <em>*</em></label><div class="in" id="r-name"><span class="ic"><svg class="fi" aria-hidden="true"><use href="#fi-user"/></svg></span><span class="ph">Votre nom</span><span class="val hidden"></span><span class="caret"></span></div></div>
+        <div class="fi"><label class="lbl">Votre téléphone <em>*</em></label><div class="in" id="r-phone"><span class="ic"><svg class="fi" aria-hidden="true"><use href="#fi-phone"/></svg></span><span class="ph">Votre téléphone</span><span class="val hidden"></span><span class="caret"></span></div></div>
+        <div class="fi"><label class="lbl">Message (optionnel)</label><div class="in" id="r-msg"><span class="ic"><svg class="fi" aria-hidden="true"><use href="#fi-edit-3"/></svg></span><span class="ph">Message (optionnel)</span><span class="val hidden"></span><span class="caret"></span></div></div>
         <button class="btn" id="r-send">Envoyer ma demande</button>
         <div class="r-ok hidden" id="r-ok"><div class="ck-s">✓</div>Message envoyé ! Nous vous contacterons dans les plus brefs délais.</div>
        </div>
@@ -715,14 +760,14 @@ html.v .ctl .cnt{font-size:11px}
      </div>
     </div>
     <div class="detail" id="bd-admin">
-     <div class="adm-top"><div class="adm-title">🛡️ Boutique Officielle <span class="adm-sub">Dashboard Admin</span></div><div class="adm-user">👤 Admin</div></div>
+     <div class="adm-top"><div class="adm-title"><svg class="fi" aria-hidden="true"><use href="#fi-shield"/></svg> Boutique Officielle <span class="adm-sub">Dashboard Admin</span></div><div class="adm-user"><svg class="fi" aria-hidden="true"><use href="#fi-user"/></svg> Admin</div></div>
      <div class="adm-stats">
-      <div class="stat-c"><div class="ic" style="background:rgba(59,130,246,.12)">📦</div><div><b>8</b><span>Produits</span></div></div>
-      <div class="stat-c"><div class="ic" style="background:rgba(217,168,60,.15)">⭐</div><div><b>3</b><span>En vedette</span></div></div>
-      <div class="stat-c"><div class="ic" style="background:rgba(16,185,129,.12)">🛍️</div><div><b>8</b><span>En stock</span></div></div>
-      <div class="stat-c"><div class="ic" style="background:rgba(220,38,38,.12)">💸</div><div><b>0</b><span>Vendus</span></div></div>
+      <div class="stat-c"><div class="ic" style="background:rgba(59,130,246,.12)"><svg class="fi" aria-hidden="true"><use href="#fi-package"/></svg></div><div><b>8</b><span>Produits</span></div></div>
+      <div class="stat-c"><div class="ic" style="background:rgba(217,168,60,.15)"><svg class="fi" aria-hidden="true"><use href="#fi-star"/></svg></div><div><b>3</b><span>En vedette</span></div></div>
+      <div class="stat-c"><div class="ic" style="background:rgba(16,185,129,.12)"><svg class="fi" aria-hidden="true"><use href="#fi-shopping-bag"/></svg></div><div><b>8</b><span>En stock</span></div></div>
+      <div class="stat-c"><div class="ic" style="background:rgba(220,38,38,.12)"><svg class="fi" aria-hidden="true"><use href="#fi-dollar-sign"/></svg></div><div><b>0</b><span>Vendus</span></div></div>
      </div>
-     <div class="adm-tabs"><div class="at">📦 Produits (8)</div><div class="at on">📩 Demandes (1)</div></div>
+     <div class="adm-tabs"><div class="at"><svg class="fi" aria-hidden="true"><use href="#fi-package"/></svg> Produits (8)</div><div class="at on"><svg class="fi" aria-hidden="true"><use href="#fi-send"/></svg> Demandes (1)</div></div>
      <div class="tbl-wrap">
       <table class="tbl">
        <thead><tr><th>Client</th><th>Téléphone</th><th>Produit</th><th>Message</th><th>Stock</th><th>Statut</th></tr></thead>
@@ -730,7 +775,7 @@ html.v .ctl .cnt{font-size:11px}
         <tr>
          <td style="font-weight:600">Karim Amrani</td>
          <td class="phn">+212 661 22 33 44</td>
-         <td><div class="tp"><div class="tp-img">📱</div><div><b>iPhone 13 Pro</b></div></div></td>
+         <td><div class="tp"><div class="tp-img"><svg class="fi" aria-hidden="true"><use href="#fi-smartphone"/></svg></div><div><b>iPhone 13 Pro</b></div></div></td>
          <td class="ms">Je souhaite réserver ce produit...</td>
          <td><span class="st-badge" id="ad-stock">Disponible</span></td>
          <td><select class="st-sel" id="ad-status"><option value="en_attente" selected>En attente</option><option value="contacte">Contacté</option><option value="termine">Terminé</option></select></td>
@@ -738,11 +783,11 @@ html.v .ctl .cnt{font-size:11px}
        </tbody>
       </table>
      </div>
-     <div class="toast" id="toast-admin">💬 Karim a été contacté — vente en cours</div>
+     <div class="toast" id="toast-admin"><svg class="fi" aria-hidden="true"><use href="#fi-message-circle"/></svg> Karim a été contacté — vente en cours</div>
      <div class="succ" id="admin-succ"><div class="ck">✓</div><h3>Vente finalisée !</h3><p>iPhone 13 Pro marqué « Vendu » — livraison organisée avec Karim.</p></div>
     </div>
     <div class="sms-pop" id="sms-admin">
-     <div class="sms-head"><div class="av">📩</div><div><b>Occasion &amp; Garantie</b><span>SMS · maintenant</span></div></div>
+     <div class="sms-head"><div class="av"><svg class="fi" aria-hidden="true"><use href="#fi-send"/></svg></div><div><b>Occasion &amp; Garantie</b><span>SMS · maintenant</span></div></div>
      <div class="sms-body">Paiement <b>#12</b> Karim Amrani +212 661 22 33 44 — <span style="color:#2563eb;font-weight:600">200 DH confirmés</span> 🔗 Lien de la capture</div>
      <div class="sms-time">Reçu à l'instant <span>OK</span></div>
     </div>
@@ -763,30 +808,30 @@ html.v .ctl .cnt{font-size:11px}
     <div class="p-wrap">
      <div class="p-back">← Accueil</div>
      <div class="p-head"><h1>Mon Profil</h1><p>Gérer vos informations personnelles</p></div>
-     <div class="prof-tabs"><button class="pt on" id="tab-prof">👤 Profil</button><button class="pt" id="tab-pwd">🔒 Mot de passe</button><button class="pt">🗑️ Supprimer</button></div>
+     <div class="prof-tabs"><button class="pt on" id="tab-prof"><svg class="fi" aria-hidden="true"><use href="#fi-user"/></svg> Profil</button><button class="pt" id="tab-pwd"><svg class="fi" aria-hidden="true"><use href="#fi-lock"/></svg> Mot de passe</button><button class="pt"><svg class="fi" aria-hidden="true"><use href="#fi-trash-2"/></svg> Supprimer</button></div>
      <div class="prof-card" id="pane-prof">
-      <div class="avatar">YE<div class="ava-cam">📷</div></div>
-      <div class="fi"><label class="lbl">Nom complet</label><div class="in" id="p-name2"><span class="ic">👤</span><span class="ph hidden"></span><span class="val">Yassine El Amrani</span><span class="caret"></span></div></div>
-      <div class="fi"><label class="lbl">Adresse e-mail</label><div class="in" style="opacity:.6"><span class="ic">✉️</span><span class="val" style="font-weight:500">yassine@phonestore.ma</span></div><small>L'email ne peut pas être modifié.</small></div>
-      <div class="fi"><label class="lbl">Téléphone</label><div class="p-row"><div class="in" style="flex:1;opacity:.6"><span class="ic">📞</span><span class="val" id="p-phone" style="font-weight:500">+212 612 345 678</span></div><button class="btn-sm" id="btn-change-phone">Changer</button></div></div>
-      <div class="fi"><label class="lbl">Boutique</label><div class="in" style="opacity:.6"><span class="ic">🏪</span><span class="val" style="font-weight:500">PhoneStore Casablanca</span></div><small>Pour modifier le nom de votre boutique, contactez le support.</small></div>
+      <div class="avatar">YE<div class="ava-cam"><svg class="fi" aria-hidden="true"><use href="#fi-camera"/></svg></div></div>
+      <div class="fi"><label class="lbl">Nom complet</label><div class="in" id="p-name2"><span class="ic"><svg class="fi" aria-hidden="true"><use href="#fi-user"/></svg></span><span class="ph hidden"></span><span class="val">Yassine El Amrani</span><span class="caret"></span></div></div>
+      <div class="fi"><label class="lbl">Adresse e-mail</label><div class="in" style="opacity:.6"><span class="ic"><svg class="fi" aria-hidden="true"><use href="#fi-mail"/></svg></span><span class="val" style="font-weight:500">yassine@phonestore.ma</span></div><small>L'email ne peut pas être modifié.</small></div>
+      <div class="fi"><label class="lbl">Téléphone</label><div class="p-row"><div class="in" style="flex:1;opacity:.6"><span class="ic"><svg class="fi" aria-hidden="true"><use href="#fi-phone"/></svg></span><span class="val" id="p-phone" style="font-weight:500">+212 612 345 678</span></div><button class="btn-sm" id="btn-change-phone">Changer</button></div></div>
+      <div class="fi"><label class="lbl">Boutique</label><div class="in" style="opacity:.6"><span class="ic"><svg class="fi" aria-hidden="true"><use href="#fi-shopping-bag"/></svg></span><span class="val" style="font-weight:500">PhoneStore Casablanca</span></div><small>Pour modifier le nom de votre boutique, contactez le support.</small></div>
       <button class="btn" id="btn-save-prof">Enregistrer le profil</button>
       <div class="alert alert-success hidden" id="al-prof">✓ Profil mis à jour avec succès.</div>
      </div>
      <div class="prof-card hidden" id="pane-pwd">
-      <h3>🔒 Changer le mot de passe</h3>
-      <div class="fi"><label class="lbl">Ancien mot de passe</label><div class="in" id="pw-old"><span class="ic">🔑</span><span class="ph">Votre mot de passe actuel</span><span class="val hidden"></span><span class="caret"></span></div></div>
-      <div class="fi"><label class="lbl">Nouveau mot de passe</label><div class="in" id="pw-new"><span class="ic">🔒</span><span class="ph">Au moins 6 caractères</span><span class="val hidden"></span><span class="caret"></span></div></div>
-      <div class="fi"><label class="lbl">Confirmer le mot de passe</label><div class="in" id="pw-conf"><span class="ic">🔒</span><span class="ph">Répétez le nouveau mot de passe</span><span class="val hidden"></span><span class="caret"></span></div></div>
+      <h3><svg class="fi" aria-hidden="true"><use href="#fi-lock"/></svg> Changer le mot de passe</h3>
+      <div class="fi"><label class="lbl">Ancien mot de passe</label><div class="in" id="pw-old"><span class="ic"><svg class="fi" aria-hidden="true"><use href="#fi-key"/></svg></span><span class="ph">Votre mot de passe actuel</span><span class="val hidden"></span><span class="caret"></span></div></div>
+      <div class="fi"><label class="lbl">Nouveau mot de passe</label><div class="in" id="pw-new"><span class="ic"><svg class="fi" aria-hidden="true"><use href="#fi-lock"/></svg></span><span class="ph">Au moins 6 caractères</span><span class="val hidden"></span><span class="caret"></span></div></div>
+      <div class="fi"><label class="lbl">Confirmer le mot de passe</label><div class="in" id="pw-conf"><span class="ic"><svg class="fi" aria-hidden="true"><use href="#fi-lock"/></svg></span><span class="ph">Répétez le nouveau mot de passe</span><span class="val hidden"></span><span class="caret"></span></div></div>
       <button class="btn" id="btn-save-pwd">Modifier le mot de passe</button>
       <div class="alert alert-success hidden" id="al-pwd">✓ Mot de passe modifié avec succès.</div>
      </div>
     </div>
     <div class="modal" id="phone-modal"><div class="mbox" style="width:420px">
-     <div class="mbox-head"><div class="ti">📞</div><h3>Changer de numéro</h3></div>
+     <div class="mbox-head"><div class="ti"><svg class="fi" aria-hidden="true"><use href="#fi-phone"/></svg></div><h3>Changer de numéro</h3></div>
      <div class="mbox-body">
       <div id="ph-form">
-       <div class="fi"><label class="lbl">Nouveau numéro</label><div class="in" id="ph-new"><span class="ic">📞</span><span class="ph">+212 6XX XXX XXX</span><span class="val hidden"></span><span class="caret"></span></div></div>
+       <div class="fi"><label class="lbl">Nouveau numéro</label><div class="in" id="ph-new"><span class="ic"><svg class="fi" aria-hidden="true"><use href="#fi-phone"/></svg></span><span class="ph">+212 6XX XXX XXX</span><span class="val hidden"></span><span class="caret"></span></div></div>
        <button class="btn" id="ph-send">Envoyer le code</button>
       </div>
       <div id="ph-verify" class="hidden">
@@ -797,7 +842,7 @@ html.v .ctl .cnt{font-size:11px}
      </div>
     </div></div>
     <div class="sms-pop" id="sms-phone">
-     <div class="sms-head"><div class="av">📩</div><div><b>Occasion &amp; Garantie</b><span>SMS · maintenant</span></div></div>
+     <div class="sms-head"><div class="av"><svg class="fi" aria-hidden="true"><use href="#fi-send"/></svg></div><div><b>Occasion &amp; Garantie</b><span>SMS · maintenant</span></div></div>
      <div class="sms-body">Votre code de vérification est <span class="sms-code">261 903</span>. Il est valable 5 minutes. Ne le partagez avec personne.</div>
      <div class="sms-time">Reçu à l'instant <span>OK</span></div>
     </div>
@@ -823,7 +868,7 @@ html.v .ctl .cnt{font-size:11px}
    <div class="rcard"><div class="n">6️⃣</div><b>Profil sécurisé</b><p>Nom, téléphone (SMS) et mot de passe modifiables à tout moment.</p></div>
   </div>
   <div style="display:flex;gap:12px;justify-content:center">
-   <a href="https://www.occasionetgarantie.store" target="_blank" class="btn2-cta" style="display:inline-flex;align-items:center;gap:9px;background:linear-gradient(135deg,var(--gold),var(--p));color:#0b0c14;font-weight:800;font-size:15px;padding:15px 34px;border-radius:14px;text-decoration:none;box-shadow:0 18px 50px rgba(217,168,60,.4)">🌐 Découvrir occasionetgarantie.store</a>
+   <a href="https://www.occasionetgarantie.store" target="_blank" class="btn2-cta" style="display:inline-flex;align-items:center;gap:9px;background:linear-gradient(135deg,var(--gold),var(--p));color:#0b0c14;font-weight:800;font-size:15px;padding:15px 34px;border-radius:14px;text-decoration:none;box-shadow:0 18px 50px rgba(217,168,60,.4)"><svg class="fi" aria-hidden="true"><use href="#fi-globe"/></svg> Découvrir occasionetgarantie.store</a>
    </div>
    </div><!-- /recap-scene -->
   </div>
