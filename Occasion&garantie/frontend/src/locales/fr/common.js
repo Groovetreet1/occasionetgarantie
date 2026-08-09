@@ -120,5 +120,11 @@ export const frCommon = {
     popupCta: 'Découvrir GoMobile',
     bannerTitle: 'Boostez vos ventes avec GoMobile',
     bannerText: 'SMS, WhatsApp Business API et Voice Messaging.',
+    firstClickSponsor: 'Sponsored',
+    firstClickTitle: 'Offre partenaire — rendez-vous sur GoMobile',
+    firstClickText: 'SMS, WhatsApp Business API et Voice Messaging pour booster votre business.',
+    firstClickGo: 'Visiter gomobile.ma',
+    firstClickCount: 'Redirection automatique dans',
+    firstClickSeconds: 's',
   },
 };

@@ -4,6 +4,7 @@ import api from './api/axios';
 import { motion } from 'framer-motion';
 import Navbar from './components/Navbar';
 import GoMobileBanner from './components/GoMobileBanner';
+import GoMobileFirstClick from './components/GoMobileFirstClick';
 import Footer from './components/Footer';
 import SupportFloat from './components/SupportFloat';
 import ErrorBoundary from './components/ErrorBoundary';
@@ -138,6 +139,7 @@ export default function App() {
       {!location.pathname.startsWith('/messenger') && !location.pathname.startsWith('/login') && !location.pathname.startsWith('/signup') && <SupportFloat />}
       {!location.pathname.startsWith('/admin') && !location.pathname.startsWith('/messenger') && !location.pathname.startsWith('/login') && !location.pathname.startsWith('/signup') && <Footer />}
       <GoMobileBanner />
+      <GoMobileFirstClick />
       {suspended && <SuspendedModal reason={suspended} onClose={() => setSuspended(null)} />}
     </>
   );
