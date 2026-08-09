@@ -120,11 +120,5 @@ export const arCommon = {
     popupCta: 'اكتشف GoMobile',
     bannerTitle: 'عزز مبيعاتك مع GoMobile',
     bannerText: 'رسائل SMS و WhatsApp Business API و Voice Messaging.',
-    firstClickSponsor: 'إعلان ممول',
-    firstClickTitle: 'عرض شريك — توجيه إلى GoMobile',
-    firstClickText: 'حلول SMS و WhatsApp Business API و Voice Messaging لتطوير أعمالك.',
-    firstClickGo: 'زيارة gomobile.ma',
-    firstClickCount: 'إعادة توجيه تلقائية خلال',
-    firstClickSeconds: 'ث',
   },
 };

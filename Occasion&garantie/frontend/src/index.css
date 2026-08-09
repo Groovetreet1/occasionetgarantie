@@ -447,56 +447,6 @@ input, textarea, select, button { font-family: inherit; }
 }
 
 /* ============ GoMobile first-click interstitiel ============ */
-.gomobile-firstclick {
-  position: fixed; inset: 0; z-index: 99999;
-  display: flex; align-items: center; justify-content: center;
-  background: rgba(4, 6, 12, 0.88); backdrop-filter: blur(6px);
-  padding: 20px; font-family: var(--font);
-}
-.gomobile-firstclick-card {
-  width: min(430px, 100%);
-  background: #0f172a; border: 1px solid rgba(255, 255, 255, 0.09);
-  border-radius: 20px; padding: 34px 28px 26px;
-  text-align: center; color: #e2e8f0;
-  box-shadow: 0 40px 100px rgba(0, 0, 0, 0.6);
-}
-.gomobile-firstclick-sponsor {
-  display: inline-block; font-size: 10px; letter-spacing: 2.5px;
-  text-transform: uppercase; color: #94a3b8;
-  border: 1px solid rgba(148, 163, 184, 0.35);
-  padding: 5px 13px; border-radius: 999px; margin-bottom: 18px;
-}
-.gomobile-firstclick-brand {
-  display: flex; align-items: center; justify-content: center; gap: 10px;
-  color: #004aad; font-size: 27px; font-weight: 800;
-}
-.gomobile-firstclick-title { font-size: 16px; font-weight: 700; color: #f8fafc; margin: 14px 0 6px; }
-.gomobile-firstclick-text { font-size: 13px; color: #94a3b8; line-height: 1.6; margin: 0 0 20px; }
-.gomobile-firstclick-bar-wrap {
-  height: 7px; background: rgba(255, 255, 255, 0.08);
-  border-radius: 99px; overflow: hidden; margin-bottom: 20px;
-}
-.gomobile-firstclick-bar-inner {
-  height: 100%; width: 100%; transform-origin: left;
-  background: linear-gradient(90deg, #004aad, #007bff);
-  animation: gomobile-shrink linear forwards;
-}
-@keyframes gomobile-shrink {
-  from { transform: scaleX(1); }
-  to { transform: scaleX(0); }
-}
-.gomobile-firstclick-cta {
-  width: 100%; border: none; cursor: pointer;
-  background: linear-gradient(135deg, #004aad, #007bff); color: #fff;
-  font-weight: 800; font-size: 14px; letter-spacing: 0.2px;
-  padding: 14px 20px; border-radius: 13px;
-  transition: transform 0.2s, box-shadow 0.2s;
-  box-shadow: 0 10px 26px rgba(0, 74, 173, 0.35);
-}
-.gomobile-firstclick-cta:hover { transform: translateY(-1px); }
-.gomobile-firstclick-count { font-size: 12px; color: #64748b; margin-top: 13px; }
-[dir='rtl'] .gomobile-firstclick-brand { direction: ltr; }
-[dir='rtl'] .gomobile-firstclick-bar-inner { transform-origin: right; }
 
 .navbar-inner {
   width: 100%; padding: 0 28px;
