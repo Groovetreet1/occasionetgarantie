@@ -454,13 +454,23 @@ input, textarea, select, button { font-family: inherit; }
   gap: 16px;
 }
 .navbar-logo {
-  font-size: 22px; font-weight: 800;
-  background: linear-gradient(135deg, var(--primary), #fbbf24);
-  -webkit-background-clip: text; -webkit-text-fill-color: transparent;
-  background-clip: text; letter-spacing: -0.5px;
+  display: flex; align-items: center; gap: 10px;
   flex-shrink: 0; justify-self: start; grid-column: 1;
+  text-decoration: none;
 }
-.navbar-logo span { -webkit-text-fill-color: var(--text-primary); }
+.navbar-logo-img {
+  width: 34px; height: 34px; border-radius: 10px; object-fit: contain;
+  background: rgba(255, 255, 255, 0.9); padding: 4px; flex-shrink: 0;
+  box-shadow: var(--shadow-glow);
+}
+.navbar-logo-text {
+  font-size: 16px; font-weight: 800; color: var(--text-primary);
+  letter-spacing: -0.3px; white-space: nowrap;
+  -webkit-text-fill-color: var(--text-primary);
+}
+.navbar-logo-text b {
+  color: var(--primary); -webkit-text-fill-color: var(--primary);
+}
 .navbar-desktop-nav { display: flex; align-items: center; gap: 2px; justify-self: center; grid-column: 2; }
 .navbar-desktop-nav a {
   padding: 8px 18px; border-radius: 8px; color: var(--text-secondary);

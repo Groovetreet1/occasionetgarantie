@@ -119,7 +119,10 @@ export default function Navbar() {
         transition={{ duration: 0.4, ease: 'easeOut' }}
       >
         <div className="navbar-inner">
-          <Link to="/" className="navbar-logo"><span>O</span>G</Link>
+          <Link to="/" className="navbar-logo">
+            <img src="/logo.png" alt="Occasion & Garantie" className="navbar-logo-img" />
+            <span className="navbar-logo-text">Occasion &amp; <b>Garantie</b></span>
+          </Link>
 
           <div className="navbar-desktop-nav">
             <NavLink to="/" end>{t('nav.home')}</NavLink>
