@@ -610,6 +610,8 @@ input, textarea, select, button { font-family: inherit; }
 @media (max-width: 900px) {
   .navbar-desktop-nav, .navbar-actions .navbar-auth, .navbar-actions .navbar-dropdown { display: none; }
   .navbar-hamburger { display: flex; }
+  .navbar-logo-text { display: none; }
+  .navbar-logo-img { width: 38px; height: 38px; }
   .navbar-mobile-panel {
     position: fixed; top: var(--nav-height); left: 0; right: 0; bottom: 0;
     display: flex; flex-direction: column; gap: 2px;
