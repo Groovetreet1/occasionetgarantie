@@ -625,13 +625,13 @@ input, textarea, select, button { font-family: inherit; }
   .navbar-mobile-panel a:hover { background: var(--bg-hover); }
   .navbar-mobile-panel a.active { color: var(--primary); background: var(--primary-light); }
   .navbar-mobile-divider { height: 1px; background: var(--border-light); margin: 8px 0; }
-  .navbar-mobile-signup, .navbar-mobile-logout {
-    display: flex; align-items: center; justify-content: center; gap: 6px;
-    padding: 10px; border-radius: 8px; font-size: 14px; font-weight: 600;
+  .navbar-mobile-panel a.navbar-mobile-signup, .navbar-mobile-panel button.navbar-mobile-logout {
+    display: flex; align-items: center; justify-content: center; gap: 8px;
+    padding: 15px; border-radius: 14px; font-size: 15px; font-weight: 800;
     border: none; cursor: pointer; font-family: var(--font);
   }
-  .navbar-mobile-signup { background: var(--gradient); color: #000; }
-  .navbar-mobile-logout { background: rgba(239, 68, 68, 0.1); color: var(--error); }
+  .navbar-mobile-panel a.navbar-mobile-signup { background: linear-gradient(135deg, #d9a83c, #f59e0b); color: #0b0c14; box-shadow: 0 8px 22px rgba(245, 158, 11, .3); }
+  .navbar-mobile-panel button.navbar-mobile-logout { background: rgba(239, 68, 68, 0.1); color: var(--error); }
   .navbar-mobile-auth { margin-top: 6px; }
 }
 
@@ -2014,12 +2014,13 @@ select.form-control, .form-group select { cursor: pointer; appearance: auto; }
   background: #4b5563; color: #fff !important;
 }
 .navbar-desktop-nav { gap: 8px; }
-.navbar-mobile-sell {
-  display: flex; align-items: center; justify-content: center; gap: 8px; padding: 16px;
-  color: #000 !important; font-weight: 700;
-  background: var(--gradient);
-  border-radius: 12px;
+.navbar-mobile-panel a.navbar-mobile-sell {
+  display: flex; align-items: center; justify-content: center; gap: 8px; padding: 15px;
+  color: #0b0c14 !important; font-weight: 800; font-size: 15px;
+  background: linear-gradient(135deg, #d9a83c, #f59e0b);
+  border-radius: 14px;
   margin: 2px 0;
+  box-shadow: 0 8px 22px rgba(245, 158, 11, .3);
   animation: mobileSellPulse 2s ease-in-out infinite;
 }
 @keyframes mobileSellPulse {
