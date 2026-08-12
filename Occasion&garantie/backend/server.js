@@ -163,7 +163,16 @@ const seo = require('./services/seo');
     crossOriginResourcePolicy: { policy: 'cross-origin' },
     contentSecurityPolicy: false,
   }));
-  app.use(cors({ origin: process.env.CLIENT_URL || 'http://localhost:5173' }));
+  app.use(cors({
+    origin: [
+      process.env.CLIENT_URL,
+      'http://localhost:5173',
+      'http://localhost:4001',
+      'http://localhost',
+      'https://localhost',
+      'capacitor://localhost',
+    ].filter(Boolean),
+  }));
   app.use(express.json({ limit: '10mb' }));
   app.use('/api/', limiter);
 
