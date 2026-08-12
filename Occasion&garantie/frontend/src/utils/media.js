@@ -1,15 +1,24 @@
 const API_BASE = import.meta.env.VITE_API_URL || '';
+const ASSET_BASE = API_BASE.replace(/\/api(\/)?$/, '');
 
-export function imgUrl(path) {
+function assetUrl(path) {
   if (!path || typeof path !== 'string') return null;
   if (path.startsWith('http://') || path.startsWith('https://')) return path;
-  return `${API_BASE}/uploads/${path}`;
+  return `${ASSET_BASE}/uploads/${path}`;
+}
+
+function avatarAssetUrl(path) {
+  if (!path || typeof path !== 'string') return null;
+  if (path.startsWith('http://') || path.startsWith('https://')) return path;
+  return `${ASSET_BASE}/uploads/avatars/${path}`;
+}
+
+export function imgUrl(path) {
+  return assetUrl(path);
 }
 
 export function avatarUrl(path) {
-  if (!path || typeof path !== 'string') return null;
-  if (path.startsWith('http://') || path.startsWith('https://')) return path;
-  return `${API_BASE}/uploads/avatars/${path}`;
+  return avatarAssetUrl(path);
 }
 
 export function toWhatsAppNumber(phone) {
