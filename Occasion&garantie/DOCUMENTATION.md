@@ -239,6 +239,19 @@ git push origin main
 - عند مرور الماوس تتوقف الحركة (pause on hover)
 - كل النصوص مترجمة في `locales/fr/common.js` و `locales/ar/common.js` ضمن كائن `ad`
 
+### 5.8 التكامل مع SaasAble UI (UX/UI Pro) — تحديث شتنبر 2026
+- **المصدر**: `https://github.com/phoenixcoded/saasable-ui` (MIT) — تم استنساخه إلى `Desktop/saasable-ui`
+- **المستوحى منه**: `SectionHero` (offer chip + wave + pill search), `IconCard` + `GraphicsCard`, `PreviewCard` (hover arrow + chip), `JoinUS` (pill newsletter), `Footer Sitemap`
+- **ما تم تطبيقه** (بدون تثبيت MUI — تكامل خفيف ب CSS + framer-motion الموجود `framer-motion@12.42.2`):
+  - `frontend/src/index.css:3012` — إضافة قسم `SaasAble-inspired` : `--saas-radius-hero/card`, `.saas-offer-chip`, `.saas-hero` (dots + rounded 24px), `.saas-icon-grid/card`, `.saas-preview-card/arrow`, `.saas-cta`, `.saas-footer-join` (+ responsive)
+  - `frontend/src/pages/Home.jsx:1` — Hero محسن `avito-hero saas-hero` مع `saas-offer-chip` (5000+ annonces), `WaveDivider` SVG, بحث pill و `boxShadow`, شبكة `SAAS_CATEGORIES` (4 IconCards) و `SAAS_FEATURES` (3 IconCards: Garantie/Livraison/Paiement), قسم `saas-cta` للدعوة للـ reprise
+  - `frontend/src/components/HomeProductCard.jsx:1` — `saas-preview-card` + سهم `FiArrowUpRight` يظهر عند hover، بطاقات `product-card` بزوايا 16px و `shadow-hover`
+  - `frontend/src/components/Footer.jsx:1` — شريط `saas-footer-join` علوي (Join our newsletter pill input + زر `FiSend`) يرسل إلى `POST /newsletter/subscribe` مع رسالة نجاح
+  - `frontend/src/components/Navbar.jsx` — محافظ عليه لكن يستفيد من `shadow` الجديد عند scroll
+- **لماذا بدون MUI؟** الموقع يستخدم `index.css` مخصص + `react-icons`؛ تثبيت MUI (130KB+) سيكسر الثيمات الستة (`light/sable/mint/sky/rose/lavender/dark`). تم استخراج المبادئ فقط (rounded, soft shadow, chip) وتطبيقها بخفة.
+- **البناء**: `node node_modules/vite/bin/vite.js build` (بسبب `&` في المسار) ثم نسخ `frontend/dist` → `backend/public` عبر `node -e fs.cpSync` — نجح 5.33s / gzip 242KB
+- **الخطوة التالية (اختيارية)**: إضافة Tailwind + `shadcn/ui` تدريجيا، استيراد `Layered UI` blocks (Hero, Pricing) إذا أردت صفحات إضافية
+
 ---
 
 ## 6. API Routes

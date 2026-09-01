@@ -1,7 +1,7 @@
 import { Link, useNavigate } from 'react-router-dom';
 import { useEffect, useRef, useState } from 'react';
 import { motion } from 'framer-motion';
-import { FiSmartphone, FiArrowRight, FiShoppingBag, FiSearch, FiMapPin } from 'react-icons/fi';
+import { FiSmartphone, FiArrowRight, FiShoppingBag, FiSearch, FiMapPin, FiShield, FiTruck, FiAward, FiStar, FiCheckCircle, FiLayers, FiHeadphones, FiMonitor, FiTablet } from 'react-icons/fi';
 import { TbShieldCheck, TbClockHour5 } from 'react-icons/tb';
 import api from '../api/axios';
 import HomeProductCard from '../components/HomeProductCard';
@@ -27,8 +27,6 @@ function SkeletonGrid({ count = 4 }) {
     </div>
   );
 }
-
-
 
 const formatPrice = (p) => new Intl.NumberFormat('fr-FR', { style: 'currency', currency: 'MAD' }).format(p).replace('MAD', '').trim() + ' DH';
 
@@ -56,6 +54,28 @@ function BrandCircle({ brand }) {
       </div>
       <span style={{ fontSize: 11, color: 'var(--text-muted)', whiteSpace: 'nowrap', fontWeight: 500 }}>{brand.charAt(0).toUpperCase() + brand.slice(1)}</span>
     </Link>
+  );
+}
+
+// SaasAble-inspired category data for IconCard grid
+const SAAS_CATEGORIES = [
+  { slug: 'Smartphones', label: 'Smartphones', icon: FiSmartphone, desc: 'iPhone, Samsung, Xiaomi reconditionnés' },
+  { slug: 'Tablettes', label: 'Tablettes', icon: FiTablet, desc: 'iPad, Samsung Tab, Huawei' },
+  { slug: 'Ordinateurs', label: 'Ordinateurs', icon: FiMonitor, desc: 'PC portables, MacBook, Gaming' },
+  { slug: 'Accessoires', label: 'Accessoires', icon: FiHeadphones, desc: 'Écouteurs, chargeurs, coques' },
+];
+
+const SAAS_FEATURES = [
+  { icon: FiShield, title: 'Garantie 12 mois', desc: 'Tous nos produits occasion sont testés, nettoyés et garantis 12 mois pièces et main d’œuvre.' },
+  { icon: FiTruck, title: 'Livraison rapide', desc: 'Livraison partout au Maroc en 24-48h. Paiement à la livraison disponible à Casablanca, Rabat, Marrakech.' },
+  { icon: FiAward, title: 'Paiement sécurisé', desc: 'Paiement sécurisé, reprise de votre ancien téléphone avec estimation instantanée et prix juste.' },
+];
+
+function WaveDivider() {
+  return (
+    <svg className="saas-wave" viewBox="0 0 120 16" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden>
+      <path d="M2 12 Q 15 2 30 12 T 60 12 T 90 12 T 118 8" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" fill="none" opacity="0.9" />
+    </svg>
   );
 }
 
@@ -144,11 +164,23 @@ export default function Home() {
     <motion.div initial="hidden" animate="show">
       <PromoPopup />
 
-      <section className="avito-hero">
+      {/* SaasAble-inspired Hero: offer chip + centered heading + wave + pill search */}
+      <section className="avito-hero saas-hero">
         <div className="container">
           <div className="avito-hero-content">
-            <h1>{t('home.heroTitle')}</h1>
-            <form onSubmit={handleSearch} className="avito-search-bar">
+            <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.4 }} style={{ display: 'flex', justifyContent: 'center' }}>
+              <span className="saas-offer-chip">
+                <FiStar size={12} style={{ color: '#f59e0b' }} />
+                <span style={{ color: 'var(--text-secondary)', fontWeight: 600 }}>5000+ annonces vérifiées</span>
+                <strong><FiCheckCircle size={12} /> Garantie 12 mois</strong>
+              </span>
+            </motion.div>
+            <motion.h1 initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.45, delay: 0.05 }}>{t('home.heroTitle')}</motion.h1>
+            <motion.p className="avito-hero-sub" initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ delay: 0.12 }} style={{ color: 'var(--text-secondary)', fontSize: 15, maxWidth: 640, margin: '0 auto 8px' }}>
+              Marketplace marocaine de l’électronique d’occasion — smartphones reconditionnés, tablettes et PC garantis.
+            </motion.p>
+            <WaveDivider />
+            <motion.form onSubmit={handleSearch} className="avito-search-bar" initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.15 }} style={{ marginTop: 20 }}>
               <div className="avito-search-input-wrap" ref={searchWrapRef}>
                 <FiSearch size={18} className="avito-search-icon" />
                 <input type="text" value={searchTerm} onChange={e => setSearchTerm(e.target.value)} placeholder={t('home.searchPlaceholder')} />
@@ -196,7 +228,7 @@ export default function Home() {
                 </select>
               </div>
               <button type="submit" className="avito-search-btn">{t('home.searchBtn')}</button>
-            </form>
+            </motion.form>
             {brands.length > 0 && (
               <div className="brands-scroll-wrapper" style={{ marginTop: 28 }}>
                 <div className="brands-scroll-track">
@@ -207,6 +239,28 @@ export default function Home() {
               </div>
             )}
           </div>
+        </div>
+      </section>
+
+      {/* SaasAble IconCard grid for categories */}
+      <section className="section" style={{ paddingTop: 32, paddingBottom: 8 }}>
+        <div className="container">
+          <motion.div className="saas-icon-grid" variants={stagger} initial="hidden" whileInView="show" viewport={{ once: true }}>
+            {SAAS_CATEGORIES.map(cat => (
+              <motion.div key={cat.slug} variants={fadeUp}>
+                <Link to={`/products?category=${cat.slug}`} style={{ textDecoration: 'none' }}>
+                  <div className="saas-icon-card">
+                    <div className="saas-icon-avatar"><cat.icon size={26} /></div>
+                    <div>
+                      <h3>{cat.label}</h3>
+                      <p>{cat.desc}</p>
+                    </div>
+                    <div className="saas-card-footer">Explorer <FiArrowRight size={14} /></div>
+                  </div>
+                </Link>
+              </motion.div>
+            ))}
+          </motion.div>
         </div>
       </section>
 
@@ -226,13 +280,14 @@ export default function Home() {
             {storeLoad ? <SkeletonGrid count={4} /> : (
               <div className="products-grid">
                 {storeProducts.map(p => (
-                  <Link key={p.id} to={`/boutique/${p.slug}`} className="product-card" style={{ textDecoration: 'none' }}>
+                  <Link key={p.id} to={`/boutique/${p.slug}`} className="product-card saas-preview-card" style={{ textDecoration: 'none' }}>
                     <div className="product-card-image" style={{ position: 'relative', background: 'var(--bg-secondary)', aspectRatio: '1/1' }}>
-                      {p.image ? <img src={p.image} alt={p.name} style={{ width: '100%', height: '100%', objectFit: 'contain' }} /> : <FiShoppingBag size={48} style={{ opacity: 0.15 }} />}
-                      <span style={{ position: 'absolute', top: 8, right: 8, background: '#d97706', color: '#fff', fontSize: 10, fontWeight: 700, padding: '2px 8px', borderRadius: 6 }}>{t('home.officialBadge')}</span>
+                      {p.image ? <img src={p.image} alt={p.name} style={{ width: '100%', height: '100%', objectFit: 'contain', padding: 16 }} /> : <FiShoppingBag size={48} style={{ opacity: 0.15 }} />}
+                      <span style={{ position: 'absolute', top: 8, right: 8, background: '#d97706', color: '#fff', fontSize: 10, fontWeight: 700, padding: '2px 8px', borderRadius: 999 }}><FiStar size={10} style={{ verticalAlign: 'middle', marginRight: 4 }} />{t('home.officialBadge')}</span>
+                      <span className="saas-preview-arrow"><FiArrowRight size={14} /></span>
                     </div>
-                    <div className="product-card-info" style={{ padding: 12 }}>
-                      <h3 style={{ fontSize: 14, fontWeight: 600, margin: 0, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{p.name}</h3>
+                    <div className="product-card-body" style={{ padding: 14 }}>
+                      <h3 className="product-card-title" style={{ fontSize: 14 }}>{p.name}</h3>
                       <div style={{ fontSize: 16, fontWeight: 700, color: 'var(--primary)', marginTop: 6 }}>{formatPrice(p.price)}</div>
                     </div>
                   </Link>
@@ -267,6 +322,25 @@ export default function Home() {
         </div>
       </motion.section>
 
+      {/* SaasAble IconCard features */}
+      <section className="section" style={{ paddingTop: 8 }}>
+        <div className="container">
+          <motion.div className="saas-icon-grid" style={{ gridTemplateColumns: 'repeat(3, 1fr)' }} variants={stagger} initial="hidden" whileInView="show" viewport={{ once: true }}>
+            {SAAS_FEATURES.map(f => (
+              <motion.div key={f.title} variants={fadeUp}>
+                <div className="saas-icon-card" style={{ minHeight: 220 }}>
+                  <div className="saas-icon-avatar"><f.icon size={26} /></div>
+                  <div>
+                    <h3>{f.title}</h3>
+                    <p>{f.desc}</p>
+                  </div>
+                </div>
+              </motion.div>
+            ))}
+          </motion.div>
+        </div>
+      </section>
+
       <TrustBar />
 
       <motion.section className="section sell-promo" variants={fadeUp} initial="hidden" whileInView="show" viewport={{ once: true }}>
@@ -282,6 +356,22 @@ export default function Home() {
           </div>
         </div>
       </motion.section>
+
+      {/* SaasAble CTA block */}
+      <section className="section" style={{ paddingTop: 0 }}>
+        <div className="container">
+          <motion.div className="saas-cta" initial={{ opacity: 0, y: 20 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }} transition={{ duration: 0.5 }}>
+            <h2>Vous avez un téléphone à vendre ?</h2>
+            <p>Estimation instantanée, reprise garantie et paiement rapide. Rejoignez les vendeurs qui font confiance à Occasion & Garantie.</p>
+            <Link to="/reprise" className="btn">Demander une reprise <FiArrowRight size={16} /></Link>
+            <div style={{ marginTop: 16, display: 'flex', justifyContent: 'center', gap: 16, fontSize: 12, opacity: 0.8, flexWrap: 'wrap' }}>
+              <span style={{ display: 'inline-flex', alignItems: 'center', gap: 6 }}><FiCheckCircle size={12} /> Estimation gratuite</span>
+              <span style={{ display: 'inline-flex', alignItems: 'center', gap: 6 }}><FiCheckCircle size={12} /> Paiement en 48h</span>
+              <span style={{ display: 'inline-flex', alignItems: 'center', gap: 6 }}><FiCheckCircle size={12} /> Suivi sécurisé</span>
+            </div>
+          </motion.div>
+        </div>
+      </section>
 
       <GoMobileTicker />
 

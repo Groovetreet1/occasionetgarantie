@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import { Link } from 'react-router-dom';
 import { motion } from 'framer-motion';
-import { FiShoppingBag } from 'react-icons/fi';
+import { FiShoppingBag, FiArrowUpRight } from 'react-icons/fi';
 import { TbChevronLeft, TbChevronRight } from 'react-icons/tb';
 import { useLanguage } from '../context/LanguageContext';
 
@@ -52,12 +52,13 @@ export default function HomeProductCard({ product, index = 0 }) {
       viewport={{ once: true, margin: '-30px' }}
       transition={{ duration: 0.35, delay: index * 0.06 }}
     >
-      <Link to={detailLink} className={`product-card product-card-compact ${isSold ? 'product-sold' : ''}`}>
+      <Link to={detailLink} className={`product-card product-card-compact saas-preview-card ${isSold ? 'product-sold' : ''}`}>
         <div className="product-card-image">
           {discount > 0 && <span className="badge-discount">-{discount}%</span>}
           {isSold && <div className="product-sold-overlay">{t('home.sold')}</div>}
           {isPending && <span className="badge-pending">{t('home.reserved')}</span>}
           {isStore && <span className="badge-store">{t('home.officialStore')}</span>}
+          <span className="saas-preview-arrow"><FiArrowUpRight size={16} /></span>
           <div className="product-card-img-wrap">
             {currentImg ? (
               <img src={currentImg} alt={product.name} loading="lazy" />
