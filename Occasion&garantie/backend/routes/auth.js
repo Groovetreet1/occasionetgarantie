@@ -387,11 +387,30 @@ router.post('/forgot-password', [
     if (identifier.includes('@')) {
       [users] = await pool.query('SELECT id, full_name, email, phone FROM users WHERE email = ?', [identifier]);
       if (users.length === 0) return res.status(404).json({ message: 'Aucun compte trouve avec cet email.' });
-      if (!users[0].phone) return res.status(400).json({ message: 'Aucun telephone enregistre sur ce compte.' });
       const code = crypto.randomInt(100000, 999999).toString();
       resetCodes.set(identifier, { code, userId: users[0].id, expiresAt: Date.now() + CODE_EXPIRY });
-      try { await gomobile.sendSms(users[0].phone, `Votre code de reinitialisation Occasion & Garantie : ${code}. Valable 15 min.`); } catch (smsErr) { console.error('SMS send failed:', smsErr.message); }
-      return res.json({ message: 'Code de verification envoye par SMS.', identifier });
+      // Try email first (primary for email identifier), fallback to SMS if email fails
+      let sentVia = 'email';
+      try {
+        await send({
+          to: identifier,
+          subject: 'Votre code de réinitialisation - Occasion & Garantie',
+          html: verification({ code, userName: users[0].full_name }),
+        });
+      } catch (mailErr) {
+        console.error('Email reset failed, trying SMS fallback:', mailErr.message);
+        sentVia = 'sms';
+        if (!users[0].phone) {
+          return res.status(500).json({ message: `Impossible d'envoyer l'email (${mailErr.message}). Aucun téléphone de secours.` });
+        }
+        try {
+          await gomobile.sendSms(users[0].phone, `Votre code de reinitialisation Occasion & Garantie : ${code}. Valable 15 min.`);
+        } catch (smsErr) {
+          console.error('SMS fallback also failed:', smsErr.message);
+          return res.status(500).json({ message: 'Impossible d\'envoyer le code. Réessayez plus tard.' });
+        }
+      }
+      return res.json({ message: sentVia === 'email' ? 'Code de vérification envoyé par email.' : 'Code de vérification envoyé par SMS.', identifier, sentVia });
     }
 
     const inputDigits = identifier.replace(/\D/g, '');

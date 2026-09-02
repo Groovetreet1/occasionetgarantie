@@ -13,6 +13,7 @@ export default function ForgotPassword() {
   const [sent, setSent] = useState(false);
   const [sentIdentifier, setSentIdentifier] = useState('');
   const [sentUserId, setSentUserId] = useState(null);
+  const [sentVia, setSentVia] = useState('sms');
   const [accounts, setAccounts] = useState([]);
   const [step, setStep] = useState('form');
 
@@ -28,6 +29,7 @@ export default function ForgotPassword() {
       } else {
         setSentIdentifier(res.data.identifier);
         setSentUserId(res.data.userId || null);
+        setSentVia(res.data.sentVia || (identifier.includes('@') ? 'email' : 'sms'));
         setSent(true);
       }
     } catch (err) {
@@ -44,6 +46,7 @@ export default function ForgotPassword() {
       const res = await api.post('/auth/forgot-password', { identifier, userId });
       setSentIdentifier(res.data.identifier);
       setSentUserId(res.data.userId);
+      setSentVia(res.data.sentVia || 'sms');
       setSent(true);
     } catch (err) {
       setError(err.response?.data?.message || t('auth.genericError'));
@@ -141,10 +144,14 @@ export default function ForgotPassword() {
 
           {sent && (
             <div style={{ textAlign: 'center' }}>
-              <FiSmartphone size={48} style={{ color: 'var(--primary)', marginBottom: '8px' }} />
+              {sentVia === 'email' ? (
+                <FiMail size={48} style={{ color: 'var(--primary)', marginBottom: '8px' }} />
+              ) : (
+                <FiSmartphone size={48} style={{ color: 'var(--primary)', marginBottom: '8px' }} />
+              )}
               <FiCheckCircle size={24} style={{ color: 'var(--success)', marginBottom: '16px', display: 'block', margin: '0 auto 16px' }} />
               <p style={{ marginBottom: '16px', color: 'var(--text-secondary)' }}>
-                {t('auth.codeSentToNumberPrefix')} <strong>{sentIdentifier}</strong>.
+                {sentVia === 'email' ? t('auth.codeSentToEmailPrefix') : t('auth.codeSentToNumberPrefix')} <strong>{sentIdentifier}</strong>.
               </p>
               <p style={{ fontSize: '13px', color: 'var(--text-muted)', marginBottom: '16px' }}>
                 {t('auth.codeExpires')}

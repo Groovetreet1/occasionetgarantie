@@ -65,14 +65,16 @@
 
     // ForgotPassword
     forgotPasswordTitle: 'Mot de passe oublie ?',
-    forgotPasswordSubtitle: 'Entrez votre email ou telephone pour recevoir un code par SMS',
+    forgotPasswordSubtitle: 'Entrez votre email ou téléphone pour recevoir un code',
     multipleAccountsFound: 'Plusieurs comptes trouves, selectionnez le votre',
     emailOrPhoneLabel: 'Email ou Telephone',
     emailOrPhonePlaceholder: 'vous@email.com ou +212 6XX XXX XXX',
-    sendCodeBySms: 'Envoyer le code par SMS',
+    sendCodeBySms: 'Envoyer le code',
+    sendCodeByEmail: 'Envoyer le code par email',
     foundAccountsCount: 'Nous avons trouve {{count}} comptes avec ce numero. Selectionnez celui qui vous concerne :',
     back: 'Revenir en arriere',
-    codeSentToNumberPrefix: 'Un code de verification a ete envoye par SMS au numero associe a',
+    codeSentToNumberPrefix: 'Un code de vérification a été envoyé par SMS au numéro associé à',
+    codeSentToEmailPrefix: 'Un code de vérification a été envoyé par email à',
     codeExpires: 'Le code expire dans 15 minutes.',
     haveCodeReset: "J'ai le code, reinitialiser",
 
@@ -81,7 +83,7 @@
     passwordResetSuccess: 'Mot de passe reinitialise',
     passwordChangedSuccess: 'Votre mot de passe a ete modifie avec succes.',
     resetTitle: 'Reinitialisation',
-    resetSubtitle: 'Entrez le code recu par SMS et votre nouveau mot de passe',
+    resetSubtitle: 'Entrez le code reçu et votre nouveau mot de passe',
     emailPhoneLabel: 'Email / Telephone',
     newPasswordLabel: 'Nouveau mot de passe',
     newPasswordPlaceholder: 'Au moins 6 caracteres',

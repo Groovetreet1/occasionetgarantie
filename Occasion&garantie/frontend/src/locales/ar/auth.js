@@ -65,14 +65,16 @@
 
     // ForgotPassword
     forgotPasswordTitle: 'نسيت كلمة المرور؟',
-    forgotPasswordSubtitle: 'أدخل بريدك الإلكتروني أو رقم هاتفك لاستلام رمز عبر الرسائل النصية',
+    forgotPasswordSubtitle: 'أدخل بريدك الإلكتروني أو رقم هاتفك لاستلام الرمز',
     multipleAccountsFound: 'تم العثور على عدة حسابات، اختر حسابك',
     emailOrPhoneLabel: 'البريد الإلكتروني أو رقم الهاتف',
     emailOrPhonePlaceholder: 'vous@email.com أو +212 6XX XXX XXX',
-    sendCodeBySms: 'إرسال الرمز عبر الرسائل النصية',
+    sendCodeBySms: 'إرسال الرمز',
+    sendCodeByEmail: 'إرسال الرمز عبر البريد الإلكتروني',
     foundAccountsCount: 'وجدنا {{count}} حساب مرتبط بهذا الرقم. اختر الحساب الذي يخصك:',
     back: 'العودة إلى الخلف',
     codeSentToNumberPrefix: 'تم إرسال رمز التحقق عبر الرسائل النصية إلى الرقم المرتبط بـ',
+    codeSentToEmailPrefix: 'تم إرسال رمز التحقق عبر البريد الإلكتروني إلى',
     codeExpires: 'ينتهي الرمز خلال 15 دقيقة.',
     haveCodeReset: 'لدي الرمز، إعادة التعيين',
 
@@ -81,7 +83,7 @@
     passwordResetSuccess: 'تمت إعادة تعيين كلمة المرور',
     passwordChangedSuccess: 'تم تغيير كلمة المرور بنجاح.',
     resetTitle: 'إعادة التعيين',
-    resetSubtitle: 'أدخل الرمز المستلم عبر الرسائل النصية وكلمة المرور الجديدة',
+    resetSubtitle: 'أدخل الرمز المستلم وكلمة المرور الجديدة',
     emailPhoneLabel: 'البريد الإلكتروني / رقم الهاتف',
     newPasswordLabel: 'كلمة المرور الجديدة',
     newPasswordPlaceholder: '6 أحرف على الأقل',
