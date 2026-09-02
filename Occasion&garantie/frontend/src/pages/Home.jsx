@@ -179,26 +179,9 @@ export default function Home() {
               </div>
             </motion.div>
 
-            <motion.h1 className="hero-title-premium" initial={{ opacity: 0, y: 14 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.55, delay: 0.06 }}>
-              L’électronique d’occasion<br /><em>enfin sans risque.</em>
-            </motion.h1>
-
-            <WaveDivider />
-
-            <motion.p className="hero-caption-premium" initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ delay: 0.14 }}>
-              Smartphones reconditionnés, tablettes et PC garantis 12 mois. Testés, nettoyés, livrés en 24h partout au Maroc.
-            </motion.p>
-
             <motion.div className="hero-actions-premium" initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.18 }}>
               <Link to="/products" className="btn-hero-primary">Explorer les annonces <FiArrowRight size={16} /></Link>
               <Link to="/vendre" className="btn-hero-secondary"><FiZap size={16} /> Vendre mon téléphone</Link>
-            </motion.div>
-
-            <motion.div className="hero-chips-premium" initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ delay: 0.22 }}>
-              <span className="hero-chip-item"><FiShield size={14} /> Garantie 12 mois</span>
-              <span className="hero-chip-item"><FiTruck size={14} /> Livraison 24/48h</span>
-              <span className="hero-chip-item"><FiCheckCircle size={14} /> Paiement sécurisé</span>
-              <span className="hero-chip-item"><FiAward size={14} /> Reprise express</span>
             </motion.div>
 
             {/* Pill search bar inside hero - SaasAble autocomplete style */}
@@ -254,11 +237,6 @@ export default function Home() {
 
             {/* Hero mockup - GraphicsCard with 5px border like SaasAble Hero17 video */}
             <motion.div className="hero-mockup-premium" initial={{ opacity: 0, y: 18, scale: 0.98 }} animate={{ opacity: 1, y: 0, scale: 1 }} transition={{ duration: 0.6, delay: 0.28, ease: [0.22, 1, 0.36, 1] }}>
-              <div className="hero-mockup-bar">
-                <span className="hero-mockup-dot r" /><span className="hero-mockup-dot y" /><span className="hero-mockup-dot g" />
-                <span style={{ fontSize: 12, fontWeight: 600, color: 'var(--text-secondary)', marginLeft: 8 }}>occasionetgarantie.store — Marketplace</span>
-                <span className="hero-mockup-search"><FiSearch size={12} /> Rechercher iPhone 14...</span>
-              </div>
               <div className="hero-mockup-grid">
                 {mockupPhones.map(p => {
                   const imgSrc = p.image ? (p.image.startsWith('http') ? p.image : `${API_BASE}/uploads/${p.image}`) : null;
@@ -439,23 +417,6 @@ export default function Home() {
           </div>
         </div>
       </motion.section>
-
-      {/* CTA PREMIUM */}
-      <section className="section" style={{ paddingTop: 0 }}>
-        <div className="container">
-          <motion.div className="saas-cta" initial={{ opacity: 0, y: 18 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }} transition={{ duration: 0.5 }} style={{ background: 'linear-gradient(135deg, #0f172a 0%, #1e293b 100%)', color: '#fff', border: '1px solid #1e293b' }}>
-            <div style={{ display: 'inline-flex', alignItems: 'center', gap: 6, padding: '6px 12px', borderRadius: 999, background: 'rgba(245,158,11,0.15)', border: '1px solid rgba(245,158,11,0.3)', color: '#fbbf24', fontSize: 11, fontWeight: 700, marginBottom: 14 }}><FiZap size={12} /> REPRISE EXPRESS</div>
-            <h2 style={{ color: '#fff' }}>Vous avez un téléphone à vendre ?</h2>
-            <p style={{ color: 'rgba(255,255,255,0.7)' }}>Estimation photo en 5 minutes, enlèvement gratuit à domicile et paiement en 48h. Zéro commission.</p>
-            <Link to="/reprise" className="btn" style={{ background: '#f59e0b', color: '#000', borderRadius: 999, padding: '14px 28px', fontWeight: 800 }}>Demander une reprise <FiArrowRight size={16} /></Link>
-            <div style={{ marginTop: 14, display: 'flex', justifyContent: 'center', gap: 16, fontSize: 11, color: 'rgba(255,255,255,0.6)', flexWrap: 'wrap' }}>
-              <span style={{ display: 'inline-flex', alignItems: 'center', gap: 6 }}><FiCheckCircle size={11} /> Estimation gratuite</span>
-              <span style={{ display: 'inline-flex', alignItems: 'center', gap: 6 }}><FiCheckCircle size={11} /> Paiement 48h</span>
-              <span style={{ display: 'inline-flex', alignItems: 'center', gap: 6 }}><FiCheckCircle size={11} /> Enlèvement gratuit</span>
-            </div>
-          </motion.div>
-        </div>
-      </section>
 
       <GoMobileTicker />
 
