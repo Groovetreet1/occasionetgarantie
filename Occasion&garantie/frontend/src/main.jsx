@@ -5,7 +5,6 @@ import App from './App';
 import { AuthProvider } from './context/AuthContext';
 import { ThemeProvider } from './context/ThemeContext';
 import { LanguageProvider } from './context/LanguageContext';
-import '@capacitor/geolocation';
 import './index.css';
 
 ReactDOM.createRoot(document.getElementById('root')).render(
