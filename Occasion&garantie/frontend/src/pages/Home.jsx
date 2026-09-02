@@ -236,28 +236,6 @@ export default function Home() {
         </section>
       </div>
 
-      {/* CATEGORIES - SaasAble IconCard premium */}
-      <section className="section" style={{ paddingTop: 32, paddingBottom: 12 }}>
-        <div className="container">
-          <motion.div className="saas-icon-grid" variants={stagger} initial="hidden" whileInView="show" viewport={{ once: true }}>
-            {SAAS_CATEGORIES.map(cat => (
-              <motion.div key={cat.slug} variants={fadeUp}>
-                <Link to={`/products?category=${cat.slug}`} style={{ textDecoration: 'none' }}>
-                  <div className="saas-icon-card" style={{ minHeight: 210 }}>
-                    <div className="saas-icon-avatar" style={{ background: 'var(--primary-light)', borderColor: 'rgba(245,158,11,0.18)' }}><cat.icon size={26} /></div>
-                    <div>
-                      <h3>{cat.label} <span style={{ fontWeight: 400, color: 'var(--text-muted)', fontSize: 12, marginLeft: 6 }}>{cat.count}</span></h3>
-                      <p>{t(cat.descKey)}</p>
-                    </div>
-                    <div className="saas-card-footer">{t('home.explore')} <FiArrowRight size={14} /></div>
-                  </div>
-                </Link>
-              </motion.div>
-            ))}
-          </motion.div>
-        </div>
-      </section>
-
       {/* STORE OFFICIAL */}
       {storeProducts.length > 0 && (
         <motion.section className="section" variants={fadeUp} initial="hidden" whileInView="show" viewport={{ once: true }} style={{ background: 'var(--bg-secondary)', borderTop: '1px solid var(--border-light)', borderBottom: '1px solid var(--border-light)' }}>
