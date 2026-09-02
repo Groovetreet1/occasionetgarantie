@@ -1,6 +1,58 @@
 import { Link } from 'react-router-dom';
+import { useState, useEffect } from 'react';
 import { FiShield, FiRefreshCw, FiSmartphone, FiTruck } from 'react-icons/fi';
 import { useLanguage } from '../context/LanguageContext';
+
+function TypewriterHeadline({ text }) {
+  const [display, setDisplay] = useState('');
+  const [isDeleting, setIsDeleting] = useState(false);
+
+  useEffect(() => {
+    setDisplay('');
+    setIsDeleting(false);
+  }, [text]);
+
+  useEffect(() => {
+    let timeout;
+    const typeSpeed = isDeleting ? 28 : 52;
+    const pauseEnd = 1800;
+    const pauseStart = 600;
+
+    if (!isDeleting && display.length < text.length) {
+      timeout = setTimeout(() => setDisplay(text.slice(0, display.length + 1)), typeSpeed);
+    } else if (!isDeleting && display.length === text.length) {
+      timeout = setTimeout(() => setIsDeleting(true), pauseEnd);
+    } else if (isDeleting && display.length > 0) {
+      timeout = setTimeout(() => setDisplay(text.slice(0, display.length - 1)), typeSpeed);
+    } else if (isDeleting && display.length === 0) {
+      timeout = setTimeout(() => setIsDeleting(false), pauseStart);
+    }
+    return () => clearTimeout(timeout);
+  }, [display, isDeleting, text]);
+
+  const firstSpace = text.indexOf(' ');
+  const firstWord = firstSpace === -1 ? text : text.slice(0, firstSpace);
+  const restText = firstSpace === -1 ? '' : text.slice(firstSpace);
+  let rendered;
+  if (display.length <= firstWord.length) {
+    rendered = <span className="brand-typed-highlight">{display}</span>;
+  } else {
+    const restDisplay = display.slice(firstWord.length);
+    rendered = (
+      <>
+        <span className="brand-typed-highlight">{firstWord}</span>
+        <span>{restDisplay}</span>
+      </>
+    );
+  }
+
+  return (
+    <span className="brand-typewriter">
+      {rendered}
+      <span className="brand-cursor" aria-hidden>|</span>
+    </span>
+  );
+}
 
 export default function AuthLayout({ title, subtitle, children, footer }) {
   const { t, lang } = useLanguage();
@@ -11,6 +63,7 @@ export default function AuthLayout({ title, subtitle, children, footer }) {
     { icon: FiSmartphone, title: t('auth.brandFeat3Title'), desc: t('auth.brandFeat3Desc') },
     { icon: FiTruck, title: t('auth.brandFeat4Title'), desc: t('auth.brandFeat4Desc') },
   ];
+  const headline = t('auth.brandHeadline');
 
   return (
     <div className="auth-split" dir={lang === 'ar' ? 'rtl' : 'ltr'}>
@@ -26,7 +79,7 @@ export default function AuthLayout({ title, subtitle, children, footer }) {
         <div className="auth-split-brand-body">
           <div className="auth-split-brand-greeting">
             <span className="auth-split-brand-eyebrow">{t('auth.brandEyebrow')}</span>
-            <h2>{t('auth.brandHeadline')}</h2>
+            <h2 style={{ minHeight: '84px' }}><TypewriterHeadline text={headline} /></h2>
             <p>{t('auth.brandSubheadline')}</p>
           </div>
 

@@ -3650,3 +3650,19 @@ select.form-control, .form-group select { cursor: pointer; appearance: auto; }
   margin-bottom: 14px;
   border: 1px solid rgba(245,158,11,0.15);
 }
+
+/* Brand headline typewriter - Achetez luminous */
+.brand-typewriter { display: inline; }
+.brand-typed-highlight {
+  color: #38bdf8;
+  text-shadow: 0 0 10px rgba(56,189,248,0.75), 0 0 22px rgba(56,189,248,0.35), 0 0 36px rgba(56,189,248,0.18);
+  font-weight: 800;
+}
+.brand-cursor {
+  display: inline-block;
+  margin-left: 2px;
+  color: #fbbf24;
+  font-weight: 300;
+  animation: brandBlink 0.85s step-end infinite;
+}
+@keyframes brandBlink { 0%, 50% { opacity: 1; } 51%, 100% { opacity: 0; } }
