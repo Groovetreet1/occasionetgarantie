@@ -71,6 +71,18 @@
     newsletterSubscribe: "S'inscrire",
     newsletterError: "Erreur lors de l'inscription.",
 
+    heroExplore: 'Explorer les annonces',
+    heroSell: 'Vendre mon téléphone',
+    brandsPopular: 'Marques populaires',
+    explore: 'Explorer',
+    catalogueLabel: 'Catalogue • {{count}}+ annonces',
+    verifiedGuaranteed: 'vérifiés & garantis',
+    aboutLabel: 'À propos • Depuis 2023',
+    catSmartphonesDesc: 'iPhone, Samsung, Xiaomi reconditionnés',
+    catTabletsDesc: 'iPad, Samsung Tab, Huawei',
+    catComputersDesc: 'MacBook, PC portables, Gaming',
+    catAccessoriesDesc: 'Écouteurs, chargeurs, coques',
+
     promoBadge: 'Marketplace Maroc',
     promoTitle: 'Vous vendez un téléphone ?',
     promoTextBefore: 'Publiez votre annonce ',

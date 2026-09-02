@@ -29,7 +29,7 @@ export default function StorePage() {
       <div style={{ background: 'var(--bg-secondary)', borderBottomLeftRadius: 24, borderBottomRightRadius: 24, border: '1px solid var(--border-light)', borderTop: 'none', backgroundImage: 'radial-gradient(var(--border-light) 1.4px, transparent 1.4px)', backgroundSize: '22px 22px', padding: '100px 0 32px', textAlign: 'center', marginBottom: 24 }}>
         <div className="container" style={{ maxWidth: 720, margin: '0 auto' }}>
           <Link to="/" className="btn btn-ghost" style={{ marginBottom: 12, background: 'var(--bg-card)', border: '1px solid var(--border-light)', borderRadius: 999, padding: '8px 14px', fontWeight: 600 }}><FiArrowLeft /> {t('shop.backHome')}</Link>
-          <div style={{ display: 'flex', justifyContent: 'center', marginBottom: 12 }}><span className="section-label-premium" style={{ display: 'inline-flex', alignItems: 'center', gap: 6 }}><FiShield size={12} /> Boutique Officielle</span></div>
+          <div style={{ display: 'flex', justifyContent: 'center', marginBottom: 12 }}><span className="section-label-premium" style={{ display: 'inline-flex', alignItems: 'center', gap: 6 }}><FiShield size={12} /> {t('home.storeLabel')}</span></div>
           <h1 style={{ fontSize: 30, fontWeight: 800, letterSpacing: -0.7, marginBottom: 8, display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 8 }}><FiShield style={{ color: '#d97706' }} /> {t('shop.pageTitle')}</h1>
           <p style={{ color: 'var(--text-secondary)', fontSize: 15 }}>{t('shop.pageSubtitle')}</p>
         </div>

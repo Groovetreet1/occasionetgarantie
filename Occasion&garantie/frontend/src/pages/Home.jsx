@@ -56,10 +56,10 @@ function BrandCircle({ brand }) {
 }
 
 const SAAS_CATEGORIES = [
-  { slug: 'Smartphones', label: 'Smartphones', icon: FiSmartphone, desc: 'iPhone, Samsung, Xiaomi reconditionnés', count: '2 400+' },
-  { slug: 'Tablettes', label: 'Tablettes', icon: FiTablet, desc: 'iPad, Samsung Tab, Huawei', count: '860+' },
-  { slug: 'Ordinateurs', label: 'Ordinateurs', icon: FiMonitor, desc: 'MacBook, PC portables, Gaming', count: '1 100+' },
-  { slug: 'Accessoires', label: 'Accessoires', icon: FiHeadphones, desc: 'Écouteurs, chargeurs, coques', count: '3 200+' },
+  { slug: 'Smartphones', label: 'Smartphones', icon: FiSmartphone, descKey: 'home.catSmartphonesDesc', count: '2 400+' },
+  { slug: 'Tablettes', label: 'Tablettes', icon: FiTablet, descKey: 'home.catTabletsDesc', count: '860+' },
+  { slug: 'Ordinateurs', label: 'Ordinateurs', icon: FiMonitor, descKey: 'home.catComputersDesc', count: '1 100+' },
+  { slug: 'Accessoires', label: 'Accessoires', icon: FiHeadphones, descKey: 'home.catAccessoriesDesc', count: '3 200+' },
 ];
 
 function WaveDivider() {
@@ -165,8 +165,8 @@ export default function Home() {
         <section className="hero-premium">
           <div className="container">
             <motion.div className="hero-actions-premium" initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.18 }}>
-              <Link to="/products" className="btn-hero-primary">Explorer les annonces <FiArrowRight size={16} /></Link>
-              <Link to="/vendre" className="btn-hero-secondary"><FiZap size={16} /> Vendre mon téléphone</Link>
+              <Link to="/products" className="btn-hero-primary">{t('home.heroExplore')} <FiArrowRight size={16} /></Link>
+              <Link to="/vendre" className="btn-hero-secondary"><FiZap size={16} /> {t('home.heroSell')}</Link>
             </motion.div>
 
             {/* Pill search bar inside hero - SaasAble autocomplete style */}
@@ -222,7 +222,7 @@ export default function Home() {
 
             {brands.length > 0 && (
               <div style={{ marginTop: 32, textAlign: 'center' }}>
-                <div style={{ fontSize: 11, fontWeight: 700, letterSpacing: 0.8, textTransform: 'uppercase', color: 'var(--text-muted)', marginBottom: 14 }}>Marques populaires</div>
+                <div style={{ fontSize: 11, fontWeight: 700, letterSpacing: 0.8, textTransform: 'uppercase', color: 'var(--text-muted)', marginBottom: 14 }}>{t('home.brandsPopular')}</div>
                 <div className="brands-scroll-wrapper">
                   <div className="brands-scroll-track">
                     {brands.concat(brands).concat(brands).map((brand, i) => (
@@ -239,11 +239,6 @@ export default function Home() {
       {/* CATEGORIES - SaasAble IconCard premium */}
       <section className="section" style={{ paddingTop: 32, paddingBottom: 12 }}>
         <div className="container">
-          <div className="section-header-premium">
-            <span className="section-label-premium"><FiLayers size={12} /> Explorer par catégorie</span>
-            <h2>Trouvez votre prochain appareil</h2>
-            <p>Des milliers d’annonces vérifiées, triées par experts et garanties 12 mois.</p>
-          </div>
           <motion.div className="saas-icon-grid" variants={stagger} initial="hidden" whileInView="show" viewport={{ once: true }}>
             {SAAS_CATEGORIES.map(cat => (
               <motion.div key={cat.slug} variants={fadeUp}>
@@ -252,9 +247,9 @@ export default function Home() {
                     <div className="saas-icon-avatar" style={{ background: 'var(--primary-light)', borderColor: 'rgba(245,158,11,0.18)' }}><cat.icon size={26} /></div>
                     <div>
                       <h3>{cat.label} <span style={{ fontWeight: 400, color: 'var(--text-muted)', fontSize: 12, marginLeft: 6 }}>{cat.count}</span></h3>
-                      <p>{cat.desc}</p>
+                      <p>{t(cat.descKey)}</p>
                     </div>
-                    <div className="saas-card-footer">Explorer <FiArrowRight size={14} /></div>
+                    <div className="saas-card-footer">{t('home.explore')} <FiArrowRight size={14} /></div>
                   </div>
                 </Link>
               </motion.div>
@@ -304,11 +299,6 @@ export default function Home() {
       {/* LATEST ADS */}
       <motion.section className="section" variants={fadeUp} initial="hidden" whileInView="show" viewport={{ once: true }}>
         <div className="container">
-          <div className="section-header-premium" style={{ marginBottom: 28 }}>
-            <span className="section-label-premium"><TbClockHour5 size={12} /> Dernières annonces</span>
-            <h2>Les bonnes affaires du moment</h2>
-            <p>{products.length} téléphones disponibles à la vente — vérifiés et garantis.</p>
-          </div>
           <div style={{ display: 'flex', justifyContent: 'center', marginBottom: 20 }}>
             <Link to="/products" className="btn btn-secondary" style={{ borderRadius: 999 }}>{t('home.viewAll')} <FiArrowRight size={16} /></Link>
           </div>

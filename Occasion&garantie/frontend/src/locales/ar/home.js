@@ -71,6 +71,18 @@
     newsletterSubscribe: 'اشترك',
     newsletterError: 'حدث خطأ أثناء التسجيل.',
 
+    heroExplore: 'استكشاف الإعلانات',
+    heroSell: 'بع هاتفي',
+    brandsPopular: 'ماركات شائعة',
+    explore: 'استكشاف',
+    catalogueLabel: 'كتالوج • {{count}}+ إعلان',
+    verifiedGuaranteed: 'موثقة ومضمونة',
+    aboutLabel: 'حول • منذ 2023',
+    catSmartphonesDesc: 'آيفون، سامسونج، شاومي مجدد',
+    catTabletsDesc: 'آيباد، سامسونج تاب، هواوي',
+    catComputersDesc: 'ماك بوك، حواسيب محمولة، ألعاب',
+    catAccessoriesDesc: 'سماعات، شواحن، أغطية',
+
     promoBadge: 'سوق المغرب',
     promoTitle: 'هل لديك هاتف للبيع؟',
     promoTextBefore: 'انشر إعلانك ',

@@ -114,9 +114,9 @@ export default function Products() {
       <div className="products-page-hero" style={{ background: 'var(--bg-secondary)', borderBottomLeftRadius: 24, borderBottomRightRadius: 24, border: '1px solid var(--border-light)', borderTop: 'none', backgroundImage: 'radial-gradient(var(--border-light) 1.4px, transparent 1.4px)', backgroundSize: '22px 22px', padding: '90px 0 36px', textAlign: 'center' }}>
         <div className="container">
           <motion.div initial="hidden" animate="show" variants={fadeUp} style={{ textAlign: 'center', maxWidth: 720, margin: '0 auto' }}>
-            <span className="section-label-premium" style={{ marginBottom: 12 }}>Catalogue • {productCount}+ annonces</span>
+            <span className="section-label-premium" style={{ marginBottom: 12 }}>{t('home.catalogueLabel', { count: productCount })}</span>
             <h1 style={{ fontSize: 32, fontWeight: 800, letterSpacing: -0.8, marginBottom: 8 }}>{t('products.pageTitle')}</h1>
-            <p style={{ color: 'var(--text-secondary)', fontSize: 15, marginBottom: 20 }}>{productCount} {productCount > 1 ? t('products.articles') : t('products.article')} {productCount > 1 ? t('products.availablePlural') : t('products.available')} — vérifiés & garantis</p>
+            <p style={{ color: 'var(--text-secondary)', fontSize: 15, marginBottom: 20 }}>{productCount} {productCount > 1 ? t('products.articles') : t('products.article')} {productCount > 1 ? t('products.availablePlural') : t('products.available')} — {t('home.verifiedGuaranteed')}</p>
           </motion.div>
           <motion.form initial="hidden" animate="show" variants={fadeUp} onSubmit={handleSearchSubmit} className="products-page-search" style={{ maxWidth: 560, margin: '0 auto', borderRadius: 999, overflow: 'hidden', boxShadow: '0 12px 32px rgba(0,0,0,0.06)', border: '1px solid var(--border-light)', background: 'var(--bg-card)', display: 'flex', alignItems: 'center' }}>
             <FiSearch size={18} style={{ marginLeft: 16, color: 'var(--text-muted)', flexShrink: 0 }} />

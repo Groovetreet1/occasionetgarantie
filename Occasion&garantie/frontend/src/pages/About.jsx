@@ -51,7 +51,7 @@ export default function About() {
     <>
       <section style={{ background: 'var(--bg-secondary)', borderBottomLeftRadius: 24, borderBottomRightRadius: 24, border: '1px solid var(--border-light)', borderTop: 'none', backgroundImage: 'radial-gradient(var(--border-light) 1.4px, transparent 1.4px)', backgroundSize: '22px 22px', textAlign: 'center', paddingTop: '110px', paddingBottom: '56px' }}>
         <div className="container" style={{ maxWidth: 760, margin: '0 auto' }}>
-          <span className="section-label-premium" style={{ marginBottom: 14 }}>À propos • Depuis 2023</span>
+          <span className="section-label-premium" style={{ marginBottom: 14 }}>{t('home.aboutLabel')}</span>
           <h1 style={{ fontSize: '34px', fontWeight: 800, letterSpacing: -0.8, marginBottom: 14, lineHeight: 1.15 }}>{t('about.heroTitle')}</h1>
           <p style={{ color: 'var(--text-secondary)', fontSize: '16px', lineHeight: 1.7, maxWidth: 600, margin: '0 auto' }}>
             {t('about.heroDesc')}
