@@ -9,7 +9,7 @@ const { body, validationResult } = require('express-validator');
 const pool = require('../config/db');
 const { authenticate } = require('../middleware/auth');
 const gomobile = require('../services/gomobile');
-const { send, verification } = require('../emails');
+const { send, verification, reset } = require('../emails');
 const { upload: cloudUpload } = require('../services/uploader');
 const { logVendorAction } = require('../services/tracker');
 
@@ -389,13 +389,14 @@ router.post('/forgot-password', [
       if (users.length === 0) return res.status(404).json({ message: 'Aucun compte trouve avec cet email.' });
       const code = crypto.randomInt(100000, 999999).toString();
       resetCodes.set(identifier, { code, userId: users[0].id, expiresAt: Date.now() + CODE_EXPIRY });
+      const resetLink = `${CLIENT_URL}/reset-password?identifier=${encodeURIComponent(identifier)}&code=${code}`;
       // Try email first (primary for email identifier), fallback to SMS if email fails
       let sentVia = 'email';
       try {
         await send({
           to: identifier,
           subject: 'Votre code de réinitialisation - Occasion & Garantie',
-          html: verification({ code, userName: users[0].full_name }),
+          html: reset({ code, userName: users[0].full_name, resetLink }),
         });
       } catch (mailErr) {
         console.error('Email reset failed, trying SMS fallback:', mailErr.message);

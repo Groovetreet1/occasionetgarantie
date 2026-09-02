@@ -1,5 +1,6 @@
 const { Resend } = require('resend');
 const verification = require('./verification');
+const reset = require('./reset');
 const creditConfirmed = require('./credit-confirmed');
 const newsletter = require('./newsletter');
 
@@ -24,4 +25,4 @@ async function send({ to, subject, html }) {
   }
 }
 
-module.exports = { send, verification, creditConfirmed, newsletter };
+module.exports = { send, verification, reset, creditConfirmed, newsletter };

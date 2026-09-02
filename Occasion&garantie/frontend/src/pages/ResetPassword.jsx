@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { Link, useSearchParams, useNavigate } from 'react-router-dom';
-import { FiLock, FiCheckCircle } from 'react-icons/fi';
+import { FiLock, FiCheckCircle, FiCopy, FiCheck } from 'react-icons/fi';
 import { useLanguage } from '../context/LanguageContext';
 import api from '../api/axios';
 
@@ -9,12 +9,23 @@ export default function ResetPassword() {
   const [searchParams] = useSearchParams();
   const identifierParam = searchParams.get('identifier') || '';
   const userIdParam = searchParams.get('userId') || '';
+  const codeParam = searchParams.get('code') || '';
   const navigate = useNavigate();
-  const [code, setCode] = useState('');
+  const [code, setCode] = useState(codeParam);
   const [newPassword, setNewPassword] = useState('');
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
   const [success, setSuccess] = useState(false);
+  const [copied, setCopied] = useState(false);
+
+  const handleCopy = async () => {
+    if (!code) return;
+    try {
+      await navigator.clipboard.writeText(code);
+      setCopied(true);
+      setTimeout(() => setCopied(false), 1500);
+    } catch {}
+  };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -80,15 +91,35 @@ export default function ResetPassword() {
             </div>
             <div className="form-group">
               <label>{t('auth.verificationCodeLabel')}</label>
-              <input
-                type="text"
-                placeholder={t('auth.verificationCodePlaceholder')}
-                value={code}
-                onChange={(e) => setCode(e.target.value.replace(/\D/g, '').slice(0, 6))}
-                required
-                maxLength={6}
-                style={{ textAlign: 'center', fontSize: '24px', letterSpacing: '8px', fontWeight: 700 }}
-              />
+              <div style={{ position: 'relative' }}>
+                <input
+                  type="text"
+                  placeholder={t('auth.verificationCodePlaceholder')}
+                  value={code}
+                  onChange={(e) => setCode(e.target.value.replace(/\D/g, '').slice(0, 6))}
+                  required
+                  maxLength={6}
+                  style={{ textAlign: 'center', fontSize: '24px', letterSpacing: '8px', fontWeight: 700, paddingRight: code ? '56px' : undefined }}
+                />
+                {code && (
+                  <button
+                    type="button"
+                    onClick={handleCopy}
+                    title="Copier"
+                    style={{
+                      position: 'absolute', right: 6, top: 6, bottom: 6,
+                      display: 'inline-flex', alignItems: 'center', gap: 6,
+                      padding: '0 12px', borderRadius: 999, border: '1px solid var(--border-light)',
+                      background: copied ? 'var(--primary-light)' : 'var(--bg-secondary)',
+                      color: copied ? 'var(--primary)' : 'var(--text-secondary)',
+                      cursor: 'pointer', fontSize: 12, fontWeight: 600, fontFamily: 'var(--font)',
+                    }}
+                  >
+                    {copied ? <><FiCheck size={12} /> Copié</> : <><FiCopy size={12} /> Copier</>}
+                  </button>
+                )}
+              </div>
+              {codeParam && code === codeParam && <p style={{ fontSize: 12, color: 'var(--success)', marginTop: 6, display: 'flex', alignItems: 'center', gap: 6 }}><FiCheckCircle size={12} /> Code pré-rempli depuis l’email — il ne vous reste qu’à saisir le nouveau mot de passe.</p>}
             </div>
             <div className="form-group">
               <label>{t('auth.newPasswordLabel')}</label>
