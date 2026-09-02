@@ -172,13 +172,6 @@ export default function Home() {
         <div className="hero-premium-bg" aria-hidden />
         <section className="hero-premium">
           <div className="container">
-            <motion.div initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.5 }}>
-              <div className="hero-chip-premium">
-                <span>Marketplace #1 au Maroc</span>
-                <span className="hero-chip-badge"><FiStar size={12} /> 4.8/5 • 12 000 avis</span>
-              </div>
-            </motion.div>
-
             <motion.div className="hero-actions-premium" initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.18 }}>
               <Link to="/products" className="btn-hero-primary">Explorer les annonces <FiArrowRight size={16} /></Link>
               <Link to="/vendre" className="btn-hero-secondary"><FiZap size={16} /> Vendre mon téléphone</Link>
@@ -234,25 +227,6 @@ export default function Home() {
               </div>
               <button type="submit" className="avito-search-btn" style={{ borderRadius: 999, margin: 4, padding: '12px 24px', background: 'linear-gradient(135deg, var(--primary), #d97706)', color: '#000', fontWeight: 700 }}>{t('home.searchBtn')}</button>
             </motion.form>
-
-            {/* Hero mockup - GraphicsCard with 5px border like SaasAble Hero17 video */}
-            <motion.div className="hero-mockup-premium" initial={{ opacity: 0, y: 18, scale: 0.98 }} animate={{ opacity: 1, y: 0, scale: 1 }} transition={{ duration: 0.6, delay: 0.28, ease: [0.22, 1, 0.36, 1] }}>
-              <div className="hero-mockup-grid">
-                {mockupPhones.map(p => {
-                  const imgSrc = p.image ? (p.image.startsWith('http') ? p.image : `${API_BASE}/uploads/${p.image}`) : null;
-                  return (
-                    <div key={p.id} className="hero-mockup-phone">
-                      <div className="hero-mockup-phone-img">
-                        {imgSrc ? <img src={imgSrc} alt={p.name} /> : <FiSmartphone size={28} style={{ opacity: 0.2 }} />}
-                      </div>
-                      <div className="hero-mockup-phone-title">{p.name}</div>
-                      <div className="hero-mockup-phone-price">{formatPrice(p.price)}</div>
-                      <div className="hero-mockup-phone-meta"><FiMapPin size={10} /> {p.ville || 'Casablanca'} <span className="hero-mockup-badge" style={{ marginLeft: 'auto' }}><FiCheck size={10} /> Garantie</span></div>
-                    </div>
-                  );
-                })}
-              </div>
-            </motion.div>
 
             {brands.length > 0 && (
               <div className="brands-scroll-wrapper" style={{ marginTop: 28 }}>
