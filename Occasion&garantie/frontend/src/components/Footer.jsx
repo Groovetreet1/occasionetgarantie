@@ -1,40 +1,13 @@
 import { Link } from 'react-router-dom';
-import { useState } from 'react';
-import { FiMapPin, FiPhone, FiMail, FiClock, FiSend } from 'react-icons/fi';
+import { FiMapPin, FiPhone, FiMail, FiClock } from 'react-icons/fi';
 import { BsInstagram, BsTiktok, BsWhatsapp } from 'react-icons/bs';
 import { useLanguage } from '../context/LanguageContext';
-import api from '../api/axios';
 
 export default function Footer() {
   const { t } = useLanguage();
-  const [email, setEmail] = useState('');
-  const [sent, setSent] = useState(false);
-  const handleJoin = async (e) => {
-    e.preventDefault();
-    if (!email) return;
-    try {
-      await api.post('/newsletter/subscribe', { email });
-      setSent(true);
-      setTimeout(() => { setSent(false); setEmail(''); }, 3000);
-    } catch {}
-  };
   return (
     <footer className="footer">
       <div className="container">
-        {/* SaasAble-inspired JoinUS bar */}
-        <form className="saas-footer-join" onSubmit={handleJoin}>
-          <div className="saas-footer-join-text">
-            <h4>Join our newsletter</h4>
-            <p>Découvrez les nouveautés, offres exclusives et conseils avant tout le monde. Pas de spam, désabonnement en un clic.</p>
-          </div>
-          <div className="saas-footer-join-form">
-            <input type="email" placeholder="Entrez votre adresse e-mail" value={email} onChange={e => setEmail(e.target.value)} required aria-label="Email" />
-            <button type="submit" aria-label="S'abonner">
-              <FiSend size={16} />
-            </button>
-          </div>
-          {sent && <span style={{ fontSize: 12, color: 'var(--success)', fontWeight: 600 }}>Merci ! Vérifiez votre e-mail.</span>}
-        </form>
 
         <div className="footer-grid">
           <div className="footer-brand">
