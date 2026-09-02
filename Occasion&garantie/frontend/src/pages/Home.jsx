@@ -155,14 +155,6 @@ export default function Home() {
     navigate(url);
   };
 
-  // Prepare 4 mockup phones from real products for premium hero mockup
-  const mockupPhones = (products && products.length >= 4 ? products.slice(0, 4) : [
-    { id: 1, name: 'iPhone 14 Pro 128GB', price: 7890, image: '', ville: 'Casablanca' },
-    { id: 2, name: 'Samsung S23 Ultra', price: 8990, image: '', ville: 'Rabat' },
-    { id: 3, name: 'MacBook Air M1', price: 7490, image: '', ville: 'Marrakech' },
-    { id: 4, name: 'iPad Air 5', price: 5490, image: '', ville: 'Tanger' },
-  ]);
-
   return (
     <motion.div initial="hidden" animate="show">
       <PromoPopup />
@@ -229,11 +221,14 @@ export default function Home() {
             </motion.form>
 
             {brands.length > 0 && (
-              <div className="brands-scroll-wrapper" style={{ marginTop: 28 }}>
-                <div className="brands-scroll-track">
-                  {brands.concat(brands).concat(brands).map((brand, i) => (
-                    <BrandCircle key={i} brand={brand} />
-                  ))}
+              <div style={{ marginTop: 32, textAlign: 'center' }}>
+                <div style={{ fontSize: 11, fontWeight: 700, letterSpacing: 0.8, textTransform: 'uppercase', color: 'var(--text-muted)', marginBottom: 14 }}>Marques populaires</div>
+                <div className="brands-scroll-wrapper">
+                  <div className="brands-scroll-track">
+                    {brands.concat(brands).concat(brands).map((brand, i) => (
+                      <BrandCircle key={i} brand={brand} />
+                    ))}
+                  </div>
                 </div>
               </div>
             )}
@@ -326,55 +321,6 @@ export default function Home() {
           )}
         </div>
       </motion.section>
-
-      {/* FEATURE PREMIUM - Why us */}
-      <section className="section" style={{ background: 'var(--bg-secondary)', borderTop: '1px solid var(--border-light)', borderBottom: '1px solid var(--border-light)' }}>
-        <div className="container">
-          <div className="feature-premium">
-            <div className="feature-premium-content">
-              <span className="section-label-premium"><FiShield size={12} /> Pourquoi nous choisir</span>
-              <h2>Achetez serein. <span style={{ color: 'var(--primary)' }}>Vendez au juste prix.</span></h2>
-              <p>Chaque appareil passe 32 points de contrôle. Batterie, écran, capteurs, IMEI — tout est vérifié par nos experts.</p>
-              <div className="feature-premium-list">
-                <div className="feature-premium-item"><div className="feature-premium-check"><FiCheck size={14} /></div><div><strong>Garantie 12 mois écrite</strong><span>Échange ou remboursement si panne — support WhatsApp 7j/7.</span></div></div>
-                <div className="feature-premium-item"><div className="feature-premium-check"><FiCheck size={14} /></div><div><strong>Paiement à la livraison</strong><span>Payez quand vous recevez. Virement instantané pour les vendeurs.</span></div></div>
-                <div className="feature-premium-item"><div className="feature-premium-check"><FiCheck size={14} /></div><div><strong>Reprise en 5 minutes</strong><span>Estimation photo immédiate, enlèvement gratuit à domicile.</span></div></div>
-              </div>
-              <div style={{ display: 'flex', gap: 10, marginTop: 22, flexWrap: 'wrap' }}>
-                <Link to="/products" className="btn-hero-primary" style={{ padding: '12px 22px' }}>Voir les annonces <FiArrowRight size={14} /></Link>
-                <Link to="/about" className="btn-hero-secondary" style={{ padding: '12px 22px' }}>Comment ça marche</Link>
-              </div>
-            </div>
-            <div className="feature-premium-visual">
-              <div style={{ display: 'flex', alignItems: 'center', gap: 12, marginBottom: 16 }}>
-                <span style={{ width: 44, height: 44, borderRadius: 12, background: 'var(--primary-light)', display: 'flex', alignItems: 'center', justifyContent: 'center', color: 'var(--primary)' }}><FiShield size={20} /></span>
-                <div><strong style={{ fontSize: 15 }}>Contrôle qualité 32 points</strong><br /><span style={{ fontSize: 12, color: 'var(--text-muted)' }}>Certifié Occasion & Garantie</span></div>
-                <span style={{ marginLeft: 'auto', padding: '6px 12px', borderRadius: 999, background: '#10b981', color: '#fff', fontSize: 11, fontWeight: 800, display: 'inline-flex', alignItems: 'center', gap: 6 }}><FiCheckCircle size={12} /> Certifié</span>
-              </div>
-              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 12, marginBottom: 14 }}>
-                <div style={{ background: 'var(--bg-secondary)', border: '1px solid var(--border-light)', borderRadius: 12, padding: 14, textAlign: 'center' }}><FiSmartphone size={20} style={{ color: 'var(--primary)' }} /><div style={{ fontWeight: 700, marginTop: 6 }}>Écran</div><div style={{ fontSize: 11, color: '#10b981' }}>● Parfait</div></div>
-                <div style={{ background: 'var(--bg-secondary)', border: '1px solid var(--border-light)', borderRadius: 12, padding: 14, textAlign: 'center' }}><FiZap size={20} style={{ color: 'var(--primary)' }} /><div style={{ fontWeight: 700, marginTop: 6 }}>Batterie 92%</div><div style={{ fontSize: 11, color: '#10b981' }}>● Excellente</div></div>
-                <div style={{ background: 'var(--bg-secondary)', border: '1px solid var(--border-light)', borderRadius: 12, padding: 14, textAlign: 'center' }}><FiLayers size={20} style={{ color: 'var(--primary)' }} /><div style={{ fontWeight: 700, marginTop: 6 }}>Châssis</div><div style={{ fontSize: 11, color: '#10b981' }}>● Impeccable</div></div>
-                <div style={{ background: 'var(--bg-secondary)', border: '1px solid var(--border-light)', borderRadius: 12, padding: 14, textAlign: 'center' }}><FiClock size={20} style={{ color: 'var(--primary)' }} /><div style={{ fontWeight: 700, marginTop: 6 }}>Garantie</div><div style={{ fontSize: 11, color: 'var(--primary)' }}>12 mois</div></div>
-              </div>
-              <div style={{ background: 'var(--primary-light)', border: '1px solid rgba(245,158,11,0.18)', borderRadius: 12, padding: 12, display: 'flex', alignItems: 'center', gap: 10, fontSize: 12 }}>
-                <FiStar size={16} style={{ color: 'var(--primary)' }} /><strong>Livré avec certificat + facture + boîte</strong> <span style={{ marginLeft: 'auto', fontWeight: 800, color: 'var(--primary)' }}>→</span>
-              </div>
-            </div>
-          </div>
-        </div>
-      </section>
-
-      {/* METRICS PREMIUM */}
-      <section className="section" style={{ paddingTop: 32 }}>
-        <div className="container">
-          <div className="metrics-premium">
-            <div className="metrics-premium-card"><div className="metrics-premium-value">5 200+</div><div className="metrics-premium-label">Produits vendus</div><div className="metrics-premium-sub">Depuis 2024, avec suivi et garantie.</div></div>
-            <div className="metrics-premium-card"><div className="metrics-premium-value">12 000+</div><div className="metrics-premium-label">Clients satisfaits</div><div className="metrics-premium-sub">Note moyenne 4.8/5 sur 3 400 avis vérifiés.</div></div>
-            <div className="metrics-premium-card"><div className="metrics-premium-value">98%</div><div className="metrics-premium-label">Avis positifs</div><div className="metrics-premium-sub">Taux de satisfaction — SAV en moins de 24h.</div></div>
-          </div>
-        </div>
-      </section>
 
       <TrustBar />
 
