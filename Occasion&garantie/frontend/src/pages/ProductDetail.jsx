@@ -230,9 +230,9 @@ export default function ProductDetail() {
 
   return (
     <>
-      <section className="product-detail-section">
+      <section className="product-detail-section" style={{ paddingTop: '100px' }}>
         <div className="container">
-          <Link to="/products" className="btn btn-ghost" style={{ marginBottom: '24px' }}>
+          <Link to="/products" className="btn btn-ghost" style={{ marginBottom: 20, background: 'var(--bg-card)', border: '1px solid var(--border-light)', borderRadius: 999, padding: '9px 16px', fontWeight: 600, boxShadow: '0 2px 8px rgba(0,0,0,0.04)' }}>
             <FiArrowLeft /> {t('products.backToProducts')}
           </Link>
 
@@ -262,8 +262,8 @@ export default function ProductDetail() {
             </div>
 
             <div>
-              <div className="product-detail-category">{product.category_name}</div>
-              <h1 className="product-detail-name">{product.name}</h1>
+              <div style={{ display: 'inline-flex', alignItems: 'center', gap: 6, padding: '6px 12px', borderRadius: 999, background: 'var(--primary-light)', border: '1px solid rgba(245,158,11,0.18)', color: 'var(--primary)', fontSize: 11, fontWeight: 800, letterSpacing: 0.5, textTransform: 'uppercase', marginBottom: 12 }}>{product.category_name}</div>
+              <h1 className="product-detail-name" style={{ fontSize: 28, fontWeight: 800, letterSpacing: -0.6, lineHeight: 1.15 }}>{product.name}</h1>
 
               <div className="product-detail-price">
                 <span className="price-current">{formatPrice(product.price)}</span>

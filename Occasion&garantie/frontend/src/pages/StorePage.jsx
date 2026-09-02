@@ -25,17 +25,16 @@ export default function StorePage() {
   });
 
   return (
-    <section className="products-section" style={{ paddingTop: '100px', paddingBottom: '60px' }}>
-      <div className="container">
-        <Link to="/" className="btn btn-ghost" style={{ marginBottom: '16px' }}><FiArrowLeft /> {t('shop.backHome')}</Link>
-        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 8, flexWrap: 'wrap', gap: 12 }}>
-          <div>
-            <h1 style={{ fontSize: '28px', fontWeight: 800, display: 'flex', alignItems: 'center', gap: 8 }}>
-              <FiShield style={{ color: '#d97706' }} /> {t('shop.pageTitle')}
-            </h1>
-            <p style={{ color: 'var(--text-secondary)' }}>{t('shop.pageSubtitle')}</p>
-          </div>
+    <section className="products-section" style={{ paddingBottom: '60px' }}>
+      <div style={{ background: 'var(--bg-secondary)', borderBottomLeftRadius: 24, borderBottomRightRadius: 24, border: '1px solid var(--border-light)', borderTop: 'none', backgroundImage: 'radial-gradient(var(--border-light) 1.4px, transparent 1.4px)', backgroundSize: '22px 22px', padding: '100px 0 32px', textAlign: 'center', marginBottom: 24 }}>
+        <div className="container" style={{ maxWidth: 720, margin: '0 auto' }}>
+          <Link to="/" className="btn btn-ghost" style={{ marginBottom: 12, background: 'var(--bg-card)', border: '1px solid var(--border-light)', borderRadius: 999, padding: '8px 14px', fontWeight: 600 }}><FiArrowLeft /> {t('shop.backHome')}</Link>
+          <div style={{ display: 'flex', justifyContent: 'center', marginBottom: 12 }}><span className="section-label-premium" style={{ display: 'inline-flex', alignItems: 'center', gap: 6 }}><FiShield size={12} /> Boutique Officielle</span></div>
+          <h1 style={{ fontSize: 30, fontWeight: 800, letterSpacing: -0.7, marginBottom: 8, display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 8 }}><FiShield style={{ color: '#d97706' }} /> {t('shop.pageTitle')}</h1>
+          <p style={{ color: 'var(--text-secondary)', fontSize: 15 }}>{t('shop.pageSubtitle')}</p>
         </div>
+      </div>
+      <div className="container">
 
         {loading ? <div style={{ padding: '60px 0' }}><div className="spinner" /></div>
         : products.length === 0 ? (
@@ -46,18 +45,17 @@ export default function StorePage() {
         ) : (
           <div className="products-grid">
             {products.map(p => (
-              <Link key={p.id} to={`/boutique/${p.slug}`} className="product-card" style={{ textDecoration: 'none' }}>
-                <div className="product-card-image" style={{ position: 'relative', background: 'var(--bg-secondary)', aspectRatio: '1/1', display: 'flex', alignItems: 'center', justifyContent: 'center', overflow: 'hidden' }}>
-                  {p.image ? <img src={p.image} alt={p.name} style={{ width: '100%', height: '100%', objectFit: 'contain', transition: 'transform 0.3s' }} /> : <FiShoppingBag size={48} style={{ opacity: 0.15 }} />}
-                  <span style={{ position: 'absolute', top: 8, left: 8, background: 'var(--primary)', color: '#fff', fontSize: 10, fontWeight: 700, padding: '2px 8px', borderRadius: 6 }}>{p.category_name}</span>
-                  {!!p.featured && <span style={{ position: 'absolute', top: 8, right: 8, background: '#d97706', color: '#fff', fontSize: 10, fontWeight: 700, padding: '2px 8px', borderRadius: 6 }}><FiStar size={10} style={{ marginRight: 2 }} /> {t('shop.official')}</span>}
+              <Link key={p.id} to={`/boutique/${p.slug}`} className="product-card saas-preview-card" style={{ textDecoration: 'none', borderRadius: 16, border: '1px solid var(--border-light)', overflow: 'hidden' }}>
+                <div className="product-card-image" style={{ position: 'relative', background: 'var(--bg-secondary)', aspectRatio: '1/1', display: 'flex', alignItems: 'center', justifyContent: 'center', overflow: 'hidden', padding: 12 }}>
+                  {p.image ? <img src={p.image} alt={p.name} style={{ width: '100%', height: '100%', objectFit: 'contain' }} /> : <FiShoppingBag size={48} style={{ opacity: 0.15 }} />}
+                  <span style={{ position: 'absolute', top: 10, left: 10, background: 'var(--bg-card)', border: '1px solid var(--border-light)', color: 'var(--text-secondary)', fontSize: 10, fontWeight: 700, padding: '4px 8px', borderRadius: 999 }}>{p.category_name}</span>
+                  {!!p.featured && <span style={{ position: 'absolute', top: 10, right: 10, background: '#d97706', color: '#fff', fontSize: 10, fontWeight: 800, padding: '4px 10px', borderRadius: 999, display: 'inline-flex', alignItems: 'center', gap: 4 }}><FiStar size={10} /> {t('shop.official')}</span>}
+                  <span className="saas-preview-arrow"><FiChevronRight size={14} /></span>
                 </div>
-                <div className="product-card-info" style={{ padding: '12px' }}>
-                  <h3 style={{ fontSize: 14, fontWeight: 600, margin: 0, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{p.name}</h3>
-                  <div style={{ fontSize: 12, color: 'var(--text-secondary)', marginTop: 2 }}>{p.brand} &middot; {t(stateLabels[p.state] || p.state)}</div>
-                  <div style={{ fontSize: 18, fontWeight: 700, color: 'var(--primary)', marginTop: 6 }}>
-                    {formatPrice(p.price)}
-                  </div>
+                <div className="product-card-body" style={{ padding: 13 }}>
+                  <h3 className="product-card-title" style={{ fontSize: 14, fontWeight: 700, margin: 0, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{p.name}</h3>
+                  <div style={{ fontSize: 11, color: 'var(--text-muted)', marginTop: 4, fontWeight: 600 }}>{p.brand} • {t(stateLabels[p.state] || p.state)}</div>
+                  <div style={{ fontSize: 16, fontWeight: 800, color: 'var(--primary)', marginTop: 8 }}>{formatPrice(p.price)}</div>
                 </div>
               </Link>
             ))}
