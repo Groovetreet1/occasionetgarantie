@@ -476,6 +476,90 @@ router.put('/store-contacts/:id/status', authenticate, adminOnly, async (req, re
   }
 });
 
+router.get('/dashboard-stats', authenticate, adminOnly, async (req, res) => {
+  try {
+    // Users stats
+    const [allUsers] = await pool.query('SELECT id, role, premium, premium_expires_at, suspended, phone_verified, created_at FROM users');
+    const totalUsers = allUsers.length;
+    const byRole = { client: allUsers.filter(u => u.role === 'client').length, seller: allUsers.filter(u => u.role === 'seller').length, admin: allUsers.filter(u => u.role === 'admin' || u.role === 'superadmin').length };
+    const byStatus = { actif: allUsers.filter(u => !u.suspended).length, suspended: allUsers.filter(u => !!u.suspended).length };
+    const now = new Date();
+    const byPremium = {
+      premium: allUsers.filter(u => u.premium && (!u.premium_expires_at || new Date(u.premium_expires_at) > now)).length,
+      nonPremium: allUsers.filter(u => !u.premium || (u.premium_expires_at && new Date(u.premium_expires_at) <= now)).length
+    };
+    const byVerified = { verified: allUsers.filter(u => !!u.phone_verified).length, unverified: allUsers.filter(u => !u.phone_verified).length };
+
+    // Monthly registrations (last 6 months)
+    const monthlyUsers = [];
+    for (let i = 5; i >= 0; i--) {
+      const d = new Date(); d.setMonth(d.getMonth() - i);
+      const key = `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}`;
+      const label = d.toLocaleDateString('fr-FR', { month: 'short' });
+      const count = allUsers.filter(u => u.created_at && new Date(u.created_at).toISOString().slice(0,7) === key).length;
+      monthlyUsers.push({ month: label, count });
+    }
+
+    // Products stats
+    let productsStats = { total: 0, pending: 0, approved: 0, store: 0, vendor: 0, vendu: 0 };
+    try {
+      const [prods] = await pool.query('SELECT id, approved, product_type, status, seller_id FROM products');
+      productsStats.total = prods.length;
+      productsStats.pending = prods.filter(p => p.approved === 0).length;
+      productsStats.approved = prods.filter(p => p.approved === 1).length;
+      productsStats.store = prods.filter(p => p.product_type === 'store').length;
+      productsStats.vendor = prods.filter(p => p.product_type !== 'store' || !p.product_type).length;
+      productsStats.vendu = prods.filter(p => p.status === 'vendu').length;
+    } catch {}
+
+    // Sales stats (orders if exists, else use vendu products as proxy)
+    let salesStats = { totalOrders: 0, totalRevenue: 0, monthly: [] };
+    try {
+      const [orders] = await pool.query('SELECT id, total_price, created_at, status FROM orders');
+      salesStats.totalOrders = orders.length;
+      salesStats.totalRevenue = orders.reduce((s,o) => s + Number(o.total_price||0), 0);
+      for (let i = 5; i >= 0; i--) {
+        const d = new Date(); d.setMonth(d.getMonth() - i);
+        const key = `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}`;
+        const label = d.toLocaleDateString('fr-FR', { month: 'short' });
+        const monthOrders = orders.filter(o => o.created_at && new Date(o.created_at).toISOString().slice(0,7) === key);
+        salesStats.monthly.push({ month: label, orders: monthOrders.length, revenue: monthOrders.reduce((s,o)=>s+Number(o.total_price||0),0) });
+      }
+    } catch {
+      // fallback: use vendu products as sales
+      try {
+        const [vendus] = await pool.query("SELECT price, created_at FROM products WHERE status='vendu'");
+        salesStats.totalOrders = vendus.length;
+        salesStats.totalRevenue = vendus.reduce((s,p)=>s+Number(p.price||0),0);
+        for (let i = 5; i >= 0; i--) {
+          const d = new Date(); d.setMonth(d.getMonth() - i);
+          const key = `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}`;
+          const label = d.toLocaleDateString('fr-FR', { month: 'short' });
+          const m = vendus.filter(p => p.created_at && new Date(p.created_at).toISOString().slice(0,7) === key);
+          salesStats.monthly.push({ month: label, orders: m.length, revenue: m.reduce((s,p)=>s+Number(p.price||0),0) });
+        }
+      } catch {}
+    }
+
+    // Credit & Premium payments
+    let creditStats = { total: 0, pending: 0, confirme: 0 };
+    let premiumStats = { total: 0, pending: 0, actif: 0 };
+    try { const [c] = await pool.query('SELECT status FROM credit_purchases'); creditStats.total=c.length; creditStats.pending=c.filter(x=>x.status==='en_attente').length; creditStats.confirme=c.filter(x=>x.status==='confirme').length; } catch {}
+    try { const [p] = await pool.query('SELECT status FROM premium_payments'); premiumStats.total=p.length; premiumStats.pending=p.filter(x=>x.status==='en_attente').length; premiumStats.actif=p.filter(x=>x.status==='actif').length; } catch {}
+
+    res.json({
+      users: { total: totalUsers, byRole, byStatus, byPremium, byVerified, monthly: monthlyUsers },
+      products: productsStats,
+      sales: salesStats,
+      credits: creditStats,
+      premiumPayments: premiumStats
+    });
+  } catch (err) {
+    console.error('dashboard-stats error:', err.message);
+    res.status(500).json({ message: 'Erreur serveur.' });
+  }
+});
+
 router.get('/users', authenticate, adminOnly, async (req, res) => {
   try {
     const page = Math.max(1, parseInt(req.query.page) || 1);

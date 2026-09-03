@@ -3,10 +3,12 @@ import { Link } from 'react-router-dom';
 import { FiCreditCard, FiPackage, FiUsers, FiArrowLeft, FiHeadphones, FiShield } from 'react-icons/fi';
 import api from '../api/axios';
 import { useLanguage } from '../context/LanguageContext';
+import AdminDashboardCharts from '../components/AdminDashboardCharts';
 
 export default function AdminDashboardPage() {
   const { t } = useLanguage();
   const [stats, setStats] = useState({ credits: 0, pendingCredits: 0, premium: 0, pendingPremium: 0, products: 0, vendorProducts: 0, tickets: 0, pendingTickets: 0, repliedTickets: 0, users: 0, pendingReprises: 0, pendingProducts: 0, storeProducts: 0, storeContacts: 0 });
+  const [chartStats, setChartStats] = useState(null);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
@@ -21,7 +23,8 @@ export default function AdminDashboardPage() {
       api.get('/admin/products/pending').catch(() => ({ data: [] })),
       api.get('/admin/store-products?limit=1').catch(() => ({ data: { stats: { total: 0 } } })),
       api.get('/admin/store-contacts?limit=1').catch(() => ({ data: { total: 0 } })),
-    ]).then(([credits, premium, products, tickets, users, reprises, pendingProds, store, contacts]) => {
+      api.get('/admin/dashboard-stats').catch(() => ({ data: null })),
+    ]).then(([credits, premium, products, tickets, users, reprises, pendingProds, store, contacts, dash]) => {
       const ticketData = tickets.data || [];
       const repriseData = reprises.data || [];
       const storeData = store.data?.stats || {};
@@ -43,6 +46,7 @@ export default function AdminDashboardPage() {
         storeProducts: storeData.total || 0,
         storeContacts: contactsData.total || 0,
       });
+      if (dash?.data) setChartStats(dash.data);
     }).catch(() => {}).finally(() => setLoading(false));
   }, []);
 
@@ -58,6 +62,8 @@ export default function AdminDashboardPage() {
             <p style={{ color: 'var(--text-secondary)' }}>{t('admin.dashboardSubtitle')}</p>
           </div>
         </div>
+
+        {chartStats && <AdminDashboardCharts stats={chartStats} />}
 
         <div style={{ display: 'grid', gap: '16px', gridTemplateColumns: 'repeat(auto-fill, minmax(200px, 1fr))', marginBottom: '32px' }}>
           <div style={{ background: 'var(--bg-card)', border: '1px solid var(--border)', borderRadius: 'var(--radius-lg)', padding: '20px' }}>
