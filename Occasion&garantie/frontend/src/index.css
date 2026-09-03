@@ -3696,3 +3696,9 @@ select.form-control, .form-group select { cursor: pointer; appearance: auto; }
   .avito-hero.saas-hero .avito-search-btn,
   .avito-search-btn { width: 100% !important; border-radius: 12px !important; margin: 0 !important; padding: 14px !important; justify-content: center !important; display: flex !important; align-items: center !important; gap: 8px !important; background: linear-gradient(135deg, #d9a83c, #f59e0b) !important; color: #0b0c14 !important; font-weight: 800 !important; box-shadow: 0 4px 12px rgba(245,158,11,0.25) !important; border: none !important; }
 }
+/* === FIX: dashboard charts mobile 9ed 9ed === */
+@media (max-width: 640px) {
+  .admin-chart-card { min-height: 280px !important; }
+  .admin-chart-card .admin-chart-3d { height: 220px !important; }
+  .admin-chart-card.admin-chart-large .admin-chart-3d { height: 220px !important; }
+}

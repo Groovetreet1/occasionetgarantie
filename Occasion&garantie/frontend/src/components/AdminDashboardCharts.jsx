@@ -145,39 +145,39 @@ export default function AdminDashboardCharts({ stats }) {
   return (
     <>
       <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(300px, 1fr))', gap: '16px', marginBottom: '16px' }}>
-        <div style={cardStyle}>
+        <div style={cardStyle} className="admin-chart-card">
           <div style={{ position: 'absolute', top: -30, right: -30, width: 120, height: 120, background: 'radial-gradient(circle, rgba(56,189,248,0.14) 0%, transparent 70%)', pointerEvents: 'none' }} />
           <h3 style={{ fontSize: 13, fontWeight: 700, color: 'var(--text-secondary)', marginBottom: 4, letterSpacing: 0.4, textTransform: 'uppercase' }}>Répartition — Clients vs Vendeurs</h3>
           <p style={{ fontSize: 11, color: 'var(--text-muted)', marginBottom: 8 }}>{users.total} utilisateurs au total</p>
-          <ReactECharts option={pie3D(roleData, ['#38bdf8','#f59e0b','#94a3b8'])} style={{ height: 220 }} opts={{ renderer: 'canvas' }} />
+          <ReactECharts option={pie3D(roleData, ['#38bdf8','#f59e0b','#94a3b8'])} style={{ height: 220 }} opts={{ renderer: 'canvas' }} className="admin-chart-3d" />
         </div>
 
-        <div style={cardStyle}>
+        <div style={cardStyle} className="admin-chart-card">
           <div style={{ position: 'absolute', top: -30, right: -30, width: 120, height: 120, background: 'radial-gradient(circle, rgba(245,158,11,0.14) 0%, transparent 70%)', pointerEvents: 'none' }} />
           <h3 style={{ fontSize: 13, fontWeight: 700, color: 'var(--text-secondary)', marginBottom: 4, letterSpacing: 0.4, textTransform: 'uppercase' }}>Premium — Qui paie ?</h3>
           <p style={{ fontSize: 11, color: 'var(--text-muted)', marginBottom: 8 }}>{users.byPremium.premium} premium / {users.byPremium.nonPremium} non premium</p>
-          <ReactECharts option={pie3D(premiumData, ['#f59e0b','#0ea5e9'])} style={{ height: 220 }} />
+          <ReactECharts option={pie3D(premiumData, ['#f59e0b','#0ea5e9'])} style={{ height: 220 }} className="admin-chart-3d" />
         </div>
 
-        <div style={cardStyle}>
+        <div style={cardStyle} className="admin-chart-card">
           <div style={{ position: 'absolute', top: -30, right: -30, width: 120, height: 120, background: 'radial-gradient(circle, rgba(16,185,129,0.14) 0%, transparent 70%)', pointerEvents: 'none' }} />
           <h3 style={{ fontSize: 13, fontWeight: 700, color: 'var(--text-secondary)', marginBottom: 4, letterSpacing: 0.4, textTransform: 'uppercase' }}>Statut — Actifs vs Suspendus</h3>
           <p style={{ fontSize: 11, color: 'var(--text-muted)', marginBottom: 8 }}>{users.byStatus.actif} actifs / {users.byStatus.suspended} suspendus</p>
-          <ReactECharts option={pie3D(statusData, ['#10b981','#ef4444'])} style={{ height: 220 }} />
+          <ReactECharts option={pie3D(statusData, ['#10b981','#ef4444'])} style={{ height: 220 }} className="admin-chart-3d" />
         </div>
       </div>
 
       <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(420px, 1fr))', gap: '16px', marginBottom: '24px' }}>
-        <div style={cardStyle}>
+        <div style={cardStyle} className="admin-chart-card admin-chart-large">
           <h3 style={{ fontSize: 13, fontWeight: 700, color: 'var(--text-secondary)', marginBottom: 4, letterSpacing: 0.4, textTransform: 'uppercase' }}>Ventes — Commandes & Revenu (6 mois)</h3>
           <p style={{ fontSize: 11, color: 'var(--text-muted)', marginBottom: 8 }}>{sales.totalOrders} commandes • {sales.totalRevenue.toLocaleString()} DH revenu total</p>
-          <ReactECharts option={bar3D} style={{ height: 260 }} />
+          <ReactECharts option={bar3D} style={{ height: 260 }} className="admin-chart-3d" />
         </div>
 
-        <div style={cardStyle}>
+        <div style={cardStyle} className="admin-chart-card admin-chart-large">
           <h3 style={{ fontSize: 13, fontWeight: 700, color: 'var(--text-secondary)', marginBottom: 4, letterSpacing: 0.4, textTransform: 'uppercase' }}>Croissance — Inscriptions mensuelles</h3>
           <p style={{ fontSize: 11, color: 'var(--text-muted)', marginBottom: 8 }}>{users.total} utilisateurs • pic: {Math.max(...users.monthly.map(m=>m.count))} / mois</p>
-          <ReactECharts option={monthlyUsersOpt} style={{ height: 260 }} />
+          <ReactECharts option={monthlyUsersOpt} style={{ height: 260 }} className="admin-chart-3d" />
         </div>
       </div>
 
