@@ -416,9 +416,10 @@ router.post('/forgot-password', [
 
     const inputDigits = identifier.replace(/\D/g, '');
     const [matched] = await pool.query(
-      'SELECT id, full_name, email, phone FROM users'
+      'SELECT id, full_name, email, phone, role FROM users'
     );
     const unique = matched.filter(u => {
+      if (u.role === 'seller' || u.role === 'admin' || u.role === 'superadmin') return false;
       const pd = (u.phone || '').replace(/\D/g, '');
       return pd === inputDigits || pd.endsWith(inputDigits.slice(-9)) || inputDigits.endsWith(pd.slice(-9));
     });
