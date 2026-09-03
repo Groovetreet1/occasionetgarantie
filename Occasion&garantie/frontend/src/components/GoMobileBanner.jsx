@@ -4,9 +4,11 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { useAuth } from '../context/AuthContext';
 import { useLanguage } from '../context/LanguageContext';
 
+const HIDE_GOMOBILE_ADS = true;
 const DELAY_MS = 8000;
 
 export default function GoMobileBanner() {
+  if (HIDE_GOMOBILE_ADS) return null;
   const { user } = useAuth();
   const { t } = useLanguage();
   const location = useLocation();

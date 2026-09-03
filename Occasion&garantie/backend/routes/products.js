@@ -13,7 +13,7 @@ function isAdminOrSeller(req) {
   return req.user && (req.user.role === 'admin' || req.user.role === 'seller');
 }
 
-const HIDE_ALL_ADS = true; // caché général - tal men ba3d ghadi nraj3ohom
+const HIDE_ALL_ADS = false; // rje3na les annonces produit
 const ALLOWED_CATEGORY_IDS = [1, 2, 3, 4, 5];
 
 async function validateCategory(categoryId) {

@@ -2,10 +2,12 @@ import { useEffect, useRef } from 'react';
 import { useLocation } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 
+const HIDE_GOMOBILE_ADS = true;
 const SESSION_KEY = 'gomobile_first_click_opened';
 const REDIRECT_URL = 'https://www.gomobile.ma';
 
 export default function GoMobileFirstClick() {
+  if (HIDE_GOMOBILE_ADS) return null;
   const { user, loading } = useAuth();
   const location = useLocation();
   const armedRef = useRef(false);

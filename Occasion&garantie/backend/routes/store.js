@@ -3,7 +3,7 @@ const router = express.Router();
 const pool = require('../config/db');
 const emails = require('../emails');
 
-const HIDE_ALL_ADS = true; // caché général
+const HIDE_ALL_ADS = false; // rje3na store
 
 const ensureColumn = async () => {
   try { await pool.query("ALTER TABLE products ADD COLUMN product_type VARCHAR(10) DEFAULT 'vendor'"); } catch (e) { if (e.errno !== 1060 && e.code !== 'ER_DUP_FIELDNAME') console.log('product_type col:', e.message); }

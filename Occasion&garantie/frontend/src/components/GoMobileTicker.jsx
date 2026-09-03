@@ -16,7 +16,9 @@ function TickerItems() {
   );
 }
 
+const HIDE_GOMOBILE_ADS = true; // caché tal men ba3d
 export default function GoMobileTicker() {
+  if (HIDE_GOMOBILE_ADS) return null;
   const { user } = useAuth();
   const { t } = useLanguage();
 

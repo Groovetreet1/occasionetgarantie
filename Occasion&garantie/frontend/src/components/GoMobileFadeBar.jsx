@@ -1,7 +1,9 @@
 import { useAuth } from '../context/AuthContext';
 import { useLanguage } from '../context/LanguageContext';
 
+const HIDE_GOMOBILE_ADS = true;
 export default function GoMobileFadeBar() {
+  if (HIDE_GOMOBILE_ADS) return null;
   const { user } = useAuth();
   const { t } = useLanguage();
 
