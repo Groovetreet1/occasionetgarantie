@@ -167,17 +167,17 @@ export default function AdminDashboardCharts({ stats }) {
         </div>
       </div>
 
-      <div className="admin-charts-row" style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(320px, 1fr))', gap: '16px', marginBottom: '24px', maxWidth: 900, marginLeft: 'auto', marginRight: 'auto', width: '100%' }}>
+      <div className="admin-charts-row" style={{ display: 'grid', gridTemplateColumns: 'repeat(2, 1fr)', gap: '16px', marginBottom: '24px' }}>
         <div style={cardStyle} className="admin-chart-card admin-chart-large">
           <h3 style={{ fontSize: 13, fontWeight: 700, color: 'var(--text-secondary)', marginBottom: 4, letterSpacing: 0.4, textTransform: 'uppercase' }}>Ventes — Commandes & Revenu (6 mois)</h3>
           <p style={{ fontSize: 11, color: 'var(--text-muted)', marginBottom: 8 }}>{sales.totalOrders} commandes • {sales.totalRevenue.toLocaleString()} DH revenu total</p>
-          <ReactECharts option={bar3D} style={{ height: 240 }} className="admin-chart-3d" />
+          <ReactECharts option={bar3D} style={{ height: 260 }} className="admin-chart-3d" />
         </div>
 
         <div style={cardStyle} className="admin-chart-card admin-chart-large">
           <h3 style={{ fontSize: 13, fontWeight: 700, color: 'var(--text-secondary)', marginBottom: 4, letterSpacing: 0.4, textTransform: 'uppercase' }}>Croissance — Inscriptions mensuelles</h3>
           <p style={{ fontSize: 11, color: 'var(--text-muted)', marginBottom: 8 }}>{users.total} utilisateurs • pic: {Math.max(...users.monthly.map(m=>m.count))} / mois</p>
-          <ReactECharts option={monthlyUsersOpt} style={{ height: 240 }} className="admin-chart-3d" />
+          <ReactECharts option={monthlyUsersOpt} style={{ height: 260 }} className="admin-chart-3d" />
         </div>
       </div>
 
