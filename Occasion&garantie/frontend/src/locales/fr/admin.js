@@ -110,6 +110,7 @@
     deleteUserMessage: 'Toutes ses annonces et données seront effacées.',
     unsuspendConfirm: 'Débloquer le compte de "{{name}}" ?',
     premium: 'Premium',
+    notPremium: 'Non Premium',
     makePremium: 'Rendre Premium',
     removePremium: 'Retirer Premium',
     makePremiumConfirm: 'Activer le compte Premium de "{{name}}" ?',

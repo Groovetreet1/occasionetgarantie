@@ -172,7 +172,9 @@ export default function AdminUsers() {
                             <FiStar size={11} /> {t('admin.premium')}
                           </span>
                         ) : (
-                          <span style={{ color: 'var(--text-muted)', padding: '2px 8px', fontSize: '11px' }}>-</span>
+                          <span style={{ color: '#0284c7', fontWeight: 600, background: 'rgba(14,165,233,0.12)', padding: '2px 8px', borderRadius: 8, display: 'inline-flex', alignItems: 'center', gap: 3, width: 'fit-content', fontSize: '11px' }}>
+                            {t('admin.notPremium')}
+                          </span>
                         )}
                         {u.suspended ? (
                           <span style={{ color: '#dc2626', fontWeight: 600, background: 'rgba(220,38,38,0.1)', padding: '2px 8px', borderRadius: 8, display: 'inline-flex', alignItems: 'center', gap: 3, width: 'fit-content' }}>

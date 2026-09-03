@@ -110,6 +110,7 @@
     deleteUserMessage: 'سيتم حذف جميع إعلاناته وبياناته.',
     unsuspendConfirm: 'إلغاء إيقاف حساب "{{name}}"؟',
     premium: 'بريميوم',
+    notPremium: 'ليس بريميوم',
     makePremium: 'تفعيل بريميوم',
     removePremium: 'إزالة بريميوم',
     makePremiumConfirm: 'تفعيل حساب بريميوم لـ "{{name}}"؟',
