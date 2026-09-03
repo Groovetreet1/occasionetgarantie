@@ -2970,13 +2970,13 @@ select.form-control, .form-group select { cursor: pointer; appearance: auto; }
 [dir='rtl'] .navbar-actions {
   flex-direction: row;
 }
-/* In Arabic: profil (gauche) -> notification -> langues -> colors themes (droite) */
+/* In Arabic inversé: themes -> langues -> notification -> profil (droite) */
+[dir='rtl'] .navbar-actions .theme-picker { order: 1; }
+[dir='rtl'] .navbar-actions .language-toggle { order: 2; }
+[dir='rtl'] .navbar-actions .navbar-notif { order: 3; }
 [dir='rtl'] .navbar-actions .navbar-dropdown,
 [dir='rtl'] .navbar-actions .navbar-auth,
-[dir='rtl'] .navbar-actions .navbar-user { order: 1; }
-[dir='rtl'] .navbar-actions .navbar-notif { order: 2; }
-[dir='rtl'] .navbar-actions .language-toggle { order: 3; }
-[dir='rtl'] .navbar-actions .theme-picker { order: 4; }
+[dir='rtl'] .navbar-actions .navbar-user { order: 4; }
 [dir='rtl'] .navbar-actions .navbar-hamburger { order: 5; }
 [dir='rtl'] .navbar-mobile-panel {
   left: 0; right: 0;
