@@ -3,12 +3,15 @@ const router = express.Router();
 const pool = require('../config/db');
 const emails = require('../emails');
 
+const HIDE_ALL_ADS = true; // caché général
+
 const ensureColumn = async () => {
   try { await pool.query("ALTER TABLE products ADD COLUMN product_type VARCHAR(10) DEFAULT 'vendor'"); } catch (e) { if (e.errno !== 1060 && e.code !== 'ER_DUP_FIELDNAME') console.log('product_type col:', e.message); }
 };
 
 router.get('/products', async (req, res) => {
   try {
+    if (HIDE_ALL_ADS) return res.json({ products: [], total: 0, page: 1, limit: 20, totalPages: 0 });
     await ensureColumn();
     const { category, page, limit } = req.query;
     const pageNum = Math.max(1, parseInt(page) || 1);
@@ -31,6 +34,7 @@ router.get('/products', async (req, res) => {
 
 router.get('/products/featured', async (req, res) => {
   try {
+    if (HIDE_ALL_ADS) return res.json([]);
     await ensureColumn();
     const [rows] = await pool.query(
       `SELECT p.*, c.name as category_name FROM products p LEFT JOIN categories c ON p.category_id = c.id WHERE p.active = TRUE AND p.status = 'disponible' AND p.approved = TRUE AND p.product_type = 'store' ORDER BY p.featured DESC, p.created_at DESC LIMIT 8`
@@ -43,6 +47,7 @@ router.get('/products/featured', async (req, res) => {
 
 router.get('/products/:slug', async (req, res) => {
   try {
+    if (HIDE_ALL_ADS) return res.status(404).json({ message: 'Produit boutique introuvable.' });
     await ensureColumn();
     const [rows] = await pool.query(
       `SELECT p.*, c.name as category_name FROM products p LEFT JOIN categories c ON p.category_id = c.id WHERE p.slug = ? AND p.product_type = 'store'`,

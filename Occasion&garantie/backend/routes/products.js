@@ -13,6 +13,7 @@ function isAdminOrSeller(req) {
   return req.user && (req.user.role === 'admin' || req.user.role === 'seller');
 }
 
+const HIDE_ALL_ADS = true; // caché général - tal men ba3d ghadi nraj3ohom
 const ALLOWED_CATEGORY_IDS = [1, 2, 3, 4, 5];
 
 async function validateCategory(categoryId) {
@@ -26,6 +27,7 @@ async function validateCategory(categoryId) {
 // Public: list products (only disponible)
 router.get('/', async (req, res) => {
   try {
+    if (HIDE_ALL_ADS) return res.json({ products: [], total: 0, page: 1, limit: 20, totalPages: 0 });
     const { category, search, min, max, state, sort, seller, ville, user_ville, page, limit, brand } = req.query;
     const pageNum = Math.max(1, parseInt(page) || 1);
     const limitNum = Math.min(100, Math.max(1, parseInt(limit) || 20));
@@ -90,6 +92,7 @@ router.get('/', async (req, res) => {
 // Public: featured products (only disponible)
 router.get('/featured', async (req, res) => {
   try {
+    if (HIDE_ALL_ADS) return res.json([]);
     let sql = `SELECT p.*, c.name as category_name, u.store_name as seller_name, u.store_logo as seller_logo, u.avatar as seller_avatar, u.premium as seller_premium
        FROM products p
        LEFT JOIN categories c ON p.category_id = c.id
@@ -124,6 +127,7 @@ router.get('/id/:id', authenticate, async (req, res) => {
 
 router.get('/cities', async (req, res) => {
   try {
+    if (HIDE_ALL_ADS) return res.json([]);
     const [rows] = await pool.query('SELECT DISTINCT ville FROM products WHERE ville IS NOT NULL AND ville != "" AND active = TRUE AND status = "disponible" ORDER BY ville');
     res.json(rows.map(r => r.ville));
   } catch (err) {
@@ -133,6 +137,7 @@ router.get('/cities', async (req, res) => {
 
 router.get('/brands/list', async (req, res) => {
   try {
+    if (HIDE_ALL_ADS) return res.json([]);
     const [rows] = await pool.query("SELECT DISTINCT TRIM(brand) as brand FROM products WHERE brand IS NOT NULL AND brand != '' AND active = TRUE AND status = 'disponible' AND approved = TRUE");
     const seen = new Set();
     const brands = rows.map(r => r.brand).filter(Boolean).map(b => b.trim()).filter(b => {
@@ -147,9 +152,10 @@ router.get('/brands/list', async (req, res) => {
   }
 });
 
-// Public: single product by slug (show any status)
+// Public: single product by slug (show any status) — caché général
 router.get('/:slug', async (req, res) => {
   try {
+    if (HIDE_ALL_ADS) return res.status(404).json({ message: 'Produit introuvable.' });
     let sql = `SELECT p.*, c.name as category_name,
               u.id as seller_id, u.full_name as seller_full_name, u.store_name as seller_name, u.store_logo as seller_logo, u.avatar as seller_avatar, u.premium as seller_premium,
               u.phone as seller_phone,
