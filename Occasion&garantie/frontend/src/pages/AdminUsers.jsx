@@ -179,7 +179,7 @@ export default function AdminUsers() {
                             <FiLock size={11} /> {t('admin.suspended')}
                           </span>
                         ) : (
-                          <span style={{ color: '#059669', fontWeight: 600, display: 'inline-flex', alignItems: 'center', gap: 3 }}>
+                          <span style={{ color: '#059669', fontWeight: 700, background: 'rgba(5,150,105,0.12)', padding: '2px 8px', borderRadius: 8, display: 'inline-flex', alignItems: 'center', gap: 3, width: 'fit-content' }}>
                             <FiCheck size={12} /> {t('admin.active')}
                           </span>
                         )}
