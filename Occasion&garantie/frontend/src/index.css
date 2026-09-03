@@ -3701,4 +3701,5 @@ select.form-control, .form-group select { cursor: pointer; appearance: auto; }
   .admin-chart-card { min-height: 280px !important; }
   .admin-chart-card .admin-chart-3d { height: 220px !important; }
   .admin-chart-card.admin-chart-large .admin-chart-3d { height: 220px !important; }
+  .admin-charts-row { max-width: 420px !important; margin-left: auto !important; margin-right: auto !important; }
 }
