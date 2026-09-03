@@ -18,7 +18,7 @@ const router = express.Router();
 const resetCodes = new Map();
 const phoneChangeCodes = new Map();
 const CODE_EXPIRY = 15 * 60 * 1000;
-const CLIENT_URL = process.env.CLIENT_URL || 'http://localhost:5173';
+const CLIENT_URL = process.env.CLIENT_URL || 'https://www.occasionetgarantie.store';
 const AVATAR_DIR = path.join(__dirname, '..', 'uploads', 'avatars');
 if (!fs.existsSync(AVATAR_DIR)) fs.mkdirSync(AVATAR_DIR, { recursive: true });
 
