@@ -93,8 +93,12 @@ export default function Home() {
 
   useEffect(() => { document.title = t('home.metaTitle'); }, [t]);
 
+  const FALLBACK_CITIES = ['Casablanca','Rabat','Marrakech','Fès','Tanger','Agadir','Oujda','Meknès','Kenitra','Tétouan','Salé','Mohammedia'];
   useEffect(() => {
-    api.get('/products/cities').then(res => { if (res.data.length) setCities(res.data); }).catch(() => {});
+    api.get('/products/cities').then(res => {
+      if (res.data && res.data.length) setCities(res.data);
+      else setCities(FALLBACK_CITIES);
+    }).catch(() => setCities(FALLBACK_CITIES));
     api.get('/products/brands/list').then(res => setBrands(res.data || [])).catch(() => {});
   }, []);
 
