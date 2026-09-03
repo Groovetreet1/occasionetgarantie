@@ -130,23 +130,26 @@ export default function AdminCreditPurchases() {
                       )}
                     </td>
                     <td style={{ padding: '12px 8px' }}>
-                      {p.status === 'en_attente' ? (
-                        <div style={{ display: 'flex', gap: '6px' }}>
-                          <button onClick={() => setConfirmTarget(p.id)} disabled={actionId === p.id}
-                            className="btn btn-primary" style={{ padding: '6px 14px', fontSize: '12px' }}>
-                            {actionId === p.id ? '...' : <><FiCheck size={14} /> {t('admin.confirm')}</>}
-                          </button>
-                          <button onClick={() => setRejectModal(p)} disabled={actionId === p.id}
-                            className="btn" style={{ padding: '6px 14px', fontSize: '12px', background: 'rgba(239,68,68,0.15)', color: 'var(--error)', border: 'none' }}>
-                            <FiThumbsDown size={14} /> {t('admin.reject')}
-                          </button>
-                        </div>
-                      ) : (
-                        <span style={{ color: p.status === 'confirme' ? 'var(--success)' : 'var(--error)', fontSize: '12px', fontWeight: 600 }}>
-                          {p.status === 'confirme' ? t('admin.confirmedStatus') : t('admin.rejectedStatus')}
-                        </span>
-                      )}
-                      <DeleteButton onClick={() => setDeleteTarget(p.id)} disabled={actionId === p.id} title={t('admin.delete')} />
+                      <div style={{ display: 'flex', alignItems: 'center', gap: '8px', flexWrap: 'wrap' }}>
+                        {p.status === 'en_attente' ? (
+                          <>
+                            <button onClick={() => setConfirmTarget(p.id)} disabled={actionId === p.id}
+                              className="btn btn-primary" style={{ padding: '6px 14px', fontSize: '12px' }}>
+                              {actionId === p.id ? '...' : <><FiCheck size={14} /> {t('admin.confirm')}</>}
+                            </button>
+                            <button onClick={() => setRejectModal(p)} disabled={actionId === p.id}
+                              className="btn" style={{ padding: '6px 14px', fontSize: '12px', background: 'rgba(239,68,68,0.15)', color: 'var(--error)', border: 'none' }}>
+                              <FiThumbsDown size={14} /> {t('admin.reject')}
+                            </button>
+                            <span style={{ width: '1px', height: '22px', background: 'var(--border)', margin: '0 4px', flexShrink: 0 }} />
+                          </>
+                        ) : (
+                          <span style={{ color: p.status === 'confirme' ? 'var(--success)' : 'var(--error)', fontSize: '12px', fontWeight: 600 }}>
+                            {p.status === 'confirme' ? t('admin.confirmedStatus') : t('admin.rejectedStatus')}
+                          </span>
+                        )}
+                        <DeleteButton onClick={() => setDeleteTarget(p.id)} disabled={actionId === p.id} title={t('admin.delete')} />
+                      </div>
                     </td>
                   </tr>
                 ))}
