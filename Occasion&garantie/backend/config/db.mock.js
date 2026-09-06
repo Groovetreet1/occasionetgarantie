@@ -20,7 +20,8 @@ const defaultData = {
   credit_purchases: [],
   credit_transactions: [],
   installments: [],
-  nextId: { users: 1, products: 1, orders: 1, order_items: 1, product_images: 1, premium_payments: 1, credit_purchases: 1, credit_transactions: 1, installments: 1 },
+  store_contacts: [],
+  nextId: { users: 1, products: 1, orders: 1, order_items: 1, product_images: 1, premium_payments: 1, credit_purchases: 1, credit_transactions: 1, installments: 1, store_contacts: 1 },
 };
 
 let data = { ...defaultData };
@@ -626,9 +627,80 @@ const mockPool = {
       return [[]];
     }
 
+    // INSERT INTO store_contacts
+    if (upper.startsWith('INSERT INTO STORE_CONTACTS')) {
+      const colsMatch = sql.match(/\(([^)]+)\)\s*VALUES/i);
+      const colNames = colsMatch ? colsMatch[1].split(',').map(c => c.trim().toLowerCase()) : [];
+      const newRow = { id: (data.nextId.store_contacts || 1), created_at: new Date().toISOString(), admin_deleted: 0, status: 'en_attente' };
+      if (!data.nextId.store_contacts) data.nextId.store_contacts = 1;
+      data.nextId.store_contacts++;
+      colNames.forEach((col, i) => {
+        newRow[col] = params[i];
+      });
+      if (!data.store_contacts) data.store_contacts = [];
+      data.store_contacts.push(newRow);
+      save();
+      return [{ insertId: newRow.id }];
+    }
+
     // INSERT INTO contact_messages
     if (upper.startsWith('INSERT INTO CONTACT_MESSAGES')) {
       return [{ insertId: 1 }];
+    }
+
+    // SELECT store_contacts for admin (with admin_deleted filter)
+    if (upper.includes('FROM STORE_CONTACTS') && upper.includes('COUNT(*)')) {
+      let filtered = [...(data.store_contacts || [])];
+      if (upper.includes('ADMIN_DELETED')) {
+        filtered = filtered.filter(c => !c.admin_deleted);
+      }
+      return [[{ total: filtered.length }]];
+    }
+    if (upper.includes('FROM STORE_CONTACTS SC') && upper.includes('LEFT JOIN PRODUCTS P')) {
+      let filtered = [...(data.store_contacts || [])];
+      if (upper.includes('ADMIN_DELETED')) {
+        filtered = filtered.filter(c => !c.admin_deleted);
+      }
+      filtered.sort((a,b) => new Date(b.created_at) - new Date(a.created_at));
+      // Handle LIMIT/OFFSET if present
+      const limitMatch = sql.match(/LIMIT\s+\?\s+OFFSET\s+\?/i);
+      if (limitMatch && params.length >= 2) {
+        const limit = Number(params[params.length-2]);
+        const offset = Number(params[params.length-1]);
+        filtered = filtered.slice(offset, offset+limit);
+      }
+      const rows = filtered.map(c => {
+        const p = data.products.find(x => x.id === c.product_id);
+        return { ...c, slug: p?.slug || null, image: p?.image || null };
+      });
+      return [rows];
+    }
+    if (upper.includes('FROM STORE_CONTACTS') && upper.includes('WHERE ADMIN_DELETED') && upper.includes('UPDATE')) {
+      // handled below
+    }
+    // UPDATE store_contacts SET admin_deleted
+    if (upper.startsWith('UPDATE STORE_CONTACTS SET') && upper.includes('ADMIN_DELETED')) {
+      const id = Number(params[params.length-1] || params[0]);
+      const idx = (data.store_contacts || []).findIndex(c => c.id === id);
+      if (idx !== -1) {
+        data.store_contacts[idx].admin_deleted = 1;
+        save();
+      }
+      return [[]];
+    }
+    // SELECT store_contacts for user my-contacts
+    if (upper.includes('FROM STORE_CONTACTS SC') && (upper.includes('WHERE SC.USER_ID') || upper.includes('WHERE SC.CLIENT_PHONE'))) {
+      // This is for my-contacts, return user's contacts
+      // For mock, just return empty or filter by user_id
+      let filtered = [...(data.store_contacts || [])];
+      // Try to find user_id param
+      const userId = params[0];
+      if (userId) {
+        filtered = filtered.filter(c => c.user_id === userId || c.client_phone?.includes(String(userId).slice(-4)));
+      }
+      // Filter out admin_deleted for user view? No, user should still see even if admin deleted
+      // So don't filter admin_deleted for my-contacts
+      return [filtered];
     }
 
     console.log('Unhandled SQL:', sql, JSON.stringify(params));

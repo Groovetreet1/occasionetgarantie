@@ -11,7 +11,8 @@ const slides = [
     subtitleKey: 'home.heroSlide1Subtitle',
     ctaKey: 'home.heroSlide1Cta',
     link: '/products',
-    orbColor: '#F59E0B',
+    image: '/slides/slide1.jpg',
+    overlay: 'linear-gradient(135deg, rgba(15,23,42,0.72) 0%, rgba(15,23,42,0.35) 100%)',
   },
   {
     id: 2,
@@ -19,7 +20,8 @@ const slides = [
     subtitleKey: 'home.heroSlide2Subtitle',
     ctaKey: 'home.heroSlide2Cta',
     link: '/signup',
-    orbColor: '#F59E0B',
+    image: '/slides/slide2.jpg',
+    overlay: 'linear-gradient(135deg, rgba(30,41,59,0.75) 0%, rgba(245,158,11,0.25) 100%)',
   },
   {
     id: 3,
@@ -27,7 +29,17 @@ const slides = [
     subtitleKey: 'home.heroSlide3Subtitle',
     ctaKey: 'home.heroSlide3Cta',
     link: '/products',
-    orbColor: '#3B82F6',
+    image: '/slides/slide3.jpg',
+    overlay: 'linear-gradient(135deg, rgba(15,23,42,0.68) 0%, rgba(59,130,246,0.30) 100%)',
+  },
+  {
+    id: 4,
+    titleKey: 'home.heroSlide1Title',
+    subtitleKey: 'home.heroSlide1Subtitle',
+    ctaKey: 'home.heroSlide1Cta',
+    link: '/support',
+    image: '/slides/support.jpg',
+    overlay: 'linear-gradient(135deg, rgba(15,23,42,0.70) 0%, rgba(16,185,129,0.28) 100%)',
   },
 ];
 
@@ -81,9 +93,13 @@ export default function HeroSlider() {
           exit="exit"
           transition={{ duration: 0.5, ease: 'easeInOut' }}
         >
-          <div className="hero-slide-bg" />
-          <div className="hero-slide-overlay" />
-          <div className="hero-slide-orb" />
+          <div className="hero-slide-bg" style={{
+            backgroundImage: `url(${slides[current].image})`,
+            backgroundSize: 'cover',
+            backgroundPosition: 'center',
+            backgroundRepeat: 'no-repeat'
+          }} />
+          <div className="hero-slide-overlay" style={{ background: slides[current].overlay || 'var(--hero-overlay)' }} />
           <div className="container">
             <div className="hero-slide-body">
               <motion.div

@@ -10,6 +10,7 @@ import NewsletterSection from '../components/NewsletterSection';
 import PromoPopup from '../components/PromoPopup';
 import GoMobileTicker from '../components/GoMobileTicker';
 import GoMobileFadeBar from '../components/GoMobileFadeBar';
+import HeroSlider from '../components/HeroSlider';
 import { useLanguage } from '../context/LanguageContext';
 import usePageMeta from '../utils/usePageMeta';
 
@@ -162,6 +163,8 @@ export default function Home() {
   return (
     <motion.div initial="hidden" animate="show">
       <PromoPopup />
+      {/* SLIDES - Photos from Desktop/photo pour slide (static, not DB) */}
+      <HeroSlider />
 
       {/* PREMIUM HERO - SaasAble Hero17 inspired */}
       <div className="hero-premium-wrap">
