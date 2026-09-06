@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
-import { FiPlus, FiEdit2, FiPackage, FiArrowLeft, FiStar, FiShield, FiShoppingBag, FiDollarSign, FiEye, FiPhone, FiMessageCircle, FiClock } from 'react-icons/fi';
+import { FiPlus, FiEdit2, FiPackage, FiArrowLeft, FiStar, FiShield, FiShoppingBag, FiDollarSign, FiEye, FiPhone, FiMessageCircle, FiClock, FiTrash2 } from 'react-icons/fi';
 import api from '../api/axios';
 import DeleteButton from '../components/DeleteButton';
 import CircleIconButton from '../components/CircleIconButton';
