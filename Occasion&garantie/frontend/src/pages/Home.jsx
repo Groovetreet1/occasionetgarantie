@@ -181,9 +181,8 @@ export default function Home() {
           <div className="container">
 
             {brands.length > 0 && (
-              <div style={{ marginTop: 32, textAlign: 'center' }}>
-                <div style={{ fontSize: 11, fontWeight: 700, letterSpacing: 0.8, textTransform: 'uppercase', color: 'var(--text-muted)', marginBottom: 14 }}>{t('home.brandsPopular')}</div>
-                <div className="brands-scroll-wrapper">
+              <div style={{ marginTop: 0, width: '100vw', marginLeft: 'calc(50% - 50vw)', background: 'var(--bg-card)', borderTop: '1px solid var(--border-light)', borderBottom: '1px solid var(--border-light)', padding: '14px 0' }}>
+                <div className="brands-scroll-wrapper" style={{ maxWidth: '100%', overflow: 'hidden' }}>
                   <div className="brands-scroll-track">
                     {brands.concat(brands).concat(brands).map((brand, i) => (
                       <BrandCircle key={i} brand={brand} />
