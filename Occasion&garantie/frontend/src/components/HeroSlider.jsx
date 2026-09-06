@@ -99,10 +99,10 @@ export default function HeroSlider() {
       onMouseEnter={() => setPaused(true)}
       onMouseLeave={() => setPaused(false)}
     >
-      <form ref={searchRef} onSubmit={handleSearch} className={`hero-slider-search ${searchOpen ? 'open' : ''}`} aria-label="Search" onClick={() => !searchOpen && setSearchOpen(true)}>
-        <FiSearch size={16} style={{ color: '#64748b', flexShrink: 0, cursor: 'pointer' }} onClick={() => setSearchOpen(true)} />
+      <form ref={searchRef} onSubmit={handleSearch} className={`hero-slider-search ${searchOpen ? '' : 'collapsed'}`} aria-label="Search" onClick={() => !searchOpen && setSearchOpen(true)}>
+        <FiSearch size={16} className="hero-slider-search-icon" onClick={() => setSearchOpen(true)} />
         <input type="text" value={searchTerm} onChange={e => setSearchTerm(e.target.value)} placeholder={t('home.searchPlaceholder')} aria-label={t('home.searchPlaceholder')} autoFocus={searchOpen} onFocus={() => setSearchOpen(true)} />
-        <button type="submit" aria-label={t('common.search')}><FiSearch size={14} /><span style={{ display: searchOpen ? 'inline' : 'none', marginLeft: 6 }}>{t('common.search')}</span></button>
+        <button type="submit">{t('common.search')}</button>
       </form>
       <AnimatePresence mode="wait">
         <motion.div
