@@ -13,7 +13,9 @@ const slides = [
     ctaKey: 'home.heroSlide1Cta',
     link: '/products',
     image: '/slides/slide1.jpg',
-    overlay: 'linear-gradient(135deg, rgba(245,158,11,0.52) 0%, rgba(217,119,6,0.22) 100%)',
+    overlay: 'linear-gradient(135deg, rgba(15,23,42,0.38) 0%, rgba(15,23,42,0.12) 100%)',
+    titleColor: '#fde68a',
+    subColor: '#fef3c7',
   },
   {
     id: 2,
@@ -22,7 +24,9 @@ const slides = [
     ctaKey: 'home.heroSlide2Cta',
     link: '/signup',
     image: '/slides/slide2.jpg',
-    overlay: 'linear-gradient(135deg, rgba(59,130,246,0.48) 0%, rgba(37,99,235,0.18) 100%)',
+    overlay: 'linear-gradient(135deg, rgba(15,23,42,0.42) 0%, rgba(15,23,42,0.15) 100%)',
+    titleColor: '#7dd3fc',
+    subColor: '#e0f2fe',
   },
   {
     id: 3,
@@ -31,7 +35,9 @@ const slides = [
     ctaKey: 'home.heroSlide3Cta',
     link: '/products',
     image: '/slides/slide3.jpg',
-    overlay: 'linear-gradient(135deg, rgba(16,185,129,0.50) 0%, rgba(5,150,105,0.20) 100%)',
+    overlay: 'linear-gradient(135deg, rgba(15,23,42,0.40) 0%, rgba(15,23,42,0.14) 100%)',
+    titleColor: '#6ee7b7',
+    subColor: '#d1fae5',
   },
   {
     id: 4,
@@ -40,7 +46,9 @@ const slides = [
     ctaKey: 'home.heroSlide1Cta',
     link: '/support',
     image: '/slides/support.jpg',
-    overlay: 'linear-gradient(135deg, rgba(139,92,246,0.46) 0%, rgba(124,58,237,0.18) 100%)',
+    overlay: 'linear-gradient(135deg, rgba(15,23,42,0.36) 0%, rgba(15,23,42,0.10) 100%)',
+    titleColor: '#c4b5fd',
+    subColor: '#ede9fe',
   },
 ];
 
@@ -50,12 +58,12 @@ const slideVariants = {
   exit: { opacity: 0, scale: 0.95 },
 };
 
-function Typewriter({ text, speed = 32, delay = 0, className, style }) {
+function Typewriter({ text, speed = 28, delay = 0, color = '#fff', style }) {
   const [displayed, setDisplayed] = useState('');
   const [done, setDone] = useState(false);
   useEffect(() => {
-    let i = 0;
-    let timer;
+    setDisplayed(''); setDone(false);
+    let i = 0; let timer;
     const start = setTimeout(() => {
       timer = setInterval(() => {
         i += 1;
@@ -66,9 +74,9 @@ function Typewriter({ text, speed = 32, delay = 0, className, style }) {
     return () => { clearTimeout(start); clearInterval(timer); };
   }, [text, speed, delay]);
   return (
-    <span className={className} style={style}>
+    <span style={{ color, ...style }}>
       {displayed}
-      {!done && <span style={{ borderLeft: '2px solid currentColor', marginLeft: 2, animation: 'blink 0.9s step-end infinite' }}>&nbsp;</span>}
+      {!done && <span style={{ borderLeft: `2px solid ${color}`, marginLeft: 2, animation: 'blink 0.9s step-end infinite' }}>&nbsp;</span>}
       <style>{`@keyframes blink{0%,50%{opacity:1}51%,100%{opacity:0}}`}</style>
     </span>
   );
@@ -84,7 +92,6 @@ export default function HeroSlider() {
   const [selectedCategory, setSelectedCategory] = useState('');
   const [selectedCity, setSelectedCity] = useState('');
   const [cities, setCities] = useState([]);
-  const [hasTyped, setHasTyped] = useState(false);
   const searchRef = useRef(null);
   const timerRef = useRef(null);
 
@@ -129,13 +136,7 @@ export default function HeroSlider() {
     return stopTimer;
   }, [paused, startTimer, stopTimer]);
 
-  useEffect(() => {
-    if (current === 0 && !hasTyped) {
-      const total = (t(slides[0].titleKey).length + t(slides[0].subtitleKey).length) * 32 + 800;
-      const timer = setTimeout(() => setHasTyped(true), total);
-      return () => clearTimeout(timer);
-    }
-  }, [current, hasTyped, t]);
+
 
   const goTo = (i) => { setCurrent(i); startTimer(); };
   const prev = () => { setCurrent((p) => (p - 1 + slides.length) % slides.length); startTimer(); };
@@ -199,11 +200,11 @@ export default function HeroSlider() {
                 transition={{ duration: 0.5, delay: 0.2 }}
                 style={{ textShadow: '0 2px 12px rgba(0,0,0,0.35)' }}
               >
-                <h2 style={{ color: '#fff', textShadow: '0 2px 16px rgba(0,0,0,0.45)', fontWeight: 800, minHeight: '1.2em' }}>
-                  {!hasTyped && current === 0 ? <Typewriter text={t(slides[current].titleKey)} speed={32} /> : t(slides[current].titleKey)}
+                <h2 style={{ color: slides[current].titleColor, textShadow: '0 2px 16px rgba(0,0,0,0.55)', fontWeight: 800, minHeight: '1.2em' }}>
+                  <Typewriter key={`t-${current}`} text={t(slides[current].titleKey)} speed={28} color={slides[current].titleColor} />
                 </h2>
-                <p style={{ color: 'rgba(255,255,255,0.92)', textShadow: '0 1px 8px rgba(0,0,0,0.35)', minHeight: '1.4em' }}>
-                  {!hasTyped && current === 0 ? <Typewriter text={t(slides[current].subtitleKey)} speed={18} delay={t(slides[current].titleKey).length * 32 + 300} /> : t(slides[current].subtitleKey)}
+                <p style={{ color: slides[current].subColor, textShadow: '0 1px 8px rgba(0,0,0,0.45)', minHeight: '1.4em' }}>
+                  <Typewriter key={`s-${current}`} text={t(slides[current].subtitleKey)} speed={16} delay={t(slides[current].titleKey).length * 28 + 280} color={slides[current].subColor} />
                 </p>
                 <Link to={slides[current].link} className="btn btn-primary" style={{ boxShadow: '0 8px 24px rgba(0,0,0,0.25)' }}>
                   {t(slides[current].ctaKey)} <FiArrowRight size={18} />
