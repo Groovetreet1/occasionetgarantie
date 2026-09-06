@@ -111,6 +111,19 @@ export default function AdminStoreProducts() {
     }
   };
 
+  const handleDeleteContact = async (id) => {
+    if (!confirm(t('admin.delete') + ' ?')) return;
+    setActionId(id);
+    try {
+      await api.delete(`/admin/store-contacts/${id}`);
+      fetchContacts(cPage, cLimit);
+    } catch (err) {
+      alert(err.response?.data?.message || t('admin.error'));
+    } finally {
+      setActionId(null);
+    }
+  };
+
   const statusColors = { disponible: '#059669', en_attente: '#d97706', vendu: '#dc2626' };
 
   return (
@@ -288,6 +301,7 @@ export default function AdminStoreProducts() {
                     <th style={{ padding: '10px 6px', textAlign: 'left' }}>{t('admin.thMessage')}</th>
                     <th style={{ padding: '10px 6px', textAlign: 'left' }}>{t('admin.thDate')}</th>
                     <th style={{ padding: '10px 6px', textAlign: 'left' }}>{t('admin.thStatus')}</th>
+                    <th style={{ padding: '10px 6px', textAlign: 'left' }}>{t('admin.thActions')}</th>
                   </tr>
                 </thead>
                 <tbody>
@@ -323,6 +337,12 @@ export default function AdminStoreProducts() {
                           <option value="contacte">{t('admin.contacted')}</option>
                           <option value="termine">{t('admin.completed')}</option>
                         </select>
+                      </td>
+                      <td style={{ padding: '8px 6px' }}>
+                        <button onClick={() => handleDeleteContact(c.id)} disabled={actionId === c.id} title={t('admin.delete')}
+                          style={{ width: 28, height: 28, borderRadius: '50%', background: '#dc2626', color: '#fff', border: 'none', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', opacity: actionId === c.id ? 0.5 : 1 }}>
+                          <FiTrash2 size={12} />
+                        </button>
                       </td>
                     </tr>
                   ))}

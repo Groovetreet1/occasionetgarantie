@@ -451,12 +451,13 @@ router.get('/store-products', authenticate, adminOnly, async (req, res) => {
 router.get('/store-contacts', authenticate, adminOnly, async (req, res) => {
   try {
     await pool.query("CREATE TABLE IF NOT EXISTS store_contacts (id INT AUTO_INCREMENT PRIMARY KEY, product_id INT NOT NULL, product_name VARCHAR(200) DEFAULT NULL, client_name VARCHAR(100) NOT NULL, client_phone VARCHAR(20) NOT NULL, message TEXT DEFAULT NULL, status VARCHAR(20) DEFAULT 'en_attente', created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP)");
+    try { await pool.query("ALTER TABLE store_contacts ADD COLUMN admin_deleted TINYINT(1) DEFAULT 0"); } catch (e) {}
     const page = Math.max(1, parseInt(req.query.page) || 1);
     const limit = Math.min(100, Math.max(1, parseInt(req.query.limit) || 50));
     const offset = (page - 1) * limit;
-    const [countRows] = await pool.query('SELECT COUNT(*) as total FROM store_contacts');
+    const [countRows] = await pool.query('SELECT COUNT(*) as total FROM store_contacts WHERE admin_deleted = 0 OR admin_deleted IS NULL');
     const total = countRows[0].total;
-    const [rows] = await pool.query('SELECT sc.*, p.slug, p.image FROM store_contacts sc LEFT JOIN products p ON sc.product_id = p.id ORDER BY sc.created_at DESC LIMIT ? OFFSET ?', [limit, offset]);
+    const [rows] = await pool.query('SELECT sc.*, p.slug, p.image FROM store_contacts sc LEFT JOIN products p ON sc.product_id = p.id WHERE sc.admin_deleted = 0 OR sc.admin_deleted IS NULL ORDER BY sc.created_at DESC LIMIT ? OFFSET ?', [limit, offset]);
     res.json({ contacts: rows, total, page, limit, totalPages: Math.ceil(total / limit) });
   } catch (err) {
     res.status(500).json({ message: 'Erreur serveur.' });
@@ -472,6 +473,16 @@ router.put('/store-contacts/:id/status', authenticate, adminOnly, async (req, re
     res.json({ message: 'Statut mis a jour.' });
   } catch (err) {
     console.error('store-contact status update error:', err.sqlMessage || err.message);
+    res.status(500).json({ message: 'Erreur serveur.' });
+  }
+});
+
+router.delete('/store-contacts/:id', authenticate, adminOnly, async (req, res) => {
+  try {
+    try { await pool.query("ALTER TABLE store_contacts ADD COLUMN admin_deleted TINYINT(1) DEFAULT 0"); } catch (e) {}
+    await pool.query('UPDATE store_contacts SET admin_deleted = 1 WHERE id = ?', [req.params.id]);
+    res.json({ message: 'Demande supprimee de la vue admin.' });
+  } catch (err) {
     res.status(500).json({ message: 'Erreur serveur.' });
   }
 });

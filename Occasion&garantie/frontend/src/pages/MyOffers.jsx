@@ -174,11 +174,6 @@ export default function MyOffers() {
                   </div>
                   <div style={{ fontSize: 11, color: 'var(--text-secondary)', marginTop: 2 }}>{c.product_price ? `${Number(c.product_price).toLocaleString()} DH` : ''} · {new Date(c.created_at).toLocaleDateString('fr-FR')}</div>
                   {c.message && <div style={{ fontSize: 11, color: 'var(--text-muted)', marginTop: 4 }}>« {c.message} »</div>}
-                  <div style={{ marginTop: 6 }}>
-                    <span style={{ fontSize: 10, fontWeight: 600, padding: '2px 8px', borderRadius: 20, background: 'rgba(245,158,11,0.12)', color: '#d97706', display: 'inline-flex', alignItems: 'center', gap: 4 }}>
-                      <FiClock size={10} /> Demande d'information — tracabilité
-                    </span>
-                  </div>
                 </div>
                 <div style={{ fontSize: 11, color: 'var(--text-muted)', textAlign: 'center', minWidth: 80 }}>
                   <div style={{ fontWeight: 600, color: 'var(--text-secondary)', textTransform: 'capitalize' }}>{c.status || 'en_attente'}</div>
