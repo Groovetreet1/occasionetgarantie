@@ -450,7 +450,7 @@ input, textarea, select, button { font-family: inherit; }
 
 .navbar-inner {
   width: 100%; padding: 0 28px;
-  display: grid; grid-template-columns: 1fr auto 1fr; align-items: center; height: var(--nav-height);
+  display: grid; grid-template-columns: auto 1fr auto auto; align-items: center; height: var(--nav-height);
   gap: 16px;
 }
 .navbar-logo {
@@ -472,6 +472,7 @@ input, textarea, select, button { font-family: inherit; }
   color: var(--primary); -webkit-text-fill-color: var(--primary);
 }
 .navbar-desktop-nav { display: flex; align-items: center; gap: 2px; justify-self: center; grid-column: 2; }
+.navbar-search { grid-column: 3; }
 .navbar-desktop-nav a {
   padding: 8px 18px; border-radius: 8px; color: var(--text-secondary);
   font-size: 14px; font-weight: 500; transition: var(--transition);
@@ -483,11 +484,12 @@ input, textarea, select, button { font-family: inherit; }
   content: ''; position: absolute; bottom: 2px; left: 50%; transform: translateX(-50%);
   width: 20px; height: 2px; background: var(--primary); border-radius: 1px;
 }
-.navbar-actions { display: flex; align-items: center; gap: 12px; flex-shrink: 0; justify-self: end; grid-column: 3; }
-.navbar-search { display: flex; align-items: center; background: var(--bg-secondary); border: 1px solid var(--border-light); border-radius: 999px; padding: 4px 4px 4px 12px; gap: 6px; flex: 1; max-width: 360px; margin: 0 16px; }
+.navbar-actions { display: flex; align-items: center; gap: 12px; flex-shrink: 0; justify-self: end; grid-column: 4; }
+.navbar-search { display: flex; align-items: center; background: var(--bg-secondary); border: 1px solid var(--border-light); border-radius: 999px; padding: 4px 4px 4px 12px; gap: 6px; flex: 1; max-width: 360px; margin: 0 16px; grid-column: 3; justify-self: center; }
 .navbar-search input::placeholder { color: var(--text-muted); }
 .navbar-search-mobile { display: none; }
-@media (max-width: 900px) { .navbar-search { display: none; } .navbar-search-mobile { display: block !important; } }
+@media (max-width: 1100px) { .navbar-search { max-width: 280px; } }
+@media (max-width: 900px) { .navbar-inner { grid-template-columns: auto 1fr auto; } .navbar-desktop-nav { display: none; } .navbar-search { display: none; } .navbar-search-mobile { display: block !important; } .navbar-actions { grid-column: 3; } }
 .navbar-auth { display: flex; align-items: center; gap: 8px; }
 .navbar-login {
   padding: 8px 18px; border-radius: 8px; color: var(--text-secondary);
