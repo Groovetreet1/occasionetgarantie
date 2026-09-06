@@ -452,12 +452,20 @@ router.get('/store-contacts', authenticate, adminOnly, async (req, res) => {
   try {
     await pool.query("CREATE TABLE IF NOT EXISTS store_contacts (id INT AUTO_INCREMENT PRIMARY KEY, product_id INT NOT NULL, product_name VARCHAR(200) DEFAULT NULL, client_name VARCHAR(100) NOT NULL, client_phone VARCHAR(20) NOT NULL, message TEXT DEFAULT NULL, status VARCHAR(20) DEFAULT 'en_attente', created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP)");
     try { await pool.query("ALTER TABLE store_contacts ADD COLUMN admin_deleted TINYINT(1) DEFAULT 0"); } catch (e) {}
+    try { await pool.query("ALTER TABLE store_contacts ADD COLUMN user_id INT DEFAULT NULL"); } catch (e) {}
     const page = Math.max(1, parseInt(req.query.page) || 1);
     const limit = Math.min(100, Math.max(1, parseInt(req.query.limit) || 50));
     const offset = (page - 1) * limit;
-    const [countRows] = await pool.query('SELECT COUNT(*) as total FROM store_contacts WHERE admin_deleted = 0 OR admin_deleted IS NULL');
-    const total = countRows[0].total;
-    const [rows] = await pool.query('SELECT sc.*, p.slug, p.image FROM store_contacts sc LEFT JOIN products p ON sc.product_id = p.id WHERE sc.admin_deleted = 0 OR sc.admin_deleted IS NULL ORDER BY sc.created_at DESC LIMIT ? OFFSET ?', [limit, offset]);
+    let countRows, rows;
+    try {
+      [countRows] = await pool.query('SELECT COUNT(*) as total FROM store_contacts WHERE admin_deleted = 0 OR admin_deleted IS NULL');
+      [rows] = await pool.query('SELECT sc.*, p.slug, p.image FROM store_contacts sc LEFT JOIN products p ON sc.product_id = p.id WHERE sc.admin_deleted = 0 OR sc.admin_deleted IS NULL ORDER BY sc.created_at DESC LIMIT ? OFFSET ?', [limit, offset]);
+    } catch (e) {
+      // fallback si colonne admin_deleted n'existe pas encore (MySQL < ou mock)
+      [countRows] = await pool.query('SELECT COUNT(*) as total FROM store_contacts');
+      [rows] = await pool.query('SELECT sc.*, p.slug, p.image FROM store_contacts sc LEFT JOIN products p ON sc.product_id = p.id ORDER BY sc.created_at DESC LIMIT ? OFFSET ?', [limit, offset]);
+      console.log('store-contacts fallback sans admin_deleted:', e.message);
+    }
     res.json({ contacts: rows, total, page, limit, totalPages: Math.ceil(total / limit) });
   } catch (err) {
     res.status(500).json({ message: 'Erreur serveur.' });
