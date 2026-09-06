@@ -1,0 +1,28 @@
+export const frNotif = {
+  notif: {
+    productApprovedTitle: 'Annonce approuvée',
+    productApprovedMessage: 'Votre annonce "{{name}}" a été approuvée et est maintenant visible sur le site.',
+    productRejectedTitle: 'Annonce refusée',
+    productRejectedMessage: 'Votre annonce "{{name}}" a été refusée.',
+    productPendingTitle: 'Annonce en attente',
+    productPendingMessage: 'Votre annonce "{{name}}" est en cours d\'examen par l\'équipe d\'administration.',
+    offerNewTitle: 'Nouvelle offre de prix',
+    offerNewMessage: '{{name}} propose {{price}} DH pour "{{product}}"',
+    offerCancelledTitle: 'Offre annulée',
+    offerCancelledMessage: 'Le client a annulé sa négociation de {{price}} DH pour "{{product}}"',
+    offerCounterTitle: 'Nouvelle contre-offre',
+    offerCounterMessage: '{{name}} propose {{price}} DH pour "{{product}}"',
+    offerAcceptedTitle: 'Offre acceptée !',
+    offerAcceptedMessage: '{{name}} a accepté le prix de {{price}} DH pour "{{product}}"',
+    offerRefusedTitle: 'Offre refusée',
+    offerRefusedMessage: '{{name}} a refusé le prix de {{price}} DH pour "{{product}}"',
+    repriseNewTitle: 'Nouvelle demande de reprise',
+    repriseNewMessage: '{{name}} a soumis une reprise pour {{product}}',
+    repriseAcceptedTitle: 'Reprise acceptée',
+    repriseAcceptedMessage: '{{name}} a accepté votre demande de reprise pour {{product}}',
+    repriseRefusedTitle: 'Reprise refusée',
+    repriseRefusedMessage: '{{name}} a refusé votre demande de reprise pour {{product}}',
+    repriseUpdateTitle: 'Reprise mise à jour',
+    repriseUpdateMessage: 'Votre reprise {{product}} a été mise à jour.',
+  }
+};

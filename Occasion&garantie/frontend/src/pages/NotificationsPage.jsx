@@ -4,10 +4,11 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { FiArrowLeft, FiBell, FiCheck, FiTrash2 } from 'react-icons/fi';
 import api from '../api/axios';
 import { useLanguage } from '../context/LanguageContext';
+import { translateNotification } from '../utils/translateNotification';
 
 export default function NotificationsPage() {
   const navigate = useNavigate();
-  const { t } = useLanguage();
+  const { t, lang } = useLanguage();
   const [notifications, setNotifications] = useState([]);
   const [loading, setLoading] = useState(true);
   const [showCleanConfirm, setShowCleanConfirm] = useState(false);
@@ -67,23 +68,26 @@ export default function NotificationsPage() {
           </div>
         ) : (
           <div style={{ display: 'flex', flexDirection: 'column', gap: 6 }}>
-            {notifications.map(n => (
+            {notifications.map(n => {
+              const tr = translateNotification(n, t);
+              const locale = lang === 'ar' ? 'ar-MA' : 'fr-FR';
+              return (
               <button key={n.id} onClick={() => markRead(n)} style={{
-                display: 'block', width: '100%', textAlign: 'left', padding: '14px 16px',
+                display: 'block', width: '100%', textAlign: lang === 'ar' ? 'right' : 'left', padding: '14px 16px',
                 border: '1px solid var(--border)', borderRadius: 10,
                 background: n.read_at ? 'var(--bg-card)' : 'rgba(99,102,241,0.05)',
-                cursor: 'pointer', color: 'inherit', fontFamily: 'var(--font)',
+                cursor: 'pointer', color: 'inherit', fontFamily: 'var(--font)', direction: lang === 'ar' ? 'rtl' : 'ltr',
               }}>
-                <div style={{ fontSize: 14, fontWeight: n.read_at ? 400 : 600, display: 'flex', gap: 8 }}>
+                <div style={{ fontSize: 14, fontWeight: n.read_at ? 400 : 600, display: 'flex', gap: 8, flexDirection: lang === 'ar' ? 'row-reverse' : 'row' }}>
                   {!n.read_at && <span style={{ width: 8, height: 8, borderRadius: '50%', background: 'var(--primary)', flexShrink: 0, marginTop: 5 }} />}
-                  <span>{n.title}</span>
+                  <span>{tr.title}</span>
                 </div>
-                <div style={{ fontSize: 12, color: 'var(--text-muted)', marginTop: 4, lineHeight: 1.5, paddingLeft: !n.read_at ? 16 : 0 }}>{n.message}</div>
-                <div style={{ fontSize: 10, color: 'var(--text-muted)', marginTop: 6, paddingLeft: !n.read_at ? 16 : 0 }}>
-                  {new Date(n.created_at).toLocaleDateString('fr-FR')} a {new Date(n.created_at).toLocaleTimeString('fr-FR', { hour: '2-digit', minute: '2-digit' })}
+                <div style={{ fontSize: 12, color: 'var(--text-muted)', marginTop: 4, lineHeight: 1.5, paddingLeft: !n.read_at && lang !== 'ar' ? 16 : 0, paddingRight: !n.read_at && lang === 'ar' ? 16 : 0 }}>{tr.message}</div>
+                <div style={{ fontSize: 10, color: 'var(--text-muted)', marginTop: 6, paddingLeft: !n.read_at && lang !== 'ar' ? 16 : 0, paddingRight: !n.read_at && lang === 'ar' ? 16 : 0 }}>
+                  {new Date(n.created_at).toLocaleDateString(locale)} {lang === 'ar' ? ' في ' : ' à '} {new Date(n.created_at).toLocaleTimeString(locale, { hour: '2-digit', minute: '2-digit' })}
                 </div>
               </button>
-            ))}
+            );})}
           </div>
         )}
       </div>

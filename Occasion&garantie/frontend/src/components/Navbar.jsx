@@ -8,6 +8,7 @@ import ThemeToggle from './ThemeToggle';
 import LanguageToggle from './LanguageToggle';
 import PremiumPopup from './PremiumPopup';
 import api from '../api/axios';
+import { translateNotification } from '../utils/translateNotification';
 
 const API_BASE = import.meta.env.VITE_API_URL || '';
 
@@ -20,7 +21,7 @@ const categories = [
 
 export default function Navbar() {
   const { user, logout } = useAuth();
-  const { t, dir } = useLanguage();
+  const { t, dir, lang } = useLanguage();
   const navigate = useNavigate();
   const location = useLocation();
   const isProductsActive = location.pathname.startsWith('/products');
@@ -215,19 +216,22 @@ export default function Navbar() {
                           <div style={{ padding: '20px 16px', textAlign: 'center', fontSize: 12, color: 'var(--text-muted)' }}>
                             {t('nav.noNotifications')}
                           </div>
-                        ) : notifications.slice(0, 10).map(n => (
-                          <button key={n.id} onClick={() => markRead(n)} style={{
-                            display: 'block', width: '100%', textAlign: 'left', padding: '8px 12px',
-                            border: 'none', borderBottom: '1px solid var(--border)', background: n.read_at ? 'transparent' : 'rgba(99,102,241,0.04)',
-                            cursor: 'pointer', color: 'inherit', fontFamily: 'var(--font)',
-                          }}>
-                            <div style={{ fontSize: 12, fontWeight: n.read_at ? 400 : 600 }}>{n.title}</div>
-                            {n.message && <div style={{ fontSize: 10, color: 'var(--text-muted)', marginTop: 1, lineHeight: 1.3, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{n.message}</div>}
-                            <div style={{ fontSize: 9, color: 'var(--text-muted)', marginTop: 2 }}>
-                              {new Date(n.created_at).toLocaleDateString('fr-FR')} {new Date(n.created_at).toLocaleTimeString('fr-FR', { hour: '2-digit', minute: '2-digit' })}
-                            </div>
-                          </button>
-                        ))}
+                        ) : notifications.slice(0, 10).map(n => {
+                          const tr = translateNotification(n, t);
+                          return (
+                            <button key={n.id} onClick={() => markRead(n)} style={{
+                              display: 'block', width: '100%', textAlign: lang === 'ar' ? 'right' : 'left', padding: '8px 12px',
+                              border: 'none', borderBottom: '1px solid var(--border)', background: n.read_at ? 'transparent' : 'rgba(99,102,241,0.04)',
+                              cursor: 'pointer', color: 'inherit', fontFamily: 'var(--font)', direction: lang === 'ar' ? 'rtl' : 'ltr',
+                            }}>
+                              <div style={{ fontSize: 12, fontWeight: n.read_at ? 400 : 600 }}>{tr.title}</div>
+                              {tr.message && <div style={{ fontSize: 10, color: 'var(--text-muted)', marginTop: 1, lineHeight: 1.3, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{tr.message}</div>}
+                              <div style={{ fontSize: 9, color: 'var(--text-muted)', marginTop: 2 }}>
+                                {new Date(n.created_at).toLocaleDateString(lang === 'ar' ? 'ar-MA' : 'fr-FR')} {lang === 'ar' ? ' في ' : ' à '} {new Date(n.created_at).toLocaleTimeString(lang === 'ar' ? 'ar-MA' : 'fr-FR', { hour: '2-digit', minute: '2-digit' })}
+                              </div>
+                            </button>
+                          );
+                        })}
                       </div>
                     </motion.div>
                   )}

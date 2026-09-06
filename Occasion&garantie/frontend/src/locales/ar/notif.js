@@ -1,0 +1,28 @@
+export const arNotif = {
+  notif: {
+    productApprovedTitle: 'تمت الموافقة على الإعلان',
+    productApprovedMessage: 'تمت الموافقة على إعلانك "{{name}}" وهو الآن ظاهر على الموقع.',
+    productRejectedTitle: 'تم رفض الإعلان',
+    productRejectedMessage: 'تم رفض إعلانك "{{name}}".',
+    productPendingTitle: 'الإعلان قيد الانتظار',
+    productPendingMessage: 'إعلانك "{{name}}" قيد المراجعة من قبل فريق الإدارة.',
+    offerNewTitle: 'عرض سعر جديد',
+    offerNewMessage: '{{name}} يقترح {{price}} درهم لـ "{{product}}"',
+    offerCancelledTitle: 'تم إلغاء العرض',
+    offerCancelledMessage: 'ألغى العميل مفاوضته البالغة {{price}} درهم لـ "{{product}}"',
+    offerCounterTitle: 'عرض مقابل جديد',
+    offerCounterMessage: '{{name}} يقترح {{price}} درهم لـ "{{product}}"',
+    offerAcceptedTitle: 'تم قبول العرض!',
+    offerAcceptedMessage: '{{name}} قبل سعر {{price}} درهم لـ "{{product}}"',
+    offerRefusedTitle: 'تم رفض العرض',
+    offerRefusedMessage: '{{name}} رفض سعر {{price}} درهم لـ "{{product}}"',
+    repriseNewTitle: 'طلب استبدال جديد',
+    repriseNewMessage: '{{name}} قدم طلب استبدال لـ {{product}}',
+    repriseAcceptedTitle: 'تم قبول طلب الاستبدال',
+    repriseAcceptedMessage: '{{name}} قبل طلب الاستبدال الخاص بك لـ {{product}}',
+    repriseRefusedTitle: 'تم رفض طلب الاستبدال',
+    repriseRefusedMessage: '{{name}} رفض طلب الاستبدال الخاص بك لـ {{product}}',
+    repriseUpdateTitle: 'تم تحديث طلب الاستبدال',
+    repriseUpdateMessage: 'تم تحديث طلب الاستبدال {{product}}.',
+  }
+};

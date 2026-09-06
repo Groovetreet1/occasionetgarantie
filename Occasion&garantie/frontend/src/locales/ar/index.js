@@ -11,6 +11,7 @@ import { arMessenger } from './messenger';
 import { arReprise } from './reprise';
 import { arProfile } from './profile';
 import { arShop } from './shop';
+import { arNotif } from './notif';
 
 export const ar = {
   ...arCommon,
@@ -26,4 +27,5 @@ export const ar = {
   ...arReprise,
   ...arProfile,
   ...arShop,
+  ...arNotif,
 };

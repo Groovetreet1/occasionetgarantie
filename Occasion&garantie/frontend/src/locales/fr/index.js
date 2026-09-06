@@ -11,6 +11,7 @@ import { frMessenger } from './messenger';
 import { frReprise } from './reprise';
 import { frProfile } from './profile';
 import { frShop } from './shop';
+import { frNotif } from './notif';
 
 export const fr = {
   ...frCommon,
@@ -26,4 +27,5 @@ export const fr = {
   ...frReprise,
   ...frProfile,
   ...frShop,
+  ...frNotif,
 };
