@@ -55,6 +55,8 @@ export default function HeroSlider() {
   const [current, setCurrent] = useState(0);
   const [paused, setPaused] = useState(false);
   const [searchTerm, setSearchTerm] = useState('');
+  const [searchOpen, setSearchOpen] = useState(false);
+  const searchRef = useRef(null);
   const timerRef = useRef(null);
 
   const handleSearch = (e) => {
@@ -62,6 +64,12 @@ export default function HeroSlider() {
     if (searchTerm.trim()) navigate(`/products?search=${encodeURIComponent(searchTerm.trim())}`);
     else navigate('/products');
   };
+
+  useEffect(() => {
+    const onDown = (e) => { if (searchRef.current && !searchRef.current.contains(e.target)) setSearchOpen(false); };
+    document.addEventListener('mousedown', onDown);
+    return () => document.removeEventListener('mousedown', onDown);
+  }, []);
 
   const startTimer = useCallback(() => {
     if (timerRef.current) clearInterval(timerRef.current);
@@ -91,10 +99,10 @@ export default function HeroSlider() {
       onMouseEnter={() => setPaused(true)}
       onMouseLeave={() => setPaused(false)}
     >
-      <form onSubmit={handleSearch} className="hero-slider-search" aria-label="Search">
-        <FiSearch size={16} style={{ color: '#64748b', flexShrink: 0 }} />
-        <input type="text" value={searchTerm} onChange={e => setSearchTerm(e.target.value)} placeholder={t('home.searchPlaceholder')} aria-label={t('home.searchPlaceholder')} />
-        <button type="submit">{t('common.search')}</button>
+      <form ref={searchRef} onSubmit={handleSearch} className={`hero-slider-search ${searchOpen ? 'open' : ''}`} aria-label="Search" onClick={() => !searchOpen && setSearchOpen(true)}>
+        <FiSearch size={16} style={{ color: '#64748b', flexShrink: 0, cursor: 'pointer' }} onClick={() => setSearchOpen(true)} />
+        <input type="text" value={searchTerm} onChange={e => setSearchTerm(e.target.value)} placeholder={t('home.searchPlaceholder')} aria-label={t('home.searchPlaceholder')} autoFocus={searchOpen} onFocus={() => setSearchOpen(true)} />
+        <button type="submit" aria-label={t('common.search')}><FiSearch size={14} /><span style={{ display: searchOpen ? 'inline' : 'none', marginLeft: 6 }}>{t('common.search')}</span></button>
       </form>
       <AnimatePresence mode="wait">
         <motion.div

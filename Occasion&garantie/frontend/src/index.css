@@ -644,17 +644,21 @@ input, textarea, select, button { font-family: inherit; }
   margin-top: calc(var(--nav-height) + 12px);
 }
 .hero-slider-search {
-  position: absolute; top: 18px; left: 50%; transform: translateX(-50%); z-index: 5;
-  width: min(760px, calc(100% - 32px)); display: flex; align-items: center;
+  position: absolute; top: 50%; right: 18px; transform: translateY(-50%); z-index: 6;
+  display: flex; align-items: center; gap: 0;
   background: rgba(255,255,255,0.96); backdrop-filter: blur(12px);
   border: 1px solid rgba(255,255,255,0.85); border-radius: 999px;
-  padding: 6px 6px 6px 16px; gap: 8px;
-  box-shadow: 0 12px 32px rgba(0,0,0,0.18), 0 2px 8px rgba(0,0,0,0.08);
+  padding: 6px; box-shadow: 0 12px 32px rgba(0,0,0,0.18), 0 2px 8px rgba(0,0,0,0.08);
+  transition: width 0.3s cubic-bezier(0.4,0,0.2,1), padding 0.3s;
+  width: 44px; height: 44px; overflow: hidden; justify-content: center; cursor: pointer;
 }
-.hero-slider-search input { flex: 1; border: none; outline: none; background: transparent; font-size: 14px; color: #1e293b; font-family: var(--font); min-width: 0; }
+.hero-slider-search.open { width: min(360px, calc(100vw - 48px)); padding: 6px 6px 6px 14px; gap: 8px; justify-content: flex-start; cursor: default; }
+.hero-slider-search input { flex: 1; border: none; outline: none; background: transparent; font-size: 14px; color: #1e293b; font-family: var(--font); min-width: 0; display: none; }
+.hero-slider-search.open input { display: block; }
 .hero-slider-search input::placeholder { color: #94a3b8; }
-.hero-slider-search button { background: var(--primary); color: #000; border: none; border-radius: 999px; padding: 10px 22px; font-size: 13px; font-weight: 700; cursor: pointer; white-space: nowrap; flex-shrink: 0; }
-@media (max-width: 900px) { .hero-slider-search { display: none; } }
+.hero-slider-search button { background: var(--primary); color: #000; border: none; border-radius: 999px; padding: 8px; width: 32px; height: 32px; display: flex; align-items: center; justify-content: center; font-size: 13px; font-weight: 700; cursor: pointer; white-space: nowrap; flex-shrink: 0; }
+.hero-slider-search.open button { padding: 8px 16px; width: auto; height: auto; }
+@media (max-width: 900px) { .hero-slider-search { right: 12px; } }
 .hero-slide {
   position: absolute; inset: 0; display: flex; align-items: center; justify-content: center;
 }
