@@ -2,12 +2,23 @@ const express = require('express');
 const router = express.Router();
 const pool = require('../config/db');
 const emails = require('../emails');
+const { authenticate } = require('../middleware/auth');
 
 const HIDE_ALL_ADS = false; // rje3na store
+const jwt = require('jsonwebtoken');
 
 const ensureColumn = async () => {
   try { await pool.query("ALTER TABLE products ADD COLUMN product_type VARCHAR(10) DEFAULT 'vendor'"); } catch (e) { if (e.errno !== 1060 && e.code !== 'ER_DUP_FIELDNAME') console.log('product_type col:', e.message); }
 };
+
+async function optionalAuth(req) {
+  const header = req.headers.authorization;
+  if (!header || !header.startsWith('Bearer ')) return null;
+  try {
+    const decoded = jwt.verify(header.split(' ')[1], process.env.JWT_SECRET);
+    return decoded;
+  } catch { return null; }
+}
 
 router.get('/products', async (req, res) => {
   try {
@@ -71,9 +82,12 @@ router.post('/contact', async (req, res) => {
       `CREATE TABLE IF NOT EXISTS store_contacts (id INT AUTO_INCREMENT PRIMARY KEY, product_id INT NOT NULL, product_name VARCHAR(200) DEFAULT NULL, client_name VARCHAR(100) NOT NULL, client_phone VARCHAR(20) NOT NULL, message TEXT DEFAULT NULL, created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP)`
     );
     try { await pool.query("ALTER TABLE store_contacts ADD COLUMN status VARCHAR(20) DEFAULT 'en_attente'"); } catch (e) { if (e.errno !== 1060 && e.code !== 'ER_DUP_FIELDNAME') {} }
+    try { await pool.query("ALTER TABLE store_contacts ADD COLUMN user_id INT DEFAULT NULL"); } catch (e) { if (e.errno !== 1060 && e.code !== 'ER_DUP_FIELDNAME') {} }
+    const authUser = await optionalAuth(req);
+    const userId = authUser ? authUser.id : null;
     await pool.query(
-      'INSERT INTO store_contacts (product_id, product_name, client_name, client_phone, message) VALUES (?, ?, ?, ?, ?)',
-      [productId, productName || rows[0].name, name, phone, message || null]
+      'INSERT INTO store_contacts (product_id, product_name, client_name, client_phone, message, user_id) VALUES (?, ?, ?, ?, ?, ?)',
+      [productId, productName || rows[0].name, name, phone, message || null, userId]
     );
 
     try {
@@ -85,6 +99,38 @@ router.post('/contact', async (req, res) => {
     } catch (notifErr) { console.error('Store contact email failed:', notifErr.message); }
 
     res.json({ message: 'Message envoye. Nous vous contacterons dans les plus brefs delais.' });
+  } catch (err) {
+    res.status(500).json({ message: 'Erreur serveur.' });
+  }
+});
+
+router.get('/my-contacts', authenticate, async (req, res) => {
+  try {
+    try { await pool.query("ALTER TABLE store_contacts ADD COLUMN user_id INT DEFAULT NULL"); } catch (e) { if (e.errno !== 1060 && e.code !== 'ER_DUP_FIELDNAME') {} }
+    const [userRows] = await pool.query('SELECT phone FROM users WHERE id = ?', [req.user.id]);
+    const userPhone = userRows[0]?.phone || '';
+    const digits = userPhone.replace(/\D/g, '').slice(-9);
+    let rows = [];
+    if (digits) {
+      [rows] = await pool.query(
+        `SELECT sc.*, p.slug as product_slug, p.image as product_image, p.price as product_price, p.name as product_name_full
+         FROM store_contacts sc
+         LEFT JOIN products p ON sc.product_id = p.id
+         WHERE sc.user_id = ? OR sc.client_phone LIKE ?
+         ORDER BY sc.created_at DESC`,
+        [req.user.id, `%${digits}`]
+      );
+    } else {
+      [rows] = await pool.query(
+        `SELECT sc.*, p.slug as product_slug, p.image as product_image, p.price as product_price, p.name as product_name_full
+         FROM store_contacts sc
+         LEFT JOIN products p ON sc.product_id = p.id
+         WHERE sc.user_id = ?
+         ORDER BY sc.created_at DESC`,
+        [req.user.id]
+      );
+    }
+    res.json(rows);
   } catch (err) {
     res.status(500).json({ message: 'Erreur serveur.' });
   }

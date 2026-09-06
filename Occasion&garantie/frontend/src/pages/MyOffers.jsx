@@ -11,6 +11,7 @@ export default function MyOffers() {
   const { t } = useLanguage();
   const navigate = useNavigate();
   const [offers, setOffers] = useState([]);
+  const [storeContacts, setStoreContacts] = useState([]);
   const [loading, setLoading] = useState(true);
   const [counterTarget, setCounterTarget] = useState(null);
   const [counterPrice, setCounterPrice] = useState('');
@@ -24,9 +25,13 @@ export default function MyOffers() {
   };
 
   useEffect(() => {
-    api.get('/negotiations/mine')
-      .then((res) => setOffers(res.data))
-      .catch(() => {})
+    Promise.all([
+      api.get('/negotiations/mine').catch(() => ({ data: [] })),
+      api.get('/store/my-contacts').catch(() => ({ data: [] }))
+    ]).then(([negRes, storeRes]) => {
+      setOffers(negRes.data || []);
+      setStoreContacts(storeRes.data || []);
+    }).catch(() => {})
       .finally(() => setLoading(false));
   }, []);
 
@@ -144,6 +149,46 @@ export default function MyOffers() {
           );
         })}
       </div>
+
+      {storeContacts.length > 0 && (
+        <div style={{ marginTop: 28 }}>
+          <h2 style={{ fontSize: 15, fontWeight: 700, marginBottom: 4, display: 'flex', alignItems: 'center', gap: 8 }}>
+            <FiShoppingBag size={16} style={{ color: '#d97706' }} /> Boutique Officielle — Demandes d'information
+            <span style={{ fontSize: 11, background: 'rgba(245,158,11,0.12)', color: '#d97706', padding: '2px 8px', borderRadius: 20, fontWeight: 600 }}>{storeContacts.length}</span>
+          </h2>
+          <p style={{ fontSize: 12, color: 'var(--text-muted)', marginBottom: 12 }}>Tracabilité de vos demandes pour téléphones de la Boutique Officielle (information uniquement)</p>
+          <div style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
+            {storeContacts.map(c => (
+              <div key={`store-${c.id}`} style={{ background: 'var(--bg-card)', border: '1px solid var(--border)', borderRadius: 'var(--radius-lg)', padding: 14, display: 'flex', alignItems: 'center', gap: 14, opacity: 0.97 }}>
+                {c.product_image ? (
+                  <img src={c.product_image.startsWith('http') ? c.product_image : `/uploads/${c.product_image}`} alt="" style={{ width: 48, height: 48, borderRadius: 8, objectFit: 'contain', background: '#fff', border: '1px solid var(--border)', flexShrink: 0 }} />
+                ) : (
+                  <div style={{ width: 48, height: 48, borderRadius: 8, background: 'var(--bg-secondary)', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
+                    <FiShoppingBag size={20} style={{ opacity: 0.3 }} />
+                  </div>
+                )}
+                <div style={{ flex: 1, minWidth: 180 }}>
+                  <div style={{ fontWeight: 600, fontSize: 13, display: 'flex', alignItems: 'center', gap: 6, flexWrap: 'wrap' }}>
+                    {c.product_name || c.product_name_full || 'Produit Boutique'}
+                    <span style={{ fontSize: 10, background: '#fef3c7', color: '#92400e', padding: '2px 6px', borderRadius: 6, fontWeight: 700, border: '1px solid #fde68a' }}>Boutique Officielle</span>
+                  </div>
+                  <div style={{ fontSize: 11, color: 'var(--text-secondary)', marginTop: 2 }}>{c.product_price ? `${Number(c.product_price).toLocaleString()} DH` : ''} · {new Date(c.created_at).toLocaleDateString('fr-FR')}</div>
+                  {c.message && <div style={{ fontSize: 11, color: 'var(--text-muted)', marginTop: 4 }}>« {c.message} »</div>}
+                  <div style={{ marginTop: 6 }}>
+                    <span style={{ fontSize: 10, fontWeight: 600, padding: '2px 8px', borderRadius: 20, background: 'rgba(245,158,11,0.12)', color: '#d97706', display: 'inline-flex', alignItems: 'center', gap: 4 }}>
+                      <FiClock size={10} /> Demande d'information — tracabilité
+                    </span>
+                  </div>
+                </div>
+                <div style={{ fontSize: 11, color: 'var(--text-muted)', textAlign: 'center', minWidth: 80 }}>
+                  <div style={{ fontWeight: 600, color: 'var(--text-secondary)', textTransform: 'capitalize' }}>{c.status || 'en_attente'}</div>
+                  <div style={{ fontSize: 10 }}>{new Date(c.created_at).toLocaleDateString('fr-FR')}</div>
+                </div>
+              </div>
+            ))}
+          </div>
+        </div>
+      )}
 
       <AnimatePresence>
         {counterTarget && (
