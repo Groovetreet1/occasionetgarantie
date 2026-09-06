@@ -12,7 +12,7 @@ const slides = [
     ctaKey: 'home.heroSlide1Cta',
     link: '/products',
     image: '/slides/slide1.jpg',
-    overlay: 'linear-gradient(135deg, rgba(15,23,42,0.72) 0%, rgba(15,23,42,0.35) 100%)',
+    overlay: 'linear-gradient(135deg, rgba(15,23,42,0.38) 0%, rgba(15,23,42,0.12) 100%)',
   },
   {
     id: 2,
@@ -21,7 +21,7 @@ const slides = [
     ctaKey: 'home.heroSlide2Cta',
     link: '/signup',
     image: '/slides/slide2.jpg',
-    overlay: 'linear-gradient(135deg, rgba(30,41,59,0.75) 0%, rgba(245,158,11,0.25) 100%)',
+    overlay: 'linear-gradient(135deg, rgba(15,23,42,0.42) 0%, rgba(15,23,42,0.15) 100%)',
   },
   {
     id: 3,
@@ -30,7 +30,7 @@ const slides = [
     ctaKey: 'home.heroSlide3Cta',
     link: '/products',
     image: '/slides/slide3.jpg',
-    overlay: 'linear-gradient(135deg, rgba(15,23,42,0.68) 0%, rgba(59,130,246,0.30) 100%)',
+    overlay: 'linear-gradient(135deg, rgba(15,23,42,0.40) 0%, rgba(15,23,42,0.14) 100%)',
   },
   {
     id: 4,
@@ -39,7 +39,7 @@ const slides = [
     ctaKey: 'home.heroSlide1Cta',
     link: '/support',
     image: '/slides/support.jpg',
-    overlay: 'linear-gradient(135deg, rgba(15,23,42,0.70) 0%, rgba(16,185,129,0.28) 100%)',
+    overlay: 'linear-gradient(135deg, rgba(15,23,42,0.36) 0%, rgba(15,23,42,0.10) 100%)',
   },
 ];
 
@@ -107,10 +107,11 @@ export default function HeroSlider() {
                 initial={{ opacity: 0, y: 30 }}
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ duration: 0.5, delay: 0.2 }}
+                style={{ textShadow: '0 2px 12px rgba(0,0,0,0.35)' }}
               >
-                <h2>{t(slides[current].titleKey)}</h2>
-                <p>{t(slides[current].subtitleKey)}</p>
-                <Link to={slides[current].link} className="btn btn-primary">
+                <h2 style={{ color: '#fff', textShadow: '0 2px 16px rgba(0,0,0,0.45)', fontWeight: 800 }}>{t(slides[current].titleKey)}</h2>
+                <p style={{ color: 'rgba(255,255,255,0.92)', textShadow: '0 1px 8px rgba(0,0,0,0.35)' }}>{t(slides[current].subtitleKey)}</p>
+                <Link to={slides[current].link} className="btn btn-primary" style={{ boxShadow: '0 8px 24px rgba(0,0,0,0.25)' }}>
                   {t(slides[current].ctaKey)} <FiArrowRight size={18} />
                 </Link>
               </motion.div>
