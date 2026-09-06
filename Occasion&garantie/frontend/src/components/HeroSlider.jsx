@@ -1,7 +1,7 @@
 import { useState, useEffect, useCallback, useRef } from 'react';
-import { Link } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
-import { FiArrowRight, FiChevronLeft, FiChevronRight } from 'react-icons/fi';
+import { FiArrowRight, FiChevronLeft, FiChevronRight, FiSearch } from 'react-icons/fi';
 import { useLanguage } from '../context/LanguageContext';
 
 const slides = [
@@ -51,9 +51,17 @@ const slideVariants = {
 
 export default function HeroSlider() {
   const { t } = useLanguage();
+  const navigate = useNavigate();
   const [current, setCurrent] = useState(0);
   const [paused, setPaused] = useState(false);
+  const [searchTerm, setSearchTerm] = useState('');
   const timerRef = useRef(null);
+
+  const handleSearch = (e) => {
+    e.preventDefault();
+    if (searchTerm.trim()) navigate(`/products?search=${encodeURIComponent(searchTerm.trim())}`);
+    else navigate('/products');
+  };
 
   const startTimer = useCallback(() => {
     if (timerRef.current) clearInterval(timerRef.current);
@@ -83,6 +91,11 @@ export default function HeroSlider() {
       onMouseEnter={() => setPaused(true)}
       onMouseLeave={() => setPaused(false)}
     >
+      <form onSubmit={handleSearch} className="hero-slider-search" aria-label="Search">
+        <FiSearch size={16} style={{ color: '#64748b', flexShrink: 0 }} />
+        <input type="text" value={searchTerm} onChange={e => setSearchTerm(e.target.value)} placeholder={t('home.searchPlaceholder')} aria-label={t('home.searchPlaceholder')} />
+        <button type="submit">{t('common.search')}</button>
+      </form>
       <AnimatePresence mode="wait">
         <motion.div
           key={slides[current].id}
