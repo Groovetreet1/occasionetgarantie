@@ -171,29 +171,23 @@ export default function Home() {
           <button type="submit" style={{ background: 'var(--primary)', color: '#000', border: 'none', borderRadius: 999, padding: '6px 14px', fontSize: 12, fontWeight: 700, cursor: 'pointer', whiteSpace: 'nowrap' }}>{t('common.search')}</button>
         </form>
       </div>
+      {/* MARQUES - Samta mabin navbar o slides */}
+      {brands.length > 0 && (
+        <div style={{ width: '100vw', marginLeft: 'calc(50% - 50vw)', background: 'var(--bg-card)', borderBottom: '1px solid var(--border-light)', padding: '14px 0', position: 'relative', zIndex: 2 }}>
+          <div className="brands-scroll-wrapper" style={{ maxWidth: '100%', overflow: 'hidden' }}>
+            <div className="brands-scroll-track">
+              {brands.concat(brands).concat(brands).map((brand, i) => (
+                <BrandCircle key={i} brand={brand} />
+              ))}
+            </div>
+          </div>
+        </div>
+      )}
+
       {/* SLIDES - Photos from Desktop/photo pour slide (static, not DB) */}
       <HeroSlider />
 
-      {/* PREMIUM HERO - SaasAble Hero17 inspired */}
-      <div className="hero-premium-wrap">
-        <div className="hero-premium-bg" aria-hidden />
-        <section className="hero-premium">
-          <div className="container">
 
-            {brands.length > 0 && (
-              <div style={{ marginTop: 0, width: '100vw', marginLeft: 'calc(50% - 50vw)', background: 'var(--bg-card)', borderTop: '1px solid var(--border-light)', borderBottom: '1px solid var(--border-light)', padding: '14px 0' }}>
-                <div className="brands-scroll-wrapper" style={{ maxWidth: '100%', overflow: 'hidden' }}>
-                  <div className="brands-scroll-track">
-                    {brands.concat(brands).concat(brands).map((brand, i) => (
-                      <BrandCircle key={i} brand={brand} />
-                    ))}
-                  </div>
-                </div>
-              </div>
-            )}
-          </div>
-        </section>
-      </div>
 
       {/* STORE OFFICIAL */}
       {storeProducts.length > 0 && (
