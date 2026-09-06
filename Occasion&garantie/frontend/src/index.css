@@ -642,24 +642,21 @@ input, textarea, select, button { font-family: inherit; }
 }
 .hero-slider-search {
   position: absolute; top: 14px; left: 50%; transform: translateX(-50%); z-index: 6;
-  display: flex; align-items: center; gap: 8px;
+  display: flex; align-items: center; gap: 6px;
   background: rgba(255,255,255,0.96); backdrop-filter: blur(12px);
   border: 1px solid rgba(255,255,255,0.85); border-radius: 999px;
-  padding: 6px 6px 6px 14px; box-shadow: 0 12px 32px rgba(0,0,0,0.18), 0 2px 8px rgba(0,0,0,0.08);
-  width: min(420px, calc(100% - 32px));
+  padding: 6px; box-shadow: 0 12px 32px rgba(0,0,0,0.18), 0 2px 8px rgba(0,0,0,0.08);
+  width: min(760px, calc(100% - 32px));
   transition: all 0.35s cubic-bezier(0.4,0,0.2,1);
 }
 .hero-slider-search.collapsed {
   width: 44px; height: 44px; padding: 0; gap: 0; justify-content: center; cursor: pointer;
   background: rgba(255,255,255,0.92); border-radius: 50%;
 }
-.hero-slider-search.collapsed input,
-.hero-slider-search.collapsed button span { display: none !important; }
 .hero-slider-search input { flex: 1; border: none; outline: none; background: transparent; font-size: 14px; color: #1e293b; font-family: var(--font); min-width: 0; }
 .hero-slider-search input::placeholder { color: #94a3b8; }
 .hero-slider-search button { background: var(--primary); color: #000; border: none; border-radius: 999px; padding: 8px 16px; font-size: 13px; font-weight: 700; cursor: pointer; white-space: nowrap; flex-shrink: 0; display: flex; align-items: center; gap: 6px; }
-.hero-slider-search-icon { color: #64748b; flex-shrink: 0; cursor: pointer; display: flex; align-items: center; justify-content: center; }
-@media (max-width: 900px) { .hero-slider-search { width: min(360px, calc(100% - 24px)); } .hero-slider-search.collapsed { width: 44px; } }
+@media (max-width: 900px) { .hero-slider-search { width: min(96vw, calc(100% - 24px)); flex-wrap: wrap; justify-content: center; border-radius: 16px; padding: 8px; } .hero-slider-search.collapsed { width: 44px; border-radius: 50%; padding: 0; } }
 .hero-slide {
   position: absolute; inset: 0; display: flex; align-items: center; justify-content: center;
 }

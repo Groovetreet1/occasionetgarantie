@@ -1,8 +1,9 @@
 import { useState, useEffect, useCallback, useRef } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
-import { FiArrowRight, FiChevronLeft, FiChevronRight, FiSearch } from 'react-icons/fi';
+import { FiArrowRight, FiChevronLeft, FiChevronRight, FiSearch, FiMapPin } from 'react-icons/fi';
 import { useLanguage } from '../context/LanguageContext';
+import api from '../api/axios';
 
 const slides = [
   {
@@ -56,13 +57,26 @@ export default function HeroSlider() {
   const [paused, setPaused] = useState(false);
   const [searchTerm, setSearchTerm] = useState('');
   const [searchOpen, setSearchOpen] = useState(false);
+  const [selectedCategory, setSelectedCategory] = useState('');
+  const [selectedCity, setSelectedCity] = useState('');
+  const [cities, setCities] = useState([]);
   const searchRef = useRef(null);
   const timerRef = useRef(null);
 
+  useEffect(() => {
+    api.get('/products/cities').then(res => {
+      if (res.data && res.data.length) setCities(res.data);
+      else setCities(['Casablanca','Rabat','Marrakech','Fès','Tanger','Agadir']);
+    }).catch(() => setCities(['Casablanca','Rabat','Marrakech','Fès','Tanger','Agadir']));
+  }, []);
+
   const handleSearch = (e) => {
     e.preventDefault();
-    if (searchTerm.trim()) navigate(`/products?search=${encodeURIComponent(searchTerm.trim())}`);
-    else navigate('/products');
+    let url = '/products?';
+    if (searchTerm.trim()) url += `search=${encodeURIComponent(searchTerm.trim())}&`;
+    if (selectedCategory) url += `category=${selectedCategory}&`;
+    if (selectedCity) url += `ville=${encodeURIComponent(selectedCity)}&`;
+    navigate(url);
   };
 
   useEffect(() => {
@@ -100,9 +114,31 @@ export default function HeroSlider() {
       onMouseLeave={() => setPaused(false)}
     >
       <form ref={searchRef} onSubmit={handleSearch} className={`hero-slider-search ${searchOpen ? '' : 'collapsed'}`} aria-label="Search" onClick={() => !searchOpen && setSearchOpen(true)}>
-        <FiSearch size={16} className="hero-slider-search-icon" onClick={() => setSearchOpen(true)} />
-        <input type="text" value={searchTerm} onChange={e => setSearchTerm(e.target.value)} placeholder={t('home.searchPlaceholder')} aria-label={t('home.searchPlaceholder')} autoFocus={searchOpen} onFocus={() => setSearchOpen(true)} />
-        <button type="submit">{t('common.search')}</button>
+        {searchOpen ? (
+          <>
+            <FiSearch size={16} style={{ color: '#64748b', flexShrink: 0 }} />
+            <input type="text" value={searchTerm} onChange={e => setSearchTerm(e.target.value)} placeholder={t('home.searchPlaceholder')} aria-label={t('home.searchPlaceholder')} autoFocus />
+            <div style={{ width: 1, height: 24, background: '#e2e8f0', flexShrink: 0 }} />
+            <select value={selectedCategory} onChange={e => setSelectedCategory(e.target.value)} style={{ border: 'none', outline: 'none', fontSize: 13, color: '#334155', background: 'transparent', cursor: 'pointer', flexShrink: 0 }}>
+              <option value="">{t('home.allCategories')}</option>
+              <option value="Smartphones">Smartphones</option>
+              <option value="Tablettes">Tablettes</option>
+              <option value="Ordinateurs">Ordinateurs</option>
+              <option value="Accessoires">Accessoires</option>
+            </select>
+            <div style={{ width: 1, height: 24, background: '#e2e8f0', flexShrink: 0 }} />
+            <div style={{ display: 'flex', alignItems: 'center', gap: 4, flexShrink: 0 }}>
+              <FiMapPin size={14} style={{ color: '#64748b' }} />
+              <select value={selectedCity} onChange={e => setSelectedCity(e.target.value)} style={{ border: 'none', outline: 'none', fontSize: 13, color: '#334155', background: 'transparent', cursor: 'pointer' }}>
+                <option value="">{t('home.allCities')}</option>
+                {cities.map(c => <option key={c} value={c}>{c}</option>)}
+              </select>
+            </div>
+            <button type="submit">{t('common.search')}</button>
+          </>
+        ) : (
+          <FiSearch size={18} style={{ color: '#1e293b' }} />
+        )}
       </form>
       <AnimatePresence mode="wait">
         <motion.div
