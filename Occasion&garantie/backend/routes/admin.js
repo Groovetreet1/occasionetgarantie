@@ -458,16 +458,23 @@ router.get('/store-contacts', authenticate, adminOnly, async (req, res) => {
     const offset = (page - 1) * limit;
     let countRows, rows;
     try {
-      [countRows] = await pool.query('SELECT COUNT(*) as total FROM store_contacts WHERE admin_deleted = 0 OR admin_deleted IS NULL');
-      [rows] = await pool.query('SELECT sc.*, p.slug, p.image FROM store_contacts sc LEFT JOIN products p ON sc.product_id = p.id WHERE sc.admin_deleted = 0 OR sc.admin_deleted IS NULL ORDER BY sc.created_at DESC LIMIT ? OFFSET ?', [limit, offset]);
+      [countRows] = await pool.query('SELECT COUNT(*) as total FROM store_contacts WHERE (admin_deleted = 0 OR admin_deleted IS NULL)');
+      [rows] = await pool.query('SELECT sc.*, p.slug, p.image FROM store_contacts sc LEFT JOIN products p ON sc.product_id = p.id WHERE (sc.admin_deleted = 0 OR sc.admin_deleted IS NULL) ORDER BY sc.created_at DESC LIMIT ? OFFSET ?', [limit, offset]);
     } catch (e) {
-      // fallback si colonne admin_deleted n'existe pas encore (MySQL < ou mock)
-      [countRows] = await pool.query('SELECT COUNT(*) as total FROM store_contacts');
-      [rows] = await pool.query('SELECT sc.*, p.slug, p.image FROM store_contacts sc LEFT JOIN products p ON sc.product_id = p.id ORDER BY sc.created_at DESC LIMIT ? OFFSET ?', [limit, offset]);
-      console.log('store-contacts fallback sans admin_deleted:', e.message);
+      try {
+        [countRows] = await pool.query('SELECT COUNT(*) as total FROM store_contacts');
+        [rows] = await pool.query('SELECT sc.*, p.slug, p.image FROM store_contacts sc LEFT JOIN products p ON sc.product_id = p.id ORDER BY sc.created_at DESC LIMIT ? OFFSET ?', [limit, offset]);
+        console.log('store-contacts fallback sans admin_deleted:', e.message);
+      } catch (e2) {
+        console.error('store-contacts fallback aussi echoue:', e2.message);
+        countRows = [{ total: 0 }];
+        rows = [];
+      }
     }
-    res.json({ contacts: rows, total, page, limit, totalPages: Math.ceil(total / limit) });
+    const total = countRows && countRows[0] ? countRows[0].total : 0;
+    res.json({ contacts: rows || [], total, page, limit, totalPages: Math.ceil(total / limit) });
   } catch (err) {
+    console.error('store-contacts outer error:', err.message, err.stack?.split('\n')[0]);
     res.status(500).json({ message: 'Erreur serveur.' });
   }
 });
