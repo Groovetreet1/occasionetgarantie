@@ -35,7 +35,7 @@ router.get('/', async (req, res) => {
 
     try { await pool.query("ALTER TABLE products ADD COLUMN product_type VARCHAR(10) DEFAULT 'vendor'"); } catch (e) { if (e.errno !== 1060 && e.code !== 'ER_DUP_FIELDNAME') {} }
     let where;
-    if (search) {
+    if (search || brand) {
       where = " WHERE p.active = TRUE AND p.status = 'disponible' AND p.approved = TRUE AND (p.product_type IS NULL OR p.product_type = 'vendor' OR p.product_type = 'store') AND u.id IS NOT NULL";
     } else {
       where = " WHERE p.active = TRUE AND p.status = 'disponible' AND p.approved = TRUE AND (p.product_type IS NULL OR p.product_type = 'vendor') AND u.id IS NOT NULL";
