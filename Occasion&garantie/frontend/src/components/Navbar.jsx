@@ -1,5 +1,5 @@
 import { Link, NavLink, useNavigate, useLocation } from 'react-router-dom';
-import { FiUser, FiLogOut, FiSettings, FiChevronDown, FiSmartphone, FiMonitor, FiHeadphones, FiTablet, FiShoppingBag, FiTrendingUp, FiStar, FiMessageCircle, FiPackage, FiBell, FiTrash2, FiAlertTriangle, FiShield, FiSearch } from 'react-icons/fi';
+import { FiUser, FiLogOut, FiSettings, FiChevronDown, FiSmartphone, FiMonitor, FiHeadphones, FiTablet, FiShoppingBag, FiTrendingUp, FiStar, FiMessageCircle, FiPackage, FiBell, FiTrash2, FiAlertTriangle, FiShield } from 'react-icons/fi';
 import { useState, useRef, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useAuth } from '../context/AuthContext';
@@ -31,14 +31,7 @@ export default function Navbar() {
   const [scrolled, setScrolled] = useState(false);
   const [showPremium, setShowPremium] = useState(false);
   const [mobileProdsOpen, setMobileProdsOpen] = useState(false);
-  const [navSearch, setNavSearch] = useState('');
   const navRef = useRef(null);
-
-  const handleNavSearch = (e) => {
-    e.preventDefault();
-    if (navSearch.trim()) navigate(`/products?search=${encodeURIComponent(navSearch.trim())}`);
-    else navigate('/products');
-  };
   const panelRef = useRef(null);
   const dropdownRef = useRef(null);
   const prodsRef = useRef(null);
@@ -185,12 +178,6 @@ export default function Navbar() {
               <NavLink to="/vendre" className="navbar-sell-link"><FiTrendingUp size={14} /> {t('nav.sell')}</NavLink>
             )}
           </div>
-
-          <form onSubmit={handleNavSearch} className="navbar-search" style={{ display: 'flex', alignItems: 'center', background: 'var(--bg-secondary)', border: '1px solid var(--border-light)', borderRadius: 999, padding: '4px 4px 4px 12px', gap: 6, flex: '1', maxWidth: 360, margin: '0 16px' }}>
-            <FiSearch size={16} style={{ color: 'var(--text-muted)', flexShrink: 0 }} />
-            <input type="text" value={navSearch} onChange={e => setNavSearch(e.target.value)} placeholder={t('nav.searchPlaceholder') || 'Rechercher...'} style={{ flex: 1, border: 'none', outline: 'none', background: 'transparent', fontSize: 13, color: 'var(--text-primary)', fontFamily: 'var(--font)', minWidth: 0 }} />
-            <button type="submit" style={{ background: 'var(--primary)', color: '#000', border: 'none', borderRadius: 999, padding: '6px 14px', fontSize: 12, fontWeight: 700, cursor: 'pointer', whiteSpace: 'nowrap' }}>{t('common.search')}</button>
-          </form>
 
           <div className="navbar-actions">
             <ThemeToggle />
