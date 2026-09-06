@@ -171,9 +171,9 @@ export default function Home() {
           <button type="submit" style={{ background: 'var(--primary)', color: '#000', border: 'none', borderRadius: 999, padding: '6px 14px', fontSize: 12, fontWeight: 700, cursor: 'pointer', whiteSpace: 'nowrap' }}>{t('common.search')}</button>
         </form>
       </div>
-      {/* MARQUES - Samta mabin navbar o slides */}
+      {/* MARQUES - Samta bayna mabin navbar o slides - nfs l3bar */}
       {brands.length > 0 && (
-        <div style={{ width: '100vw', marginLeft: 'calc(50% - 50vw)', background: 'var(--bg-card)', borderBottom: '1px solid var(--border-light)', padding: '14px 0', position: 'relative', zIndex: 2 }}>
+        <div style={{ width: '100vw', marginLeft: 'calc(50% - 50vw)', background: 'var(--bg-card)', borderTop: '1px solid var(--border-light)', borderBottom: '1px solid var(--border-light)', padding: '12px 0', marginTop: 'var(--nav-height)', position: 'relative', zIndex: 1 }}>
           <div className="brands-scroll-wrapper" style={{ maxWidth: '100%', overflow: 'hidden' }}>
             <div className="brands-scroll-track">
               {brands.concat(brands).concat(brands).map((brand, i) => (

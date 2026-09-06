@@ -638,7 +638,7 @@ input, textarea, select, button { font-family: inherit; }
 
 .hero-slider {
   position: relative; width: 100%; height: 600px; overflow: hidden;
-  margin-top: calc(var(--nav-height) + 12px);
+  margin-top: 12px;
 }
 .hero-slider-search {
   position: absolute; top: 14px; left: 50%; transform: translateX(-50%); z-index: 6;
