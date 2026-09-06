@@ -163,6 +163,14 @@ export default function Home() {
   return (
     <motion.div initial="hidden" animate="show">
       <PromoPopup />
+      {/* Mobile search - visible only on mobile, since navbar search is hidden */}
+      <div className="navbar-search-mobile" style={{ display: 'none', padding: '12px 16px', background: 'var(--bg-card)', borderBottom: '1px solid var(--border-light)' }}>
+        <form onSubmit={handleSearch} style={{ display: 'flex', alignItems: 'center', background: 'var(--bg-secondary)', border: '1px solid var(--border-light)', borderRadius: 999, padding: '4px 4px 4px 12px', gap: 6 }}>
+          <FiSearch size={16} style={{ color: 'var(--text-muted)', flexShrink: 0 }} />
+          <input type="text" value={searchTerm} onChange={e => setSearchTerm(e.target.value)} placeholder={t('home.searchPlaceholder')} style={{ flex: 1, border: 'none', outline: 'none', background: 'transparent', fontSize: 14, color: 'var(--text-primary)', fontFamily: 'var(--font)', minWidth: 0 }} />
+          <button type="submit" style={{ background: 'var(--primary)', color: '#000', border: 'none', borderRadius: 999, padding: '6px 14px', fontSize: 12, fontWeight: 700, cursor: 'pointer', whiteSpace: 'nowrap' }}>{t('common.search')}</button>
+        </form>
+      </div>
       {/* SLIDES - Photos from Desktop/photo pour slide (static, not DB) */}
       <HeroSlider />
 
@@ -171,61 +179,6 @@ export default function Home() {
         <div className="hero-premium-bg" aria-hidden />
         <section className="hero-premium">
           <div className="container">
-            <motion.div className="hero-actions-premium" initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.18 }}>
-              <Link to="/products" className="btn-hero-primary">{t('home.heroExplore')} <FiArrowRight size={16} /></Link>
-              <Link to="/vendre" className="btn-hero-secondary"><FiZap size={16} /> {t('home.heroSell')}</Link>
-            </motion.div>
-
-            {/* Pill search bar inside hero - SaasAble autocomplete style */}
-            <motion.form onSubmit={handleSearch} className="avito-search-bar" initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.24 }} style={{ maxWidth: 760, margin: '0 auto 36px', borderRadius: 999, boxShadow: '0 16px 40px rgba(0,0,0,0.08)', border: '1px solid var(--border-light)' }}>
-              <div className="avito-search-input-wrap" ref={searchWrapRef} style={{ borderRadius: '999px 0 0 999px' }}>
-                <FiSearch size={18} className="avito-search-icon" />
-                <input type="text" value={searchTerm} onChange={e => setSearchTerm(e.target.value)} placeholder={t('home.searchPlaceholder')} style={{ fontSize: 15 }} />
-                {suggestOpen && trimmed.length >= 2 && (
-                  <div className="avito-search-dropdown" style={{ borderRadius: 16 }}>
-                    {suggestLoading ? (
-                      <div className="avito-search-dropdown-loading"><div className="spinner spinner-sm" /></div>
-                    ) : suggestions.length > 0 ? (
-                      <>
-                        {suggestions.map(p => (
-                          <Link key={p.id} to={p.product_type === 'store' ? `/boutique/${p.slug}` : `/products/${p.slug}`} className="avito-search-item" onClick={() => setSuggestOpen(false)}>
-                            <div className="avito-search-item-img">
-                              {p.image ? <img src={p.image.startsWith('http') ? p.image : `${API_BASE}/uploads/${p.image}`} alt={p.name} loading="lazy" /> : <FiShoppingBag size={18} style={{ opacity: 0.3 }} />}
-                            </div>
-                            <div className="avito-search-item-body">
-                              <span className="avito-search-item-name">{p.name}</span>
-                              <span className="avito-search-item-price">{formatPrice(p.price)}</span>
-                            </div>
-                          </Link>
-                        ))}
-                        <Link to={`/products?search=${encodeURIComponent(trimmed)}`} className="avito-search-all" onClick={() => setSuggestOpen(false)}>
-                          {t('home.seeAllResults')} <FiArrowRight size={14} />
-                        </Link>
-                      </>
-                    ) : (
-                      <div className="avito-search-empty">{t('home.noResult', { query: trimmed })}</div>
-                    )}
-                  </div>
-                )}
-              </div>
-              <div className="avito-search-select">
-                <select value={selectedCategory} onChange={e => setSelectedCategory(e.target.value)}>
-                  <option value="">{t('home.allCategories')}</option>
-                  <option value="Smartphones">Smartphones</option>
-                  <option value="Tablettes">Tablettes</option>
-                  <option value="Ordinateurs">Ordinateurs</option>
-                  <option value="Accessoires">Accessoires</option>
-                </select>
-              </div>
-              <div className="avito-search-select">
-                <FiMapPin size={16} className="avito-search-icon-inside" />
-                <select value={selectedCity} onChange={e => setSelectedCity(e.target.value)}>
-                  <option value="">{t('home.allCities')}</option>
-                  {cities.map(c => <option key={c} value={c}>{c}</option>)}
-                </select>
-              </div>
-              <button type="submit" className="avito-search-btn" style={{ borderRadius: 999, margin: 4, padding: '12px 24px', background: 'linear-gradient(135deg, var(--primary), #d97706)', color: '#000', fontWeight: 700 }}>{t('home.searchBtn')}</button>
-            </motion.form>
 
             {brands.length > 0 && (
               <div style={{ marginTop: 32, textAlign: 'center' }}>

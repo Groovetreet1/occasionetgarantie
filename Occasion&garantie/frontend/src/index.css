@@ -484,6 +484,10 @@ input, textarea, select, button { font-family: inherit; }
   width: 20px; height: 2px; background: var(--primary); border-radius: 1px;
 }
 .navbar-actions { display: flex; align-items: center; gap: 12px; flex-shrink: 0; justify-self: end; grid-column: 3; }
+.navbar-search { display: flex; align-items: center; background: var(--bg-secondary); border: 1px solid var(--border-light); border-radius: 999px; padding: 4px 4px 4px 12px; gap: 6px; flex: 1; max-width: 360px; margin: 0 16px; }
+.navbar-search input::placeholder { color: var(--text-muted); }
+.navbar-search-mobile { display: none; }
+@media (max-width: 900px) { .navbar-search { display: none; } .navbar-search-mobile { display: block !important; } }
 .navbar-auth { display: flex; align-items: center; gap: 8px; }
 .navbar-login {
   padding: 8px 18px; border-radius: 8px; color: var(--text-secondary);
