@@ -92,9 +92,13 @@
 
     genericError: 'Erreur.',
     tfaTitle: 'Vérification en deux étapes',
-    tfaSubtitle: 'Entrez le code de votre application d’authentification pour {{email}} (ou un code de secours).',
-    tfaCodeLabel: 'Code à 6 chiffres (ou code de secours)',
+    tfaSubtitle: 'Entrez le code de votre application d’authentification pour {{email}}.',
+    tfaCodeLabel: 'Code à 6 chiffres',
     tfaVerifyBtn: 'Vérifier',
+    tfaUseBackup: 'Utiliser un code de secours',
+    tfaUseApp: 'Utiliser l’application',
+    tfaBackupLabel: 'Code de secours (8 caractères)',
+    rememberMe: 'Se souvenir de moi · 7 jours',
 
     // Auth split brand panel
     brandEyebrow: 'Marketplace Marocaine',

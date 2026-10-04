@@ -236,11 +236,13 @@ router.post('/login', [
       });
     }
     try { await pool.query('ALTER TABLE users ADD COLUMN totp_enabled TINYINT(1) DEFAULT 0'); } catch {}
+    const remember = req.body.remember === true;
+    const fullExpiry = remember ? '7d' : '6h';
     try {
       const [tfaRows] = await pool.query('SELECT totp_enabled FROM users WHERE id = ?', [user.id]);
       if (tfaRows.length > 0 && tfaRows[0].totp_enabled) {
         const tempToken = jwt.sign(
-          { id: user.id, twofa: true },
+          { id: user.id, twofa: true, remember },
           process.env.JWT_SECRET,
           { expiresIn: '10m' }
         );
@@ -250,7 +252,7 @@ router.post('/login', [
     const token = jwt.sign(
       { id: user.id, email: user.email, role: user.role },
       process.env.JWT_SECRET,
-      { expiresIn: '6h' }
+      { expiresIn: fullExpiry }
     );
     const ip = req.headers['x-forwarded-for']?.split(',')[0]?.trim() || req.socket.remoteAddress || 'unknown';
     const { latitude, longitude } = req.body;
@@ -394,7 +396,7 @@ router.post('/2fa/verify', [
     const fullToken = jwt.sign(
       { id: user.id, email: user.email, role: user.role },
       process.env.JWT_SECRET,
-      { expiresIn: '6h' }
+      { expiresIn: decoded.remember ? '7d' : '6h' }
     );
     const ip = req.headers['x-forwarded-for']?.split(',')[0]?.trim() || req.socket.remoteAddress || 'unknown';
     logVendorAction({ userId: user.id, action: 'connexion', ip, userAgent: req.headers['user-agent'] });

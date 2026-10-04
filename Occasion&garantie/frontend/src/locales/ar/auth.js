@@ -92,9 +92,13 @@
 
     genericError: 'حدث خطأ.',
     tfaTitle: 'تحقق بخطوتين',
-    tfaSubtitle: 'أدخل رمز تطبيق المصادقة الخاص بـ {{email}} (أو رمز طوارئ).',
-    tfaCodeLabel: 'رمز من 6 أرقام (أو رمز طوارئ)',
+    tfaSubtitle: 'أدخل رمز تطبيق المصادقة الخاص بـ {{email}}.',
+    tfaCodeLabel: 'رمز من 6 أرقام',
     tfaVerifyBtn: 'تحقق',
+    tfaUseBackup: 'استخدام رمز طوارئ',
+    tfaUseApp: 'استخدام التطبيق',
+    tfaBackupLabel: 'رمز الطوارئ (8 أحرف)',
+    rememberMe: 'تذكرني · 7 أيام',
 
     // Auth split brand panel
     brandEyebrow: 'سوق مغربي',
