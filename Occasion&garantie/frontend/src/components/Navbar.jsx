@@ -302,7 +302,7 @@ export default function Navbar() {
                           <FiPackage size={14} /> {t('nav.adminDashboard')}
                         </NavLink>
                       )}
-                      <button onClick={() => { logout(); navigate('/'); setDropdownOpen(false); }}>
+                      <button className="navbar-logout-btn" onClick={() => { logout(); navigate('/'); setDropdownOpen(false); }}>
                         <FiLogOut size={14} /> {t('nav.logout')}
                       </button>
                     </motion.div>
