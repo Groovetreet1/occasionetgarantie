@@ -1,6 +1,8 @@
 import { Link } from 'react-router-dom';
-import { FiShield, FiRefreshCw, FiSmartphone, FiTruck, FiCheck, FiChevronLeft, FiStar, FiMapPin } from 'react-icons/fi';
+import { FiShield, FiRefreshCw, FiSmartphone, FiTruck, FiCheck, FiChevronLeft, FiStar, FiMapPin, FiPlay } from 'react-icons/fi';
 import { useLanguage } from '../context/LanguageContext';
+
+const REAL_PRODUCT_IMAGE = 'https://res.cloudinary.com/rk97x4hc/image/upload/v1785024268/occasionetgarantie/products/oawup62jfgpcnbt9ecbs.jpg';
 
 export default function AuthLayout({ title, subtitle, children, footer }) {
   const { t, lang } = useLanguage();
@@ -11,6 +13,8 @@ export default function AuthLayout({ title, subtitle, children, footer }) {
     { icon: FiSmartphone, title: t('auth.brandFeat3Title'), desc: t('auth.brandFeat3Desc') },
     { icon: FiTruck, title: t('auth.brandFeat4Title'), desc: t('auth.brandFeat4Desc') },
   ];
+
+  const categories = ['Smartphones', 'Tablettes', 'Ordinateurs', 'Accessoires', 'Gaming'];
 
   return (
     <div className="auth-split" dir={lang === 'ar' ? 'rtl' : 'ltr'}>
@@ -39,22 +43,27 @@ export default function AuthLayout({ title, subtitle, children, footer }) {
             <p>{t('auth.brandSubheadline')}</p>
           </div>
 
+          <div className="auth-services" dir="ltr">
+            {categories.map((c) => (
+              <span key={c} className="auth-service-chip">{c}</span>
+            ))}
+          </div>
+
           <div className="auth-showcase-wrap">
             <div className="auth-showcase" dir="ltr">
               <div className="auth-showcase-crumb">
-                <FiChevronLeft size={14} />Accueil<span>/</span>Téléphones<span>/</span><strong>iPhone 13 Pro</strong>
+                <FiChevronLeft size={14} />Accueil<span>/</span>Smartphones<span>/</span><strong>Redmi 15C</strong>
               </div>
               <div className="auth-showcase-photo">
-                <span className="auth-showcase-discount">-11%</span>
-                <FiSmartphone size={42} />
-                <span className="auth-showcase-count">1/4</span>
+                <FiSmartphone size={40} />
+                <img src={REAL_PRODUCT_IMAGE} alt="Redmi 15C" loading="lazy" onError={(e) => { e.currentTarget.style.display = 'none'; }} />
               </div>
               <div className="auth-showcase-meta">
-                <span className="auth-showcase-cat">Smartphone</span>
-                <span className="auth-showcase-rating"><FiStar size={11} /> 4.8</span>
+                <span className="auth-showcase-cat">Smartphones</span>
+                <span className="auth-showcase-rating"><FiStar size={11} /> 4.7</span>
               </div>
-              <div className="auth-showcase-title">iPhone 13 Pro · 128 Go · Excellent état</div>
-              <div className="auth-showcase-price">6 499 DH <s>7 299 DH</s></div>
+              <div className="auth-showcase-title">Redmi 15C · 8/128 Go · Neuf</div>
+              <div className="auth-showcase-price">1 400 DH</div>
               <div className="auth-showcase-foot">
                 <span className="auth-showcase-loc"><FiMapPin size={11} /> Casablanca</span>
                 <span className="auth-showcase-warranty"><FiShield size={10} /> 12 mois</span>
@@ -69,11 +78,28 @@ export default function AuthLayout({ title, subtitle, children, footer }) {
                 <div className="auth-showcase-meter"><i style={{ '--w': '66%' }} /></div>
               </div>
             </div>
+
+            <div className="auth-chat" dir="ltr">
+              <div className="auth-chat-head">
+                <div className="auth-chat-avatars"><span className="store">GP</span></div>
+                <div className="auth-chat-who"><strong>GoPhone 2026</strong><span><i />En ligne</span></div>
+              </div>
+              <div className="auth-chat-bubble seller">Oui disponible, avec garantie 12 mois incluse.<em>14:01</em></div>
+              <div className="auth-chat-audio">
+                <span className="auth-chat-play"><FiPlay size={12} /></span>
+                <span className="auth-chat-bars">
+                  <i /><i /><i /><i /><i /><i /><i /><i /><i /><i /><i /><i /><i /><i /><i /><i /><i /><i />
+                </span>
+                <span className="auth-chat-time">0:12</span>
+              </div>
+              <div className="auth-chat-bubble buyer">Parfait, je le prends. On se voit demain ?<em>14:03</em></div>
+            </div>
+
             <div className="auth-showcase-toast" dir="ltr">
               <span className="auth-showcase-toast-icon"><FiCheck size={14} /></span>
               <div>
                 <strong>Paiement confirmé</strong>
-                <span>6 499 DH · à l'instant</span>
+                <span>1 400 DH · à l'instant</span>
               </div>
             </div>
           </div>
