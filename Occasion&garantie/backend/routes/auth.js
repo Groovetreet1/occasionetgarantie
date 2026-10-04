@@ -419,7 +419,7 @@ router.post('/forgot-password', [
       'SELECT id, full_name, email, phone, role FROM users'
     );
     const unique = matched.filter(u => {
-      if (u.role === 'seller' || u.role === 'admin' || u.role === 'superadmin') return false;
+      if (u.role === 'admin' || u.role === 'superadmin') return false;
       const pd = (u.phone || '').replace(/\D/g, '');
       return pd === inputDigits || pd.endsWith(inputDigits.slice(-9)) || inputDigits.endsWith(pd.slice(-9));
     });
@@ -429,6 +429,7 @@ router.post('/forgot-password', [
       const accounts = unique.map(u => ({
         id: u.id,
         full_name: u.full_name,
+        role: u.role,
         email: u.email.replace(/(.{2})(.*)(@.*)/, (_, a, b, c) => a + '*'.repeat(b.length) + c),
       }));
       return res.json({ multipleAccounts: true, accounts, message: 'Plusieurs comptes trouves. Selectionnez le compte concerne.' });
@@ -462,7 +463,8 @@ router.post('/verify-reset-code', [
 ], validate, async (req, res) => {
   try {
     const { identifier, code, userId } = req.body;
-    const key = userId ? identifier + '-' + userId : identifier;
+    const normId = identifier.includes('@') ? identifier : identifier.replace(/\D/g, '');
+    const key = userId ? normId + '-' + userId : normId;
     const entry = resetCodes.get(key);
     if (!entry) return res.status(400).json({ message: 'Aucun code demande pour cet identifiant.' });
     if (Date.now() > entry.expiresAt) {
@@ -484,7 +486,8 @@ router.post('/reset-password', [
 ], validate, async (req, res) => {
   try {
     const { identifier, code, newPassword, userId } = req.body;
-    const key = userId ? identifier + '-' + userId : identifier;
+    const normId = identifier.includes('@') ? identifier : identifier.replace(/\D/g, '');
+    const key = userId ? normId + '-' + userId : normId;
     const entry = resetCodes.get(key);
     if (!entry) return res.status(400).json({ message: 'Aucune demande de reinitialisation.' });
     if (Date.now() > entry.expiresAt) {

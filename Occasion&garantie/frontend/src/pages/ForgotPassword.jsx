@@ -124,7 +124,7 @@ export default function ForgotPassword() {
                     <FiUser size={18} style={{ color: 'var(--primary)' }} />
                   </div>
                   <div style={{ flex: 1 }}>
-                    <div style={{ fontWeight: 600, color: 'var(--text)' }}>{acc.full_name}</div>
+                    <div style={{ fontWeight: 600, color: 'var(--text)' }}>{acc.full_name} {acc.role === 'seller' && <span style={{ fontSize: '11px', background: 'rgba(245,158,11,0.15)', color: '#b45309', padding: '2px 8px', borderRadius: 999, marginLeft: 6 }}>Vendeur</span>}</div>
                     <div style={{ fontSize: '12px', color: 'var(--text-muted)' }}>{acc.email}</div>
                   </div>
                 </button>
