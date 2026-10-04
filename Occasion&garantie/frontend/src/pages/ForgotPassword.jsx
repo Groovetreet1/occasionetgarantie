@@ -20,11 +20,6 @@ export default function ForgotPassword() {
   const handleSubmit = async (e) => {
     e.preventDefault();
     setError('');
-    // Si email -> proposer le choix SMS / Email avant d'envoyer
-    if (identifier.includes('@')) {
-      setStep('choose-method');
-      return;
-    }
     setLoading(true);
     try {
       const res = await api.post('/auth/forgot-password', { identifier });
@@ -37,22 +32,6 @@ export default function ForgotPassword() {
         setSentVia(res.data.sentVia || (identifier.includes('@') ? 'email' : 'sms'));
         setSent(true);
       }
-    } catch (err) {
-      setError(err.response?.data?.message || t('auth.genericError'));
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  const handleSendMethod = async (method) => {
-    setError('');
-    setLoading(true);
-    try {
-      const res = await api.post('/auth/forgot-password', { identifier, method });
-      setSentIdentifier(res.data.identifier);
-      setSentUserId(res.data.userId || null);
-      setSentVia(res.data.sentVia || method);
-      setSent(true);
     } catch (err) {
       setError(err.response?.data?.message || t('auth.genericError'));
     } finally {
@@ -91,7 +70,6 @@ export default function ForgotPassword() {
           <h1>{t('auth.forgotPasswordTitle')}</h1>
           {step === 'form' && <p>{t('auth.forgotPasswordSubtitle')}</p>}
           {step === 'choose' && <p>{t('auth.multipleAccountsFound')}</p>}
-          {step === 'choose-method' && <p>{t('auth.receiveCodeBy')}</p>}
         </div>
         <div className="auth-card">
           {error && <div className="alert alert-error">{error}</div>}
@@ -120,56 +98,6 @@ export default function ForgotPassword() {
                 {loading ? t('auth.verifying') : t('auth.sendCodeBySms')}
               </button>
             </form>
-          )}
-
-          {step === 'choose-method' && !sent && (
-            <div>
-              <p style={{ fontSize: '14px', color: 'var(--text-secondary)', marginBottom: '16px', textAlign: 'center' }}>
-                {t('auth.receiveCodeBy')} <strong>{identifier}</strong> :
-              </p>
-              <button
-                onClick={() => handleSendMethod('email')}
-                disabled={loading}
-                style={{
-                  width: '100%', display: 'flex', alignItems: 'center', gap: '12px',
-                  padding: '14px 16px', marginBottom: '10px', border: '1px solid var(--border)',
-                  borderRadius: 'var(--radius)', background: 'var(--bg-card)',
-                  cursor: 'pointer', fontFamily: 'var(--font)', fontSize: '14px', textAlign: 'left',
-                }}
-              >
-                <FiMail size={20} style={{ color: 'var(--primary)' }} />
-                <div style={{ flex: 1 }}>
-                  <div style={{ fontWeight: 600, color: 'var(--text)' }}>{t('auth.emailOption')}</div>
-                  <div style={{ fontSize: '12px', color: 'var(--text-muted)' }}>{identifier}</div>
-                </div>
-              </button>
-              <button
-                onClick={() => handleSendMethod('sms')}
-                disabled={loading}
-                style={{
-                  width: '100%', display: 'flex', alignItems: 'center', gap: '12px',
-                  padding: '14px 16px', marginBottom: '10px', border: '1px solid var(--border)',
-                  borderRadius: 'var(--radius)', background: 'var(--bg-card)',
-                  cursor: 'pointer', fontFamily: 'var(--font)', fontSize: '14px', textAlign: 'left',
-                }}
-              >
-                <FiSmartphone size={20} style={{ color: 'var(--primary)' }} />
-                <div style={{ flex: 1 }}>
-                  <div style={{ fontWeight: 600, color: 'var(--text)' }}>{t('auth.smsOption')}</div>
-                  <div style={{ fontSize: '12px', color: 'var(--text-muted)' }}>SMS</div>
-                </div>
-              </button>
-              <button
-                onClick={handleBack}
-                style={{
-                  background: 'none', border: 'none', color: 'var(--text-secondary)',
-                  cursor: 'pointer', fontSize: '13px', display: 'flex', alignItems: 'center',
-                  gap: '6px', margin: '12px auto 0', fontFamily: 'var(--font)',
-                }}
-              >
-                <FiArrowLeft size={14} /> {t('auth.back')}
-              </button>
-            </div>
           )}
 
           {step === 'choose' && (

@@ -76,11 +76,11 @@ export default function SignUp() {
         <div className="form-group">
           <label style={{ marginBottom: 8, display: 'block' }}>{t('auth.receiveCodeBy')}</label>
           <div style={{ display: 'flex', gap: 12 }}>
-            <label style={{ flex: 1, display: 'flex', alignItems: 'center', gap: 8, padding: '10px 14px', border: verifMethod === 'sms' ? '2px solid var(--primary)' : '1px solid var(--border)', borderRadius: 8, cursor: 'pointer', background: verifMethod === 'sms' ? 'rgba(245,158,11,0.08)' : 'transparent' }}>
+            <label style={{ flex: 1, display: 'flex', alignItems: 'center', gap: 8, padding: '10px 14px', border: verifMethod === 'sms' ? '2px solid var(--primary)' : '1px solid var(--border)', borderRadius: 8, cursor: 'pointer', background: verifMethod === 'sms' ? 'rgba(37,99,235,0.05)' : 'transparent' }}>
               <input type="radio" name="verifMethod" value="sms" checked={verifMethod === 'sms'} onChange={() => setVerifMethod('sms')} style={{ accentColor: 'var(--primary)' }} />
               <FiMessageSquare size={16} /> {t('auth.smsOption')}
             </label>
-            <label style={{ flex: 1, display: 'flex', alignItems: 'center', gap: 8, padding: '10px 14px', border: verifMethod === 'email' ? '2px solid var(--primary)' : '1px solid var(--border)', borderRadius: 8, cursor: 'pointer', background: verifMethod === 'email' ? 'rgba(245,158,11,0.08)' : 'transparent' }}>
+            <label style={{ flex: 1, display: 'flex', alignItems: 'center', gap: 8, padding: '10px 14px', border: verifMethod === 'email' ? '2px solid var(--primary)' : '1px solid var(--border)', borderRadius: 8, cursor: 'pointer', background: verifMethod === 'email' ? 'rgba(37,99,235,0.05)' : 'transparent' }}>
               <input type="radio" name="verifMethod" value="email" checked={verifMethod === 'email'} onChange={() => setVerifMethod('email')} style={{ accentColor: 'var(--primary)' }} />
               <FiMail size={16} /> {t('auth.emailOption')}
             </label>
