@@ -1,5 +1,5 @@
 const express = require('express');
-const crypto = require('crypto');
+const bcrypt = require('bcryptjs');
 const router = express.Router();
 const pool = require('../config/db');
 const { authenticate, adminOnly } = require('../middleware/auth');
@@ -643,66 +643,23 @@ router.post('/newsletter/send', authenticate, adminOnly, async (req, res) => {
   }
 });
 
-// ---- OTP gate for sensitive vendor-logs ----
-const vendorLogsOtp = new Map(); // adminId -> { code, expiresAt }
+// ---- Password gate for sensitive vendor-logs (hash bcrypt, jamais en clair) ----
 const vendorLogsAccess = new Map(); // adminId -> expiresAt
-const VENDOR_OTP_TTL = 5 * 60 * 1000;
 const VENDOR_ACCESS_TTL = 30 * 60 * 1000;
+const VENDOR_LOGS_PASSWORD_HASH = process.env.VENDOR_LOGS_PASSWORD_HASH || '$2b$10$Ow.5TcsKWmrbAHsJo29Ar.HoLWGdvv2Bo24aHlH3W2BLcX5.hnKSu';
 
 function requireVendorLogsAccess(req, res, next) {
   const until = vendorLogsAccess.get(req.user.id);
   if (until && Date.now() < until) return next();
-  return res.status(403).json({ message: 'Code OTP requis pour acceder au journal.', otpRequired: true });
+  return res.status(403).json({ message: 'Mot de passe requis pour acceder au journal.', passwordRequired: true });
 }
 
-router.post('/vendor-logs/request-otp', authenticate, adminOnly, async (req, res) => {
+router.post('/vendor-logs/unlock', authenticate, adminOnly, async (req, res) => {
   try {
-    const [rows] = await pool.query('SELECT full_name, phone, email FROM users WHERE id = ?', [req.user.id]);
-    if (rows.length === 0) return res.status(404).json({ message: 'Admin introuvable.' });
-    const admin = rows[0];
-    const code = crypto.randomInt(100000, 999999).toString();
-    vendorLogsOtp.set(req.user.id, { code, expiresAt: Date.now() + VENDOR_OTP_TTL });
-    // Immediat: SMS en premier, email en secours
-    let sentVia = 'sms';
-    let maskedTo = (admin.phone || '').replace(/\d(?=\d{2})/g, '*');
-    try {
-      if (!admin.phone) throw new Error('no admin phone');
-      await gomobile.sendSms(admin.phone, `Code acces Journal vendeurs : ${code}. Valable 5 min.`);
-    } catch (smsErr) {
-      console.error('Vendor-logs OTP SMS failed:', smsErr.message);
-      sentVia = 'email';
-      maskedTo = (admin.email || '').replace(/(.{2})(.*)(@.*)/, (_, a, b, c) => a + '*'.repeat(Math.max(b.length, 3)) + c);
-      try {
-        await send({
-          to: admin.email,
-          subject: 'Code OTP - Journal des vendeurs',
-          html: `<div style="font-family:Arial,sans-serif;max-width:420px;margin:0 auto;padding:24px"><h2 style="color:#1e293b">Code d'acces</h2><p>Bonjour ${admin.full_name || ''},</p><p>Votre code pour le <strong>Journal des vendeurs</strong> :</p><div style="font-size:32px;font-weight:800;letter-spacing:8px;text-align:center;background:#f1f5f9;border-radius:8px;padding:16px;margin:16px 0">${code}</div><p style="color:#64748b;font-size:13px">Valable 5 minutes. Ne le partagez avec personne.</p></div>`,
-        });
-      } catch (mailErr) {
-        console.error('Vendor-logs OTP email failed:', mailErr.message);
-        return res.status(500).json({ message: 'Impossible d\'envoyer le code. Reessayez plus tard.' });
-      }
-    }
-    res.json({ message: sentVia === 'sms' ? 'Code envoye par SMS.' : 'Code envoye par email.', sentVia, maskedTo, expiresIn: 300 });
-  } catch (err) {
-    res.status(500).json({ message: 'Erreur serveur.' });
-  }
-});
-
-router.post('/vendor-logs/verify-otp', authenticate, adminOnly, async (req, res) => {
-  try {
-    const { code } = req.body;
-    if (!code) return res.status(400).json({ message: 'Code requis.' });
-    const entry = vendorLogsOtp.get(req.user.id);
-    if (!entry) return res.status(400).json({ message: 'Demandez d\'abord un code.', otpRequired: true });
-    if (Date.now() > entry.expiresAt) {
-      vendorLogsOtp.delete(req.user.id);
-      return res.status(400).json({ message: 'Code expire. Demandez un nouveau code.', otpRequired: true });
-    }
-    if (entry.code !== String(code).trim()) {
-      return res.status(400).json({ message: 'Code incorrect.' });
-    }
-    vendorLogsOtp.delete(req.user.id);
+    const { password } = req.body;
+    if (!password) return res.status(400).json({ message: 'Mot de passe requis.' });
+    const ok = await bcrypt.compare(String(password), VENDOR_LOGS_PASSWORD_HASH);
+    if (!ok) return res.status(400).json({ message: 'Mot de passe incorrect.' });
     vendorLogsAccess.set(req.user.id, Date.now() + VENDOR_ACCESS_TTL);
     res.json({ message: 'Acces autorise.', accessMinutes: 30 });
   } catch (err) {

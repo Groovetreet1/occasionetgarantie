@@ -38,42 +38,25 @@ export default function AdminVendorLogs() {
   const [total, setTotal] = useState(0);
   const [totalPages, setTotalPages] = useState(0);
   const [locked, setLocked] = useState(true);
-  const [otp, setOtp] = useState('');
-  const [otpLoading, setOtpLoading] = useState(false);
-  const [otpError, setOtpError] = useState('');
-  const [otpInfo, setOtpInfo] = useState(null);
-  const [cooldown, setCooldown] = useState(0);
+  const [password, setPassword] = useState('');
+  const [unlockLoading, setUnlockLoading] = useState(false);
+  const [unlockError, setUnlockError] = useState('');
   const mapRef = useRef(null);
   const mapContainerRef = useRef(null);
   const LRef = useRef(null);
 
-  const requestOtp = async () => {
-    setOtpError('');
-    setOtpLoading(true);
-    try {
-      const res = await api.post('/admin/vendor-logs/request-otp');
-      setOtpInfo({ sentVia: res.data.sentVia, maskedTo: res.data.maskedTo });
-      setCooldown(30);
-    } catch (e) {
-      setOtpError(e.response?.data?.message || 'Erreur.');
-    } finally {
-      setOtpLoading(false);
-    }
-  };
-
-  const verifyOtp = async (e) => {
+  const unlock = async (e) => {
     if (e) e.preventDefault();
-    setOtpError('');
-    setOtpLoading(true);
+    setUnlockError('');
+    setUnlockLoading(true);
     try {
-      await api.post('/admin/vendor-logs/verify-otp', { code: otp });
-      setOtp('');
+      await api.post('/admin/vendor-logs/unlock', { password });
+      setPassword('');
       setLocked(false);
     } catch (e) {
-      setOtpError(e.response?.data?.message || 'Code incorrect.');
-      if (e.response?.data?.otpRequired) requestOtp();
+      setUnlockError(e.response?.data?.message || 'Mot de passe incorrect.');
     } finally {
-      setOtpLoading(false);
+      setUnlockLoading(false);
     }
   };
 
@@ -86,22 +69,14 @@ export default function AdminVendorLogs() {
         setTotalPages(res.data.totalPages || 1);
       })
       .catch((e) => {
-        if (e.response?.status === 403 && e.response?.data?.otpRequired) {
+        if (e.response?.status === 403 && e.response?.data?.passwordRequired) {
           setLocked(true);
-          requestOtp();
         }
       })
       .finally(() => setLoading(false));
   };
 
-  useEffect(() => { requestOtp(); }, []);
   useEffect(() => { if (!locked) load(); }, [page, limit, locked]);
-
-  useEffect(() => {
-    if (cooldown <= 0) return;
-    const id = setTimeout(() => setCooldown((c) => c - 1), 1000);
-    return () => clearTimeout(id);
-  }, [cooldown]);
 
   useEffect(() => {
     let cancelled = false;
@@ -186,9 +161,8 @@ export default function AdminVendorLogs() {
       setPage(1);
       load();
     } catch (e) {
-      if (e.response?.status === 403 && e.response?.data?.otpRequired) {
+      if (e.response?.status === 403 && e.response?.data?.passwordRequired) {
         setLocked(true);
-        requestOtp();
         setReindexMsg('');
       } else {
         setReindexMsg(`${t('admin.reindexError')} ${e.response?.data?.error || e.message}`);
@@ -205,7 +179,6 @@ export default function AdminVendorLogs() {
   const hasCoords = logs.filter(l => l.latitude && l.longitude);
 
   if (locked) {
-    const viaLabel = otpInfo?.sentVia === 'email' ? t('admin.otpEmail') : t('admin.otpSms');
     return (
       <section className="admin-dashboard">
         <div className="container" style={{ position: 'relative', zIndex: 1, maxWidth: 440, margin: '0 auto', paddingTop: 40 }}>
@@ -215,28 +188,21 @@ export default function AdminVendorLogs() {
             </div>
             <h1 style={{ fontSize: 22, fontWeight: 800, marginBottom: 8 }}>{t('admin.otpGateTitle')}</h1>
             <p style={{ fontSize: 13.5, color: 'var(--text-secondary)', marginBottom: 20, lineHeight: 1.6 }}>
-              {otpInfo ? t('admin.otpGateSubtitle', { via: viaLabel, to: otpInfo.maskedTo }) : '...'}
+              {t('admin.otpGateSubtitle')}
             </p>
-            {otpError && <div className="alert alert-error">{otpError}</div>}
-            <form onSubmit={verifyOtp}>
+            {unlockError && <div className="alert alert-error">{unlockError}</div>}
+            <form onSubmit={unlock}>
               <input
-                type="text"
-                inputMode="numeric"
+                type="password"
                 placeholder={t('admin.otpCodePlaceholder')}
-                value={otp}
-                onChange={(e) => setOtp(e.target.value.replace(/\D/g, '').slice(0, 6))}
-                style={{ width: '100%', textAlign: 'center', fontSize: 26, letterSpacing: 10, fontWeight: 800, padding: '12px 12px 12px 22px', border: '1px solid var(--border)', borderRadius: 10, background: 'var(--bg-secondary)', color: 'var(--text)', marginBottom: 12, fontFamily: 'var(--font)', boxSizing: 'border-box' }}
+                value={password}
+                onChange={(e) => setPassword(e.target.value)}
+                style={{ width: '100%', textAlign: 'center', fontSize: 18, fontWeight: 700, padding: '12px', border: '1px solid var(--border)', borderRadius: 10, background: 'var(--bg-secondary)', color: 'var(--text)', marginBottom: 12, fontFamily: 'var(--font)', boxSizing: 'border-box' }}
               />
-              <button type="submit" className="form-submit" disabled={otpLoading || otp.length !== 6}>
-                {otpLoading ? t('admin.otpVerifying') : t('admin.otpVerify')}
+              <button type="submit" className="form-submit" disabled={unlockLoading || !password}>
+                {unlockLoading ? t('admin.otpVerifying') : t('admin.otpVerify')}
               </button>
             </form>
-            <div style={{ marginTop: 14, fontSize: 13, color: 'var(--text-muted)' }}>
-              {t('admin.otpNoCode')}{' '}
-              <button onClick={requestOtp} disabled={otpLoading || cooldown > 0} style={{ background: 'none', border: 'none', color: 'var(--primary)', fontWeight: 700, cursor: cooldown > 0 ? 'not-allowed' : 'pointer', fontSize: 13, fontFamily: 'var(--font)' }}>
-                {t('admin.otpResend')}{cooldown > 0 ? ` (${cooldown}s)` : ''}
-              </button>
-            </div>
             <div style={{ marginTop: 16 }}>
               <Link to="/admin" className="btn btn-ghost" style={{ fontSize: 13 }}><FiArrowLeft /> {t('admin.dashboardTitle')}</Link>
             </div>
