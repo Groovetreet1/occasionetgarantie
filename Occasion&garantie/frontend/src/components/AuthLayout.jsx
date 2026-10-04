@@ -1,5 +1,5 @@
 import { Link } from 'react-router-dom';
-import { FiShield, FiRefreshCw, FiSmartphone, FiTruck, FiCheck, FiChevronLeft, FiStar } from 'react-icons/fi';
+import { FiShield, FiRefreshCw, FiSmartphone, FiTruck, FiCheck, FiChevronLeft, FiStar, FiMapPin } from 'react-icons/fi';
 import { useLanguage } from '../context/LanguageContext';
 
 export default function AuthLayout({ title, subtitle, children, footer }) {
@@ -39,41 +39,41 @@ export default function AuthLayout({ title, subtitle, children, footer }) {
             <p>{t('auth.brandSubheadline')}</p>
           </div>
 
-          <div className="auth-showcase">
-            <div className="auth-showcase-crumb">
-              <FiChevronLeft size={14} />Accueil<span>/</span>Téléphones<span>/</span><strong>iPhone 13 Pro</strong>
-            </div>
-            <div className="auth-showcase-head">
-              <div>
-                <div className="auth-showcase-title">iPhone 13 Pro · 128 Go</div>
-                <div className="auth-showcase-sub">Reconditionné · Excellent état</div>
+          <div className="auth-showcase-wrap">
+            <div className="auth-showcase" dir="ltr">
+              <div className="auth-showcase-crumb">
+                <FiChevronLeft size={14} />Accueil<span>/</span>Téléphones<span>/</span><strong>iPhone 13 Pro</strong>
               </div>
-              <span className="auth-showcase-badge">Garantie 12 mois</span>
-            </div>
-            <div className="auth-showcase-product">
-              <div className="auth-showcase-thumb"><FiSmartphone size={26} /></div>
-              <div className="auth-showcase-product-info">
-                <div className="auth-showcase-price">6 499 MAD <s>7 299 MAD</s></div>
-                <div className="auth-showcase-seller">PhoneStore Casablanca · <span>Vendeur vérifié</span></div>
+              <div className="auth-showcase-photo">
+                <span className="auth-showcase-discount">-11%</span>
+                <FiSmartphone size={42} />
+                <span className="auth-showcase-count">1/4</span>
               </div>
-              <span className="auth-showcase-stock">En stock</span>
-            </div>
-            <div className="auth-showcase-tiles">
-              <div className="auth-showcase-tile"><FiShield size={17} /><span>Garantie 12 mois</span></div>
-              <div className="auth-showcase-tile"><FiCheck size={17} /><span>Paiement sécurisé</span></div>
-              <div className="auth-showcase-tile"><FiTruck size={17} /><span>Livraison 48h</span></div>
-            </div>
-            <div className="auth-showcase-review">
-              <div className="auth-showcase-avatar">YB</div>
-              <div className="auth-showcase-review-body">
-                <div className="auth-showcase-review-top">
-                  <strong>Yasmine B.</strong>
-                  <span className="auth-showcase-stars">
-                    <FiStar size={11} /><FiStar size={11} /><FiStar size={11} /><FiStar size={11} /><FiStar size={11} />
-                  </span>
-                  <span className="auth-showcase-time">il y a 2 min</span>
+              <div className="auth-showcase-meta">
+                <span className="auth-showcase-cat">Smartphone</span>
+                <span className="auth-showcase-rating"><FiStar size={11} /> 4.8</span>
+              </div>
+              <div className="auth-showcase-title">iPhone 13 Pro · 128 Go · Excellent état</div>
+              <div className="auth-showcase-price">6 499 DH <s>7 299 DH</s></div>
+              <div className="auth-showcase-foot">
+                <span className="auth-showcase-loc"><FiMapPin size={11} /> Casablanca</span>
+                <span className="auth-showcase-warranty"><FiShield size={10} /> 12 mois</span>
+              </div>
+              <div className="auth-showcase-track">
+                <div className="auth-showcase-track-head"><span>Suivi de commande #OG-2481</span><b>2/3</b></div>
+                <div className="auth-showcase-steps">
+                  <span className="done"><FiCheck size={11} /> Vérifié</span>
+                  <span className="done"><FiCheck size={11} /> Payé</span>
+                  <span className="current">En livraison</span>
                 </div>
-                <div className="auth-showcase-review-text">Produit reçu rapidement, garantie activée sans problème.</div>
+                <div className="auth-showcase-meter"><i style={{ '--w': '66%' }} /></div>
+              </div>
+            </div>
+            <div className="auth-showcase-toast" dir="ltr">
+              <span className="auth-showcase-toast-icon"><FiCheck size={14} /></span>
+              <div>
+                <strong>Paiement confirmé</strong>
+                <span>6 499 DH · à l'instant</span>
               </div>
             </div>
           </div>
