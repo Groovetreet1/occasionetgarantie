@@ -236,23 +236,32 @@ router.post('/login', [
       });
     }
     try { await pool.query('ALTER TABLE users ADD COLUMN totp_enabled TINYINT(1) DEFAULT 0'); } catch {}
-    const remember = req.body.remember === true;
-    const fullExpiry = remember ? '7d' : '6h';
+    try { await pool.query('ALTER TABLE users ADD COLUMN totp_gen INT DEFAULT 0'); } catch {}
+    let skip2fa = false;
     try {
-      const [tfaRows] = await pool.query('SELECT totp_enabled FROM users WHERE id = ?', [user.id]);
+      const [tfaRows] = await pool.query('SELECT totp_enabled, totp_gen FROM users WHERE id = ?', [user.id]);
       if (tfaRows.length > 0 && tfaRows[0].totp_enabled) {
-        const tempToken = jwt.sign(
-          { id: user.id, twofa: true, remember },
-          process.env.JWT_SECRET,
-          { expiresIn: '10m' }
-        );
-        return res.json({ requires2FA: true, tempToken, email: user.email });
+        const trust = req.body.tfaTrust;
+        if (trust) {
+          try {
+            const d = jwt.verify(trust, process.env.JWT_SECRET);
+            if (d.tfaTrust && d.id === user.id && d.gen === (tfaRows[0].totp_gen || 0)) skip2fa = true;
+          } catch {}
+        }
+        if (!skip2fa) {
+          const tempToken = jwt.sign(
+            { id: user.id, twofa: true },
+            process.env.JWT_SECRET,
+            { expiresIn: '10m' }
+          );
+          return res.json({ requires2FA: true, tempToken, email: user.email });
+        }
       }
     } catch {}
     const token = jwt.sign(
       { id: user.id, email: user.email, role: user.role },
       process.env.JWT_SECRET,
-      { expiresIn: fullExpiry }
+      { expiresIn: '6h' }
     );
     const ip = req.headers['x-forwarded-for']?.split(',')[0]?.trim() || req.socket.remoteAddress || 'unknown';
     const { latitude, longitude } = req.body;
@@ -271,6 +280,7 @@ async function ensure2faColumns() {
   try { await pool.query('ALTER TABLE users ADD COLUMN totp_secret VARCHAR(64) DEFAULT NULL'); } catch {}
   try { await pool.query('ALTER TABLE users ADD COLUMN totp_enabled TINYINT(1) DEFAULT 0'); } catch {}
   try { await pool.query('ALTER TABLE users ADD COLUMN totp_backup TEXT DEFAULT NULL'); } catch {}
+  try { await pool.query('ALTER TABLE users ADD COLUMN totp_gen INT DEFAULT 0'); } catch {}
 }
 
 router.get('/2fa/status', authenticate, async (req, res) => {
@@ -316,7 +326,7 @@ router.post('/2fa/enable', authenticate, [body('code').trim().notEmpty().withMes
       plain.push(c);
       hashed.push(await bcrypt.hash(c, 10));
     }
-    await pool.query('UPDATE users SET totp_enabled = 1, totp_backup = ? WHERE id = ?', [JSON.stringify(hashed), req.user.id]);
+    await pool.query('UPDATE users SET totp_enabled = 1, totp_backup = ?, totp_gen = COALESCE(totp_gen, 0) + 1 WHERE id = ?', [JSON.stringify(hashed), req.user.id]);
     res.json({ message: '2FA activee avec succes.', backupCodes: plain });
   } catch (err) {
     res.status(500).json({ message: 'Erreur serveur.' });
@@ -396,13 +406,22 @@ router.post('/2fa/verify', [
     const fullToken = jwt.sign(
       { id: user.id, email: user.email, role: user.role },
       process.env.JWT_SECRET,
-      { expiresIn: decoded.remember ? '7d' : '6h' }
+      { expiresIn: '6h' }
     );
+    let trustToken = null;
+    if (req.body.trustDevice === true) {
+      trustToken = jwt.sign(
+        { id: user.id, tfaTrust: true, gen: user.totp_gen || 0 },
+        process.env.JWT_SECRET,
+        { expiresIn: '30d' }
+      );
+    }
     const ip = req.headers['x-forwarded-for']?.split(',')[0]?.trim() || req.socket.remoteAddress || 'unknown';
     logVendorAction({ userId: user.id, action: 'connexion', ip, userAgent: req.headers['user-agent'] });
     res.json({
       token: fullToken,
       usedBackup,
+      trustToken,
       user: { id: user.id, fullName: user.full_name, email: user.email, phone: user.phone, role: user.role, phoneVerified: true, premium: !!user.premium, premium_expires_at: user.premium_expires_at }
     });
   } catch (err) {

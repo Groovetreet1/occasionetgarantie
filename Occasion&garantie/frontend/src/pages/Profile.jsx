@@ -44,6 +44,12 @@ export default function Profile() {
   const [tfaLoading, setTfaLoading] = useState(false);
   const [tfaDisablePw, setTfaDisablePw] = useState('');
   const [tfaDisableCode, setTfaDisableCode] = useState('');
+  const [tfaTrusted, setTfaTrusted] = useState(() => { try { return !!localStorage.getItem('tfa_trust'); } catch { return false; } });
+
+  const forgetDevice = () => {
+    try { localStorage.removeItem('tfa_trust'); } catch {}
+    setTfaTrusted(false);
+  };
 
   useEffect(() => {
     const token = localStorage.getItem('token');
@@ -353,6 +359,12 @@ export default function Profile() {
               <span style={{ width: 10, height: 10, borderRadius: '50%', background: tfaEnabled ? '#10b981' : '#94a3b8' }} />
               {tfaEnabled ? t('profile.tfaActive') : t('profile.tfaInactive')}
             </div>
+
+            {tfaEnabled && tfaTrusted && (
+              <button type="button" className="btn btn-outline" onClick={forgetDevice} style={{ marginBottom: 16, fontSize: 13 }}>
+                {t('profile.tfaForgetDevice')}
+              </button>
+            )}
 
             {!tfaEnabled && !tfaSetup && (
               <button className="form-submit" onClick={startTfaSetup} disabled={tfaLoading}>

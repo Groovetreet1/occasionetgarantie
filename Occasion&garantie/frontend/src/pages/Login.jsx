@@ -85,7 +85,7 @@ export default function Login() {
   const [digits, setDigits] = useState(['', '', '', '', '', '']);
   const [backupMode, setBackupMode] = useState(false);
   const [backupCode, setBackupCode] = useState('');
-  const [rememberMe, setRememberMe] = useState(false);
+  const [trustDevice, setTrustDevice] = useState(false);
   const navigate = useNavigate();
 
   const reset2fa = () => {
@@ -111,8 +111,9 @@ export default function Login() {
       lat = pos.coords.latitude; lng = pos.coords.longitude;
     } catch {}
     try {
-      const { data } = await api.post('/auth/login', { email, password, latitude: lat, longitude: lng, remember: rememberMe });
+      const { data } = await api.post('/auth/login', { email, password, latitude: lat, longitude: lng, tfaTrust: localStorage.getItem('tfa_trust') || undefined });
       if (data.requires2FA) {
+        localStorage.removeItem('tfa_trust');
         setNeed2fa({ tempToken: data.tempToken, email: data.email || email });
         setDigits(['', '', '', '', '', '']);
         setBackupMode(false);
@@ -137,7 +138,8 @@ export default function Login() {
     setError('');
     setLoading(true);
     try {
-      const { data } = await api.post('/auth/2fa/verify', { tempToken: need2fa.tempToken, code });
+      const { data } = await api.post('/auth/2fa/verify', { tempToken: need2fa.tempToken, code, trustDevice });
+      if (data.trustToken) localStorage.setItem('tfa_trust', data.trustToken);
       setSession(data.token, data.user);
       navigate('/');
     } catch (err) {
@@ -175,6 +177,10 @@ export default function Login() {
               disabled={loading}
               onComplete={doVerify}
             />
+            <label style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '6px', fontSize: '13px', color: 'var(--text-secondary)', cursor: 'pointer', userSelect: 'none', marginBottom: '12px' }}>
+              <input type="checkbox" checked={trustDevice} onChange={(e) => setTrustDevice(e.target.checked)} style={{ width: 15, height: 15, accentColor: 'var(--primary)', cursor: 'pointer' }} />
+              {t('auth.trustDevice')}
+            </label>
             <div style={{ textAlign: 'center', marginTop: '4px' }}>
               <button onClick={() => setBackupMode(true)} style={{ background: 'none', border: 'none', color: 'var(--primary)', cursor: 'pointer', fontSize: '13px', fontWeight: 600 }}>
                 {t('auth.tfaUseBackup')}
@@ -274,11 +280,7 @@ export default function Login() {
             </button>
           </div>
         </div>
-        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginTop: '4px', marginBottom: '14px' }}>
-          <label style={{ display: 'flex', alignItems: 'center', gap: '6px', fontSize: '13px', color: 'var(--text-secondary)', cursor: 'pointer', userSelect: 'none' }}>
-            <input type="checkbox" checked={rememberMe} onChange={(e) => setRememberMe(e.target.checked)} style={{ width: 15, height: 15, accentColor: 'var(--primary)', cursor: 'pointer' }} />
-            {t('auth.rememberMe')}
-          </label>
+        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'flex-end', marginTop: '4px', marginBottom: '14px' }}>
           <Link to="/forgot-password" style={{ fontSize: '13px', color: 'var(--primary)' }}>{t('auth.forgotPassword')}</Link>
         </div>
         <button type="submit" className="form-submit" disabled={loading}>

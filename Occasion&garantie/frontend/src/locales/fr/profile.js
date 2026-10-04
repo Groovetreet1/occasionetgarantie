@@ -68,6 +68,7 @@
     tfaBackupTitle: 'Codes de secours — notez-les maintenant',
     tfaBackupDesc: 'Chaque code est à usage unique. Utilisez-les si vous perdez l’accès à votre application. Ils ne seront plus affichés.',
     tfaDisableTitle: 'Désactiver la 2FA',
+    tfaForgetDevice: 'Oublier cet appareil',
     tfaPwLabel: 'Mot de passe',
     tfaDisableBtn: 'Désactiver la 2FA',
   },

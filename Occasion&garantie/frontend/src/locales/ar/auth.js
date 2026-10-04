@@ -99,6 +99,7 @@
     tfaUseApp: 'استخدام التطبيق',
     tfaBackupLabel: 'رمز الطوارئ (8 أحرف)',
     rememberMe: 'تذكرني · 7 أيام',
+    trustDevice: 'تذكر هذا الجهاز · 30 يوما',
 
     // Auth split brand panel
     brandEyebrow: 'سوق مغربي',

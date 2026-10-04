@@ -99,6 +99,7 @@
     tfaUseApp: 'Utiliser l’application',
     tfaBackupLabel: 'Code de secours (8 caractères)',
     rememberMe: 'Se souvenir de moi · 7 jours',
+    trustDevice: 'Se souvenir de cet appareil · 30 jours',
 
     // Auth split brand panel
     brandEyebrow: 'Marketplace Marocaine',
