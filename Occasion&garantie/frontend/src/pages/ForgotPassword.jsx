@@ -5,7 +5,7 @@ import { useLanguage } from '../context/LanguageContext';
 import api from '../api/axios';
 
 export default function ForgotPassword() {
-  const { t } = useLanguage();
+  const { t, lang } = useLanguage();
   const navigate = useNavigate();
   const [identifier, setIdentifier] = useState('');
   const [loading, setLoading] = useState(false);
@@ -20,9 +20,36 @@ export default function ForgotPassword() {
   const handleSubmit = async (e) => {
     e.preventDefault();
     setError('');
+    const value = identifier.trim();
+    // 1) Cas email: verifier le format puis l'existence AVANT de proposer SMS/Email
+    if (value.includes('@')) {
+      if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(value)) {
+        setError(lang === 'ar' ? 'البريد الإلكتروني غير صالح.' : 'Adresse email invalide.');
+        return;
+      }
+      setLoading(true);
+      try {
+        const check = await api.post('/auth/check-account', { identifier: value });
+        if (!check.data.exists) {
+          setError(lang === 'ar' ? 'لا يوجد أي حساب بهذا البريد الإلكتروني.' : 'Aucun compte trouvé avec cet email.');
+          return;
+        }
+        setStep('choose-method');
+      } catch (err) {
+        setError(err.response?.data?.message || t('auth.genericError'));
+      } finally {
+        setLoading(false);
+      }
+      return;
+    }
+    // 2) Cas telephone: refuser le texte libre / numeros trop courts (sinon tous les comptes matchent)
+    if (value.replace(/\D/g, '').length < 9) {
+      setError(lang === 'ar' ? 'رقم الهاتف غير صالح. أدخل رقما مغربيا صحيحا.' : 'Numéro de téléphone invalide. Entrez un numéro marocain valide.');
+      return;
+    }
     setLoading(true);
     try {
-      const res = await api.post('/auth/forgot-password', { identifier });
+      const res = await api.post('/auth/forgot-password', { identifier: value });
       if (res.data.multipleAccounts) {
         setAccounts(res.data.accounts);
         setStep('choose');
@@ -32,6 +59,22 @@ export default function ForgotPassword() {
         setSentVia(res.data.sentVia || (identifier.includes('@') ? 'email' : 'sms'));
         setSent(true);
       }
+    } catch (err) {
+      setError(err.response?.data?.message || t('auth.genericError'));
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleSendMethod = async (method) => {
+    setError('');
+    setLoading(true);
+    try {
+      const res = await api.post('/auth/forgot-password', { identifier: identifier.trim(), method });
+      setSentIdentifier(res.data.identifier);
+      setSentUserId(res.data.userId || null);
+      setSentVia(res.data.sentVia || method);
+      setSent(true);
     } catch (err) {
       setError(err.response?.data?.message || t('auth.genericError'));
     } finally {
@@ -70,6 +113,7 @@ export default function ForgotPassword() {
           <h1>{t('auth.forgotPasswordTitle')}</h1>
           {step === 'form' && <p>{t('auth.forgotPasswordSubtitle')}</p>}
           {step === 'choose' && <p>{t('auth.multipleAccountsFound')}</p>}
+          {step === 'choose-method' && <p>{t('auth.receiveCodeBy')}</p>}
         </div>
         <div className="auth-card">
           {error && <div className="alert alert-error">{error}</div>}
@@ -98,6 +142,56 @@ export default function ForgotPassword() {
                 {loading ? t('auth.verifying') : t('auth.sendCodeBySms')}
               </button>
             </form>
+          )}
+
+          {step === 'choose-method' && !sent && (
+            <div>
+              <p style={{ fontSize: '14px', color: 'var(--text-secondary)', marginBottom: '16px', textAlign: 'center' }}>
+                {t('auth.receiveCodeBy')} <strong>{identifier.trim()}</strong> :
+              </p>
+              <button
+                onClick={() => handleSendMethod('email')}
+                disabled={loading}
+                style={{
+                  width: '100%', display: 'flex', alignItems: 'center', gap: '12px',
+                  padding: '14px 16px', marginBottom: '10px', border: '1px solid var(--border)',
+                  borderRadius: 'var(--radius)', background: 'var(--bg-card)',
+                  cursor: 'pointer', fontFamily: 'var(--font)', fontSize: '14px', textAlign: 'left',
+                }}
+              >
+                <FiMail size={20} style={{ color: 'var(--primary)' }} />
+                <div style={{ flex: 1 }}>
+                  <div style={{ fontWeight: 600, color: 'var(--text)' }}>{t('auth.emailOption')}</div>
+                  <div style={{ fontSize: '12px', color: 'var(--text-muted)' }}>{identifier.trim()}</div>
+                </div>
+              </button>
+              <button
+                onClick={() => handleSendMethod('sms')}
+                disabled={loading}
+                style={{
+                  width: '100%', display: 'flex', alignItems: 'center', gap: '12px',
+                  padding: '14px 16px', marginBottom: '10px', border: '1px solid var(--border)',
+                  borderRadius: 'var(--radius)', background: 'var(--bg-card)',
+                  cursor: 'pointer', fontFamily: 'var(--font)', fontSize: '14px', textAlign: 'left',
+                }}
+              >
+                <FiSmartphone size={20} style={{ color: 'var(--primary)' }} />
+                <div style={{ flex: 1 }}>
+                  <div style={{ fontWeight: 600, color: 'var(--text)' }}>{t('auth.smsOption')}</div>
+                  <div style={{ fontSize: '12px', color: 'var(--text-muted)' }}>SMS</div>
+                </div>
+              </button>
+              <button
+                onClick={handleBack}
+                style={{
+                  background: 'none', border: 'none', color: 'var(--text-secondary)',
+                  cursor: 'pointer', fontSize: '13px', display: 'flex', alignItems: 'center',
+                  gap: '6px', margin: '12px auto 0', fontFamily: 'var(--font)',
+                }}
+              >
+                <FiArrowLeft size={14} /> {t('auth.back')}
+              </button>
+            </div>
           )}
 
           {step === 'choose' && (

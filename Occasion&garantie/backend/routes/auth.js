@@ -378,6 +378,30 @@ function normalizePhone(val) {
   return val;
 }
 
+router.post('/check-account', [
+  body('identifier').trim().notEmpty().withMessage('Email ou telephone requis.'),
+], validate, async (req, res) => {
+  try {
+    const { identifier } = req.body;
+    if (identifier.includes('@')) {
+      const [users] = await pool.query('SELECT id FROM users WHERE email = ?', [identifier]);
+      return res.json({ exists: users.length > 0, type: 'email' });
+    }
+    const inputDigits = identifier.replace(/\D/g, '');
+    if (inputDigits.length < 9) return res.json({ exists: false, type: 'phone', invalid: true });
+    const [matched] = await pool.query('SELECT id, phone, role FROM users');
+    const unique = matched.filter(u => {
+      if (u.role === 'admin' || u.role === 'superadmin') return false;
+      const pd = (u.phone || '').replace(/\D/g, '');
+      if (!pd) return false;
+      return pd === inputDigits || pd.endsWith(inputDigits.slice(-9)) || inputDigits.endsWith(pd.slice(-9));
+    });
+    return res.json({ exists: unique.length > 0, type: 'phone', count: unique.length });
+  } catch (err) {
+    res.status(500).json({ message: 'Erreur serveur.' });
+  }
+});
+
 router.post('/forgot-password', [
   body('identifier').trim().notEmpty().withMessage('Email ou telephone requis.'),
 ], validate, async (req, res) => {
@@ -428,12 +452,16 @@ router.post('/forgot-password', [
     }
 
     const inputDigits = identifier.replace(/\D/g, '');
+    if (inputDigits.length < 9) {
+      return res.status(400).json({ message: 'Numéro de téléphone invalide. Entrez un numéro marocain valide (ex: 06 XX XX XX XX).' });
+    }
     const [matched] = await pool.query(
       'SELECT id, full_name, email, phone, role FROM users'
     );
     const unique = matched.filter(u => {
       if (u.role === 'admin' || u.role === 'superadmin') return false;
       const pd = (u.phone || '').replace(/\D/g, '');
+      if (!pd) return false;
       return pd === inputDigits || pd.endsWith(inputDigits.slice(-9)) || inputDigits.endsWith(pd.slice(-9));
     });
     if (unique.length === 0) return res.status(404).json({ message: 'Aucun compte trouve avec ce telephone.' });
