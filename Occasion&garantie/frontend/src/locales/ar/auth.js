@@ -91,6 +91,10 @@
     resetPasswordButton: 'إعادة تعيين كلمة المرور',
 
     genericError: 'حدث خطأ.',
+    tfaTitle: 'تحقق بخطوتين',
+    tfaSubtitle: 'أدخل رمز تطبيق المصادقة الخاص بـ {{email}} (أو رمز طوارئ).',
+    tfaCodeLabel: 'رمز من 6 أرقام (أو رمز طوارئ)',
+    tfaVerifyBtn: 'تحقق',
 
     // Auth split brand panel
     brandEyebrow: 'سوق مغربي',

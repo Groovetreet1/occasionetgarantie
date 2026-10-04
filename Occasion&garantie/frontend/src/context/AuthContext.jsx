@@ -73,6 +73,12 @@ export function AuthProvider({ children }) {
     setUser(null);
   };
 
+  const setSession = (token, userData) => {
+    localStorage.setItem('token', token);
+    localStorage.setItem('user', JSON.stringify({ id: userData.id, role: userData.role, full_name: userData.fullName, fullName: userData.fullName }));
+    setUser(userData);
+  };
+
   const refreshUser = async () => {
     try {
       const { data } = await api.get('/auth/me');
@@ -87,7 +93,7 @@ export function AuthProvider({ children }) {
   };
 
   return (
-    <AuthContext.Provider value={{ user, loading, suspended, setSuspended, login, signup, logout, refreshUser }}>
+    <AuthContext.Provider value={{ user, loading, suspended, setSuspended, login, signup, logout, refreshUser, setSession }}>
       {children}
     </AuthContext.Provider>
   );

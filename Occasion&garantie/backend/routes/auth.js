@@ -2,6 +2,8 @@ const express = require('express');
 const bcrypt = require('bcryptjs');
 const jwt = require('jsonwebtoken');
 const crypto = require('crypto');
+const speakeasy = require('speakeasy');
+const QRCode = require('qrcode');
 const multer = require('multer');
 const path = require('path');
 const fs = require('fs');
@@ -233,6 +235,18 @@ router.post('/login', [
         email: user.email
       });
     }
+    try { await pool.query('ALTER TABLE users ADD COLUMN totp_enabled TINYINT(1) DEFAULT 0'); } catch {}
+    try {
+      const [tfaRows] = await pool.query('SELECT totp_enabled FROM users WHERE id = ?', [user.id]);
+      if (tfaRows.length > 0 && tfaRows[0].totp_enabled) {
+        const tempToken = jwt.sign(
+          { id: user.id, twofa: true },
+          process.env.JWT_SECRET,
+          { expiresIn: '10m' }
+        );
+        return res.json({ requires2FA: true, tempToken, email: user.email });
+      }
+    } catch {}
     const token = jwt.sign(
       { id: user.id, email: user.email, role: user.role },
       process.env.JWT_SECRET,
@@ -243,6 +257,150 @@ router.post('/login', [
     logVendorAction({ userId: user.id, action: 'connexion', ip, userAgent: req.headers['user-agent'], latitude, longitude });
     res.json({
       token,
+      user: { id: user.id, fullName: user.full_name, email: user.email, phone: user.phone, role: user.role, phoneVerified: true, premium: !!user.premium, premium_expires_at: user.premium_expires_at }
+    });
+  } catch (err) {
+    res.status(500).json({ message: 'Erreur serveur.' });
+  }
+});
+
+// ---- Two-Factor Authentication (TOTP, compatible Google Authenticator) ----
+async function ensure2faColumns() {
+  try { await pool.query('ALTER TABLE users ADD COLUMN totp_secret VARCHAR(64) DEFAULT NULL'); } catch {}
+  try { await pool.query('ALTER TABLE users ADD COLUMN totp_enabled TINYINT(1) DEFAULT 0'); } catch {}
+  try { await pool.query('ALTER TABLE users ADD COLUMN totp_backup TEXT DEFAULT NULL'); } catch {}
+}
+
+router.get('/2fa/status', authenticate, async (req, res) => {
+  try {
+    await ensure2faColumns();
+    const [rows] = await pool.query('SELECT totp_enabled FROM users WHERE id = ?', [req.user.id]);
+    res.json({ enabled: rows.length > 0 && !!rows[0].totp_enabled });
+  } catch (err) {
+    res.status(500).json({ message: 'Erreur serveur.' });
+  }
+});
+
+router.post('/2fa/setup', authenticate, async (req, res) => {
+  try {
+    await ensure2faColumns();
+    const [rows] = await pool.query('SELECT id, email, totp_enabled FROM users WHERE id = ?', [req.user.id]);
+    if (rows.length === 0) return res.status(404).json({ message: 'Utilisateur introuvable.' });
+    if (rows[0].totp_enabled) return res.status(400).json({ message: '2FA deja active.' });
+    const secret = speakeasy.generateSecret({ name: `Occasion&Garantie:${rows[0].email}`, length: 20 });
+    await pool.query('UPDATE users SET totp_secret = ?, totp_enabled = 0 WHERE id = ?', [secret.base32, req.user.id]);
+    let qr = null;
+    try { qr = await QRCode.toDataURL(secret.otpauth_url); } catch {}
+    res.json({ secret: secret.base32, otpauth_url: secret.otpauth_url, qr });
+  } catch (err) {
+    res.status(500).json({ message: 'Erreur serveur.' });
+  }
+});
+
+router.post('/2fa/enable', authenticate, [body('code').trim().notEmpty().withMessage('Code requis.')], validate, async (req, res) => {
+  try {
+    await ensure2faColumns();
+    const { code } = req.body;
+    const [rows] = await pool.query('SELECT totp_secret, totp_enabled FROM users WHERE id = ?', [req.user.id]);
+    if (rows.length === 0) return res.status(404).json({ message: 'Utilisateur introuvable.' });
+    if (rows[0].totp_enabled) return res.status(400).json({ message: '2FA deja active.' });
+    if (!rows[0].totp_secret) return res.status(400).json({ message: 'Faites d\'abord la configuration.' });
+    const ok = speakeasy.totp.verify({ secret: rows[0].totp_secret, encoding: 'base32', token: String(code).trim(), window: 1 });
+    if (!ok) return res.status(400).json({ message: 'Code incorrect. Reessayez.' });
+    const plain = [];
+    const hashed = [];
+    for (let i = 0; i < 8; i++) {
+      const c = crypto.randomBytes(4).toString('hex').toUpperCase();
+      plain.push(c);
+      hashed.push(await bcrypt.hash(c, 10));
+    }
+    await pool.query('UPDATE users SET totp_enabled = 1, totp_backup = ? WHERE id = ?', [JSON.stringify(hashed), req.user.id]);
+    res.json({ message: '2FA activee avec succes.', backupCodes: plain });
+  } catch (err) {
+    res.status(500).json({ message: 'Erreur serveur.' });
+  }
+});
+
+router.post('/2fa/disable', authenticate, [
+  body('password').notEmpty().withMessage('Mot de passe requis.'),
+  body('code').trim().notEmpty().withMessage('Code requis.'),
+], validate, async (req, res) => {
+  try {
+    await ensure2faColumns();
+    const { password, code } = req.body;
+    const [rows] = await pool.query('SELECT password, totp_secret, totp_backup FROM users WHERE id = ?', [req.user.id]);
+    if (rows.length === 0) return res.status(404).json({ message: 'Utilisateur introuvable.' });
+    const validPw = await bcrypt.compare(password, rows[0].password);
+    if (!validPw) return res.status(400).json({ message: 'Mot de passe incorrect.' });
+    const token = String(code).trim().replace(/[\s-]/g, '');
+    let ok = false;
+    if (rows[0].totp_secret) {
+      ok = speakeasy.totp.verify({ secret: rows[0].totp_secret, encoding: 'base32', token, window: 1 });
+    }
+    if (!ok && rows[0].totp_backup) {
+      try {
+        const backups = JSON.parse(rows[0].totp_backup);
+        for (const h of backups) {
+          if (await bcrypt.compare(token, h)) { ok = true; break; }
+        }
+      } catch {}
+    }
+    if (!ok) return res.status(400).json({ message: 'Code incorrect.' });
+    await pool.query('UPDATE users SET totp_secret = NULL, totp_enabled = 0, totp_backup = NULL WHERE id = ?', [req.user.id]);
+    res.json({ message: '2FA desactivee.' });
+  } catch (err) {
+    res.status(500).json({ message: 'Erreur serveur.' });
+  }
+});
+
+router.post('/2fa/verify', [
+  body('tempToken').notEmpty().withMessage('Session requise.'),
+  body('code').trim().notEmpty().withMessage('Code requis.'),
+], validate, async (req, res) => {
+  try {
+    await ensure2faColumns();
+    const { tempToken, code } = req.body;
+    let decoded;
+    try {
+      decoded = jwt.verify(tempToken, process.env.JWT_SECRET);
+    } catch {
+      return res.status(401).json({ message: 'Session expiree. Reconnectez-vous.' });
+    }
+    if (!decoded.twofa) return res.status(401).json({ message: 'Session invalide.' });
+    const [rows] = await pool.query('SELECT * FROM users WHERE id = ?', [decoded.id]);
+    if (rows.length === 0) return res.status(400).json({ message: 'Utilisateur introuvable.' });
+    const user = rows[0];
+    if (!user.totp_enabled || !user.totp_secret) {
+      return res.status(400).json({ message: '2FA non active sur ce compte.' });
+    }
+    const token = String(code).trim().replace(/[\s-]/g, '');
+    let ok = speakeasy.totp.verify({ secret: user.totp_secret, encoding: 'base32', token, window: 1 });
+    let usedBackup = false;
+    if (!ok && user.totp_backup) {
+      try {
+        const backups = JSON.parse(user.totp_backup);
+        const remaining = [];
+        for (const h of backups) {
+          if (!usedBackup && await bcrypt.compare(token, h)) { usedBackup = true; continue; }
+          remaining.push(h);
+        }
+        if (usedBackup) {
+          ok = true;
+          await pool.query('UPDATE users SET totp_backup = ? WHERE id = ?', [JSON.stringify(remaining), user.id]);
+        }
+      } catch {}
+    }
+    if (!ok) return res.status(400).json({ message: 'Code incorrect.' });
+    const fullToken = jwt.sign(
+      { id: user.id, email: user.email, role: user.role },
+      process.env.JWT_SECRET,
+      { expiresIn: '6h' }
+    );
+    const ip = req.headers['x-forwarded-for']?.split(',')[0]?.trim() || req.socket.remoteAddress || 'unknown';
+    logVendorAction({ userId: user.id, action: 'connexion', ip, userAgent: req.headers['user-agent'] });
+    res.json({
+      token: fullToken,
+      usedBackup,
       user: { id: user.id, fullName: user.full_name, email: user.email, phone: user.phone, role: user.role, phoneVerified: true, premium: !!user.premium, premium_expires_at: user.premium_expires_at }
     });
   } catch (err) {

@@ -1,5 +1,5 @@
 import { useState, useEffect, useRef } from 'react';
-import { FiUser, FiMail, FiPhone, FiLock, FiSave, FiArrowLeft, FiCamera, FiX, FiShoppingBag, FiStar, FiTrash2 } from 'react-icons/fi';
+import { FiUser, FiMail, FiPhone, FiLock, FiSave, FiArrowLeft, FiCamera, FiX, FiShoppingBag, FiStar, FiTrash2, FiShield } from 'react-icons/fi';
 import { motion } from 'framer-motion';
 import { Link, useNavigate } from 'react-router-dom';
 import api from '../api/axios';
@@ -36,6 +36,14 @@ export default function Profile() {
   const [phoneCode, setPhoneCode] = useState('');
   const [phoneStep, setPhoneStep] = useState('form');
   const [phoneLoading, setPhoneLoading] = useState(false);
+  const [tfaEnabled, setTfaEnabled] = useState(false);
+  const [tfaSetup, setTfaSetup] = useState(null);
+  const [tfaCode, setTfaCode] = useState('');
+  const [tfaBackup, setTfaBackup] = useState([]);
+  const [tfaMsg, setTfaMsg] = useState(null);
+  const [tfaLoading, setTfaLoading] = useState(false);
+  const [tfaDisablePw, setTfaDisablePw] = useState('');
+  const [tfaDisableCode, setTfaDisableCode] = useState('');
 
   useEffect(() => {
     const token = localStorage.getItem('token');
@@ -115,6 +123,66 @@ export default function Profile() {
     }
   };
 
+  const loadTfaStatus = async () => {
+    try {
+      const { data } = await api.get('/auth/2fa/status');
+      setTfaEnabled(!!data.enabled);
+    } catch {}
+  };
+
+  useEffect(() => { loadTfaStatus(); }, []);
+
+  const startTfaSetup = async () => {
+    setTfaMsg(null);
+    setTfaLoading(true);
+    try {
+      const { data } = await api.post('/auth/2fa/setup');
+      setTfaSetup(data);
+      setTfaCode('');
+      setTfaBackup([]);
+    } catch (err) {
+      setTfaMsg({ type: 'error', text: err.response?.data?.message || t('profile.error') });
+    } finally {
+      setTfaLoading(false);
+    }
+  };
+
+  const confirmTfaEnable = async (e) => {
+    e.preventDefault();
+    setTfaMsg(null);
+    setTfaLoading(true);
+    try {
+      const { data } = await api.post('/auth/2fa/enable', { code: tfaCode });
+      setTfaBackup(data.backupCodes || []);
+      setTfaSetup(null);
+      setTfaCode('');
+      setTfaEnabled(true);
+      setTfaMsg({ type: 'success', text: data.message });
+    } catch (err) {
+      setTfaMsg({ type: 'error', text: err.response?.data?.message || t('profile.error') });
+    } finally {
+      setTfaLoading(false);
+    }
+  };
+
+  const disableTfa = async (e) => {
+    e.preventDefault();
+    setTfaMsg(null);
+    setTfaLoading(true);
+    try {
+      const { data } = await api.post('/auth/2fa/disable', { password: tfaDisablePw, code: tfaDisableCode });
+      setTfaEnabled(false);
+      setTfaDisablePw('');
+      setTfaDisableCode('');
+      setTfaBackup([]);
+      setTfaMsg({ type: 'success', text: data.message });
+    } catch (err) {
+      setTfaMsg({ type: 'error', text: err.response?.data?.message || t('profile.error') });
+    } finally {
+      setTfaLoading(false);
+    }
+  };
+
   const handlePhoneChange = async (e) => {
     e.preventDefault();
     setPhoneLoading(true);
@@ -128,8 +196,7 @@ export default function Profile() {
     }
   };
 
-  const handlePhoneVerify = async (e) => {
-    e.preventDefault();
+  const handlePhoneVerify = async (e) => {    e.preventDefault();
     setPhoneLoading(true);
     try {
       const { data } = await api.post('/auth/verify-phone-change', { code: phoneCode });
@@ -167,6 +234,9 @@ export default function Profile() {
           </button>
           <button type="button" onClick={() => setActiveTab('password')} className={activeTab === 'password' ? 'btn btn-primary' : 'btn btn-outline'} style={{ flex: 1, justifyContent: 'center' }}>
             <FiLock size={16} /> {t('profile.tabPassword')}
+          </button>
+          <button type="button" onClick={() => setActiveTab('security')} className={activeTab === 'security' ? 'btn btn-primary' : 'btn btn-outline'} style={{ flex: 1, justifyContent: 'center' }}>
+            <FiShield size={16} /> {t('profile.tabSecurity')}
           </button>
           {role !== 'admin' && (
             <button type="button" onClick={() => setActiveTab('delete')} className={activeTab === 'delete' ? 'btn btn-primary' : 'btn btn-outline'} style={{ flex: 1, justifyContent: 'center', color: activeTab === 'delete' ? '#fff' : 'var(--error)', background: activeTab === 'delete' ? 'var(--error)' : 'transparent' }}>
@@ -266,6 +336,81 @@ export default function Profile() {
               <FiSave size={16} /> {savingPwd ? t('profile.modifyingPassword') : t('profile.modifyPassword')}
             </motion.button>
           </motion.form>
+        )}
+
+        {activeTab === 'security' && (
+          <motion.div variants={item} className="auth-card">
+            <h3 style={{ marginBottom: 8, fontSize: 15, display: 'flex', alignItems: 'center', gap: 8 }}>
+              <FiShield size={16} /> {t('profile.tfaTitle')}
+            </h3>
+            <p style={{ fontSize: 13, color: 'var(--text-secondary)', marginBottom: 16, lineHeight: 1.6 }}>
+              {t('profile.tfaDesc')}
+            </p>
+
+            {tfaMsg && <div className={`alert alert-${tfaMsg.type}`}>{tfaMsg.text}</div>}
+
+            <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 16, fontSize: 13, fontWeight: 600 }}>
+              <span style={{ width: 10, height: 10, borderRadius: '50%', background: tfaEnabled ? '#10b981' : '#94a3b8' }} />
+              {tfaEnabled ? t('profile.tfaActive') : t('profile.tfaInactive')}
+            </div>
+
+            {!tfaEnabled && !tfaSetup && (
+              <button className="form-submit" onClick={startTfaSetup} disabled={tfaLoading}>
+                <FiShield size={16} /> {tfaLoading ? t('profile.sending') : t('profile.tfaSetupBtn')}
+              </button>
+            )}
+
+            {!tfaEnabled && tfaSetup && (
+              <form onSubmit={confirmTfaEnable}>
+                {tfaSetup.qr && (
+                  <div style={{ textAlign: 'center', marginBottom: 12 }}>
+                    <img src={tfaSetup.qr} alt="QR 2FA" style={{ width: 180, height: 180, borderRadius: 12, border: '1px solid var(--border)' }} />
+                  </div>
+                )}
+                <p style={{ fontSize: 13, color: 'var(--text-secondary)', marginBottom: 6 }}>{t('profile.tfaScanHint')}</p>
+                <div style={{ fontSize: 12, color: 'var(--text-secondary)', marginBottom: 4 }}>{t('profile.tfaSecretLabel')}</div>
+                <div style={{ fontFamily: 'monospace', fontSize: 14, fontWeight: 700, letterSpacing: 2, background: 'var(--bg-secondary)', border: '1px solid var(--border)', borderRadius: 8, padding: '10px 12px', marginBottom: 14, wordBreak: 'break-all', textAlign: 'center' }}>
+                  {tfaSetup.secret}
+                </div>
+                <div className="form-group">
+                  <label>{t('profile.tfaCodeLabel')}</label>
+                  <input type="text" inputMode="numeric" placeholder="123456" value={tfaCode} onChange={(e) => setTfaCode(e.target.value.replace(/\D/g, '').slice(0, 6))} required maxLength={6} style={{ textAlign: 'center', fontSize: 22, letterSpacing: 8, fontWeight: 700 }} />
+                </div>
+                <motion.button className="form-submit" type="submit" disabled={tfaLoading || tfaCode.length !== 6} whileTap={{ scale: 0.97 }}>
+                  {tfaLoading ? t('profile.verifying') : t('profile.tfaConfirmBtn')}
+                </motion.button>
+              </form>
+            )}
+
+            {tfaBackup.length > 0 && (
+              <div style={{ marginTop: 16, padding: 14, background: 'rgba(245,158,11,0.07)', border: '1px solid rgba(245,158,11,0.25)', borderRadius: 10 }}>
+                <h4 style={{ fontSize: 14, marginBottom: 6 }}>{t('profile.tfaBackupTitle')}</h4>
+                <p style={{ fontSize: 12, color: 'var(--text-secondary)', marginBottom: 10 }}>{t('profile.tfaBackupDesc')}</p>
+                <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 6, fontFamily: 'monospace', fontSize: 13, fontWeight: 700 }}>
+                  {tfaBackup.map((c) => (
+                    <div key={c} style={{ background: 'var(--bg-card)', border: '1px solid var(--border)', borderRadius: 6, padding: '6px 8px', textAlign: 'center' }}>{c}</div>
+                  ))}
+                </div>
+              </div>
+            )}
+
+            {tfaEnabled && (
+              <form onSubmit={disableTfa} style={{ marginTop: tfaBackup.length > 0 ? 16 : 0 }}>
+                <h4 style={{ fontSize: 14, marginBottom: 12 }}>{t('profile.tfaDisableTitle')}</h4>
+                <div className="form-group">
+                  <label>{t('profile.tfaPwLabel')}</label>
+                  <input type="password" value={tfaDisablePw} onChange={(e) => setTfaDisablePw(e.target.value)} placeholder={t('profile.yourPasswordPlaceholder')} required />
+                </div>
+                <div className="form-group">
+                  <label>{t('profile.tfaCodeLabel')}</label>
+                  <input type="text" value={tfaDisableCode} onChange={(e) => setTfaDisableCode(e.target.value.replace(/[^0-9A-Za-z]/g, '').slice(0, 8))} placeholder="123456" required style={{ textAlign: 'center', fontSize: 20, letterSpacing: 6, fontWeight: 700 }} />
+                </div>
+                <motion.button className="form-submit" type="submit" disabled={tfaLoading} whileTap={{ scale: 0.97 }} style={{ background: 'var(--error)', color: '#fff' }}>
+                  {tfaLoading ? t('profile.sending') : t('profile.tfaDisableBtn')}
+                </motion.button>
+              </form>
+            )}
+          </motion.div>
         )}
 
         {activeTab === 'delete' && role !== 'admin' && (

@@ -1,12 +1,13 @@
 import { useState } from 'react';
 import { Link, useNavigate, Navigate, useSearchParams } from 'react-router-dom';
-import { FiMail, FiLock, FiEye, FiEyeOff, FiCheckCircle, FiSmartphone } from 'react-icons/fi';
+import { FiMail, FiLock, FiEye, FiEyeOff, FiCheckCircle, FiSmartphone, FiShield } from 'react-icons/fi';
 import { useAuth } from '../context/AuthContext';
 import { useLanguage } from '../context/LanguageContext';
 import AuthLayout from '../components/AuthLayout';
+import api from '../api/axios';
 
 export default function Login() {
-  const { user, login } = useAuth();
+  const { user, setSession } = useAuth();
   const { t } = useLanguage();
   const [searchParams] = useSearchParams();
   const [email, setEmail] = useState('');
@@ -15,6 +16,8 @@ export default function Login() {
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
   const [needsVerification, setNeedsVerification] = useState(null);
+  const [need2fa, setNeed2fa] = useState(null);
+  const [code2fa, setCode2fa] = useState('');
   const navigate = useNavigate();
 
   const verified = searchParams.get('verified');
@@ -32,7 +35,13 @@ export default function Login() {
       lat = pos.coords.latitude; lng = pos.coords.longitude;
     } catch {}
     try {
-      await login(email, password, lat, lng);
+      const { data } = await api.post('/auth/login', { email, password, latitude: lat, longitude: lng });
+      if (data.requires2FA) {
+        setNeed2fa({ tempToken: data.tempToken, email: data.email || email });
+        setCode2fa('');
+        return;
+      }
+      setSession(data.token, data.user);
       navigate('/');
     } catch (err) {
       const data = err.response?.data;
@@ -45,6 +54,54 @@ export default function Login() {
       setLoading(false);
     }
   };
+
+  const handle2faVerify = async (e) => {
+    e.preventDefault();
+    setError('');
+    setLoading(true);
+    try {
+      const { data } = await api.post('/auth/2fa/verify', { tempToken: need2fa.tempToken, code: code2fa });
+      setSession(data.token, data.user);
+      navigate('/');
+    } catch (err) {
+      setError(err.response?.data?.message || t('auth.genericError'));
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  if (need2fa) {
+    return (
+      <AuthLayout
+        title={t('auth.tfaTitle')}
+        subtitle={t('auth.tfaSubtitle', { email: need2fa.email })}
+        footer={<button onClick={() => { setNeed2fa(null); setCode2fa(''); setError(''); }} style={{ background: 'none', border: 'none', color: 'var(--text-secondary)', cursor: 'pointer', fontSize: '13px' }}>← {t('auth.backToLogin')}</button>}
+      >
+        {error && <div className="alert alert-error">{error}</div>}
+        <form onSubmit={handle2faVerify}>
+          <div style={{ textAlign: 'center', marginBottom: '16px' }}>
+            <FiShield size={44} style={{ color: 'var(--primary)' }} />
+          </div>
+          <div className="form-group">
+            <label>{t('auth.tfaCodeLabel')}</label>
+            <input
+              type="text"
+              inputMode="numeric"
+              placeholder="123456"
+              value={code2fa}
+              onChange={(e) => setCode2fa(e.target.value.replace(/[^0-9A-Za-z]/g, '').slice(0, 8))}
+              required
+              autoFocus
+              style={{ textAlign: 'center', fontSize: '24px', letterSpacing: '6px', fontWeight: 700 }}
+            />
+          </div>
+          <button type="submit" className="form-submit" disabled={loading || !code2fa}>
+            {loading ? t('auth.verifying') : t('auth.tfaVerifyBtn')}
+          </button>
+        </form>
+      </AuthLayout>
+    );
+  }
 
   return (
     <AuthLayout

@@ -91,6 +91,10 @@
     resetPasswordButton: 'Reinitialiser le mot de passe',
 
     genericError: 'Erreur.',
+    tfaTitle: 'Vérification en deux étapes',
+    tfaSubtitle: 'Entrez le code de votre application d’authentification pour {{email}} (ou un code de secours).',
+    tfaCodeLabel: 'Code à 6 chiffres (ou code de secours)',
+    tfaVerifyBtn: 'Vérifier',
 
     // Auth split brand panel
     brandEyebrow: 'Marketplace Marocaine',
