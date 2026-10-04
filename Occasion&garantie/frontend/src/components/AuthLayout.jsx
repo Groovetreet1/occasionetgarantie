@@ -1,11 +1,61 @@
 import { Link } from 'react-router-dom';
-import { FiShield, FiRefreshCw, FiSmartphone, FiTruck, FiCheck, FiChevronLeft, FiStar, FiMapPin, FiPlay } from 'react-icons/fi';
+import { useState, useEffect } from 'react';
+import { FiShield, FiRefreshCw, FiSmartphone, FiTruck, FiCheck, FiChevronLeft, FiStar, FiMapPin, FiPlay, FiShoppingBag } from 'react-icons/fi';
 import { useLanguage } from '../context/LanguageContext';
 
 const REAL_PRODUCT_IMAGE = 'https://res.cloudinary.com/rk97x4hc/image/upload/v1785024268/occasionetgarantie/products/oawup62jfgpcnbt9ecbs.jpg';
 
+const LIVE_EVENTS = [
+  { icon: FiCheck, title: 'Paiement confirmé', sub: "1 400 DH · à l'instant" },
+  { icon: FiShoppingBag, title: 'Nouvelle commande', sub: 'Redmi 15C · Smartphones' },
+  { icon: FiStar, title: 'Avis 5/5', sub: 'GoPhone 2026 · vendeur vérifié' },
+];
+
+function useCountUp(target, duration = 1300, delay = 400) {
+  const [val, setVal] = useState(0);
+  useEffect(() => {
+    if (window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
+      setVal(target);
+      return;
+    }
+    let raf;
+    let start;
+    const t = setTimeout(() => {
+      const step = (ts) => {
+        if (!start) start = ts;
+        const p = Math.min((ts - start) / duration, 1);
+        setVal(Math.round(target * (1 - Math.pow(1 - p, 3))));
+        if (p < 1) raf = requestAnimationFrame(step);
+      };
+      raf = requestAnimationFrame(step);
+    }, delay);
+    return () => { clearTimeout(t); cancelAnimationFrame(raf); };
+  }, [target, duration, delay]);
+  return val;
+}
+
 export default function AuthLayout({ title, subtitle, children, footer }) {
   const { t, lang } = useLanguage();
+  const products = useCountUp(50);
+  const satisfaction = useCountUp(96, 1300, 550);
+  const [liveIdx, setLiveIdx] = useState(0);
+  const [bars, setBars] = useState(() => Array.from({ length: 18 }, (_, i) => 35 + ((i * 37) % 55)));
+
+  useEffect(() => {
+    if (window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches) return;
+    const id = setInterval(() => setLiveIdx((i) => (i + 1) % LIVE_EVENTS.length), 4000);
+    return () => clearInterval(id);
+  }, []);
+
+  useEffect(() => {
+    if (window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches) return;
+    const id = setInterval(() => {
+      setBars(Array.from({ length: 18 }, () => 25 + Math.round(Math.random() * 70)));
+    }, 900);
+    return () => clearInterval(id);
+  }, []);
+
+  const LiveIcon = LIVE_EVENTS[liveIdx].icon;
 
   const features = [
     { icon: FiShield, title: t('auth.brandFeat1Title'), desc: t('auth.brandFeat1Desc') },
@@ -68,6 +118,11 @@ export default function AuthLayout({ title, subtitle, children, footer }) {
                 <span className="auth-showcase-loc"><FiMapPin size={11} /> Casablanca</span>
                 <span className="auth-showcase-warranty"><FiShield size={10} /> 12 mois</span>
               </div>
+              <div className="auth-showcase-live">
+                <div><strong>{products}+</strong><span>Produits</span></div>
+                <div><strong>{satisfaction}%</strong><span>Satisfaction</span></div>
+                <div><strong>48h</strong><span>Livraison</span></div>
+              </div>
               <div className="auth-showcase-track">
                 <div className="auth-showcase-track-head"><span>Suivi de commande #OG-2481</span><b>2/3</b></div>
                 <div className="auth-showcase-steps">
@@ -88,18 +143,20 @@ export default function AuthLayout({ title, subtitle, children, footer }) {
               <div className="auth-chat-audio">
                 <span className="auth-chat-play"><FiPlay size={12} /></span>
                 <span className="auth-chat-bars">
-                  <i /><i /><i /><i /><i /><i /><i /><i /><i /><i /><i /><i /><i /><i /><i /><i /><i /><i />
+                  {bars.map((h, i) => (
+                    <i key={i} style={{ height: `${h}%` }} />
+                  ))}
                 </span>
                 <span className="auth-chat-time">0:12</span>
               </div>
               <div className="auth-chat-bubble buyer">Parfait, je le prends. On se voit demain ?<em>14:03</em></div>
             </div>
 
-            <div className="auth-showcase-toast" dir="ltr">
-              <span className="auth-showcase-toast-icon"><FiCheck size={14} /></span>
+            <div className="auth-showcase-toast" dir="ltr" key={liveIdx}>
+              <span className="auth-showcase-toast-icon"><LiveIcon size={14} /></span>
               <div>
-                <strong>Paiement confirmé</strong>
-                <span>1 400 DH · à l'instant</span>
+                <strong>{LIVE_EVENTS[liveIdx].title}</strong>
+                <span>{LIVE_EVENTS[liveIdx].sub}</span>
               </div>
             </div>
           </div>
