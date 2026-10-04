@@ -1,12 +1,12 @@
 import { Link } from 'react-router-dom';
 import { useState, useEffect } from 'react';
-import { FiShield, FiRefreshCw, FiSmartphone, FiTruck, FiCheck, FiChevronLeft, FiStar, FiMapPin, FiPlay, FiShoppingBag } from 'react-icons/fi';
+import { FiShield, FiRefreshCw, FiSmartphone, FiTruck, FiCheck, FiCheckCircle, FiStar, FiMapPin, FiPlay, FiShoppingBag } from 'react-icons/fi';
 import { useLanguage } from '../context/LanguageContext';
 
 const REAL_PRODUCT_IMAGE = 'https://res.cloudinary.com/rk97x4hc/image/upload/v1785024268/occasionetgarantie/products/oawup62jfgpcnbt9ecbs.jpg';
 
 const LIVE_EVENTS = [
-  { icon: FiCheck, title: 'Paiement confirmé', sub: "1 400 DH · à l'instant" },
+  { icon: FiCheckCircle, title: 'Paiement confirmé', sub: "1 400 DH · à l'instant" },
   { icon: FiShoppingBag, title: 'Nouvelle commande', sub: 'Redmi 15C · Smartphones' },
   { icon: FiStar, title: 'Avis 5/5', sub: 'GoPhone 2026 · vendeur vérifié' },
 ];
@@ -43,7 +43,7 @@ export default function AuthLayout({ title, subtitle, children, footer }) {
 
   useEffect(() => {
     if (window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches) return;
-    const id = setInterval(() => setLiveIdx((i) => (i + 1) % LIVE_EVENTS.length), 4000);
+    const id = setInterval(() => setLiveIdx((i) => (i + 1) % LIVE_EVENTS.length), 4500);
     return () => clearInterval(id);
   }, []);
 
@@ -87,78 +87,90 @@ export default function AuthLayout({ title, subtitle, children, footer }) {
 
       <div className="auth-split-brand">
         <div className="auth-split-brand-body">
-          <div className="auth-split-brand-greeting">
-            <span className="auth-split-brand-eyebrow">{t('auth.brandEyebrow')}</span>
+          <div className="auth-brand-head">
+            <span className="auth-brand-eyebrow"><i />{t('auth.brandEyebrow')}</span>
             <h2>{t('auth.brandHeadline')}</h2>
             <p>{t('auth.brandSubheadline')}</p>
           </div>
 
-          <div className="auth-services" dir="ltr">
-            {categories.map((c) => (
-              <span key={c} className="auth-service-chip">{c}</span>
+          <div className="auth-brand-cats" dir="ltr">
+            {categories.map((c, i) => (
+              <span key={c} className={i === 0 ? 'on' : ''}>{c}</span>
             ))}
           </div>
 
-          <div className="auth-showcase-wrap">
-            <div className="auth-showcase" dir="ltr">
-              <div className="auth-showcase-crumb">
-                <FiChevronLeft size={14} />Accueil<span>/</span>Smartphones<span>/</span><strong>Redmi 15C</strong>
-              </div>
-              <div className="auth-showcase-photo">
-                <FiSmartphone size={40} />
+          <div className="auth-brand-stage" dir="ltr">
+            <div className="auth-product">
+              <div className="auth-product-crumb">Smartphones<span>/</span><strong>Redmi 15C</strong></div>
+              <div className="auth-product-photo">
+                <FiSmartphone size={34} />
                 <img src={REAL_PRODUCT_IMAGE} alt="Redmi 15C" loading="lazy" onError={(e) => { e.currentTarget.style.display = 'none'; }} />
+                <span className="auth-product-cond">Neuf</span>
               </div>
-              <div className="auth-showcase-meta">
-                <span className="auth-showcase-cat">Smartphones</span>
-                <span className="auth-showcase-rating"><FiStar size={11} /> 4.7</span>
+              <div className="auth-product-meta">
+                <span className="auth-product-cat">Smartphones</span>
+                <span className="auth-product-rating"><FiStar size={11} /> 4.7</span>
               </div>
-              <div className="auth-showcase-title">Redmi 15C · 8/128 Go · Neuf</div>
-              <div className="auth-showcase-price">1 400 DH</div>
-              <div className="auth-showcase-foot">
-                <span className="auth-showcase-loc"><FiMapPin size={11} /> Casablanca</span>
-                <span className="auth-showcase-warranty"><FiShield size={10} /> 12 mois</span>
+              <div className="auth-product-title">Redmi 15C · 8/128 Go</div>
+              <div className="auth-product-price">1 400 DH</div>
+              <div className="auth-product-seller">
+                <span className="auth-avatar">GP</span>
+                <div>
+                  <strong>GoPhone 2026</strong>
+                  <small><FiStar size={10} /> 4.7 · Premium</small>
+                </div>
+                <span className="auth-online"><i />En ligne</span>
               </div>
-              <div className="auth-showcase-live">
-                <div><strong>{products}+</strong><span>Produits</span></div>
-                <div><strong>{satisfaction}%</strong><span>Satisfaction</span></div>
-                <div><strong>48h</strong><span>Livraison</span></div>
+              <div className="auth-product-foot">
+                <span className="auth-loc"><FiMapPin size={11} /> Casablanca</span>
+                <span className="auth-warranty"><FiShield size={10} /> Garantie 12 mois</span>
               </div>
-              <div className="auth-showcase-track">
-                <div className="auth-showcase-track-head"><span>Suivi de commande #OG-2481</span><b>2/3</b></div>
-                <div className="auth-showcase-steps">
+              <div className="auth-track">
+                <div className="auth-track-head"><span>Suivi de commande</span><b>2/3</b></div>
+                <div className="auth-track-steps">
                   <span className="done"><FiCheck size={11} /> Vérifié</span>
                   <span className="done"><FiCheck size={11} /> Payé</span>
-                  <span className="current">En livraison</span>
+                  <span className="now">Livraison</span>
                 </div>
-                <div className="auth-showcase-meter"><i style={{ '--w': '66%' }} /></div>
+                <div className="auth-track-bar"><i style={{ '--w': '66%' }} /></div>
               </div>
             </div>
 
-            <div className="auth-chat" dir="ltr">
+            <div className="auth-chat">
               <div className="auth-chat-head">
-                <div className="auth-chat-avatars"><span className="store">GP</span></div>
-                <div className="auth-chat-who"><strong>GoPhone 2026</strong><span><i />En ligne</span></div>
+                <span className="auth-avatar sm">GP</span>
+                <div>
+                  <strong>GoPhone 2026</strong>
+                  <span className="st"><i />En ligne</span>
+                </div>
+                <time>14:03</time>
               </div>
-              <div className="auth-chat-bubble seller">Oui disponible, avec garantie 12 mois incluse.<em>14:01</em></div>
-              <div className="auth-chat-audio">
-                <span className="auth-chat-play"><FiPlay size={12} /></span>
-                <span className="auth-chat-bars">
+              <p className="auth-bubble in">Oui, disponible — garantie 12 mois incluse.</p>
+              <div className="auth-voice">
+                <span className="auth-play"><FiPlay size={11} /></span>
+                <span className="auth-bars">
                   {bars.map((h, i) => (
                     <i key={i} style={{ height: `${h}%` }} />
                   ))}
                 </span>
-                <span className="auth-chat-time">0:12</span>
+                <span className="auth-len">0:12</span>
               </div>
-              <div className="auth-chat-bubble buyer">Parfait, je le prends. On se voit demain ?<em>14:03</em></div>
+              <p className="auth-bubble out">Parfait, je le prends.</p>
             </div>
 
-            <div className="auth-showcase-toast" dir="ltr" key={liveIdx}>
-              <span className="auth-showcase-toast-icon"><LiveIcon size={14} /></span>
+            <div className="auth-toast" key={liveIdx}>
+              <span className="auth-toast-ic"><LiveIcon size={14} /></span>
               <div>
                 <strong>{LIVE_EVENTS[liveIdx].title}</strong>
                 <span>{LIVE_EVENTS[liveIdx].sub}</span>
               </div>
             </div>
+          </div>
+
+          <div className="auth-stats" dir="ltr">
+            <div><strong>{products}+</strong><span>Produits</span></div>
+            <div><strong>{satisfaction}%</strong><span>Satisfaction</span></div>
+            <div><strong>12<i> mois</i></strong><span>Garantie</span></div>
           </div>
 
           <div className="auth-split-features">
