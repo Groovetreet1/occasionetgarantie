@@ -1316,8 +1316,8 @@ select.form-control, .form-group select { cursor: pointer; appearance: auto; }
   position: relative;
   z-index: 1;
 }
-.auth-split-brand-body { display: flex; flex-direction: column; justify-content: safe center; flex: 1; min-height: 0; }
-.auth-split-brand-greeting { max-width: 520px; margin-bottom: 22px; }
+.auth-split-brand-body { display: flex; flex-direction: column; align-items: center; justify-content: safe center; flex: 1; min-height: 0; }
+.auth-split-brand-greeting { width: 100%; max-width: 520px; margin-bottom: 22px; text-align: center; }
 .auth-split-brand-eyebrow {
   display: inline-block; font-size: 11.5px; font-weight: 700;
   text-transform: uppercase; letter-spacing: 1.6px;
@@ -1336,7 +1336,7 @@ select.form-control, .form-group select { cursor: pointer; appearance: auto; }
 }
 
 /* Showcase: faithful replica of a product card + order tracking */
-.auth-showcase-wrap { position: relative; z-index: 1; max-width: 520px; margin-bottom: 30px; }
+.auth-showcase-wrap { position: relative; z-index: 1; width: 100%; max-width: 520px; margin-bottom: 30px; }
 .auth-showcase {
   background: #ffffff;
   border: 1px solid #e5e7eb;
@@ -1408,7 +1408,7 @@ select.form-control, .form-group select { cursor: pointer; appearance: auto; }
 .auth-showcase-toast span { font-size: 11px; color: #64748b; }
 
 /* Services row: what you can do on the platform */
-.auth-services { position: relative; z-index: 1; display: flex; gap: 8px; flex-wrap: wrap; max-width: 520px; margin-bottom: 16px; animation: auth-rise 0.7s cubic-bezier(0.22, 1, 0.36, 1) 0.1s both; }
+.auth-services { position: relative; z-index: 1; display: flex; gap: 8px; flex-wrap: wrap; justify-content: center; width: 100%; max-width: 520px; margin-bottom: 16px; animation: auth-rise 0.7s cubic-bezier(0.22, 1, 0.36, 1) 0.1s both; }
 .auth-service-chip {
   display: inline-flex; align-items: center; gap: 6px;
   font-size: 11.5px; font-weight: 700; color: #fde68a;
@@ -1473,7 +1473,7 @@ select.form-control, .form-group select { cursor: pointer; appearance: auto; }
   .auth-chat-bars i, .auth-chat-who span i { animation: none; }
 }
 
-.auth-split-features { display: grid; grid-template-columns: 1fr 1fr; gap: 14px 18px; max-width: 520px; }
+.auth-split-features { display: grid; grid-template-columns: 1fr 1fr; gap: 14px 18px; width: 100%; max-width: 520px; }
 .auth-split-feature { display: flex; gap: 10px; align-items: flex-start; }
 .auth-split-feature-icon {
   flex-shrink: 0; width: 32px; height: 32px; border-radius: 8px;
@@ -1484,7 +1484,7 @@ select.form-control, .form-group select { cursor: pointer; appearance: auto; }
 .auth-split-feature h3 { font-size: 13.5px; font-weight: 700; margin: 0 0 2px; color: #faf7f0; }
 .auth-split-feature p { font-size: 11.5px; line-height: 1.5; color: rgba(250, 247, 240, 0.6); margin: 0; }
 
-.auth-split-brand-copy { font-size: 12px; color: rgba(250, 247, 240, 0.45); position: relative; z-index: 1; padding-top: 18px; }
+.auth-split-brand-copy { font-size: 12px; color: rgba(250, 247, 240, 0.45); position: relative; z-index: 1; padding-top: 18px; text-align: center; }
 
 @media (max-width: 1180px) {
   .auth-split { grid-template-columns: 1fr; }
