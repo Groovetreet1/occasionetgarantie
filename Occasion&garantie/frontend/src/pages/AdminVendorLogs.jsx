@@ -37,9 +37,45 @@ export default function AdminVendorLogs() {
   const [limit, setLimit] = useState(50);
   const [total, setTotal] = useState(0);
   const [totalPages, setTotalPages] = useState(0);
+  const [locked, setLocked] = useState(true);
+  const [otp, setOtp] = useState('');
+  const [otpLoading, setOtpLoading] = useState(false);
+  const [otpError, setOtpError] = useState('');
+  const [otpInfo, setOtpInfo] = useState(null);
+  const [cooldown, setCooldown] = useState(0);
   const mapRef = useRef(null);
   const mapContainerRef = useRef(null);
   const LRef = useRef(null);
+
+  const requestOtp = async () => {
+    setOtpError('');
+    setOtpLoading(true);
+    try {
+      const res = await api.post('/admin/vendor-logs/request-otp');
+      setOtpInfo({ sentVia: res.data.sentVia, maskedTo: res.data.maskedTo });
+      setCooldown(30);
+    } catch (e) {
+      setOtpError(e.response?.data?.message || 'Erreur.');
+    } finally {
+      setOtpLoading(false);
+    }
+  };
+
+  const verifyOtp = async (e) => {
+    if (e) e.preventDefault();
+    setOtpError('');
+    setOtpLoading(true);
+    try {
+      await api.post('/admin/vendor-logs/verify-otp', { code: otp });
+      setOtp('');
+      setLocked(false);
+    } catch (e) {
+      setOtpError(e.response?.data?.message || 'Code incorrect.');
+      if (e.response?.data?.otpRequired) requestOtp();
+    } finally {
+      setOtpLoading(false);
+    }
+  };
 
   const load = () => {
     setLoading(true);
@@ -49,11 +85,23 @@ export default function AdminVendorLogs() {
         setTotal(res.data.total || 0);
         setTotalPages(res.data.totalPages || 1);
       })
-      .catch(() => {})
+      .catch((e) => {
+        if (e.response?.status === 403 && e.response?.data?.otpRequired) {
+          setLocked(true);
+          requestOtp();
+        }
+      })
       .finally(() => setLoading(false));
   };
 
-  useEffect(() => { load(); }, [page, limit]);
+  useEffect(() => { requestOtp(); }, []);
+  useEffect(() => { if (!locked) load(); }, [page, limit, locked]);
+
+  useEffect(() => {
+    if (cooldown <= 0) return;
+    const id = setTimeout(() => setCooldown((c) => c - 1), 1000);
+    return () => clearTimeout(id);
+  }, [cooldown]);
 
   useEffect(() => {
     let cancelled = false;
@@ -138,7 +186,13 @@ export default function AdminVendorLogs() {
       setPage(1);
       load();
     } catch (e) {
-      setReindexMsg(`${t('admin.reindexError')} ${e.response?.data?.error || e.message}`);
+      if (e.response?.status === 403 && e.response?.data?.otpRequired) {
+        setLocked(true);
+        requestOtp();
+        setReindexMsg('');
+      } else {
+        setReindexMsg(`${t('admin.reindexError')} ${e.response?.data?.error || e.message}`);
+      }
     }
     setReindexing(false);
     setTimeout(() => setReindexMsg(''), 6000);
@@ -149,6 +203,48 @@ export default function AdminVendorLogs() {
   });
 
   const hasCoords = logs.filter(l => l.latitude && l.longitude);
+
+  if (locked) {
+    const viaLabel = otpInfo?.sentVia === 'email' ? t('admin.otpEmail') : t('admin.otpSms');
+    return (
+      <section className="admin-dashboard">
+        <div className="container" style={{ position: 'relative', zIndex: 1, maxWidth: 440, margin: '0 auto', paddingTop: 40 }}>
+          <div style={{ background: 'var(--bg-card)', border: '1px solid var(--border)', borderRadius: 16, padding: 32, textAlign: 'center' }}>
+            <div style={{ width: 56, height: 56, borderRadius: '50%', background: 'rgba(245,158,11,0.12)', display: 'flex', alignItems: 'center', justifyContent: 'center', margin: '0 auto 16px' }}>
+              <FiShield size={26} style={{ color: 'var(--primary)' }} />
+            </div>
+            <h1 style={{ fontSize: 22, fontWeight: 800, marginBottom: 8 }}>{t('admin.otpGateTitle')}</h1>
+            <p style={{ fontSize: 13.5, color: 'var(--text-secondary)', marginBottom: 20, lineHeight: 1.6 }}>
+              {otpInfo ? t('admin.otpGateSubtitle', { via: viaLabel, to: otpInfo.maskedTo }) : '...'}
+            </p>
+            {otpError && <div className="alert alert-error">{otpError}</div>}
+            <form onSubmit={verifyOtp}>
+              <input
+                type="text"
+                inputMode="numeric"
+                placeholder={t('admin.otpCodePlaceholder')}
+                value={otp}
+                onChange={(e) => setOtp(e.target.value.replace(/\D/g, '').slice(0, 6))}
+                style={{ width: '100%', textAlign: 'center', fontSize: 26, letterSpacing: 10, fontWeight: 800, padding: '12px 12px 12px 22px', border: '1px solid var(--border)', borderRadius: 10, background: 'var(--bg-secondary)', color: 'var(--text)', marginBottom: 12, fontFamily: 'var(--font)', boxSizing: 'border-box' }}
+              />
+              <button type="submit" className="form-submit" disabled={otpLoading || otp.length !== 6}>
+                {otpLoading ? t('admin.otpVerifying') : t('admin.otpVerify')}
+              </button>
+            </form>
+            <div style={{ marginTop: 14, fontSize: 13, color: 'var(--text-muted)' }}>
+              {t('admin.otpNoCode')}{' '}
+              <button onClick={requestOtp} disabled={otpLoading || cooldown > 0} style={{ background: 'none', border: 'none', color: 'var(--primary)', fontWeight: 700, cursor: cooldown > 0 ? 'not-allowed' : 'pointer', fontSize: 13, fontFamily: 'var(--font)' }}>
+                {t('admin.otpResend')}{cooldown > 0 ? ` (${cooldown}s)` : ''}
+              </button>
+            </div>
+            <div style={{ marginTop: 16 }}>
+              <Link to="/admin" className="btn btn-ghost" style={{ fontSize: 13 }}><FiArrowLeft /> {t('admin.dashboardTitle')}</Link>
+            </div>
+          </div>
+        </div>
+      </section>
+    );
+  }
 
   return (
     <section className="admin-dashboard">
