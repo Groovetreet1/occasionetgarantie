@@ -41,9 +41,51 @@ export default function AdminVendorLogs() {
   const [password, setPassword] = useState('');
   const [unlockLoading, setUnlockLoading] = useState(false);
   const [unlockError, setUnlockError] = useState('');
+  const [gateStep, setGateStep] = useState('password');
+  const [resetOtp, setResetOtp] = useState('');
+  const [newPw, setNewPw] = useState('');
+  const [confirmPw, setConfirmPw] = useState('');
+  const [resetInfo, setResetInfo] = useState(null);
   const mapRef = useRef(null);
   const mapContainerRef = useRef(null);
   const LRef = useRef(null);
+
+  const forgot = async () => {
+    setUnlockError('');
+    setUnlockLoading(true);
+    try {
+      const res = await api.post('/admin/vendor-logs/forgot');
+      setResetInfo({ sentVia: res.data.sentVia, maskedTo: res.data.maskedTo });
+      setGateStep('forgot');
+    } catch (e) {
+      setUnlockError(e.response?.data?.message || 'Erreur.');
+    } finally {
+      setUnlockLoading(false);
+    }
+  };
+
+  const doReset = async (e) => {
+    if (e) e.preventDefault();
+    if (newPw !== confirmPw) {
+      setUnlockError(t('admin.pwdMismatch'));
+      return;
+    }
+    setUnlockError('');
+    setUnlockLoading(true);
+    try {
+      await api.post('/admin/vendor-logs/reset', { otp: resetOtp, newPassword: newPw });
+      setPassword('');
+      setResetOtp('');
+      setNewPw('');
+      setConfirmPw('');
+      setGateStep('password');
+      setLocked(false);
+    } catch (e) {
+      setUnlockError(e.response?.data?.message || 'Erreur.');
+    } finally {
+      setUnlockLoading(false);
+    }
+  };
 
   const unlock = async (e) => {
     if (e) e.preventDefault();
@@ -70,6 +112,7 @@ export default function AdminVendorLogs() {
       })
       .catch((e) => {
         if (e.response?.status === 403 && e.response?.data?.passwordRequired) {
+          setGateStep('password');
           setLocked(true);
         }
       })
@@ -162,6 +205,7 @@ export default function AdminVendorLogs() {
       load();
     } catch (e) {
       if (e.response?.status === 403 && e.response?.data?.passwordRequired) {
+        setGateStep('password');
         setLocked(true);
         setReindexMsg('');
       } else {
@@ -191,18 +235,65 @@ export default function AdminVendorLogs() {
               {t('admin.otpGateSubtitle')}
             </p>
             {unlockError && <div className="alert alert-error">{unlockError}</div>}
-            <form onSubmit={unlock}>
-              <input
-                type="password"
-                placeholder={t('admin.otpCodePlaceholder')}
-                value={password}
-                onChange={(e) => setPassword(e.target.value)}
-                style={{ width: '100%', textAlign: 'center', fontSize: 18, fontWeight: 700, padding: '12px', border: '1px solid var(--border)', borderRadius: 10, background: 'var(--bg-secondary)', color: 'var(--text)', marginBottom: 12, fontFamily: 'var(--font)', boxSizing: 'border-box' }}
-              />
-              <button type="submit" className="form-submit" disabled={unlockLoading || !password}>
-                {unlockLoading ? t('admin.otpVerifying') : t('admin.otpVerify')}
-              </button>
-            </form>
+            {gateStep === 'password' ? (
+              <>
+                <form onSubmit={unlock}>
+                  <input
+                    type="password"
+                    placeholder={t('admin.otpCodePlaceholder')}
+                    value={password}
+                    onChange={(e) => setPassword(e.target.value)}
+                    style={{ width: '100%', textAlign: 'center', fontSize: 18, fontWeight: 700, padding: '12px', border: '1px solid var(--border)', borderRadius: 10, background: 'var(--bg-secondary)', color: 'var(--text)', marginBottom: 12, fontFamily: 'var(--font)', boxSizing: 'border-box' }}
+                  />
+                  <button type="submit" className="form-submit" disabled={unlockLoading || !password}>
+                    {unlockLoading ? t('admin.otpVerifying') : t('admin.otpVerify')}
+                  </button>
+                </form>
+                <div style={{ marginTop: 14 }}>
+                  <button onClick={forgot} disabled={unlockLoading} style={{ background: 'none', border: 'none', color: 'var(--primary)', fontWeight: 600, cursor: 'pointer', fontSize: 13, fontFamily: 'var(--font)' }}>
+                    {t('admin.pwdForgot')}
+                  </button>
+                </div>
+              </>
+            ) : (
+              <>
+                <p style={{ fontSize: 13, color: 'var(--text-secondary)', marginBottom: 16, lineHeight: 1.6 }}>
+                  {resetInfo ? t('admin.pwdResetSubtitle', { via: resetInfo.sentVia === 'email' ? t('admin.otpEmail') : t('admin.otpSms'), to: resetInfo.maskedTo }) : '...'}
+                </p>
+                <form onSubmit={doReset}>
+                  <input
+                    type="text"
+                    inputMode="numeric"
+                    placeholder="123456"
+                    value={resetOtp}
+                    onChange={(e) => setResetOtp(e.target.value.replace(/\D/g, '').slice(0, 6))}
+                    style={{ width: '100%', textAlign: 'center', fontSize: 24, letterSpacing: 8, fontWeight: 800, padding: '10px 10px 10px 18px', border: '1px solid var(--border)', borderRadius: 10, background: 'var(--bg-secondary)', color: 'var(--text)', marginBottom: 10, fontFamily: 'var(--font)', boxSizing: 'border-box' }}
+                  />
+                  <input
+                    type="password"
+                    placeholder={t('admin.pwdNewPlaceholder')}
+                    value={newPw}
+                    onChange={(e) => setNewPw(e.target.value)}
+                    style={{ width: '100%', padding: '12px', border: '1px solid var(--border)', borderRadius: 10, background: 'var(--bg-secondary)', color: 'var(--text)', marginBottom: 10, fontFamily: 'var(--font)', fontSize: 14, boxSizing: 'border-box' }}
+                  />
+                  <input
+                    type="password"
+                    placeholder={t('admin.pwdConfirmPlaceholder')}
+                    value={confirmPw}
+                    onChange={(e) => setConfirmPw(e.target.value)}
+                    style={{ width: '100%', padding: '12px', border: '1px solid var(--border)', borderRadius: 10, background: 'var(--bg-secondary)', color: 'var(--text)', marginBottom: 12, fontFamily: 'var(--font)', fontSize: 14, boxSizing: 'border-box' }}
+                  />
+                  <button type="submit" className="form-submit" disabled={unlockLoading || resetOtp.length !== 6 || newPw.length < 8}>
+                    {unlockLoading ? t('admin.otpVerifying') : t('admin.pwdResetBtn')}
+                  </button>
+                </form>
+                <div style={{ marginTop: 14 }}>
+                  <button onClick={() => { setGateStep('password'); setUnlockError(''); }} style={{ background: 'none', border: 'none', color: 'var(--text-secondary)', cursor: 'pointer', fontSize: 13, fontFamily: 'var(--font)' }}>
+                    ← {t('admin.pwdBack')}
+                  </button>
+                </div>
+              </>
+            )}
             <div style={{ marginTop: 16 }}>
               <Link to="/admin" className="btn btn-ghost" style={{ fontSize: 13 }}><FiArrowLeft /> {t('admin.dashboardTitle')}</Link>
             </div>

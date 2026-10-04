@@ -1,5 +1,6 @@
 const express = require('express');
 const bcrypt = require('bcryptjs');
+const crypto = require('crypto');
 const router = express.Router();
 const pool = require('../config/db');
 const { authenticate, adminOnly } = require('../middleware/auth');
@@ -645,8 +646,25 @@ router.post('/newsletter/send', authenticate, adminOnly, async (req, res) => {
 
 // ---- Password gate for sensitive vendor-logs (hash bcrypt, jamais en clair) ----
 const vendorLogsAccess = new Map(); // adminId -> expiresAt
+const vendorLogsResetOtp = new Map(); // adminId -> { code, expiresAt }
 const VENDOR_ACCESS_TTL = 30 * 60 * 1000;
-const VENDOR_LOGS_PASSWORD_HASH = process.env.VENDOR_LOGS_PASSWORD_HASH || '$2b$10$Ow.5TcsKWmrbAHsJo29Ar.HoLWGdvv2Bo24aHlH3W2BLcX5.hnKSu';
+const VENDOR_RESET_OTP_TTL = 5 * 60 * 1000;
+const DEFAULT_VENDOR_LOGS_HASH = '$2b$10$Ow.5TcsKWmrbAHsJo29Ar.HoLWGdvv2Bo24aHlH3W2BLcX5.hnKSu';
+
+async function ensureSettingsTable() {
+  try {
+    await pool.query('CREATE TABLE IF NOT EXISTS app_settings (`key` VARCHAR(100) PRIMARY KEY, `value` TEXT, updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP)');
+  } catch {}
+}
+
+async function getVendorLogsHash() {
+  await ensureSettingsTable();
+  try {
+    const [rows] = await pool.query('SELECT `value` FROM app_settings WHERE `key` = ?', ['vendor_logs_password_hash']);
+    if (rows.length > 0 && rows[0].value) return rows[0].value;
+  } catch {}
+  return process.env.VENDOR_LOGS_PASSWORD_HASH || DEFAULT_VENDOR_LOGS_HASH;
+}
 
 function requireVendorLogsAccess(req, res, next) {
   const until = vendorLogsAccess.get(req.user.id);
@@ -658,10 +676,69 @@ router.post('/vendor-logs/unlock', authenticate, adminOnly, async (req, res) => 
   try {
     const { password } = req.body;
     if (!password) return res.status(400).json({ message: 'Mot de passe requis.' });
-    const ok = await bcrypt.compare(String(password), VENDOR_LOGS_PASSWORD_HASH);
+    const hash = await getVendorLogsHash();
+    const ok = await bcrypt.compare(String(password), hash);
     if (!ok) return res.status(400).json({ message: 'Mot de passe incorrect.' });
     vendorLogsAccess.set(req.user.id, Date.now() + VENDOR_ACCESS_TTL);
     res.json({ message: 'Acces autorise.', accessMinutes: 30 });
+  } catch (err) {
+    res.status(500).json({ message: 'Erreur serveur.' });
+  }
+});
+
+router.post('/vendor-logs/forgot', authenticate, adminOnly, async (req, res) => {
+  try {
+    const [rows] = await pool.query('SELECT full_name, phone, email FROM users WHERE id = ?', [req.user.id]);
+    if (rows.length === 0) return res.status(404).json({ message: 'Admin introuvable.' });
+    const admin = rows[0];
+    const code = crypto.randomInt(100000, 999999).toString();
+    vendorLogsResetOtp.set(req.user.id, { code, expiresAt: Date.now() + VENDOR_RESET_OTP_TTL });
+    let sentVia = 'sms';
+    let maskedTo = (admin.phone || '').replace(/\d(?=\d{2})/g, '*');
+    try {
+      if (!admin.phone) throw new Error('no admin phone');
+      await gomobile.sendSms(admin.phone, `Code recuperation Journal vendeurs : ${code}. Valable 5 min.`);
+    } catch (smsErr) {
+      console.error('Vendor-logs reset SMS failed:', smsErr.message);
+      sentVia = 'email';
+      maskedTo = (admin.email || '').replace(/(.{2})(.*)(@.*)/, (_, a, b, c) => a + '*'.repeat(Math.max(b.length, 3)) + c);
+      try {
+        await send({
+          to: admin.email,
+          subject: 'Code de récupération - Journal des vendeurs',
+          html: `<div style="font-family:Arial,sans-serif;max-width:420px;margin:0 auto;padding:24px"><h2 style="color:#1e293b">Récupération</h2><p>Bonjour ${admin.full_name || ''},</p><p>Votre code de récupération :</p><div style="font-size:32px;font-weight:800;letter-spacing:8px;text-align:center;background:#f1f5f9;border-radius:8px;padding:16px;margin:16px 0">${code}</div><p style="color:#64748b;font-size:13px">Valable 5 minutes. Ne le partagez avec personne.</p></div>`,
+        });
+      } catch (mailErr) {
+        console.error('Vendor-logs reset email failed:', mailErr.message);
+        return res.status(500).json({ message: 'Impossible d\'envoyer le code. Reessayez plus tard.' });
+      }
+    }
+    res.json({ message: 'Code envoye.', sentVia, maskedTo, expiresIn: 300 });
+  } catch (err) {
+    res.status(500).json({ message: 'Erreur serveur.' });
+  }
+});
+
+router.post('/vendor-logs/reset', authenticate, adminOnly, async (req, res) => {
+  try {
+    const { otp, newPassword } = req.body;
+    if (!otp) return res.status(400).json({ message: 'Code requis.' });
+    if (!newPassword || String(newPassword).length < 8) {
+      return res.status(400).json({ message: 'Nouveau mot de passe requis (8 caracteres minimum).' });
+    }
+    const entry = vendorLogsResetOtp.get(req.user.id);
+    if (!entry) return res.status(400).json({ message: 'Demandez d\'abord un code.' });
+    if (Date.now() > entry.expiresAt) {
+      vendorLogsResetOtp.delete(req.user.id);
+      return res.status(400).json({ message: 'Code expire. Demandez un nouveau code.' });
+    }
+    if (entry.code !== String(otp).trim()) return res.status(400).json({ message: 'Code incorrect.' });
+    const hash = await bcrypt.hash(String(newPassword), 10);
+    await ensureSettingsTable();
+    await pool.query('INSERT INTO app_settings (`key`, `value`) VALUES (?, ?) ON DUPLICATE KEY UPDATE `value` = VALUES(`value`)', ['vendor_logs_password_hash', hash]);
+    vendorLogsResetOtp.delete(req.user.id);
+    vendorLogsAccess.set(req.user.id, Date.now() + VENDOR_ACCESS_TTL);
+    res.json({ message: 'Mot de passe mis a jour. Acces autorise.', accessMinutes: 30 });
   } catch (err) {
     res.status(500).json({ message: 'Erreur serveur.' });
   }
