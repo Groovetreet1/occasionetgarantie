@@ -1,6 +1,6 @@
 import { Link } from 'react-router-dom';
 import { useState, useEffect } from 'react';
-import { FiShield, FiRefreshCw, FiSmartphone, FiTruck } from 'react-icons/fi';
+import { FiShield, FiRefreshCw, FiSmartphone, FiTruck, FiCheckCircle } from 'react-icons/fi';
 import { useLanguage } from '../context/LanguageContext';
 
 function TypewriterHeadline({ text }) {
@@ -81,6 +81,32 @@ export default function AuthLayout({ title, subtitle, children, footer }) {
             <span className="auth-split-brand-eyebrow">{t('auth.brandEyebrow')}</span>
             <h2 style={{ minHeight: '84px' }}><TypewriterHeadline text={headline} /></h2>
             <p>{t('auth.brandSubheadline')}</p>
+          </div>
+
+          <div className="auth-preview-card" aria-hidden>
+            <div className="auth-preview-head">
+              <span className="auth-preview-live"><span className="auth-preview-dot" />En direct</span>
+              <span className="auth-preview-order">Commande #OG-2481 · Active</span>
+            </div>
+            <div className="auth-preview-title">iPhone 13 Pro · 128 Go</div>
+            <div className="auth-preview-sub">Reconditionné vérifié, garantie 12 mois incluse</div>
+            <div className="auth-preview-stats">
+              <div className="auth-preview-stat"><strong>2 480+</strong><span>Produits</span></div>
+              <div className="auth-preview-stat"><strong>98%</strong><span>Satisfaction</span></div>
+              <div className="auth-preview-stat"><strong>48h</strong><span>Livraison</span></div>
+            </div>
+            <div className="auth-preview-bars">
+              <div className="auth-preview-bar-row"><span>Vendeurs vérifiés</span><div className="auth-preview-bar"><i style={{ width: '88%' }} /></div><b>88%</b></div>
+              <div className="auth-preview-bar-row"><span>Garantie activée</span><div className="auth-preview-bar"><i style={{ width: '74%' }} /></div><b>74%</b></div>
+              <div className="auth-preview-bar-row"><span>Livrés à temps</span><div className="auth-preview-bar"><i style={{ width: '96%' }} /></div><b>96%</b></div>
+            </div>
+            <div className="auth-preview-activity">
+              <div className="auth-preview-avatar">YB</div>
+              <div className="auth-preview-activity-body">
+                <div className="auth-preview-activity-top"><strong>Yasmine B.</strong><span>il y a 2 min</span></div>
+                <div className="auth-preview-activity-text">Achat vérifié · paiement sécurisé <FiCheckCircle size={12} /></div>
+              </div>
+            </div>
           </div>
 
           <div className="auth-split-features">

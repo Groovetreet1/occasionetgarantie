@@ -382,7 +382,7 @@ router.post('/forgot-password', [
   body('identifier').trim().notEmpty().withMessage('Email ou telephone requis.'),
 ], validate, async (req, res) => {
   try {
-    const { identifier, userId } = req.body;
+    const { identifier, userId, method } = req.body;
     let users;
     if (identifier.includes('@')) {
       [users] = await pool.query('SELECT id, full_name, email, phone FROM users WHERE email = ?', [identifier]);
@@ -390,6 +390,19 @@ router.post('/forgot-password', [
       const code = crypto.randomInt(100000, 999999).toString();
       resetCodes.set(identifier, { code, userId: users[0].id, expiresAt: Date.now() + CODE_EXPIRY });
       const resetLink = `${CLIENT_URL}/reset-password?identifier=${encodeURIComponent(identifier)}&code=${code}`;
+      // Choix utilisateur: sms force l'envoi par SMS, sinon email (fallback SMS si echec)
+      if (method === 'sms') {
+        if (!users[0].phone) {
+          return res.status(400).json({ message: 'Aucun numero de telephone associe a ce compte. Choisissez Email.' });
+        }
+        try {
+          await gomobile.sendSms(users[0].phone, `Votre code de reinitialisation Occasion & Garantie : ${code}. Valable 15 min.`);
+        } catch (smsErr) {
+          console.error('SMS reset failed:', smsErr.message);
+          return res.status(500).json({ message: 'Impossible d\'envoyer le SMS. Reessayez plus tard.' });
+        }
+        return res.json({ message: 'Code de vérification envoyé par SMS.', identifier, sentVia: 'sms' });
+      }
       // Try email first (primary for email identifier), fallback to SMS if email fails
       let sentVia = 'email';
       try {
