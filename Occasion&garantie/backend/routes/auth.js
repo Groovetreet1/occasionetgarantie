@@ -560,19 +560,25 @@ function normalizePhone(val) {
 const MAX_RESET_ATTEMPTS = 3;
 const RESET_REQUEST_LIMIT = 2;
 const RESET_REQUEST_WINDOW = 60 * 60 * 1000;
+const RESET_IP_LIMIT = 5;
+const RESET_IP_WINDOW = 15 * 60 * 1000;
 const resetThrottle = new Map(); // identifiant normalise -> [timestamps]
+const resetIpThrottle = new Map(); // ip -> [timestamps]
 
-function checkResetThrottle(normId) {
+function checkWindowThrottle(map, key, limit, windowMs) {
   const now = Date.now();
-  const arr = (resetThrottle.get(normId) || []).filter((ts) => now - ts < RESET_REQUEST_WINDOW);
-  if (arr.length >= RESET_REQUEST_LIMIT) {
+  const arr = (map.get(key) || []).filter((ts) => now - ts < windowMs);
+  if (arr.length >= limit) {
     const oldest = Math.min(...arr);
-    const waitMin = Math.ceil((RESET_REQUEST_WINDOW - (now - oldest)) / 60000);
-    return { blocked: true, waitMin };
+    return { blocked: true, waitMin: Math.ceil((windowMs - (now - oldest)) / 60000) };
   }
   arr.push(now);
-  resetThrottle.set(normId, arr);
+  map.set(key, arr);
   return { blocked: false };
+}
+
+function checkResetThrottle(normId) {
+  return checkWindowThrottle(resetThrottle, normId, RESET_REQUEST_LIMIT, RESET_REQUEST_WINDOW);
 }
 
 function checkResetCode(entry, key, code) {
@@ -598,6 +604,11 @@ router.post('/forgot-password', [
 ], validate, async (req, res) => {
   try {
     const { identifier, userId, method } = req.body;
+    const ip = req.headers['x-forwarded-for']?.split(',')[0]?.trim() || req.socket.remoteAddress || 'unknown';
+    const ipTh = checkWindowThrottle(resetIpThrottle, ip, RESET_IP_LIMIT, RESET_IP_WINDOW);
+    if (ipTh.blocked) {
+      return res.status(429).json({ message: `Trop de demandes depuis votre connexion. Réessayez dans ${ipTh.waitMin} minute(s).` });
+    }
     const throttleKey = identifier.includes('@') ? identifier.toLowerCase() : identifier.replace(/\D/g, '');
     const th = checkResetThrottle(throttleKey);
     if (th.blocked) {
