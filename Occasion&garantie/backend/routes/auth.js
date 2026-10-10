@@ -558,6 +558,22 @@ function normalizePhone(val) {
 }
 
 const MAX_RESET_ATTEMPTS = 3;
+const RESET_REQUEST_LIMIT = 2;
+const RESET_REQUEST_WINDOW = 60 * 60 * 1000;
+const resetThrottle = new Map(); // identifiant normalise -> [timestamps]
+
+function checkResetThrottle(normId) {
+  const now = Date.now();
+  const arr = (resetThrottle.get(normId) || []).filter((ts) => now - ts < RESET_REQUEST_WINDOW);
+  if (arr.length >= RESET_REQUEST_LIMIT) {
+    const oldest = Math.min(...arr);
+    const waitMin = Math.ceil((RESET_REQUEST_WINDOW - (now - oldest)) / 60000);
+    return { blocked: true, waitMin };
+  }
+  arr.push(now);
+  resetThrottle.set(normId, arr);
+  return { blocked: false };
+}
 
 function checkResetCode(entry, key, code) {
   if (!entry) return { status: 400, message: 'Aucun code demande pour cet identifiant.' };
@@ -582,6 +598,11 @@ router.post('/forgot-password', [
 ], validate, async (req, res) => {
   try {
     const { identifier, userId, method } = req.body;
+    const throttleKey = identifier.includes('@') ? identifier.toLowerCase() : identifier.replace(/\D/g, '');
+    const th = checkResetThrottle(throttleKey);
+    if (th.blocked) {
+      return res.status(429).json({ message: `Trop de demandes pour ce compte. Réessayez dans ${th.waitMin} minute(s).` });
+    }
     let users;
     if (identifier.includes('@')) {
       [users] = await pool.query('SELECT id, full_name, email, phone FROM users WHERE email = ?', [identifier]);
