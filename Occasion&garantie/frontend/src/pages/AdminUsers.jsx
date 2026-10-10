@@ -23,6 +23,7 @@ export default function AdminUsers() {
   const [suspendReason, setSuspendReason] = useState('');
   const [suspendLoading, setSuspendLoading] = useState(false);
   const [openMenu, setOpenMenu] = useState(null);
+  const [tfaResult, setTfaResult] = useState(null);
   const menuRef = useRef(null);
 
   const fetchUsers = (p, l) => {
@@ -108,10 +109,10 @@ export default function AdminUsers() {
     if (action === 'disable' && !confirm(t('admin.tfaDisableConfirm', { name: user.full_name }))) return;
     try {
       const { data } = await api.post(`/admin/users/${user.id}/2fa`, { action });
-      alert(data.message);
+      setTfaResult({ type: 'success', text: data.message });
       fetchUsers(page, limit);
     } catch (err) {
-      alert(err.response?.data?.message || t('admin.error'));
+      setTfaResult({ type: 'error', text: err.response?.data?.message || t('admin.error') });
     }
   };
 
@@ -402,6 +403,30 @@ export default function AdminUsers() {
         confirmColor="#dc2626"
         icon={<FiTrash2 size={26} color="#dc2626" />}
       />
+
+      {tfaResult && (
+        <div style={{ position: 'fixed', inset: 0, background: 'rgba(0,0,0,0.5)', zIndex: 99999, display: 'flex', alignItems: 'center', justifyContent: 'center', padding: 16 }}
+          onClick={() => setTfaResult(null)}>
+          <div style={{ background: 'var(--bg-card)', borderRadius: 20, padding: 32, maxWidth: 360, width: '100%', boxShadow: '0 25px 80px rgba(0,0,0,0.35)', textAlign: 'center' }}
+            onClick={e => e.stopPropagation()}>
+            <div style={{
+              width: 56, height: 56, borderRadius: '50%', margin: '0 auto 14px',
+              background: tfaResult.type === 'success' ? 'rgba(5,150,105,0.12)' : 'rgba(239,68,68,0.12)',
+              display: 'flex', alignItems: 'center', justifyContent: 'center',
+            }}>
+              {tfaResult.type === 'success'
+                ? <FiCheck size={28} color="#059669" />
+                : <FiX size={28} color="#dc2626" />}
+            </div>
+            <p style={{ fontSize: 14, fontWeight: 600, color: tfaResult.type === 'success' ? '#059669' : '#dc2626', margin: '0 0 20px', lineHeight: 1.6 }}>
+              {tfaResult.text}
+            </p>
+            <button onClick={() => setTfaResult(null)} className="btn btn-primary" style={{ width: '100%', justifyContent: 'center', padding: '10px 0' }}>
+              OK
+            </button>
+          </div>
+        </div>
+      )}
     </section>
   );
 }
