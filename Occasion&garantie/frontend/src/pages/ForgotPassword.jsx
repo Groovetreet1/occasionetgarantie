@@ -21,25 +21,13 @@ export default function ForgotPassword() {
     e.preventDefault();
     setError('');
     const value = identifier.trim();
-    // 1) Cas email: verifier le format puis l'existence AVANT de proposer SMS/Email
+    // 1) Cas email: reponse uniforme (anti-enumeration) -> choix SMS/Email direct, sans verifier l'existence
     if (value.includes('@')) {
       if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(value)) {
         setError(lang === 'ar' ? 'البريد الإلكتروني غير صالح.' : 'Adresse email invalide.');
         return;
       }
-      setLoading(true);
-      try {
-        const check = await api.post('/auth/check-account', { identifier: value });
-        if (!check.data.exists) {
-          setError(lang === 'ar' ? 'لا يوجد أي حساب بهذا البريد الإلكتروني.' : 'Aucun compte trouvé avec cet email.');
-          return;
-        }
-        setStep('choose-method');
-      } catch (err) {
-        setError(err.response?.data?.message || t('auth.genericError'));
-      } finally {
-        setLoading(false);
-      }
+      setStep('choose-method');
       return;
     }
     // 2) Cas telephone: refuser le texte libre / numeros trop courts (sinon tous les comptes matchent)

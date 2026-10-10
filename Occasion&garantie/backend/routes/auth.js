@@ -557,29 +557,25 @@ function normalizePhone(val) {
   return val;
 }
 
-router.post('/check-account', [
-  body('identifier').trim().notEmpty().withMessage('Email ou telephone requis.'),
-], validate, async (req, res) => {
-  try {
-    const { identifier } = req.body;
-    if (identifier.includes('@')) {
-      const [users] = await pool.query('SELECT id FROM users WHERE email = ?', [identifier]);
-      return res.json({ exists: users.length > 0, type: 'email' });
-    }
-    const inputDigits = identifier.replace(/\D/g, '');
-    if (inputDigits.length < 9) return res.json({ exists: false, type: 'phone', invalid: true });
-    const [matched] = await pool.query('SELECT id, phone, role FROM users');
-    const unique = matched.filter(u => {
-      if (u.role === 'admin' || u.role === 'superadmin') return false;
-      const pd = (u.phone || '').replace(/\D/g, '');
-      if (!pd) return false;
-      return pd === inputDigits || pd.endsWith(inputDigits.slice(-9)) || inputDigits.endsWith(pd.slice(-9));
-    });
-    return res.json({ exists: unique.length > 0, type: 'phone', count: unique.length });
-  } catch (err) {
-    res.status(500).json({ message: 'Erreur serveur.' });
+const MAX_RESET_ATTEMPTS = 3;
+
+function checkResetCode(entry, key, code) {
+  if (!entry) return { status: 400, message: 'Aucun code demande pour cet identifiant.' };
+  if (Date.now() > entry.expiresAt) {
+    resetCodes.delete(key);
+    return { status: 400, message: 'Code expire. Veuillez refaire une demande.' };
   }
-});
+  if (entry.code !== code) {
+    entry.attempts = (entry.attempts || 0) + 1;
+    if (entry.attempts >= MAX_RESET_ATTEMPTS) {
+      resetCodes.delete(key);
+      return { status: 400, message: 'Trop de tentatives. Demandez un nouveau code.' };
+    }
+    const left = MAX_RESET_ATTEMPTS - entry.attempts;
+    return { status: 400, message: `Code incorrect. Il vous reste ${left} tentative${left > 1 ? 's' : ''}.` };
+  }
+  return null;
+}
 
 router.post('/forgot-password', [
   body('identifier').trim().notEmpty().withMessage('Email ou telephone requis.'),
@@ -589,22 +585,23 @@ router.post('/forgot-password', [
     let users;
     if (identifier.includes('@')) {
       [users] = await pool.query('SELECT id, full_name, email, phone FROM users WHERE email = ?', [identifier]);
-      if (users.length === 0) return res.status(404).json({ message: 'Aucun compte trouve avec cet email.' });
+      const genericMsg = 'Si ce compte existe, vous recevrez un code de vérification.';
+      if (users.length === 0) return res.json({ message: genericMsg, identifier, sentVia: method === 'sms' ? 'sms' : 'email' });
       const code = crypto.randomInt(100000, 999999).toString();
-      resetCodes.set(identifier, { code, userId: users[0].id, expiresAt: Date.now() + CODE_EXPIRY });
+      resetCodes.set(identifier, { code, userId: users[0].id, expiresAt: Date.now() + CODE_EXPIRY, attempts: 0 });
       const resetLink = `${CLIENT_URL}/reset-password?identifier=${encodeURIComponent(identifier)}&code=${code}`;
       // Choix utilisateur: sms force l'envoi par SMS, sinon email (fallback SMS si echec)
       if (method === 'sms') {
         if (!users[0].phone) {
-          return res.status(400).json({ message: 'Aucun numero de telephone associe a ce compte. Choisissez Email.' });
+          return res.json({ message: genericMsg, identifier, sentVia: 'sms' });
         }
         try {
           await gomobile.sendSms(users[0].phone, `Votre code de reinitialisation Occasion & Garantie : ${code}. Valable 15 min.`);
         } catch (smsErr) {
           console.error('SMS reset failed:', smsErr.message);
-          return res.status(500).json({ message: 'Impossible d\'envoyer le SMS. Reessayez plus tard.' });
+          return res.json({ message: genericMsg, identifier, sentVia: 'sms' });
         }
-        return res.json({ message: 'Code de vérification envoyé par SMS.', identifier, sentVia: 'sms' });
+        return res.json({ message: genericMsg, identifier, sentVia: 'sms' });
       }
       // Try email first (primary for email identifier), fallback to SMS if email fails
       let sentVia = 'email';
@@ -618,16 +615,16 @@ router.post('/forgot-password', [
         console.error('Email reset failed, trying SMS fallback:', mailErr.message);
         sentVia = 'sms';
         if (!users[0].phone) {
-          return res.status(500).json({ message: `Impossible d'envoyer l'email (${mailErr.message}). Aucun téléphone de secours.` });
+          return res.json({ message: genericMsg, identifier, sentVia: 'email' });
         }
         try {
           await gomobile.sendSms(users[0].phone, `Votre code de reinitialisation Occasion & Garantie : ${code}. Valable 15 min.`);
         } catch (smsErr) {
           console.error('SMS fallback also failed:', smsErr.message);
-          return res.status(500).json({ message: 'Impossible d\'envoyer le code. Réessayez plus tard.' });
+          return res.json({ message: genericMsg, identifier, sentVia: 'email' });
         }
       }
-      return res.json({ message: sentVia === 'email' ? 'Code de vérification envoyé par email.' : 'Code de vérification envoyé par SMS.', identifier, sentVia });
+      return res.json({ message: genericMsg, identifier, sentVia });
     }
 
     const inputDigits = identifier.replace(/\D/g, '');
@@ -643,7 +640,7 @@ router.post('/forgot-password', [
       if (!pd) return false;
       return pd === inputDigits || pd.endsWith(inputDigits.slice(-9)) || inputDigits.endsWith(pd.slice(-9));
     });
-    if (unique.length === 0) return res.status(404).json({ message: 'Aucun compte trouve avec ce telephone.' });
+    if (unique.length === 0) return res.json({ message: 'Si un compte est associe a ce numero, vous recevrez un code par SMS.', identifier });
 
     if (unique.length > 1 && !userId) {
       const accounts = unique.map(u => ({
@@ -662,7 +659,9 @@ router.post('/forgot-password', [
 
     const code = crypto.randomInt(100000, 999999).toString();
     const key = inputDigits + '-' + targetId;
-    resetCodes.set(key, { code, userId: targetId, expiresAt: Date.now() + CODE_EXPIRY });
+    const entry = { code, userId: targetId, expiresAt: Date.now() + CODE_EXPIRY, attempts: 0 };
+    resetCodes.set(key, entry);
+    resetCodes.set(inputDigits, entry);
 
     try {
       await gomobile.sendSms(target.phone, `Votre code de reinitialisation Occasion & Garantie : ${code}. Valable 15 min.`);
@@ -670,7 +669,7 @@ router.post('/forgot-password', [
       console.error('SMS send failed:', smsErr.message);
     }
 
-    res.json({ message: 'Code de verification envoye par SMS.', identifier, userId: targetId });
+    res.json({ message: 'Si un compte est associe a ce numero, vous recevrez un code par SMS.', identifier });
   } catch (err) {
     console.error('forgot-password error:', err.message, err.stack?.split('\n').slice(0, 3).join('\n'));
     res.status(500).json({ message: 'Erreur serveur.' });
@@ -686,12 +685,8 @@ router.post('/verify-reset-code', [
     const normId = identifier.includes('@') ? identifier : identifier.replace(/\D/g, '');
     const key = userId ? normId + '-' + userId : normId;
     const entry = resetCodes.get(key);
-    if (!entry) return res.status(400).json({ message: 'Aucun code demande pour cet identifiant.' });
-    if (Date.now() > entry.expiresAt) {
-      resetCodes.delete(key);
-      return res.status(400).json({ message: 'Code expire. Veuillez refaire une demande.' });
-    }
-    if (entry.code !== code) return res.status(400).json({ message: 'Code incorrect.' });
+    const codeErr = checkResetCode(entry, key, code);
+    if (codeErr) return res.status(codeErr.status).json({ message: codeErr.message });
 
     res.json({ message: 'Code verifie.', valid: true, identifier, userId: entry.userId });
   } catch (err) {
@@ -709,12 +704,8 @@ router.post('/reset-password', [
     const normId = identifier.includes('@') ? identifier : identifier.replace(/\D/g, '');
     const key = userId ? normId + '-' + userId : normId;
     const entry = resetCodes.get(key);
-    if (!entry) return res.status(400).json({ message: 'Aucune demande de reinitialisation.' });
-    if (Date.now() > entry.expiresAt) {
-      resetCodes.delete(key);
-      return res.status(400).json({ message: 'Code expire. Veuillez refaire une demande.' });
-    }
-    if (entry.code !== code) return res.status(400).json({ message: 'Code incorrect.' });
+    const codeErr = checkResetCode(entry, key, code);
+    if (codeErr) return res.status(codeErr.status).json({ message: codeErr.message });
 
     const hashed = await bcrypt.hash(newPassword, 10);
     await pool.query('UPDATE users SET password = ? WHERE id = ?', [hashed, entry.userId]);
