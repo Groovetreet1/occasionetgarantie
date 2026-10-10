@@ -365,6 +365,17 @@ router.post('/2fa/disable', authenticate, [
   }
 });
 
+// ---- 2FA brute-force guard: 3 essais max puis blocage 30 min ----
+const tfaAttempts = new Map(); // userId -> { count, lockedUntil }
+const MAX_TFA_ATTEMPTS = 3;
+const TFA_LOCK_MS = 30 * 60 * 1000;
+const SUPPORT_CONTACT = 'contact-occasionetgarantie@proton.me';
+router.tfaAttempts = tfaAttempts;
+
+function tfaLockMessage(mins) {
+  return `Trop de tentatives. Accès 2FA bloqué${mins ? ` (${mins} min)` : ''}. Contactez le super administrateur (${SUPPORT_CONTACT}).`;
+}
+
 router.post('/2fa/verify', [
   body('tempToken').notEmpty().withMessage('Session requise.'),
   body('code').trim().notEmpty().withMessage('Code requis.'),
@@ -385,6 +396,12 @@ router.post('/2fa/verify', [
     if (!user.totp_enabled || !user.totp_secret) {
       return res.status(400).json({ message: '2FA non active sur ce compte.' });
     }
+    const nowAtt = Date.now();
+    const att = tfaAttempts.get(user.id);
+    if (att && att.lockedUntil && nowAtt < att.lockedUntil) {
+      const mins = Math.ceil((att.lockedUntil - nowAtt) / 60000);
+      return res.status(403).json({ message: tfaLockMessage(mins), locked: true });
+    }
     const token = String(code).trim().replace(/[\s-]/g, '');
     let ok = speakeasy.totp.verify({ secret: user.totp_secret, encoding: 'base32', token, window: 1 });
     let usedBackup = false;
@@ -402,7 +419,19 @@ router.post('/2fa/verify', [
         }
       } catch {}
     }
-    if (!ok) return res.status(400).json({ message: 'Code incorrect.' });
+    if (!ok) {
+      const a = tfaAttempts.get(user.id) || { count: 0, lockedUntil: 0 };
+      a.count += 1;
+      if (a.count >= MAX_TFA_ATTEMPTS) {
+        a.lockedUntil = Date.now() + TFA_LOCK_MS;
+        tfaAttempts.set(user.id, a);
+        return res.status(403).json({ message: tfaLockMessage(30), locked: true });
+      }
+      tfaAttempts.set(user.id, a);
+      const left = MAX_TFA_ATTEMPTS - a.count;
+      return res.status(400).json({ message: `Code incorrect. Il vous reste ${left} tentative${left > 1 ? 's' : ''}.`, attemptsLeft: left });
+    }
+    tfaAttempts.delete(user.id);
     const fullToken = jwt.sign(
       { id: user.id, email: user.email, role: user.role },
       process.env.JWT_SECRET,

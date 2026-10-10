@@ -91,14 +91,24 @@ export default function AdminUsers() {
     }
   };
 
-  const handleTogglePremium = async (user) => {
-    const makePremium = !user.premium;
+  const handleTogglePremium = async (user) => {    const makePremium = !user.premium;
     const confirmed = makePremium
       ? confirm(t('admin.makePremiumConfirm', { name: user.full_name }))
       : confirm(t('admin.removePremiumConfirm', { name: user.full_name }));
     if (!confirmed) return;
     try {
       await api.put(`/admin/users/${user.id}/premium`, { premium: makePremium });
+      fetchUsers(page, limit);
+    } catch (err) {
+      alert(err.response?.data?.message || t('admin.error'));
+    }
+  };
+
+  const handleTfaAction = async (user, action) => {
+    if (action === 'disable' && !confirm(t('admin.tfaDisableConfirm', { name: user.full_name }))) return;
+    try {
+      const { data } = await api.post(`/admin/users/${user.id}/2fa`, { action });
+      alert(data.message);
       fetchUsers(page, limit);
     } catch (err) {
       alert(err.response?.data?.message || t('admin.error'));
@@ -167,6 +177,11 @@ export default function AdminUsers() {
                     <td style={{ padding: '10px 6px', fontWeight: 700 }}>{Number(u.credit_balance || 0).toLocaleString()}</td>
                     <td style={{ padding: '10px 6px', fontSize: '11px' }}>
                       <div style={{ display: 'flex', flexDirection: 'column', gap: 4 }}>
+                        {!!u.totp_enabled && (
+                          <span style={{ color: '#6d28d9', fontWeight: 700, background: 'rgba(109,40,217,0.1)', padding: '2px 8px', borderRadius: 8, display: 'inline-flex', alignItems: 'center', gap: 3, width: 'fit-content', fontSize: '11px' }}>
+                            <FiShield size={11} /> {t('admin.tfaBadge')}
+                          </span>
+                        )}
                         {u.premium ? (
                           <span style={{ color: '#d97706', fontWeight: 700, background: 'rgba(217,119,6,0.12)', padding: '2px 8px', borderRadius: 8, display: 'inline-flex', alignItems: 'center', gap: 3, width: 'fit-content' }}>
                             <FiStar size={11} /> {t('admin.premium')}
@@ -236,6 +251,20 @@ export default function AdminUsers() {
                                   onMouseEnter={e => e.currentTarget.style.background = 'rgba(245,158,11,0.08)'}
                                   onMouseLeave={e => e.currentTarget.style.background = 'none'}>
                                   <FiStar size={14} /> {t('admin.removePremium')}
+                                </button>
+                              )}
+                              <button onClick={() => { setOpenMenu(null); handleTfaAction(u, 'unlock'); }}
+                                style={{ display: 'flex', alignItems: 'center', gap: 8, width: '100%', padding: '8px 12px', fontSize: '12px', background: 'none', border: 'none', color: '#059669', cursor: 'pointer', borderRadius: 8 }}
+                                onMouseEnter={e => e.currentTarget.style.background = 'rgba(5,150,105,0.08)'}
+                                onMouseLeave={e => e.currentTarget.style.background = 'none'}>
+                                <FiShield size={14} /> {t('admin.tfaUnlock')}
+                              </button>
+                              {!!u.totp_enabled && (
+                                <button onClick={() => { setOpenMenu(null); handleTfaAction(u, 'disable'); }}
+                                  style={{ display: 'flex', alignItems: 'center', gap: 8, width: '100%', padding: '8px 12px', fontSize: '12px', background: 'none', border: 'none', color: '#dc2626', cursor: 'pointer', borderRadius: 8 }}
+                                  onMouseEnter={e => e.currentTarget.style.background = 'rgba(239,68,68,0.08)'}
+                                  onMouseLeave={e => e.currentTarget.style.background = 'none'}>
+                                  <FiShield size={14} /> {t('admin.tfaDisable')}
                                 </button>
                               )}
                               <div style={{ height: 1, background: 'var(--border)', margin: '4px 6px' }} />

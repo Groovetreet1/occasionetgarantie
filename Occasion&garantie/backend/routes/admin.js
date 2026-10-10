@@ -593,10 +593,59 @@ router.get('/users', authenticate, adminOnly, async (req, res) => {
     const page = Math.max(1, parseInt(req.query.page) || 1);
     const limit = Math.min(100, Math.max(1, parseInt(req.query.limit) || 50));
     const offset = (page - 1) * limit;
+    try { await pool.query('ALTER TABLE users ADD COLUMN totp_enabled TINYINT(1) DEFAULT 0'); } catch {}
     const [countRows] = await pool.query('SELECT COUNT(*) as total FROM users');
     const total = countRows[0].total;
-    const [rows] = await pool.query('SELECT id, full_name, email, phone, role, phone_verified, created_at, store_name, premium, credit_balance, terms_accepted, suspended, suspension_reason FROM users ORDER BY id ASC LIMIT ? OFFSET ?', [limit, offset]);
+    let rows;
+    try {
+      [rows] = await pool.query('SELECT id, full_name, email, phone, role, phone_verified, created_at, store_name, premium, credit_balance, terms_accepted, suspended, suspension_reason, totp_enabled FROM users ORDER BY id ASC LIMIT ? OFFSET ?', [limit, offset]);
+    } catch (e) {
+      if (e.errno === 1054 || e.code === 'ER_BAD_FIELD_ERROR') {
+        [rows] = await pool.query('SELECT id, full_name, email, phone, role, phone_verified, created_at, store_name, premium, credit_balance, terms_accepted, suspended, suspension_reason FROM users ORDER BY id ASC LIMIT ? OFFSET ?', [limit, offset]);
+        rows = rows.map(r => ({ ...r, totp_enabled: 0 }));
+      } else throw e;
+    }
     res.json({ users: rows, total, page, limit, totalPages: Math.ceil(total / limit) });
+  } catch (err) {
+    res.status(500).json({ message: 'Erreur serveur.' });
+  }
+});
+
+// ---- 2FA client: statut + reset/deblocage par l'admin ----
+const tfaAttempts = require('./auth').tfaAttempts || new Map();
+
+router.get('/users/:id/2fa', authenticate, adminOnly, async (req, res) => {
+  try {
+    const targetId = Number(req.params.id);
+    const [rows] = await pool.query('SELECT totp_enabled FROM users WHERE id = ?', [targetId]);
+    if (rows.length === 0) return res.status(404).json({ message: 'Utilisateur introuvable.' });
+    const att = tfaAttempts.get(targetId);
+    const locked = !!(att && att.lockedUntil && Date.now() < att.lockedUntil);
+    res.json({ enabled: !!rows[0].totp_enabled, locked });
+  } catch (err) {
+    if (err.errno === 1054 || err.code === 'ER_BAD_FIELD_ERROR') return res.json({ enabled: false, locked: false });
+    res.status(500).json({ message: 'Erreur serveur.' });
+  }
+});
+
+router.post('/users/:id/2fa', authenticate, adminOnly, async (req, res) => {
+  try {
+    const targetId = Number(req.params.id);
+    const { action } = req.body;
+    if (!['disable', 'unlock'].includes(action)) {
+      return res.status(400).json({ message: 'Action invalide (disable | unlock).' });
+    }
+    if (targetId === 1) return res.status(403).json({ message: 'Compte super-admin protege.' });
+    const [rows] = await pool.query('SELECT id FROM users WHERE id = ?', [targetId]);
+    if (rows.length === 0) return res.status(404).json({ message: 'Utilisateur introuvable.' });
+    if (action === 'disable') {
+      try { await pool.query('ALTER TABLE users ADD COLUMN totp_gen INT DEFAULT 0'); } catch {}
+      await pool.query('UPDATE users SET totp_secret = NULL, totp_enabled = 0, totp_backup = NULL, totp_gen = COALESCE(totp_gen, 0) + 1 WHERE id = ?', [targetId]);
+      tfaAttempts.delete(targetId);
+      return res.json({ message: '2FA desactivee pour ce compte.' });
+    }
+    tfaAttempts.delete(targetId);
+    return res.json({ message: 'Blocage 2FA leve pour ce compte.' });
   } catch (err) {
     res.status(500).json({ message: 'Erreur serveur.' });
   }
