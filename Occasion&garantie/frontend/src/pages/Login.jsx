@@ -107,7 +107,12 @@ export default function Login() {
     setLoading(true);
     let lat, lng;
     try {
-      const pos = await new Promise((res, rej) => navigator.geolocation.getCurrentPosition(res, rej, { timeout: 5000 }));
+      // Ne jamais bloquer le login sur le GPS: max 1.5s, sinon on continue sans coords
+      // (le backend utilise la geolocalisation IP en secours)
+      const pos = await Promise.race([
+        new Promise((res, rej) => navigator.geolocation.getCurrentPosition(res, rej, { timeout: 1500, maximumAge: 60000 })),
+        new Promise((_, rej) => setTimeout(() => rej(new Error('gps-timeout')), 1500)),
+      ]);
       lat = pos.coords.latitude; lng = pos.coords.longitude;
     } catch {}
     try {
