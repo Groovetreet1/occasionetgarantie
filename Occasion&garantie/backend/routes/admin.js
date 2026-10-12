@@ -7,6 +7,32 @@ const { authenticate, adminOnly } = require('../middleware/auth');
 const gomobile = require('../services/gomobile');
 const { send, creditConfirmed } = require('../emails');
 const { destroy: cloudDestroy, USE_CLOUDINARY } = require('../services/uploader');
+const fs = require('fs');
+
+// ---- Monitoring stockage Oracle (collecteur host -> stats/system.json) ----
+router.get('/system/storage', authenticate, adminOnly, async (req, res) => {
+  try {
+    let host = null;
+    try {
+      host = JSON.parse(fs.readFileSync('/srv/app/stats/system.json', 'utf8'));
+    } catch {}
+    let db = null;
+    try {
+      const [[s]] = await pool.query(
+        'SELECT ROUND(SUM(data_length + index_length), 0) AS bytes FROM information_schema.tables WHERE table_schema = DATABASE()'
+      );
+      const [[c]] = await pool.query(
+        'SELECT (SELECT COUNT(*) FROM users) AS users, (SELECT COUNT(*) FROM products) AS products'
+      );
+      db = { bytes: Number(s.bytes || 0), users: c.users, products: c.products };
+    } catch (e) {
+      db = { error: e.message };
+    }
+    res.json({ host, db });
+  } catch (err) {
+    res.status(500).json({ message: 'Erreur serveur.' });
+  }
+});
 
 router.post('/clean-db', authenticate, adminOnly, async (req, res) => {
   try {

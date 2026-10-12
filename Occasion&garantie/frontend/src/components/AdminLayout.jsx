@@ -4,7 +4,7 @@ import { AnimatePresence, motion } from 'framer-motion';
 import {
   FiGrid, FiCreditCard, FiShield, FiPackage, FiHeadphones, FiSmartphone,
   FiUserCheck, FiMonitor, FiUsers, FiChevronsLeft, FiChevronsRight,
-  FiTrendingUp, FiCheckSquare,
+  FiTrendingUp, FiCheckSquare, FiHardDrive,
 } from 'react-icons/fi';
 import { useLanguage } from '../context/LanguageContext';
 
@@ -47,6 +47,7 @@ export default function AdminLayout() {
     { to: '/admin/managed-vendors', icon: FiUserCheck, label: t('admin.vendorAccounts') },
     { to: '/admin/vendor-logs', icon: FiMonitor, label: t('admin.vendorJournal') },
     { to: '/admin/users', icon: FiUsers, label: t('admin.users') },
+    { to: '/admin/storage', icon: FiHardDrive, label: t('admin.storage') },
   ];
 
   return (
