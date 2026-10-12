@@ -259,7 +259,7 @@ router.post('/login', [
       }
     } catch {}
     const token = jwt.sign(
-      { id: user.id, email: user.email, role: user.role },
+      { id: user.id, email: user.email, role: user.role, v: user.token_version || 0 },
       process.env.JWT_SECRET,
       { expiresIn: '6h' }
     );
@@ -437,7 +437,7 @@ router.post('/2fa/verify', [
     }
     tfaAttempts.delete(user.id);
     const fullToken = jwt.sign(
-      { id: user.id, email: user.email, role: user.role },
+      { id: user.id, email: user.email, role: user.role, v: user.token_version || 0 },
       process.env.JWT_SECRET,
       { expiresIn: '6h' }
     );
@@ -510,7 +510,8 @@ router.put('/profile', authenticate, [
 
     if (newPassword) {
       const hashed = await bcrypt.hash(newPassword, 10);
-      await pool.query('UPDATE users SET password = ? WHERE id = ?', [hashed, userId]);
+      try { await pool.query('ALTER TABLE users ADD COLUMN token_version INT DEFAULT 0'); } catch {}
+      await pool.query('UPDATE users SET password = ?, token_version = COALESCE(token_version, 0) + 1 WHERE id = ?', [hashed, userId]);
     }
 
     res.json({ message: 'Profil mis a jour avec succes.' });
@@ -773,7 +774,8 @@ router.post('/reset-password', [
     if (codeErr) return res.status(codeErr.status).json({ message: codeErr.message });
 
     const hashed = await bcrypt.hash(newPassword, 10);
-    await pool.query('UPDATE users SET password = ? WHERE id = ?', [hashed, entry.userId]);
+    try { await pool.query('ALTER TABLE users ADD COLUMN token_version INT DEFAULT 0'); } catch {}
+    await pool.query('UPDATE users SET password = ?, token_version = COALESCE(token_version, 0) + 1 WHERE id = ?', [hashed, entry.userId]);
     resetCodes.delete(key);
 
     res.json({ message: 'Mot de passe reinitialise avec succes.' });

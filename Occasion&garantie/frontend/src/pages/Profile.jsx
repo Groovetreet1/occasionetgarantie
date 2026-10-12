@@ -12,7 +12,7 @@ const item = { hidden: { opacity: 0, y: 20 }, show: { opacity: 1, y: 0, transiti
 
 export default function Profile() {
   const navigate = useNavigate();
-  const { refreshUser } = useAuth();
+  const { refreshUser, logout } = useAuth();
   const { t } = useLanguage();
   const fileRef = useRef();
   const [name, setName] = useState('');
@@ -118,10 +118,9 @@ export default function Profile() {
     setSavingPwd(true);
     try {
       await api.put('/auth/profile', { oldPassword, newPassword });
-      setPwdMsg({ type: 'success', text: t('profile.passwordUpdated') });
-      setOldPassword('');
-      setNewPassword('');
-      setConfirmPassword('');
+      // Le password a change: toutes les sessions (y compris celle-ci) sont invalidees
+      logout();
+      navigate('/login');
     } catch (err) {
       setPwdMsg({ type: 'error', text: err.response?.data?.message || t('profile.error') });
     } finally {

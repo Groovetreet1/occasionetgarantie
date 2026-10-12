@@ -22,13 +22,25 @@ const authenticate = async (req, res, next) => {
   }
 
   try {
-    const [rows] = await pool.query('SELECT id, role, suspended, suspension_reason FROM users WHERE id = ?', [decoded.id]);
+    await pool.query("ALTER TABLE users ADD COLUMN token_version INT DEFAULT 0"); } catch (e) { if (e.errno !== 1060 && e.code !== 'ER_DUP_FIELDNAME') {}
+  }
+
+  try {
+    const [rows] = await pool.query('SELECT id, role, suspended, suspension_reason, token_version FROM users WHERE id = ?', [decoded.id]);
     if (rows.length > 0 && rows[0].suspended && rows[0].role !== 'admin' && rows[0].role !== 'superadmin') {
       return res.status(403).json({
         message: 'Votre compte a ete suspendu. Raison : ' + (rows[0].suspension_reason || 'Non specifiee') + '. Contactez l\'administration.',
         suspended: true,
         suspension_reason: rows[0].suspension_reason,
       });
+    }
+    // Sessions invalidees apres changement de mot de passe (token_version)
+    if (rows.length > 0) {
+      const tokenV = decoded.v === undefined ? 0 : decoded.v;
+      const currentV = rows[0].token_version || 0;
+      if (tokenV !== currentV) {
+        return res.status(401).json({ message: 'Session expiree (mot de passe modifie). Reconnectez-vous.' });
+      }
     }
   } catch (e) {
     if (e.errno === 1054 || e.code === 'ER_BAD_FIELD_ERROR') {
