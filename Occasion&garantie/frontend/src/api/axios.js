@@ -30,7 +30,9 @@ api.interceptors.response.use(
     if (err.response?.status === 401) {
       localStorage.removeItem('token');
       localStorage.removeItem('user');
-      if (onUnauthorized) onUnauthorized();
+      const url = err.config?.url || '';
+      // /auth/me is handled by AuthContext (live popup), not silent redirect
+      if (!url.includes('/auth/me') && onUnauthorized) onUnauthorized();
     }
     return Promise.reject(err);
   }

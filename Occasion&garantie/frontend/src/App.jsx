@@ -9,6 +9,7 @@ import Footer from './components/Footer';
 import SupportFloat from './components/SupportFloat';
 import ErrorBoundary from './components/ErrorBoundary';
 import SuspendedModal from './components/SuspendedModal';
+import SessionExpiredModal from './components/SessionExpiredModal';
 import { useAuth } from './context/AuthContext';
 import AdminRoute from './components/AdminRoute';
 import AdminLayout from './components/AdminLayout';
@@ -74,7 +75,7 @@ function AnimatedPage({ children }) {
 export default function App() {
   const location = useLocation();
   const navigate = useNavigate();
-  const { suspended, setSuspended, logout } = useAuth();
+  const { suspended, setSuspended, logout, sessionExpired, dismissSessionExpired } = useAuth();
 
   useEffect(() => { window.scrollTo(0, 0); }, [location.pathname]);
   useEffect(() => { api.onUnauthorized(() => navigate('/login', { replace: true })); }, [navigate]);
@@ -141,6 +142,12 @@ export default function App() {
       <GoMobileBanner />
       <GoMobileFirstClick />
       {suspended && <SuspendedModal reason={suspended} onClose={() => setSuspended(null)} />}
+      {sessionExpired && (
+        <SessionExpiredModal
+          onClose={dismissSessionExpired}
+          onLogin={() => { logout(); dismissSessionExpired(); navigate('/login', { replace: true }); }}
+        />
+      )}
     </>
   );
 }

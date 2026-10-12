@@ -7,10 +7,12 @@ export function AuthProvider({ children }) {
   const [user, setUser] = useState(null);
   const [loading, setLoading] = useState(true);
   const [suspended, setSuspended] = useState(null);
+  const [sessionExpired, setSessionExpired] = useState(false);
 
   useEffect(() => {
     let cancelled = false;
     const token = localStorage.getItem('token');
+    const hadToken = !!token;
     if (token) {
       api.get('/auth/me')
         .then((res) => { if (!cancelled) setUser(res.data); })
@@ -22,6 +24,7 @@ export function AuthProvider({ children }) {
               setSuspended(err.response.data.suspension_reason || '');
             } else {
               localStorage.removeItem('token');
+              if (hadToken && err.response?.status === 401) setSessionExpired(true);
             }
           }
         })
@@ -45,6 +48,8 @@ export function AuthProvider({ children }) {
           localStorage.removeItem('user');
           setUser(null);
           setSuspended(err.response.data.suspension_reason || '');
+        } else if (err.response?.status === 401 && user?.id) {
+          setSessionExpired(true);
         }
       }
     }, 30000);
@@ -87,13 +92,29 @@ export function AuthProvider({ children }) {
       if (err.response?.status === 403 && err.response?.data?.suspended) {
         logout();
         setSuspended(err.response.data.suspension_reason || '');
+      } else if (err.response?.status === 401 && user?.id) {
+        setSessionExpired(true);
       }
       console.error('refreshUser failed:', err);
     }
   };
 
+  useEffect(() => {
+    const onVisible = () => {
+      if (document.visibilityState === 'visible' && localStorage.getItem('token')) {
+        refreshUser();
+      }
+    };
+    window.addEventListener('focus', onVisible);
+    document.addEventListener('visibilitychange', onVisible);
+    return () => {
+      window.removeEventListener('focus', onVisible);
+      document.removeEventListener('visibilitychange', onVisible);
+    };
+  });
+
   return (
-    <AuthContext.Provider value={{ user, loading, suspended, setSuspended, login, signup, logout, refreshUser, setSession }}>
+    <AuthContext.Provider value={{ user, loading, suspended, setSuspended, sessionExpired, dismissSessionExpired: () => setSessionExpired(false), login, signup, logout, refreshUser, setSession }}>
       {children}
     </AuthContext.Provider>
   );
