@@ -2,7 +2,7 @@ import { useEffect, useRef } from 'react';
 import { useLocation } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 
-const HIDE_GOMOBILE_ADS = false;
+const HIDE_GOMOBILE_ADS = true;
 const SESSION_KEY = 'gomobile_first_click_opened';
 const REDIRECT_URL = 'https://www.gomobile.ma';
 
