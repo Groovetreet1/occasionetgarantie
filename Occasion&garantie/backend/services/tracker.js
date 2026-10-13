@@ -3,6 +3,18 @@ const emails = require('../emails');
 
 const CACHE = {};
 
+const CONTACT_EMAIL = 'contact-occasionetgarantie@proton.me';
+
+// Noms de fournisseurs VPN/proxy connus (filet de securite si les APIs echouent)
+const VPN_KEYWORDS = /vpn|proxy|\btor\b|tunnel|nord|expressvpn|surf.?shark|mullvad|proton.?vpn|cactusvpn|cyber.?ghost|ipvanish|vypr|windscribe|hotspot.?shield|torguard|hidemyass|pure.?vpn|ivacy|netprotect|psiphon|betternet|touch.?vpn|strong.?vpn|zenmate|private.?internet.?access|\bpia\b|wireguard|openvpn/i;
+
+function boostVpn(info) {
+  if (!info.isVpn && info.isp && VPN_KEYWORDS.test(info.isp)) {
+    info.isVpn = true;
+  }
+  return info;
+}
+
 const VPN_WARN_HTML = ({ store, ip }) => `
   <div style="font-family:sans-serif;max-width:560px;margin:0 auto;padding:20px">
     <h2 style="color:#ef4444;">Alerte securite - VPN detecte</h2>
@@ -51,6 +63,22 @@ async function resolveIp(ip, force) {
   const def = { isp: 'Inconnu', city: null, region: null, country: null, latitude: null, longitude: null, isVpn: false, isDatacenter: false };
   if (!ip || ip === 'unknown' || ip === '127.0.0.1' || ip === '::1' || ip === '::ffff:127.0.0.1') return { ...def, isp: 'Local' };
 
+  // 1) GetIPIntel: gratuit, sans cle, concu pour la detection VPN/proxy
+  try {
+    const gi = await fetchJson(`https://check.getipintel.net/check.php?ip=${ip}&contact=${CONTACT_EMAIL}&flags=m&format=json`, 6000);
+    if (gi && (gi.status === 'success' || gi.result === '0' || gi.result === '1')) {
+      if (gi.result === '1') {
+        const result = {
+          isp: 'VPN/Proxy detecte', city: null, region: null, country: null,
+          latitude: null, longitude: null, isVpn: true, isDatacenter: false,
+        };
+        CACHE[ip] = boostVpn(result);
+        return result;
+      }
+      // result 0 = pas de VPN: on continue pour recuperer ISP/geo via les autres sources
+    }
+  } catch {}
+
   const json = await fetchJson(`https://api.ipapi.is/?q=${ip}`);
   if (json && json.ip) {
     const result = {
@@ -63,7 +91,7 @@ async function resolveIp(ip, force) {
       isVpn: !!(json.is_vpn || json.is_proxy || json.is_tor),
       isDatacenter: !!(json.is_datacenter || json.company?.type === 'hosting'),
     };
-    CACHE[ip] = result;
+    CACHE[ip] = boostVpn(result);
     return result;
   }
 
@@ -81,7 +109,7 @@ async function resolveIp(ip, force) {
       isVpn: false,
       isDatacenter,
     };
-    CACHE[ip] = result;
+    CACHE[ip] = boostVpn(result);
     return result;
   }
 
@@ -99,7 +127,7 @@ async function resolveIp(ip, force) {
       isVpn: false,
       isDatacenter,
     };
-    CACHE[ip] = result;
+    CACHE[ip] = boostVpn(result);
     return result;
   }
 
