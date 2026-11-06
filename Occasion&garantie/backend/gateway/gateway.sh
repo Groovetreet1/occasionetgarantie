@@ -7,7 +7,7 @@
 set -u
 
 API_URL="${API_URL:-https://occasionetgarantie.store/api/sms-gateway}"
-GATEWAY_KEY="${GATEWAY_KEY:-REMPLACE_MOI}"
+GATEWAY_KEY="81c4c4845fac1e13d63715f98cf242abeeab4f226b84f5fe7556bc3767b3d792"
 DEVICE_ID="${DEVICE_ID:-$(getprop ro.product.model 2>/dev/null | tr ' ' '-')}"
 INTERVAL="${INTERVAL:-5}"
 
@@ -57,12 +57,14 @@ while true; do
     phone=$(echo "$resp" | jq -r ".messages[$i].phone")
     msg=$(echo "$resp" | jq -r ".messages[$i].message")
     log "Envoi #$id -> $phone"
-    if termux-sms-send -n "$phone" "$msg"; then
+    out=$(termux-sms-send -n "$phone" "$msg" 2>&1)
+    if echo "$out" | grep -q '"error"'; then
+      err=$(echo "$out" | tr '\n' ' ' | cut -c1-200)
+      log "ECHEC #$id : $err"
+      ack_one "$id" "failed" "$err"
+    else
       log "OK #$id"
       ack_one "$id" "sent" ""
-    else
-      log "ECHEC #$id"
-      ack_one "$id" "failed" "termux-sms-send a echoue"
     fi
     i=$((i + 1))
   done
