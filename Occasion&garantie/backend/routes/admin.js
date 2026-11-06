@@ -7,6 +7,8 @@ const { authenticate, adminOnly } = require('../middleware/auth');
 const sms = require('../services/sms');
 const smsGateway = require('../services/smsGateway');
 const settings = require('../services/settings');
+const messageLogs = require('../services/messageLogs');
+const messagingReport = require('../services/messagingReport');
 const { send, creditConfirmed } = require('../emails');
 const { destroy: cloudDestroy, USE_CLOUDINARY } = require('../services/uploader');
 const fs = require('fs');
@@ -96,6 +98,41 @@ router.post('/sms/test', authenticate, adminOnly, async (req, res) => {
     res.json({ message: 'SMS mis en file. Le telephone le enverra dans quelques secondes.', id });
   } catch (err) {
     res.status(500).json({ message: err.message });
+  }
+});
+
+// ---- Journal unifie SMS + emails ----
+router.get('/messaging/logs', authenticate, adminOnly, async (req, res) => {
+  try {
+    const days = messageLogs.clampDays(req.query.days);
+    const limit = Math.min(Math.max(parseInt(req.query.limit, 10) || 200, 1), 500);
+    const [summary, entries] = await Promise.all([
+      messageLogs.summary(days),
+      messageLogs.unified(days, limit),
+    ]);
+    res.json({ days, summary, entries });
+  } catch (err) {
+    console.error('messaging logs error:', err.message);
+    res.status(500).json({ message: 'Erreur serveur.' });
+  }
+});
+
+router.get('/messaging/report.pdf', authenticate, adminOnly, async (req, res) => {
+  try {
+    const days = messageLogs.clampDays(req.query.days);
+    const [summary, entries] = await Promise.all([
+      messageLogs.summary(days),
+      messageLogs.unified(days, 500),
+    ]);
+    const doc = messagingReport.buildReport({ summary, entries, days, generatedAt: new Date() });
+    const filename = `occasion-garantie-rapport-sms-emails-${new Date().toISOString().slice(0, 10)}.pdf`;
+    res.setHeader('Content-Type', 'application/pdf');
+    res.setHeader('Content-Disposition', `attachment; filename="${filename}"`);
+    doc.pipe(res);
+    doc.end();
+  } catch (err) {
+    console.error('messaging report error:', err.message);
+    if (!res.headersSent) res.status(500).json({ message: 'Erreur serveur.' });
   }
 });
 

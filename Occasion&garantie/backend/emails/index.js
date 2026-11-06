@@ -3,6 +3,7 @@ const verification = require('./verification');
 const reset = require('./reset');
 const creditConfirmed = require('./credit-confirmed');
 const newsletter = require('./newsletter');
+const messageLogs = require('../services/messageLogs');
 
 const FROM = 'Occasion & Garantie <contact@contact.occasionetgarantie.store>';
 
@@ -14,12 +15,20 @@ function getResend() {
   return _resend;
 }
 
-async function send({ to, subject, html }) {
+async function send({ to, subject, html, source }) {
   const r = getResend();
-  if (!r) throw new Error('RESEND_API_KEY not configured');
+  if (!r) {
+    await messageLogs.logEmail({ to, subject, status: 'failed', error: 'RESEND_API_KEY not configured', source });
+    throw new Error('RESEND_API_KEY not configured');
+  }
   try {
-    await r.emails.send({ from: FROM, to, subject, html });
+    const result = await r.emails.send({ from: FROM, to, subject, html });
+    if (result && result.error) {
+      throw new Error(result.error.message || 'Resend error');
+    }
+    await messageLogs.logEmail({ to, subject, status: 'sent', source });
   } catch (e) {
+    await messageLogs.logEmail({ to, subject, status: 'failed', error: e.message, source });
     console.log('Email send failed:', e.message);
     throw e;
   }

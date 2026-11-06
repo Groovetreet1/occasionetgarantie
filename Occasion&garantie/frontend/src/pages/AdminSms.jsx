@@ -3,6 +3,7 @@ import { Link } from 'react-router-dom';
 import {
   FiArrowLeft, FiMessageSquare, FiRefreshCw, FiSmartphone, FiSend,
   FiCheckCircle, FiAlertTriangle, FiClock, FiWifi, FiWifiOff, FiMail,
+  FiDownload, FiList,
 } from 'react-icons/fi';
 import api from '../api/axios';
 import { useLanguage } from '../context/LanguageContext';
@@ -63,7 +64,9 @@ function Toggle({ checked, onChange, disabled, saving }) {
 export default function AdminSms() {
   const { t } = useLanguage();
   const [data, setData] = useState(null);
-  const [recent, setRecent] = useState([]);
+  const [logs, setLogs] = useState(null);
+  const [logDays, setLogDays] = useState(30);
+  const [logTab, setLogTab] = useState('all');
   const [loading, setLoading] = useState(true);
   const [refreshing, setRefreshing] = useState(false);
   const [savingKey, setSavingKey] = useState('');
@@ -71,6 +74,7 @@ export default function AdminSms() {
   const [testPhone, setTestPhone] = useState('');
   const [testMessage, setTestMessage] = useState('');
   const [sendingTest, setSendingTest] = useState(false);
+  const [downloading, setDownloading] = useState(false);
 
   const flash = useCallback((type, text) => {
     setNotice({ type, text });
@@ -82,19 +86,19 @@ export default function AdminSms() {
     if (silent) setRefreshing(true);
     else setLoading(true);
     try {
-      const [settingsRes, queueRes] = await Promise.all([
+      const [settingsRes, logsRes] = await Promise.all([
         api.get('/admin/sms/settings'),
-        api.get('/admin/sms/queue'),
+        api.get('/admin/messaging/logs', { params: { days: logDays, limit: 200 } }),
       ]);
       setData(settingsRes.data);
-      setRecent(queueRes.data.recent || []);
+      setLogs(logsRes.data);
     } catch (err) {
       if (!silent) flash('error', err?.response?.data?.message || t('admin.smsError'));
     } finally {
       setLoading(false);
       setRefreshing(false);
     }
-  }, [flash, t]);
+  }, [flash, t, logDays]);
 
   useEffect(() => {
     load(false);
@@ -135,6 +139,37 @@ export default function AdminSms() {
     }
   };
 
+  const downloadPdf = async () => {
+    setDownloading(true);
+    try {
+      const res = await api.get('/admin/messaging/report.pdf', {
+        params: { days: logDays },
+        responseType: 'blob',
+      });
+      const url = URL.createObjectURL(new Blob([res.data], { type: 'application/pdf' }));
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = `occasion-garantie-rapport-sms-emails-${new Date().toISOString().slice(0, 10)}.pdf`;
+      document.body.appendChild(a);
+      a.click();
+      a.remove();
+      URL.revokeObjectURL(url);
+    } catch (err) {
+      let msg = t('admin.smsPdfError');
+      if (err?.response?.data instanceof Blob) {
+        try {
+          const parsed = JSON.parse(await err.response.data.text());
+          msg = parsed.message || msg;
+        } catch {}
+      } else if (err?.response?.data?.message) {
+        msg = err.response.data.message;
+      }
+      flash('error', msg);
+    } finally {
+      setDownloading(false);
+    }
+  };
+
   const card = {
     background: 'var(--bg-card)', border: '1px solid var(--border)',
     borderRadius: 16, padding: 20,
@@ -150,6 +185,20 @@ export default function AdminSms() {
     : false;
   const provider = data?.provider || '-';
   const isGateway = provider === 'gateway';
+
+  const summary = logs?.summary;
+  const allEntries = logs?.entries || [];
+  const entries = allEntries.filter((e) => logTab === 'all' || e.type === logTab);
+  const smsPeriod = summary?.sms || { sent: 0, failed: 0 };
+  const emailPeriod = summary?.email || { sent: 0, failed: 0 };
+  const allTime = summary?.allTime || {};
+
+  const statCards = [
+    { label: t('admin.smsStatSmsSent'), value: smsPeriod.sent, color: '#059669', bg: '#ecfdf5' },
+    { label: t('admin.smsStatSmsFailed'), value: smsPeriod.failed, color: '#dc2626', bg: '#fef2f2' },
+    { label: t('admin.smsStatEmailSent'), value: emailPeriod.sent, color: '#2563eb', bg: '#eff6ff' },
+    { label: t('admin.smsStatEmailFailed'), value: emailPeriod.failed, color: '#dc2626', bg: '#fef2f2' },
+  ];
 
   return (
     <section className="admin-dashboard">
@@ -286,6 +335,137 @@ export default function AdminSms() {
               </div>
             </div>
 
+            {/* Compteurs SMS / Emails */}
+            <div style={{ ...card }}>
+              <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 12, flexWrap: 'wrap', marginBottom: 14 }}>
+                <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+                  <FiList size={18} style={{ color: 'var(--primary)' }} />
+                  <div>
+                    <strong>{t('admin.smsHistory')}</strong>
+                    <div style={{ fontSize: 12, color: 'var(--text-muted)', marginTop: 2 }}>{t('admin.smsHistoryDesc')}</div>
+                  </div>
+                </div>
+                <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+                  <select
+                    value={logDays}
+                    onChange={(e) => setLogDays(Number(e.target.value))}
+                    className="form-control"
+                    style={{ width: 'auto', fontSize: 12.5, padding: '6px 10px' }}
+                  >
+                    <option value={7}>{t('admin.smsDays7')}</option>
+                    <option value={30}>{t('admin.smsDays30')}</option>
+                    <option value={90}>{t('admin.smsDays90')}</option>
+                  </select>
+                  <button
+                    onClick={downloadPdf}
+                    disabled={downloading}
+                    className="btn btn-primary"
+                    style={{ fontSize: 12.5, display: 'flex', alignItems: 'center', gap: 6, whiteSpace: 'nowrap' }}
+                  >
+                    <FiDownload size={14} /> {downloading ? t('admin.smsPdfGenerating') : t('admin.smsDownloadPdf')}
+                  </button>
+                </div>
+              </div>
+
+              <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(160px, 1fr))', gap: 12, marginBottom: 12 }}>
+                {statCards.map((s) => (
+                  <div key={s.label} style={{ background: s.bg, borderRadius: 12, padding: '14px 16px' }}>
+                    <div style={{ fontSize: 26, fontWeight: 800, color: s.color, lineHeight: 1.1 }}>{s.value}</div>
+                    <div style={{ fontSize: 12, fontWeight: 600, color: '#475569', marginTop: 4 }}>{s.label}</div>
+                    <div style={{ fontSize: 10.5, color: '#94a3b8' }}>{t('admin.smsOnPeriod')}</div>
+                  </div>
+                ))}
+              </div>
+
+              <div style={{ fontSize: 12, color: 'var(--text-secondary)', background: 'var(--bg-secondary)', border: '1px solid var(--border)', borderRadius: 8, padding: '8px 12px', marginBottom: 14 }}>
+                {t('admin.smsAllTime', {
+                  sms: allTime.smsSent || 0,
+                  emails: allTime.emailSent || 0,
+                  smsFailed: allTime.smsFailed || 0,
+                  emailsFailed: allTime.emailFailed || 0,
+                })}
+                <span style={{ display: 'block', fontSize: 11, color: 'var(--text-muted)', marginTop: 2 }}>{t('admin.smsPdfHint')}</span>
+              </div>
+
+              <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap', marginBottom: 12 }}>
+                {[
+                  { key: 'all', label: t('admin.smsFilterAll'), count: allEntries.length },
+                  { key: 'sms', label: t('admin.smsFilterSms'), count: allEntries.filter((e) => e.type === 'sms').length },
+                  { key: 'email', label: t('admin.smsFilterEmail'), count: allEntries.filter((e) => e.type === 'email').length },
+                ].map((tab) => (
+                  <button
+                    key={tab.key}
+                    type="button"
+                    onClick={() => setLogTab(tab.key)}
+                    className={logTab === tab.key ? 'btn btn-primary' : 'btn btn-outline'}
+                    style={{ fontSize: 12, padding: '5px 12px' }}
+                  >
+                    {tab.label} ({tab.count})
+                  </button>
+                ))}
+                <span style={{ marginLeft: 'auto', fontSize: 11.5, color: 'var(--text-muted)', alignSelf: 'center' }}>
+                  {t('admin.smsAutoRefresh')}
+                </span>
+              </div>
+
+              {entries.length === 0 ? (
+                <div style={{ fontSize: 13, color: 'var(--text-muted)', padding: '18px 0', textAlign: 'center' }}>
+                  {t('admin.smsNoHistory')}
+                </div>
+              ) : (
+                <div style={{ overflowX: 'auto' }}>
+                  <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: 12.5 }}>
+                    <thead>
+                      <tr style={{ textAlign: 'left', color: 'var(--text-muted)' }}>
+                        <th style={{ padding: '8px 6px', fontWeight: 600 }}>{t('admin.smsColDate')}</th>
+                        <th style={{ padding: '8px 6px', fontWeight: 600 }}>{t('admin.smsColType')}</th>
+                        <th style={{ padding: '8px 6px', fontWeight: 600 }}>{t('admin.smsColRecipient')}</th>
+                        <th style={{ padding: '8px 6px', fontWeight: 600 }}>{t('admin.smsColContent')}</th>
+                        <th style={{ padding: '8px 6px', fontWeight: 600 }}>{t('admin.smsColStatus')}</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      {entries.map((row) => {
+                        const Icon = statusIcon(row.status);
+                        return (
+                          <tr key={`${row.type}-${row.id}`} style={{ borderTop: '1px solid var(--border)' }}>
+                            <td style={{ padding: '9px 6px', whiteSpace: 'nowrap', color: 'var(--text-secondary)' }}>
+                              {fmtDate(row.sent_at || row.created_at)}
+                            </td>
+                            <td style={{ padding: '9px 6px', whiteSpace: 'nowrap' }}>
+                              <span style={{
+                                fontSize: 11, fontWeight: 800, padding: '2px 8px', borderRadius: 999,
+                                background: row.type === 'email' ? '#eff6ff' : '#fffbeb',
+                                color: row.type === 'email' ? '#2563eb' : '#d97706',
+                              }}>
+                                {row.type === 'email' ? t('admin.smsTypeEmail') : t('admin.smsTypeSms')}
+                              </span>
+                            </td>
+                            <td style={{ padding: '9px 6px', whiteSpace: 'nowrap', fontWeight: 600 }}>{row.recipient}</td>
+                            <td style={{ padding: '9px 6px', maxWidth: 380 }}>
+                              <div style={{ overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }} title={row.content}>
+                                {row.content}
+                              </div>
+                              {row.error && (
+                                <div style={{ fontSize: 11, color: '#dc2626', marginTop: 2, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }} title={row.error}>
+                                  {row.error}
+                                </div>
+                              )}
+                            </td>
+                            <td style={{ padding: '9px 6px', whiteSpace: 'nowrap' }}>
+                              <span style={{ display: 'inline-flex', alignItems: 'center', gap: 5, fontWeight: 700, color: statusColor(row.status) }}>
+                                <Icon size={13} /> {t(`admin.smsStatus${row.status.charAt(0).toUpperCase()}${row.status.slice(1)}`)}
+                              </span>
+                            </td>
+                          </tr>
+                        );
+                      })}
+                    </tbody>
+                  </table>
+                </div>
+              )}
+            </div>
+
             {/* Test d'envoi */}
             <div style={card}>
               <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 14 }}>
@@ -331,68 +511,6 @@ export default function AdminSms() {
               {!smsEnabled && (
                 <div style={{ marginTop: 10, fontSize: 12, color: '#92400e' }}>
                   {t('admin.smsTestDisabled')}
-                </div>
-              )}
-            </div>
-
-            {/* Historique */}
-            <div style={card}>
-              <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 12, flexWrap: 'wrap', gap: 8 }}>
-                <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
-                  <FiClock size={18} style={{ color: 'var(--primary)' }} />
-                  <strong>{t('admin.smsRecent')}</strong>
-                </div>
-                <span style={{ fontSize: 12, color: 'var(--text-muted)' }}>{t('admin.smsAutoRefresh')}</span>
-              </div>
-              {recent.length === 0 ? (
-                <div style={{ fontSize: 13, color: 'var(--text-muted)', padding: '18px 0', textAlign: 'center' }}>
-                  {t('admin.smsNoMessages')}
-                </div>
-              ) : (
-                <div style={{ overflowX: 'auto' }}>
-                  <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: 12.5 }}>
-                    <thead>
-                      <tr style={{ textAlign: 'left', color: 'var(--text-muted)' }}>
-                        <th style={{ padding: '8px 6px', fontWeight: 600 }}>#</th>
-                        <th style={{ padding: '8px 6px', fontWeight: 600 }}>{t('admin.smsColPhone')}</th>
-                        <th style={{ padding: '8px 6px', fontWeight: 600 }}>{t('admin.smsColMessage')}</th>
-                        <th style={{ padding: '8px 6px', fontWeight: 600 }}>{t('admin.smsColStatus')}</th>
-                        <th style={{ padding: '8px 6px', fontWeight: 600 }}>{t('admin.smsColDate')}</th>
-                      </tr>
-                    </thead>
-                    <tbody>
-                      {recent.map((row) => {
-                        const Icon = statusIcon(row.status);
-                        return (
-                          <tr key={row.id} style={{ borderTop: '1px solid var(--border)' }}>
-                            <td style={{ padding: '9px 6px', color: 'var(--text-muted)' }}>{row.id}</td>
-                            <td style={{ padding: '9px 6px', whiteSpace: 'nowrap', fontWeight: 600 }}>{row.phone}</td>
-                            <td style={{ padding: '9px 6px', maxWidth: 360 }}>
-                              <div style={{ overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }} title={row.message}>
-                                {row.message}
-                              </div>
-                              {row.error && (
-                                <div style={{ fontSize: 11, color: '#dc2626', marginTop: 2, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }} title={row.error}>
-                                  {row.error}
-                                </div>
-                              )}
-                            </td>
-                            <td style={{ padding: '9px 6px', whiteSpace: 'nowrap' }}>
-                              <span style={{ display: 'inline-flex', alignItems: 'center', gap: 5, fontWeight: 700, color: statusColor(row.status) }}>
-                                <Icon size={13} /> {t(`admin.smsStatus${row.status.charAt(0).toUpperCase()}${row.status.slice(1)}`)}
-                              </span>
-                              {row.attempts > 0 && (
-                                <span style={{ fontSize: 10.5, color: 'var(--text-muted)', marginLeft: 6 }}>×{row.attempts}</span>
-                              )}
-                            </td>
-                            <td style={{ padding: '9px 6px', whiteSpace: 'nowrap', color: 'var(--text-secondary)' }}>
-                              {fmtDate(row.sent_at || row.created_at)}
-                            </td>
-                          </tr>
-                        );
-                      })}
-                    </tbody>
-                  </table>
                 </div>
               )}
             </div>

@@ -2,6 +2,7 @@ const cron = require('node-cron');
 const { Resend } = require('resend');
 const pool = require('../config/db');
 const { newsletter } = require('../emails');
+const messageLogs = require('./messageLogs');
 const API_BASE = process.env.CLIENT_URL || 'https://www.occasionetgarantie.store';
 const AUDIENCE_ID = 'd755ae5f-37c7-460b-8fec-26487de88023';
 const FROM = 'Occasion & Garantie <contact@contact.occasionetgarantie.store>';
@@ -60,10 +61,23 @@ async function sendNewsletterToAll() {
 
     if (broadcast?.id) {
       await resend.broadcasts.send(broadcast.id);
+      await messageLogs.logEmail({
+        to: `Liste newsletter (${AUDIENCE_ID})`,
+        subject: title,
+        status: 'sent',
+        source: 'newsletter',
+      });
       console.log(`[NewsletterCron] Broadcast "${title}" sent to audience.`);
     }
   } catch (err) {
     console.error('[NewsletterCron] Error:', err.message);
+    await messageLogs.logEmail({
+      to: `Liste newsletter (${AUDIENCE_ID})`,
+      subject: 'Newsletter automatique',
+      status: 'failed',
+      error: err.message,
+      source: 'newsletter',
+    });
   }
 }
 
