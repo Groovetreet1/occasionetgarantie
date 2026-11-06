@@ -367,6 +367,55 @@ export default function AdminSms() {
               </div>
             </div>
 
+            {/* Test d'envoi */}
+            <div style={card}>
+              <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 14 }}>
+                <FiSend size={18} style={{ color: 'var(--primary)' }} />
+                <strong>{t('admin.smsTest')}</strong>
+              </div>
+              <form onSubmit={sendTest} style={{ display: 'flex', gap: 10, flexWrap: 'wrap', alignItems: 'flex-end' }}>
+                <div style={{ flex: '1 1 200px', minWidth: 180 }}>
+                  <label style={{ display: 'block', fontSize: 12, color: 'var(--text-secondary)', marginBottom: 5 }}>
+                    {t('admin.smsTestPhone')}
+                  </label>
+                  <input
+                    type="tel"
+                    value={testPhone}
+                    onChange={(e) => setTestPhone(e.target.value)}
+                    placeholder="06XXXXXXXX"
+                    className="form-control"
+                    style={{ width: '100%' }}
+                  />
+                </div>
+                <div style={{ flex: '2 1 280px', minWidth: 200 }}>
+                  <label style={{ display: 'block', fontSize: 12, color: 'var(--text-secondary)', marginBottom: 5 }}>
+                    {t('admin.smsTestMessage')}
+                  </label>
+                  <input
+                    type="text"
+                    value={testMessage}
+                    onChange={(e) => setTestMessage(e.target.value)}
+                    placeholder={t('admin.smsTestPlaceholder')}
+                    className="form-control"
+                    style={{ width: '100%' }}
+                  />
+                </div>
+                <button
+                  type="submit"
+                  className="btn btn-primary"
+                  disabled={sendingTest || !testPhone.trim() || !smsEnabled}
+                  style={{ fontSize: 13, display: 'flex', alignItems: 'center', gap: 6, minHeight: 40 }}
+                >
+                  <FiSend size={14} /> {sendingTest ? t('admin.smsSending') : t('admin.smsSend')}
+                </button>
+              </form>
+              {!smsEnabled && (
+                <div style={{ marginTop: 10, fontSize: 12, color: '#92400e' }}>
+                  {t('admin.smsTestDisabled')}
+                </div>
+              )}
+            </div>
+
             {/* Compteurs SMS / Emails */}
             <div style={{ ...card }}>
               <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 12, flexWrap: 'wrap', marginBottom: 14 }}>
@@ -546,54 +595,6 @@ export default function AdminSms() {
               )}
             </div>
 
-            {/* Test d'envoi */}
-            <div style={card}>
-              <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 14 }}>
-                <FiSend size={18} style={{ color: 'var(--primary)' }} />
-                <strong>{t('admin.smsTest')}</strong>
-              </div>
-              <form onSubmit={sendTest} style={{ display: 'flex', gap: 10, flexWrap: 'wrap', alignItems: 'flex-end' }}>
-                <div style={{ flex: '1 1 200px', minWidth: 180 }}>
-                  <label style={{ display: 'block', fontSize: 12, color: 'var(--text-secondary)', marginBottom: 5 }}>
-                    {t('admin.smsTestPhone')}
-                  </label>
-                  <input
-                    type="tel"
-                    value={testPhone}
-                    onChange={(e) => setTestPhone(e.target.value)}
-                    placeholder="06XXXXXXXX"
-                    className="form-control"
-                    style={{ width: '100%' }}
-                  />
-                </div>
-                <div style={{ flex: '2 1 280px', minWidth: 200 }}>
-                  <label style={{ display: 'block', fontSize: 12, color: 'var(--text-secondary)', marginBottom: 5 }}>
-                    {t('admin.smsTestMessage')}
-                  </label>
-                  <input
-                    type="text"
-                    value={testMessage}
-                    onChange={(e) => setTestMessage(e.target.value)}
-                    placeholder={t('admin.smsTestPlaceholder')}
-                    className="form-control"
-                    style={{ width: '100%' }}
-                  />
-                </div>
-                <button
-                  type="submit"
-                  className="btn btn-primary"
-                  disabled={sendingTest || !testPhone.trim() || !smsEnabled}
-                  style={{ fontSize: 13, display: 'flex', alignItems: 'center', gap: 6, minHeight: 40 }}
-                >
-                  <FiSend size={14} /> {sendingTest ? t('admin.smsSending') : t('admin.smsSend')}
-                </button>
-              </form>
-              {!smsEnabled && (
-                <div style={{ marginTop: 10, fontSize: 12, color: '#92400e' }}>
-                  {t('admin.smsTestDisabled')}
-                </div>
-              )}
-            </div>
           </div>
         )}
       </div>
