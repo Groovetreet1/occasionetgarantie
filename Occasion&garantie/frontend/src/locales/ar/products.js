@@ -11,6 +11,8 @@
     storeOfficial: 'المتجر الرسمي',
     storeSoldBy: '— يُباع بواسطة Occasion & Garantie',
     viewAll: 'عرض الكل',
+    viewGrid: 'شبكة',
+    viewList: 'قائمة',
     filters: 'الفلاتر',
     reset: 'إعادة تعيين',
     result: 'نتيجة',

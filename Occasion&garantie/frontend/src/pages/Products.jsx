@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react';
 import { Link, useSearchParams } from 'react-router-dom';
-import { FiSearch, FiSliders, FiPackage, FiX, FiArrowRight, FiShield, FiShoppingBag } from 'react-icons/fi';
+import { FiSearch, FiSliders, FiPackage, FiX, FiArrowRight, FiShield, FiShoppingBag, FiGrid, FiList } from 'react-icons/fi';
 
 import { motion } from 'framer-motion';
 import api from '../api/axios';
@@ -31,11 +31,23 @@ export default function Products() {
   const [priceMin, setPriceMin] = useState('');
   const [priceMax, setPriceMax] = useState('');
   const [visibleCount, setVisibleCount] = useState(12);
+  const [viewMode, setViewMode] = useState(() => {
+    try {
+      const saved = localStorage.getItem('productsViewMode');
+      return saved === 'list' || saved === 'grid' ? saved : 'grid';
+    } catch {
+      return 'grid';
+    }
+  });
   const [storeProducts, setStoreProducts] = useState([]);
   const [storeLoad, setStoreLoad] = useState(true);
   const [cities, setCities] = useState([]);
 
   useEffect(() => { document.title = t('products.metaTitle'); }, [t]);
+
+  useEffect(() => {
+    try { localStorage.setItem('productsViewMode', viewMode); } catch {}
+  }, [viewMode]);
 
   useEffect(() => {
     const catParam = searchParams.get('category');
@@ -164,7 +176,36 @@ export default function Products() {
           {hasFilters && (
             <button className="btn-filter-reset" onClick={resetFilters} style={{ fontWeight: 600 }}>{t('products.reset')}</button>
           )}
-          <span className="products-count" style={{ marginLeft: 'auto', background: 'var(--bg-secondary)', border: '1px solid var(--border-light)', padding: '6px 14px', borderRadius: 999, fontSize: 12, fontWeight: 600, color: 'var(--text-secondary)' }}>{filtered.length} {filtered.length > 1 ? t('products.results') : t('products.result')}</span>
+          <span className="products-count" style={{ background: 'var(--bg-secondary)', border: '1px solid var(--border-light)', padding: '6px 14px', borderRadius: 999, fontSize: 12, fontWeight: 600, color: 'var(--text-secondary)' }}>{filtered.length} {filtered.length > 1 ? t('products.results') : t('products.result')}</span>
+
+          <div className="products-view-toggle" style={{ marginLeft: 'auto', display: 'inline-flex', padding: 3, gap: 3, background: 'var(--bg-secondary)', border: '1px solid var(--border-light)', borderRadius: 999 }}>
+            <button
+              type="button"
+              onClick={() => setViewMode('grid')}
+              aria-label={t('products.viewGrid')}
+              title={t('products.viewGrid')}
+              style={{
+                display: 'inline-flex', alignItems: 'center', gap: 6, padding: '6px 12px', borderRadius: 999, border: 'none',
+                background: viewMode === 'grid' ? 'var(--primary)' : 'transparent', color: viewMode === 'grid' ? '#000' : 'var(--text-secondary)',
+                fontSize: 12, fontWeight: 700, cursor: 'pointer',
+              }}
+            >
+              <FiGrid size={14} /> {t('products.viewGrid')}
+            </button>
+            <button
+              type="button"
+              onClick={() => setViewMode('list')}
+              aria-label={t('products.viewList')}
+              title={t('products.viewList')}
+              style={{
+                display: 'inline-flex', alignItems: 'center', gap: 6, padding: '6px 12px', borderRadius: 999, border: 'none',
+                background: viewMode === 'list' ? 'var(--primary)' : 'transparent', color: viewMode === 'list' ? '#000' : 'var(--text-secondary)',
+                fontSize: 12, fontWeight: 700, cursor: 'pointer',
+              }}
+            >
+              <FiList size={14} /> {t('products.viewList')}
+            </button>
+          </div>
         </div>
 
         {showFilters && (
@@ -225,8 +266,8 @@ export default function Products() {
           <div className="products-loading"><div className="spinner" /></div>
         ) : filtered.length > 0 ? (
           <>
-            <div className="product-grid-modern">
-              {displayed.map((p, i) => <HomeProductCard key={p.id} product={p} index={i} />)}
+            <div className={`product-grid-modern ${viewMode === 'list' ? 'view-list' : 'view-grid'}`}>
+              {displayed.map((p, i) => <HomeProductCard key={p.id} product={p} index={i} view={viewMode} />)}
             </div>
             {hasMore && (
               <div className="products-load-more">

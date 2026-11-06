@@ -9,7 +9,7 @@ const API_BASE = import.meta.env.VITE_API_URL || '';
 
 const toUrl = (img) => (img ? (img.startsWith('http') ? img : `${API_BASE}/uploads/${img}`) : null);
 
-export default function HomeProductCard({ product, index = 0 }) {
+export default function HomeProductCard({ product, index = 0, view = 'grid' }) {
   const { t } = useLanguage();
   const [photoIndex, setPhotoIndex] = useState(0);
 
@@ -54,14 +54,14 @@ export default function HomeProductCard({ product, index = 0 }) {
       viewport={{ once: true, margin: '-30px' }}
       transition={{ duration: 0.38, delay: index * 0.045, ease: [0.22, 1, 0.36, 1] }}
     >
-      <Link to={detailLink} className={`product-card product-card-compact saas-preview-card ${isSold ? 'product-sold' : ''}`} style={{ borderRadius: 16, border: '1px solid var(--border-light)', overflow: 'hidden' }}>
-        <div className="product-card-image" style={{ background: 'var(--bg-secondary)', position: 'relative' }}>
+      <Link to={detailLink} className={`product-card product-card-compact saas-preview-card ${view === 'list' ? 'product-card-list' : ''} ${isSold ? 'product-sold' : ''}`} style={{ borderRadius: 16, border: '1px solid var(--border-light)', overflow: 'hidden', ...(view === 'list' ? { display: 'flex', alignItems: 'stretch' } : {}) }}>
+        <div className="product-card-image" style={{ background: 'var(--bg-secondary)', position: 'relative', ...(view === 'list' ? { width: 150, maxWidth: 150, aspectRatio: '1 / 1', flexShrink: 0 } : {}) }}>
           {discount > 0 && <span className="badge-discount" style={{ background: '#ef4444', color: '#fff', borderRadius: 999, padding: '4px 10px', fontSize: 11, fontWeight: 800, top: 10, right: 10 }}>-{discount}%</span>}
           {isSold && <div className="product-sold-overlay" style={{ background: 'rgba(15,23,42,0.55)', backdropFilter: 'blur(2px)' }}>{t('home.sold')}</div>}
           {isPending && <span className="badge-pending" style={{ borderRadius: 999 }}>{t('home.reserved')}</span>}
           {isStore && <span className="badge-store" style={{ borderRadius: 999, background: 'var(--primary)', color: '#000' }}><FiStar size={10} style={{ verticalAlign: 'middle', marginRight: 4 }} />Officiel</span>}
           <span className="saas-preview-arrow" style={{ background: 'var(--bg-card)', border: '1px solid var(--border-light)', boxShadow: '0 8px 20px rgba(0,0,0,0.08)' }}><FiArrowUpRight size={15} /></span>
-          <div className="product-card-img-wrap" style={{ padding: 16 }}>
+          <div className="product-card-img-wrap" style={{ padding: view === 'list' ? 10 : 16 }}>
             {currentImg ? (
               <img src={currentImg} alt={product.name} loading="lazy" style={{ transition: 'transform 0.5s' }} />
             ) : (
@@ -81,7 +81,7 @@ export default function HomeProductCard({ product, index = 0 }) {
           )}
         </div>
 
-        <div className="product-card-body" style={{ padding: '13px 14px 14px' }}>
+        <div className="product-card-body" style={{ padding: view === 'list' ? '14px 16px' : '13px 14px 14px', ...(view === 'list' ? { flex: 1, minWidth: 0, display: 'flex', flexDirection: 'column', justifyContent: 'center' } : {}) }}>
           <div style={{ display: 'flex', alignItems: 'center', gap: 6, marginBottom: 6 }}>
             <span style={{ fontSize: 10, fontWeight: 700, letterSpacing: 0.6, textTransform: 'uppercase', color: 'var(--text-muted)' }}>{product.category || product.category_name || 'Smartphone'}</span>
             <span style={{ marginLeft: 'auto', display: 'inline-flex', alignItems: 'center', gap: 4, fontSize: 11, fontWeight: 700, color: '#f59e0b' }}><FiStar size={11} style={{ fill: '#f59e0b', color: '#f59e0b' }} /> 4.8</span>

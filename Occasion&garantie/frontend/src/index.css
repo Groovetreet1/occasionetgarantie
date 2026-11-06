@@ -928,6 +928,12 @@ input, textarea, select, button { font-family: inherit; }
   display: grid; grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
   gap: 20px;
 }
+.product-grid-modern.view-list {
+  grid-template-columns: 1fr;
+  gap: 14px;
+}
+.product-grid-modern.view-list .product-card-list { display: flex; align-items: stretch; }
+.product-grid-modern.view-list .product-card-list:hover { transform: translateY(-2px); }
 
 /* Product card modern */
 .product-card {

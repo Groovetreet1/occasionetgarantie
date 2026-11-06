@@ -11,6 +11,8 @@
     storeOfficial: 'Boutique Officielle',
     storeSoldBy: '— Vendu par Occasion & Garantie',
     viewAll: 'Voir tout',
+    viewGrid: 'Grille',
+    viewList: 'Liste',
     filters: 'Filtres',
     reset: 'Réinitialiser',
     result: 'résultat',
