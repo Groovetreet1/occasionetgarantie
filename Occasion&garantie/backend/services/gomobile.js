@@ -61,6 +61,14 @@ async function sendSms(phone, message) {
     method: 'POST',
     body: JSON.stringify({ to, senderId, message }),
   });
+  // L'API GoMobile repond 201 meme quand l'operateur refuse l'envoi (success: false,
+  // creditCharged: 0). Sans ce controle, l'app croit que le SMS est parti.
+  if (data && data.success === false) {
+    const err = new Error(data.error || "Echec de l'envoi du SMS");
+    err.status = 502;
+    err.data = data;
+    throw err;
+  }
   return data;
 }
 
