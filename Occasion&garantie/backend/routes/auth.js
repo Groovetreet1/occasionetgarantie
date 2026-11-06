@@ -10,7 +10,7 @@ const fs = require('fs');
 const { body, validationResult } = require('express-validator');
 const pool = require('../config/db');
 const { authenticate } = require('../middleware/auth');
-const gomobile = require('../services/gomobile');
+const sms = require('../services/sms');
 const { send, verification, reset } = require('../emails');
 const { upload: cloudUpload } = require('../services/uploader');
 const { logVendorAction } = require('../services/tracker');
@@ -92,7 +92,7 @@ router.post('/signup', [
       } catch (mailErr) {
         console.error('Email failed, trying SMS:', mailErr.message);
         try {
-          await gomobile.sendSms(phone, `Votre code de verification Occasion & Garantie : ${code}`);
+          await sms.sendSms(phone, `Votre code de verification Occasion & Garantie : ${code}`);
         } catch (smsErr2) {
           console.error('SMS also failed:', smsErr2.message);
           await pool.query('DELETE FROM users WHERE id = ?', [result.insertId]);
@@ -101,7 +101,7 @@ router.post('/signup', [
       }
     } else {
       try {
-        await gomobile.sendSms(phone, `Votre code de verification Occasion & Garantie : ${code}`);
+        await sms.sendSms(phone, `Votre code de verification Occasion & Garantie : ${code}`);
       } catch (smsErr) {
         console.error('SMS failed, trying email:', smsErr.message);
         try {
@@ -176,7 +176,7 @@ router.post('/resend-code', [
       } catch (mailErr) {
         console.error('Email failed, trying SMS:', mailErr.message);
         try {
-          await gomobile.sendSms(user.phone, `Votre code de verification Occasion & Garantie : ${code}`);
+          await sms.sendSms(user.phone, `Votre code de verification Occasion & Garantie : ${code}`);
         } catch (smsErr2) {
           console.error('SMS also failed:', smsErr2.message);
           return res.status(500).json({ message: 'Impossible d\'envoyer le code. Reessayez plus tard.' });
@@ -184,7 +184,7 @@ router.post('/resend-code', [
       }
     } else {
       try {
-        await gomobile.sendSms(user.phone, `Votre code de verification Occasion & Garantie : ${code}`);
+        await sms.sendSms(user.phone, `Votre code de verification Occasion & Garantie : ${code}`);
       } catch (smsErr) {
         console.error('SMS failed, trying email:', smsErr.message);
         try {
@@ -549,7 +549,7 @@ router.post('/send-phone-code', authenticate, [
     phoneChangeCodes.set(req.user.id, { code, newPhone, expiresAt: Date.now() + CODE_EXPIRY });
 
     try {
-      await gomobile.sendSms(newPhone, `Votre code de verification Occasion & Garantie : ${code}. Valable 15 min.`);
+      await sms.sendSms(newPhone, `Votre code de verification Occasion & Garantie : ${code}. Valable 15 min.`);
     } catch (smsErr) {
       console.error('SMS send failed:', smsErr.message);
     }
@@ -662,7 +662,7 @@ router.post('/forgot-password', [
           return res.json({ message: genericMsg, identifier, sentVia: 'sms' });
         }
         try {
-          await gomobile.sendSms(users[0].phone, `Votre code de reinitialisation Occasion & Garantie : ${code}. Valable 15 min.`);
+          await sms.sendSms(users[0].phone, `Votre code de reinitialisation Occasion & Garantie : ${code}. Valable 15 min.`);
         } catch (smsErr) {
           console.error('SMS reset failed:', smsErr.message);
           return res.json({ message: genericMsg, identifier, sentVia: 'sms' });
@@ -684,7 +684,7 @@ router.post('/forgot-password', [
           return res.json({ message: genericMsg, identifier, sentVia: 'email' });
         }
         try {
-          await gomobile.sendSms(users[0].phone, `Votre code de reinitialisation Occasion & Garantie : ${code}. Valable 15 min.`);
+          await sms.sendSms(users[0].phone, `Votre code de reinitialisation Occasion & Garantie : ${code}. Valable 15 min.`);
         } catch (smsErr) {
           console.error('SMS fallback also failed:', smsErr.message);
           return res.json({ message: genericMsg, identifier, sentVia: 'email' });
@@ -730,7 +730,7 @@ router.post('/forgot-password', [
     resetCodes.set(inputDigits, entry);
 
     try {
-      await gomobile.sendSms(target.phone, `Votre code de reinitialisation Occasion & Garantie : ${code}. Valable 15 min.`);
+      await sms.sendSms(target.phone, `Votre code de reinitialisation Occasion & Garantie : ${code}. Valable 15 min.`);
     } catch (smsErr) {
       console.error('SMS send failed:', smsErr.message);
     }
@@ -797,7 +797,7 @@ router.post('/upgrade-seller', authenticate, async (req, res) => {
     sellerUpgradeCodes.set(req.user.id, { code, expiresAt });
 
     try {
-      await gomobile.sendSms(users[0].phone, `Code verification vendeur Occasion & Garantie : ${code}`);
+      await sms.sendSms(users[0].phone, `Code verification vendeur Occasion & Garantie : ${code}`);
     } catch (smsErr) {
       console.log('SMS upgrade failed:', smsErr.message);
     }

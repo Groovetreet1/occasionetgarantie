@@ -18,10 +18,12 @@ const chatRoutes = require('./routes/chat');
 const contactRoutes = require('./routes/contact');
 const pool = require('./config/db');
 const { ensureTables } = require('./services/tracker');
+const { ensureTables: ensureSmsGatewayTables } = require('./services/smsGateway');
 const seo = require('./services/seo');
 
 (async () => {
   await ensureTables();
+  try { await ensureSmsGatewayTables(); } catch (e) { console.log('sms gateway table init:', e.message); }
   try {
     await pool.query('ALTER TABLE users ADD COLUMN premium BOOLEAN DEFAULT FALSE');
   } catch {}
@@ -231,6 +233,7 @@ const seo = require('./services/seo');
   app.use('/api/negotiations', require('./routes/negotiations'));
   app.use('/api/notifications', require('./routes/notifications'));
   app.use('/api/store', require('./routes/store'));
+  app.use('/api/sms-gateway', require('./routes/smsGateway'));
 
   const { startNewsletterCron, sendNewsletterToAll } = require('./services/newsletterCron');
   app.post('/api/newsletter/trigger', authenticate, adminOnly, async (req, res) => {

@@ -5,7 +5,7 @@ const path = require('path');
 const fs = require('fs');
 const pool = require('../config/db');
 const { authenticate } = require('../middleware/auth');
-const gomobile = require('../services/gomobile');
+const sms = require('../services/sms');
 const { upload: cloudUpload } = require('../services/uploader');
 
 // Auto-create premium_payments table if missing
@@ -155,7 +155,7 @@ router.post('/activate', authenticate, screenshotUpload.single('screenshot'), as
       if (admins.length > 0 && admins[0].phone) adminPhone = admins[0].phone;
       if (adminPhone) {
         const msg = `Premium #${paymentRow.id} ${paymentRow.full_name} ${paymentRow.phone} 50DH recu, confirmer sur admin`;
-        await gomobile.sendSms(adminPhone, msg);
+        await sms.sendSms(adminPhone, msg);
       }
     } catch (smsErr) {
       console.error('Admin SMS failed:', smsErr.message);

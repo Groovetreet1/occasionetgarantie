@@ -4,7 +4,8 @@ const crypto = require('crypto');
 const router = express.Router();
 const pool = require('../config/db');
 const { authenticate, adminOnly } = require('../middleware/auth');
-const gomobile = require('../services/gomobile');
+const sms = require('../services/sms');
+const smsGateway = require('../services/smsGateway');
 const { send, creditConfirmed } = require('../emails');
 const { destroy: cloudDestroy, USE_CLOUDINARY } = require('../services/uploader');
 const fs = require('fs');
@@ -31,6 +32,31 @@ router.get('/system/storage', authenticate, adminOnly, async (req, res) => {
     res.json({ host, db });
   } catch (err) {
     res.status(500).json({ message: 'Erreur serveur.' });
+  }
+});
+
+// ---- Passerelle SMS auto-hebergee (telephone Android + SIM) ----
+router.get('/sms/queue', authenticate, adminOnly, async (req, res) => {
+  try {
+    const [stats, recent] = await Promise.all([smsGateway.stats(), smsGateway.recent(50)]);
+    res.json({ provider: (process.env.SMS_PROVIDER || 'gomobile'), stats, recent });
+  } catch (err) {
+    res.status(500).json({ message: 'Erreur serveur.' });
+  }
+});
+
+router.post('/sms/test', authenticate, adminOnly, async (req, res) => {
+  try {
+    if ((process.env.SMS_PROVIDER || 'gomobile') !== 'gateway') {
+      return res.status(400).json({ message: 'SMS_PROVIDER n est pas configure sur "gateway".' });
+    }
+    const phone = String(req.body.phone || '').trim();
+    const message = String(req.body.message || 'Test Occasion & Garantie').trim();
+    if (!phone) return res.status(400).json({ message: 'Numero de telephone requis.' });
+    const id = await smsGateway.enqueue(phone, message, 'admin-test');
+    res.json({ message: 'SMS mis en file. Le telephone le enverra dans quelques secondes.', id });
+  } catch (err) {
+    res.status(500).json({ message: err.message });
   }
 });
 
@@ -772,7 +798,7 @@ router.post('/vendor-logs/forgot', authenticate, adminOnly, async (req, res) => 
     let maskedTo = (admin.phone || '').replace(/\d(?=\d{2})/g, '*');
     try {
       if (!admin.phone) throw new Error('no admin phone');
-      await gomobile.sendSms(admin.phone, `Code recuperation Journal vendeurs : ${code}. Valable 5 min.`);
+      await sms.sendSms(admin.phone, `Code recuperation Journal vendeurs : ${code}. Valable 5 min.`);
     } catch (smsErr) {
       console.error('Vendor-logs reset SMS failed:', smsErr.message);
       sentVia = 'email';

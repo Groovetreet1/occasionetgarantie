@@ -6,7 +6,7 @@ const path = require('path');
 const fs = require('fs');
 const pool = require('../config/db');
 const { authenticate } = require('../middleware/auth');
-const gomobile = require('../services/gomobile');
+const sms = require('../services/sms');
 const { upload: cloudUpload } = require('../services/uploader');
 
 const RESERVATION_AMOUNT = 200;
@@ -89,7 +89,7 @@ router.post('/:id/screenshot', authenticate, screenshotUpload.single('screenshot
       }
       if (adminPhone) {
         const smsMessage = `Paiement #${reservationId} ${clientName} ${clientPhone} ${screenshotUrl}`;
-        await gomobile.sendSms(adminPhone, smsMessage);
+        await sms.sendSms(adminPhone, smsMessage);
       }
     } catch (smsErr) {
       console.error('Admin SMS failed:', smsErr.message);
