@@ -40,19 +40,18 @@ async function apiFetch(path, options = {}) {
 }
 
 async function getSenderName() {
-  // API /sms/send attend le NOM (ex: "GOMOBILE"), pas l'UUID.
-  // On verifie qu'il est disponible, sinon on prend le premier actif.
-  if (process.env.SMS_SENDER_NAME) return process.env.SMS_SENDER_NAME;
+  // API /sms/send attend le NOM du sender ID (ex: "OCCASION"), pas l'UUID.
+  // Aucun fallback sur "GOMOBILE" : ce sender ID appartient a Gomobile (marque tierce),
+  // l'utiliser serait une usurpation de marque (refuse par l'API: SENDER_ID_NOT_ACCESSIBLE).
+  const configured = (process.env.SMS_SENDER_NAME || '').trim();
+  if (configured) return configured;
   try {
     const r = await apiFetch('/sender-ids/available?limit=20', { method: 'GET' });
     const list = Array.isArray(r) ? r : (r.data || []);
-    const wanted = 'gomobile';
-    const match = list.find((s) => String(s.senderId || '').toLowerCase() === wanted)
-      || list.find((s) => s.status === 'active')
-      || list[0];
+    const match = list.find((s) => s.status === 'active') || list[0];
     if (match && match.senderId) return match.senderId;
   } catch {}
-  return 'GOMOBILE';
+  throw new Error('Aucun Sender ID actif pour cette organisation Gomobile (SMS_SENDER_NAME non configure)');
 }
 
 async function sendSms(phone, message) {
