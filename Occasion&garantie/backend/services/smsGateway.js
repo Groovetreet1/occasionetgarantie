@@ -29,6 +29,12 @@ async function ensureTables() {
     updated_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
     INDEX idx_status (status, created_at)
   ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4`);
+  // Battement de coeur des telephones : permet d'afficher "connecte" meme
+  // quand la file est vide (le telephone appelle /pull toutes les 5 s).
+  await pool.query(`CREATE TABLE IF NOT EXISTS sms_gateway_devices (
+    device_id VARCHAR(100) PRIMARY KEY,
+    last_seen DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP
+  ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4`);
   _tablesReady = true;
   console.log('sms_gateway_queue table ready');
 }
@@ -76,6 +82,13 @@ async function enqueueAndWait(phone, message, source) {
 
 async function pull(deviceId, limit = 10) {
   await ensureTables();
+  const device = deviceId || 'unknown';
+  try {
+    await pool.query(
+      'INSERT INTO sms_gateway_devices (device_id, last_seen) VALUES (?, NOW()) ON DUPLICATE KEY UPDATE last_seen = NOW()',
+      [device]
+    );
+  } catch {}
   const conn = await pool.getConnection();
   try {
     await conn.beginTransaction();
@@ -149,13 +162,20 @@ async function stats() {
     if (r.last_update && (!lastActivity || r.last_update > lastActivity)) lastActivity = r.last_update;
   }
   const [[dev]] = await pool.query(
-    "SELECT device_id, MAX(claimed_at) AS last_seen FROM sms_gateway_queue WHERE device_id IS NOT NULL GROUP BY device_id ORDER BY last_seen DESC LIMIT 1"
+    'SELECT device_id, last_seen FROM sms_gateway_devices ORDER BY last_seen DESC LIMIT 1'
   );
+  let lastDevice = dev ? { id: dev.device_id, lastSeen: dev.last_seen } : null;
+  if (!lastDevice) {
+    const [[oldDev]] = await pool.query(
+      "SELECT device_id, MAX(claimed_at) AS last_seen FROM sms_gateway_queue WHERE device_id IS NOT NULL GROUP BY device_id ORDER BY last_seen DESC LIMIT 1"
+    );
+    if (oldDev) lastDevice = { id: oldDev.device_id, lastSeen: oldDev.last_seen };
+  }
   return {
     counts: out,
     oldestPending,
     lastActivity,
-    lastDevice: dev ? { id: dev.device_id, lastSeen: dev.last_seen } : null,
+    lastDevice,
   };
 }
 
