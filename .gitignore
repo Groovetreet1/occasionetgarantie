@@ -39,6 +39,9 @@ ffmpeg-bin/
 .env*
 !.env.example
 
+# Secrets locaux (ne jamais commit)
+*.local.sh
+
 # Metro
 .metro-health-check*
 
