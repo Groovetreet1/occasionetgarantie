@@ -169,6 +169,7 @@
     smsTypeSms: 'SMS',
     smsTypeEmail: 'إيميل',
     smsNoHistory: 'لا يوجد إرسال في هذه الفترة.',
+    smsPageInfo: '{{from}}-{{to}} من {{total}} إرسال',
     tfaBadge: '2FA',
     tfaUnlock: 'فك حظر 2FA',
     tfaDisable: 'تعطيل 2FA',

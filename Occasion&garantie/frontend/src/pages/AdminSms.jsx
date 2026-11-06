@@ -75,6 +75,8 @@ export default function AdminSms() {
   const [testMessage, setTestMessage] = useState('');
   const [sendingTest, setSendingTest] = useState(false);
   const [downloading, setDownloading] = useState(false);
+  const [page, setPage] = useState(1);
+  const PAGE_SIZE = 10;
 
   const flash = useCallback((type, text) => {
     setNotice({ type, text });
@@ -192,6 +194,36 @@ export default function AdminSms() {
   const smsPeriod = summary?.sms || { sent: 0, failed: 0 };
   const emailPeriod = summary?.email || { sent: 0, failed: 0 };
   const allTime = summary?.allTime || {};
+
+  const totalPages = Math.max(1, Math.ceil(entries.length / PAGE_SIZE));
+  const safePage = Math.min(page, totalPages);
+  const pageStart = (safePage - 1) * PAGE_SIZE;
+  const pageEntries = entries.slice(pageStart, pageStart + PAGE_SIZE);
+
+  useEffect(() => {
+    setPage(1);
+  }, [logTab, logDays]);
+
+  const pageNumbers = [];
+  if (totalPages <= 7) {
+    for (let p = 1; p <= totalPages; p++) pageNumbers.push(p);
+  } else {
+    const start = Math.max(2, safePage - 1);
+    const end = Math.min(totalPages - 1, safePage + 1);
+    pageNumbers.push(1);
+    if (start > 2) pageNumbers.push('...');
+    for (let p = start; p <= end; p++) pageNumbers.push(p);
+    if (end < totalPages - 1) pageNumbers.push('...');
+    pageNumbers.push(totalPages);
+  }
+
+  const pageBtnStyle = (active) => ({
+    minWidth: 30, height: 30, padding: '0 8px', borderRadius: 8,
+    border: `1px solid ${active ? 'var(--primary)' : 'var(--border)'}`,
+    background: active ? 'var(--primary)' : 'var(--bg-card)',
+    color: active ? '#fff' : 'var(--text)',
+    fontSize: 12, fontWeight: 700, cursor: 'pointer',
+  });
 
   const statCards = [
     { label: t('admin.smsStatSmsSent'), value: smsPeriod.sent, color: '#059669', bg: '#ecfdf5' },
@@ -348,7 +380,7 @@ export default function AdminSms() {
                 <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
                   <select
                     value={logDays}
-                    onChange={(e) => setLogDays(Number(e.target.value))}
+                    onChange={(e) => { setLogDays(Number(e.target.value)); setPage(1); }}
                     className="form-control"
                     style={{ width: 'auto', fontSize: 12.5, padding: '6px 10px' }}
                   >
@@ -399,7 +431,7 @@ export default function AdminSms() {
                   <button
                     key={tab.key}
                     type="button"
-                    onClick={() => setLogTab(tab.key)}
+                    onClick={() => { setLogTab(tab.key); setPage(1); }}
                     className={logTab === tab.key ? 'btn btn-primary' : 'btn btn-outline'}
                     style={{ fontSize: 12, padding: '5px 12px' }}
                   >
@@ -416,56 +448,101 @@ export default function AdminSms() {
                   {t('admin.smsNoHistory')}
                 </div>
               ) : (
-                <div style={{ overflowX: 'auto' }}>
-                  <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: 12.5 }}>
-                    <thead>
-                      <tr style={{ textAlign: 'left', color: 'var(--text-muted)' }}>
-                        <th style={{ padding: '8px 6px', fontWeight: 600 }}>{t('admin.smsColDate')}</th>
-                        <th style={{ padding: '8px 6px', fontWeight: 600 }}>{t('admin.smsColType')}</th>
-                        <th style={{ padding: '8px 6px', fontWeight: 600 }}>{t('admin.smsColRecipient')}</th>
-                        <th style={{ padding: '8px 6px', fontWeight: 600 }}>{t('admin.smsColContent')}</th>
-                        <th style={{ padding: '8px 6px', fontWeight: 600 }}>{t('admin.smsColStatus')}</th>
-                      </tr>
-                    </thead>
-                    <tbody>
-                      {entries.map((row) => {
-                        const Icon = statusIcon(row.status);
-                        return (
-                          <tr key={`${row.type}-${row.id}`} style={{ borderTop: '1px solid var(--border)' }}>
-                            <td style={{ padding: '9px 6px', whiteSpace: 'nowrap', color: 'var(--text-secondary)' }}>
-                              {fmtDate(row.sent_at || row.created_at)}
-                            </td>
-                            <td style={{ padding: '9px 6px', whiteSpace: 'nowrap' }}>
-                              <span style={{
-                                fontSize: 11, fontWeight: 800, padding: '2px 8px', borderRadius: 999,
-                                background: row.type === 'email' ? '#eff6ff' : '#fffbeb',
-                                color: row.type === 'email' ? '#2563eb' : '#d97706',
-                              }}>
-                                {row.type === 'email' ? t('admin.smsTypeEmail') : t('admin.smsTypeSms')}
-                              </span>
-                            </td>
-                            <td style={{ padding: '9px 6px', whiteSpace: 'nowrap', fontWeight: 600 }}>{row.recipient}</td>
-                            <td style={{ padding: '9px 6px', maxWidth: 380 }}>
-                              <div style={{ overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }} title={row.content}>
-                                {row.content}
-                              </div>
-                              {row.error && (
-                                <div style={{ fontSize: 11, color: '#dc2626', marginTop: 2, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }} title={row.error}>
-                                  {row.error}
+                <>
+                  <div style={{ overflowX: 'auto' }}>
+                    <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: 12.5 }}>
+                      <thead>
+                        <tr style={{ textAlign: 'left', color: 'var(--text-muted)' }}>
+                          <th style={{ padding: '8px 6px', fontWeight: 600 }}>{t('admin.smsColDate')}</th>
+                          <th style={{ padding: '8px 6px', fontWeight: 600 }}>{t('admin.smsColType')}</th>
+                          <th style={{ padding: '8px 6px', fontWeight: 600 }}>{t('admin.smsColRecipient')}</th>
+                          <th style={{ padding: '8px 6px', fontWeight: 600 }}>{t('admin.smsColContent')}</th>
+                          <th style={{ padding: '8px 6px', fontWeight: 600 }}>{t('admin.smsColStatus')}</th>
+                        </tr>
+                      </thead>
+                      <tbody>
+                        {pageEntries.map((row) => {
+                          const Icon = statusIcon(row.status);
+                          return (
+                            <tr key={`${row.type}-${row.id}`} style={{ borderTop: '1px solid var(--border)' }}>
+                              <td style={{ padding: '9px 6px', whiteSpace: 'nowrap', color: 'var(--text-secondary)' }}>
+                                {fmtDate(row.sent_at || row.created_at)}
+                              </td>
+                              <td style={{ padding: '9px 6px', whiteSpace: 'nowrap' }}>
+                                <span style={{
+                                  fontSize: 11, fontWeight: 800, padding: '2px 8px', borderRadius: 999,
+                                  background: row.type === 'email' ? '#eff6ff' : '#fffbeb',
+                                  color: row.type === 'email' ? '#2563eb' : '#d97706',
+                                }}>
+                                  {row.type === 'email' ? t('admin.smsTypeEmail') : t('admin.smsTypeSms')}
+                                </span>
+                              </td>
+                              <td style={{ padding: '9px 6px', whiteSpace: 'nowrap', fontWeight: 600 }}>{row.recipient}</td>
+                              <td style={{ padding: '9px 6px', maxWidth: 380 }}>
+                                <div style={{ overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }} title={row.content}>
+                                  {row.content}
                                 </div>
-                              )}
-                            </td>
-                            <td style={{ padding: '9px 6px', whiteSpace: 'nowrap' }}>
-                              <span style={{ display: 'inline-flex', alignItems: 'center', gap: 5, fontWeight: 700, color: statusColor(row.status) }}>
-                                <Icon size={13} /> {t(`admin.smsStatus${row.status.charAt(0).toUpperCase()}${row.status.slice(1)}`)}
-                              </span>
-                            </td>
-                          </tr>
-                        );
+                                {row.error && (
+                                  <div style={{ fontSize: 11, color: '#dc2626', marginTop: 2, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }} title={row.error}>
+                                    {row.error}
+                                  </div>
+                                )}
+                              </td>
+                              <td style={{ padding: '9px 6px', whiteSpace: 'nowrap' }}>
+                                <span style={{ display: 'inline-flex', alignItems: 'center', gap: 5, fontWeight: 700, color: statusColor(row.status) }}>
+                                  <Icon size={13} /> {t(`admin.smsStatus${row.status.charAt(0).toUpperCase()}${row.status.slice(1)}`)}
+                                </span>
+                              </td>
+                            </tr>
+                          );
+                        })}
+                      </tbody>
+                    </table>
+                  </div>
+                  <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: 10, marginTop: 12 }}>
+                    <span style={{ fontSize: 12, color: 'var(--text-muted)' }}>
+                      {t('admin.smsPageInfo', {
+                        from: pageStart + 1,
+                        to: Math.min(pageStart + PAGE_SIZE, entries.length),
+                        total: entries.length,
                       })}
-                    </tbody>
-                  </table>
-                </div>
+                    </span>
+                    <div style={{ display: 'flex', alignItems: 'center', gap: 4 }}>
+                      <button
+                        type="button"
+                        onClick={() => setPage(Math.max(1, safePage - 1))}
+                        disabled={safePage === 1}
+                        style={{ ...pageBtnStyle(false), opacity: safePage === 1 ? 0.4 : 1 }}
+                        aria-label={t('admin.previous')}
+                      >
+                        ‹
+                      </button>
+                      {pageNumbers.map((p, idx) => (
+                        p === '...' ? (
+                          <span key={`ellipsis-${idx}`} style={{ padding: '0 4px', color: 'var(--text-muted)' }}>…</span>
+                        ) : (
+                          <button
+                            key={p}
+                            type="button"
+                            onClick={() => setPage(p)}
+                            style={pageBtnStyle(p === safePage)}
+                          >
+                            {p}
+                          </button>
+                        )
+                      ))}
+                      <button
+                        type="button"
+                        onClick={() => setPage(Math.min(totalPages, safePage + 1))}
+                        disabled={safePage === totalPages}
+                        style={{ ...pageBtnStyle(false), opacity: safePage === totalPages ? 0.4 : 1 }}
+                        aria-label={t('admin.next')}
+                      >
+                        ›
+                      </button>
+                    </div>
+                  </div>
+                </>
               )}
             </div>
 
