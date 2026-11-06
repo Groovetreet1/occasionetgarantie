@@ -6,6 +6,7 @@ const pool = require('../config/db');
 const { authenticate, adminOnly } = require('../middleware/auth');
 const sms = require('../services/sms');
 const smsGateway = require('../services/smsGateway');
+const settings = require('../services/settings');
 const { send, creditConfirmed } = require('../emails');
 const { destroy: cloudDestroy, USE_CLOUDINARY } = require('../services/uploader');
 const fs = require('fs');
@@ -45,15 +46,53 @@ router.get('/sms/queue', authenticate, adminOnly, async (req, res) => {
   }
 });
 
+// ---- Interrupteurs SMS / OTP ----
+router.get('/sms/settings', authenticate, adminOnly, async (req, res) => {
+  try {
+    const [smsEnabled, otpEnabled, stats] = await Promise.all([
+      sms.isSmsEnabled(),
+      sms.isOtpSmsEnabled(),
+      smsGateway.stats(),
+    ]);
+    res.json({
+      sms_enabled: smsEnabled,
+      otp_sms_enabled: otpEnabled,
+      provider: sms.provider(),
+      stats,
+    });
+  } catch (err) {
+    res.status(500).json({ message: 'Erreur serveur.' });
+  }
+});
+
+router.put('/sms/settings', authenticate, adminOnly, async (req, res) => {
+  try {
+    const body = req.body || {};
+    if (Object.prototype.hasOwnProperty.call(body, 'sms_enabled')) {
+      await settings.set('sms_enabled', body.sms_enabled ? '1' : '0');
+    }
+    if (Object.prototype.hasOwnProperty.call(body, 'otp_sms_enabled')) {
+      await settings.set('otp_sms_enabled', body.otp_sms_enabled ? '1' : '0');
+    }
+    const [smsEnabled, otpEnabled] = await Promise.all([sms.isSmsEnabled(), sms.isOtpSmsEnabled()]);
+    res.json({ message: 'Reglages enregistres.', sms_enabled: smsEnabled, otp_sms_enabled: otpEnabled });
+  } catch (err) {
+    res.status(500).json({ message: 'Erreur serveur.' });
+  }
+});
+
 router.post('/sms/test', authenticate, adminOnly, async (req, res) => {
   try {
     if ((process.env.SMS_PROVIDER || 'gomobile') !== 'gateway') {
       return res.status(400).json({ message: 'SMS_PROVIDER n est pas configure sur "gateway".' });
     }
+    if (!(await sms.isSmsEnabled())) {
+      return res.status(400).json({ message: 'Les SMS sont desactives (interrupteur global).' });
+    }
     const phone = String(req.body.phone || '').trim();
     const message = String(req.body.message || 'Test Occasion & Garantie').trim();
     if (!phone) return res.status(400).json({ message: 'Numero de telephone requis.' });
-    const id = await smsGateway.enqueue(phone, message, 'admin-test');
+    const id = await smsGateway.enqueue(phone, sms.withBrand(message), 'admin-test');
     res.json({ message: 'SMS mis en file. Le telephone le enverra dans quelques secondes.', id });
   } catch (err) {
     res.status(500).json({ message: err.message });
@@ -798,7 +837,7 @@ router.post('/vendor-logs/forgot', authenticate, adminOnly, async (req, res) => 
     let maskedTo = (admin.phone || '').replace(/\d(?=\d{2})/g, '*');
     try {
       if (!admin.phone) throw new Error('no admin phone');
-      await sms.sendSms(admin.phone, `Occasion & Garantie : code de recuperation Journal vendeurs ${code}. Valable 5 min.`);
+      await sms.sendOtp(admin.phone, `Occasion & Garantie : code de recuperation Journal vendeurs ${code}. Valable 5 min.`);
     } catch (smsErr) {
       console.error('Vendor-logs reset SMS failed:', smsErr.message);
       sentVia = 'email';

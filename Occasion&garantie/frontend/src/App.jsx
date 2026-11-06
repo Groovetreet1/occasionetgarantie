@@ -35,6 +35,7 @@ import AdminUsers from './pages/AdminUsers';
 import AdminTickets from './pages/AdminTickets';
 import AdminVendorLogs from './pages/AdminVendorLogs';
 import AdminStorage from './pages/AdminStorage';
+import AdminSms from './pages/AdminSms';
 import AdminManagedVendors from './pages/AdminManagedVendors';
 import AdminPendingProducts from './pages/AdminPendingProducts';
 import AdminStoreProducts from './pages/AdminStoreProducts';
@@ -112,6 +113,7 @@ export default function App() {
             <Route path="tickets" element={<AdminTickets />} />
             <Route path="vendor-logs" element={<AdminVendorLogs />} />
             <Route path="storage" element={<AdminStorage />} />
+            <Route path="sms" element={<AdminSms />} />
             <Route path="managed-vendors" element={<AdminManagedVendors />} />
             <Route path="products/pending" element={<AdminPendingProducts />} />
             <Route path="store-products" element={<AdminStoreProducts />} />

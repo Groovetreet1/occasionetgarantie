@@ -92,7 +92,7 @@ router.post('/signup', [
       } catch (mailErr) {
         console.error('Email failed, trying SMS:', mailErr.message);
         try {
-          await sms.sendSms(phone, `Occasion & Garantie : code de verification ${code}`);
+          await sms.sendOtp(phone, `Occasion & Garantie : code de verification ${code}`);
         } catch (smsErr2) {
           console.error('SMS also failed:', smsErr2.message);
           await pool.query('DELETE FROM users WHERE id = ?', [result.insertId]);
@@ -101,7 +101,7 @@ router.post('/signup', [
       }
     } else {
       try {
-        await sms.sendSms(phone, `Occasion & Garantie : code de verification ${code}`);
+        await sms.sendOtp(phone, `Occasion & Garantie : code de verification ${code}`);
       } catch (smsErr) {
         console.error('SMS failed, trying email:', smsErr.message);
         try {
@@ -176,7 +176,7 @@ router.post('/resend-code', [
       } catch (mailErr) {
         console.error('Email failed, trying SMS:', mailErr.message);
         try {
-          await sms.sendSms(user.phone, `Occasion & Garantie : code de verification ${code}`);
+          await sms.sendOtp(user.phone, `Occasion & Garantie : code de verification ${code}`);
         } catch (smsErr2) {
           console.error('SMS also failed:', smsErr2.message);
           return res.status(500).json({ message: 'Impossible d\'envoyer le code. Reessayez plus tard.' });
@@ -184,7 +184,7 @@ router.post('/resend-code', [
       }
     } else {
       try {
-        await sms.sendSms(user.phone, `Occasion & Garantie : code de verification ${code}`);
+        await sms.sendOtp(user.phone, `Occasion & Garantie : code de verification ${code}`);
       } catch (smsErr) {
         console.error('SMS failed, trying email:', smsErr.message);
         try {
@@ -549,7 +549,7 @@ router.post('/send-phone-code', authenticate, [
     phoneChangeCodes.set(req.user.id, { code, newPhone, expiresAt: Date.now() + CODE_EXPIRY });
 
     try {
-      await sms.sendSms(newPhone, `Occasion & Garantie : code de verification ${code}. Valable 15 min.`);
+      await sms.sendOtp(newPhone, `Occasion & Garantie : code de verification ${code}. Valable 15 min.`);
     } catch (smsErr) {
       console.error('SMS send failed:', smsErr.message);
     }
@@ -662,10 +662,20 @@ router.post('/forgot-password', [
           return res.json({ message: genericMsg, identifier, sentVia: 'sms' });
         }
         try {
-          await sms.sendSms(users[0].phone, `Occasion & Garantie : code de reinitialisation ${code}. Valable 15 min.`);
+          await sms.sendOtp(users[0].phone, `Occasion & Garantie : code de reinitialisation ${code}. Valable 15 min.`);
         } catch (smsErr) {
-          console.error('SMS reset failed:', smsErr.message);
-          return res.json({ message: genericMsg, identifier, sentVia: 'sms' });
+          console.error('SMS reset failed, trying email:', smsErr.message);
+          try {
+            await send({
+              to: identifier,
+              subject: 'Votre code de réinitialisation - Occasion & Garantie',
+              html: reset({ code, userName: users[0].full_name, resetLink }),
+            });
+            return res.json({ message: genericMsg, identifier, sentVia: 'email' });
+          } catch (mailErr) {
+            console.error('Email reset fallback failed:', mailErr.message);
+            return res.json({ message: genericMsg, identifier, sentVia: 'sms' });
+          }
         }
         return res.json({ message: genericMsg, identifier, sentVia: 'sms' });
       }
@@ -684,7 +694,7 @@ router.post('/forgot-password', [
           return res.json({ message: genericMsg, identifier, sentVia: 'email' });
         }
         try {
-          await sms.sendSms(users[0].phone, `Occasion & Garantie : code de reinitialisation ${code}. Valable 15 min.`);
+          await sms.sendOtp(users[0].phone, `Occasion & Garantie : code de reinitialisation ${code}. Valable 15 min.`);
         } catch (smsErr) {
           console.error('SMS fallback also failed:', smsErr.message);
           return res.json({ message: genericMsg, identifier, sentVia: 'email' });
@@ -730,9 +740,20 @@ router.post('/forgot-password', [
     resetCodes.set(inputDigits, entry);
 
     try {
-      await sms.sendSms(target.phone, `Occasion & Garantie : code de reinitialisation ${code}. Valable 15 min.`);
+      await sms.sendOtp(target.phone, `Occasion & Garantie : code de reinitialisation ${code}. Valable 15 min.`);
     } catch (smsErr) {
-      console.error('SMS send failed:', smsErr.message);
+      console.error('SMS send failed, trying email fallback:', smsErr.message);
+      if (target.email) {
+        try {
+          await send({
+            to: target.email,
+            subject: 'Votre code de réinitialisation - Occasion & Garantie',
+            html: reset({ code, userName: target.full_name, resetLink: `${CLIENT_URL}/reset-password?identifier=${encodeURIComponent(identifier)}&code=${code}` }),
+          });
+        } catch (mailErr) {
+          console.error('Email fallback also failed:', mailErr.message);
+        }
+      }
     }
 
     res.json({ message: 'Si un compte est associe a ce numero, vous recevrez un code par SMS.', identifier });
@@ -797,7 +818,7 @@ router.post('/upgrade-seller', authenticate, async (req, res) => {
     sellerUpgradeCodes.set(req.user.id, { code, expiresAt });
 
     try {
-      await sms.sendSms(users[0].phone, `Occasion & Garantie : code de verification vendeur ${code}`);
+      await sms.sendOtp(users[0].phone, `Occasion & Garantie : code de verification vendeur ${code}`);
     } catch (smsErr) {
       console.log('SMS upgrade failed:', smsErr.message);
     }
