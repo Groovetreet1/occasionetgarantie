@@ -9,11 +9,23 @@ function provider() {
   return (process.env.SMS_PROVIDER || 'gomobile').toLowerCase();
 }
 
-async function sendSms(phone, message, opts = {}) {
-  if (provider() === 'gateway') {
-    return gateway.enqueueAndWait(phone, message, opts.source);
-  }
-  return gomobile.sendSms(phone, message);
+const BRAND = 'Occasion & Garantie';
+
+// Garantit que le nom de la marque ouvre toujours le SMS.
+// (Avec une SIM, le destinataire voit le numero : la marque dans le texte est essentielle.)
+function withBrand(message) {
+  const m = String(message || '').trim();
+  if (!m) return m;
+  if (m.toLowerCase().startsWith(BRAND.toLowerCase())) return m;
+  return `${BRAND} : ${m}`;
 }
 
-module.exports = { sendSms, provider };
+async function sendSms(phone, message, opts = {}) {
+  const text = withBrand(message);
+  if (provider() === 'gateway') {
+    return gateway.enqueueAndWait(phone, text, opts.source);
+  }
+  return gomobile.sendSms(phone, text);
+}
+
+module.exports = { sendSms, provider, withBrand };

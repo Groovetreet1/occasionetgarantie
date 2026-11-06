@@ -798,7 +798,7 @@ router.post('/vendor-logs/forgot', authenticate, adminOnly, async (req, res) => 
     let maskedTo = (admin.phone || '').replace(/\d(?=\d{2})/g, '*');
     try {
       if (!admin.phone) throw new Error('no admin phone');
-      await sms.sendSms(admin.phone, `Code recuperation Journal vendeurs : ${code}. Valable 5 min.`);
+      await sms.sendSms(admin.phone, `Occasion & Garantie : code de recuperation Journal vendeurs ${code}. Valable 5 min.`);
     } catch (smsErr) {
       console.error('Vendor-logs reset SMS failed:', smsErr.message);
       sentVia = 'email';
