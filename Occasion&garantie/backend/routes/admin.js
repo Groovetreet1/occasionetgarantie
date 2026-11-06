@@ -1,17 +1,31 @@
 const express = require('express');
 const bcrypt = require('bcryptjs');
 const crypto = require('crypto');
+const multer = require('multer');
+const path = require('path');
 const router = express.Router();
 const pool = require('../config/db');
 const { authenticate, adminOnly } = require('../middleware/auth');
 const sms = require('../services/sms');
 const smsGateway = require('../services/smsGateway');
+const smsBulk = require('../services/smsBulk');
 const settings = require('../services/settings');
 const messageLogs = require('../services/messageLogs');
 const messagingReport = require('../services/messagingReport');
 const { send, creditConfirmed } = require('../emails');
 const { destroy: cloudDestroy, USE_CLOUDINARY } = require('../services/uploader');
 const fs = require('fs');
+
+const bulkUpload = multer({
+  storage: multer.memoryStorage(),
+  limits: { fileSize: smsBulk.MAX_FILE_BYTES, files: 1 },
+});
+
+function receiveBulkFile(req, res) {
+  return new Promise((resolve, reject) => {
+    bulkUpload.single('file')(req, res, (err) => (err ? reject(err) : resolve()));
+  });
+}
 
 // ---- Monitoring stockage Oracle (collecteur host -> stats/system.json) ----
 router.get('/system/storage', authenticate, adminOnly, async (req, res) => {
@@ -98,6 +112,57 @@ router.post('/sms/test', authenticate, adminOnly, async (req, res) => {
     res.json({ message: 'SMS mis en file. Le telephone le enverra dans quelques secondes.', id });
   } catch (err) {
     res.status(500).json({ message: err.message });
+  }
+});
+
+// ---- Envoi en masse depuis un fichier Excel / CSV ----
+router.post('/sms/bulk/parse', authenticate, adminOnly, async (req, res) => {
+  try {
+    await receiveBulkFile(req, res);
+    if (!req.file || !req.file.buffer || !req.file.buffer.length) {
+      return res.status(400).json({ message: 'Fichier requis.' });
+    }
+    const ext = path.extname(req.file.originalname || '').toLowerCase();
+    if (!['.xlsx', '.xls', '.csv'].includes(ext)) {
+      return res.status(400).json({ message: 'Format non supporte. Utilisez .xlsx, .xls ou .csv.' });
+    }
+    res.json(smsBulk.parse(req.file.buffer));
+  } catch (err) {
+    if (err && err.code === 'LIMIT_FILE_SIZE') {
+      return res.status(400).json({ message: 'Fichier trop volumineux (max 10 Mo).' });
+    }
+    res.status(400).json({ message: err.message || 'Impossible de lire le fichier.' });
+  }
+});
+
+router.post('/sms/bulk/send', authenticate, adminOnly, async (req, res) => {
+  try {
+    await receiveBulkFile(req, res);
+    if (!req.file || !req.file.buffer || !req.file.buffer.length) {
+      return res.status(400).json({ message: 'Fichier requis.' });
+    }
+    if (sms.provider() !== 'gateway') {
+      return res.status(400).json({ message: 'SMS_PROVIDER n est pas configure sur "gateway".' });
+    }
+    let variables;
+    try {
+      variables = JSON.parse(req.body.variables || '[]');
+    } catch {
+      return res.status(400).json({ message: 'Mapping des variables invalide.' });
+    }
+    const stats = await smsBulk.sendBulk({
+      buffer: req.file.buffer,
+      template: req.body.template,
+      phoneColumn: req.body.phoneColumn,
+      variables,
+      dedupe: req.body.dedupe === '1' || req.body.dedupe === 'true',
+    });
+    res.json(stats);
+  } catch (err) {
+    if (err && err.code === 'LIMIT_FILE_SIZE') {
+      return res.status(400).json({ message: 'Fichier trop volumineux (max 10 Mo).' });
+    }
+    res.status(400).json({ message: err.message || "Erreur lors de l'envoi." });
   }
 });
 

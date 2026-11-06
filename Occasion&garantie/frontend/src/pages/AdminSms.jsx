@@ -7,6 +7,7 @@ import {
 } from 'react-icons/fi';
 import api from '../api/axios';
 import { useLanguage } from '../context/LanguageContext';
+import AdminSmsBulk from '../components/AdminSmsBulk';
 
 function fmtDate(d) {
   if (!d) return '-';
@@ -415,6 +416,8 @@ export default function AdminSms() {
                 </div>
               )}
             </div>
+
+            <AdminSmsBulk enabled={smsEnabled} onSent={() => load(true)} notify={flash} />
 
             {/* Compteurs SMS / Emails */}
             <div style={{ ...card }}>
