@@ -166,6 +166,22 @@ router.post('/sms/bulk/send', authenticate, adminOnly, async (req, res) => {
   }
 });
 
+router.get('/sms/bulk/progress', authenticate, adminOnly, async (req, res) => {
+  try {
+    const campaign = smsBulkProgress(req.query);
+    res.json(await smsBulk.progress(campaign));
+  } catch (err) {
+    res.status(500).json({ message: 'Erreur serveur.' });
+  }
+});
+
+function smsBulkProgress(query) {
+  return {
+    startId: Number(query.startId) || 0,
+    endId: Number(query.endId) || 0,
+  };
+}
+
 // ---- Journal unifie SMS + emails ----
 router.get('/messaging/logs', authenticate, adminOnly, async (req, res) => {
   try {

@@ -168,6 +168,7 @@ async function sendBulk({ buffer, template, phoneColumn, variables, dedupe }) {
   }
 
   const seenPhones = new Set();
+  const firstId = await smsGateway.peekNextId();
   const stats = {
     total: rows.length,
     queued: 0,
@@ -178,6 +179,7 @@ async function sendBulk({ buffer, template, phoneColumn, variables, dedupe }) {
     failed: 0,
     limit: MAX_ROWS,
     errors: [],
+    campaign: { startId: firstId, endId: null },
   };
 
   for (const row of rows) {
@@ -212,12 +214,34 @@ async function sendBulk({ buffer, template, phoneColumn, variables, dedupe }) {
     }
   }
 
+  stats.campaign.endId = stats.queued > 0 ? firstId + stats.queued - 1 : null;
+  stats.campaign.queued = stats.queued;
   return stats;
+}
+
+// Compteur live d'une campagne (par plage d'ids contiguë créée à l'envoi).
+async function progress(campaign) {
+  const startId = Number(campaign && campaign.startId);
+  const endId = Number(campaign && campaign.endId);
+  if (!startId || !endId || endId < startId) {
+    return { total: 0, pending: 0, sending: 0, sent: 0, failed: 0, done: 0, percent: 100 };
+  }
+  const pool = require('../config/db');
+  const [rows] = await pool.query(
+    'SELECT status, COUNT(*) AS cnt FROM sms_gateway_queue WHERE id BETWEEN ? AND ? GROUP BY status',
+    [startId, endId]
+  );
+  const out = { total: endId - startId + 1, pending: 0, sending: 0, sent: 0, failed: 0 };
+  for (const r of rows) out[r.status] = Number(r.cnt);
+  out.done = out.sent + out.failed;
+  out.percent = out.total ? Math.round((out.done / out.total) * 100) : 0;
+  return out;
 }
 
 module.exports = {
   parse,
   sendBulk,
+  progress,
   toE164,
   renderTemplate,
   templateKeys,

@@ -188,6 +188,13 @@ async function recent(limit = 50) {
   return rows;
 }
 
+// Prochain id AUTO_INCREMENT (pour délimiter une campagne d'envoi en masse).
+async function peekNextId() {
+  await ensureTables();
+  const [[row]] = await pool.query('SELECT COALESCE(MAX(id), 0) + 1 AS nextId FROM sms_gateway_queue');
+  return Number(row.nextId);
+}
+
 // Nettoyage : garde 7 jours d'historique
 async function cleanup() {
   try {
@@ -195,4 +202,4 @@ async function cleanup() {
   } catch {}
 }
 
-module.exports = { ensureTables, enqueue, enqueueAndWait, pull, ack, stats, recent, cleanup, MAX_ATTEMPTS };
+module.exports = { ensureTables, enqueue, enqueueAndWait, pull, ack, stats, recent, cleanup, peekNextId, MAX_ATTEMPTS };

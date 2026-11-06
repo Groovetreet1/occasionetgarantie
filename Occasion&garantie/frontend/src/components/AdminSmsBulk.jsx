@@ -1,7 +1,8 @@
-import { useRef, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import {
   FiUploadCloud, FiChevronDown, FiChevronUp, FiPlus, FiTrash2, FiSend,
   FiCheckCircle, FiAlertTriangle, FiUsers, FiInfo, FiDownload, FiFileText,
+  FiX, FiClock, FiActivity, FiRefreshCw,
 } from 'react-icons/fi';
 import api from '../api/axios';
 import { useLanguage } from '../context/LanguageContext';
@@ -77,6 +78,10 @@ export default function AdminSmsBulk({ enabled, onSent, notify }) {
   const [sending, setSending] = useState(false);
   const [error, setError] = useState('');
   const [result, setResult] = useState(null);
+  const [confirmOpen, setConfirmOpen] = useState(false);
+  const [progress, setProgress] = useState(null);
+  const [polling, setPolling] = useState(false);
+  const [campaign, setCampaign] = useState(null);
   const [dragging, setDragging] = useState(false);
   const textareaRef = useRef(null);
   const fileInputRef = useRef(null);
@@ -91,12 +96,15 @@ export default function AdminSmsBulk({ enabled, onSent, notify }) {
     setPhoneColumn('');
     setVariables([{ key: 'var1', column: '' }]);
     setTemplate('');
+    setConfirmOpen(false);
     if (fileInputRef.current) fileInputRef.current.value = '';
   };
 
   const parseFile = async (f) => {
     setError('');
     setResult(null);
+    setProgress(null);
+    setCampaign(null);
     const ext = String(f.name || '').split('.').pop().toLowerCase();
     if (!['xlsx', 'xls', 'csv'].includes(ext)) {
       setError(t('admin.smsBulkFileTypeErr'));
@@ -200,7 +208,37 @@ export default function AdminSmsBulk({ enabled, onSent, notify }) {
   const charLimit = smsPartLimit(firstMessage);
   const parts = firstMessage ? Math.max(1, Math.ceil(firstMessage.length / charLimit)) : 0;
 
-  const send = async () => {
+  const fetchProgress = async (c) => {
+    if (!c || !c.startId || !c.endId) return null;
+    const res = await api.get('/admin/sms/bulk/progress', { params: { startId: c.startId, endId: c.endId } });
+    return res.data;
+  };
+
+  useEffect(() => {
+    if (!campaign || !campaign.startId || !campaign.endId) {
+      setPolling(false);
+      return;
+    }
+    let stopped = false;
+    setPolling(true);
+    const tick = async () => {
+      try {
+        const data = await fetchProgress(campaign);
+        if (!stopped && data) setProgress(data);
+      } catch {}
+    };
+    tick();
+    const id = setInterval(tick, 3000);
+    return () => { stopped = true; clearInterval(id); setPolling(false); };
+  }, [campaign]);
+
+  useEffect(() => {
+    if (!progress || !campaign) return;
+    const remaining = (progress.total || 0) - (progress.done || 0);
+    if (remaining <= 0) setPolling(false);
+  }, [progress, campaign]);
+
+  const openConfirm = () => {
     setError('');
     setResult(null);
     if (!file || !parsed) return setError(t('admin.smsBulkNeedFile'));
@@ -213,9 +251,12 @@ export default function AdminSmsBulk({ enabled, onSent, notify }) {
       return setError(t('admin.smsBulkUnmapped', { keys: unmapped.map((k) => `{{${k}}}`).join(', ') }));
     }
     if (!phoneCount) return setError(t('admin.smsBulkNoValid'));
-    if (!window.confirm(t('admin.smsBulkConfirm', { count: phoneCount }))) return;
+    setConfirmOpen(true);
+  };
 
+  const send = async () => {
     setSending(true);
+    setConfirmOpen(false);
     try {
       const fd = new FormData();
       fd.append('file', file);
@@ -225,6 +266,14 @@ export default function AdminSmsBulk({ enabled, onSent, notify }) {
       fd.append('dedupe', dedupe ? '1' : '0');
       const res = await api.post('/admin/sms/bulk/send', fd);
       setResult(res.data);
+      const c = res.data?.campaign;
+      if (c && c.startId && c.endId) {
+        setCampaign(c);
+        try {
+          const p = await fetchProgress(c);
+          if (p) setProgress(p);
+        } catch {}
+      }
       flash('success', t('admin.smsBulkQueuedFlash', { count: res.data?.queued || 0 }));
       if (typeof onSent === 'function') onSent();
       resetFile();
@@ -505,7 +554,7 @@ export default function AdminSmsBulk({ enabled, onSent, notify }) {
                   </div>
                   <button
                     type="button"
-                    onClick={send}
+                    onClick={openConfirm}
                     className="btn btn-primary"
                     disabled={sending || !enabled || !phoneCount || !template.trim()}
                     style={{ fontSize: 13, display: 'flex', alignItems: 'center', gap: 7, minHeight: 42 }}
@@ -516,21 +565,119 @@ export default function AdminSmsBulk({ enabled, onSent, notify }) {
                 </div>
               </Step>
 
-              {result && (
-                <div style={{ border: '1px solid #a7f3d0', background: '#ecfdf5', borderRadius: 12, padding: 14 }}>
-                  <div style={{ display: 'flex', alignItems: 'center', gap: 7, marginBottom: 10 }}>
-                    <FiCheckCircle size={16} style={{ color: '#059669' }} />
-                    <strong style={{ fontSize: 13, color: '#065f46' }}>{t('admin.smsBulkResultTitle')}</strong>
+              {confirmOpen && (
+                <div style={{ ...card, border: '1px solid var(--primary)', boxShadow: '0 10px 30px rgba(245,158,11,0.15)' }}>
+                  <div style={{ display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between', gap: 12 }}>
+                    <div style={{ display: 'flex', gap: 10, alignItems: 'flex-start' }}>
+                      <span style={{ width: 38, height: 38, borderRadius: '50%', background: '#fffbeb', display: 'inline-flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
+                        <FiAlertTriangle size={18} style={{ color: 'var(--primary)' }} />
+                      </span>
+                      <div>
+                        <strong style={{ fontSize: 14 }}>{t('admin.smsBulkConfirmTitle')}</strong>
+                        <div style={{ fontSize: 12.5, color: 'var(--text-secondary)', marginTop: 4, lineHeight: 1.6 }}>
+                          {t('admin.smsBulkConfirmBody', { count: phoneCount })}
+                        </div>
+                        <div style={{ marginTop: 10, background: 'var(--bg-secondary)', border: '1px solid var(--border)', borderRadius: 10, padding: 10, fontSize: 12 }}>
+                          <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap', fontSize: 11.5, color: 'var(--text-secondary)' }}>
+                            <span>{file?.name}</span>
+                            <span>·</span>
+                            <span>{phoneColumn}</span>
+                            <span>·</span>
+                            <span>{template.length} {t('admin.smsBulkChars', { count: template.length, parts }).split('·')[0]}</span>
+                          </div>
+                          <div style={{ marginTop: 6, color: 'var(--text)', lineHeight: 1.5 }}>{firstMessage}</div>
+                        </div>
+                      </div>
+                    </div>
+                    <button type="button" onClick={() => setConfirmOpen(false)} className="btn btn-ghost" style={{ padding: 6 }} aria-label={t('admin.smsBulkClose')}>
+                      <FiX size={16} />
+                    </button>
                   </div>
-                  <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap' }}>
-                    <span style={chip('#ecfdf5', '#059669', '#a7f3d0')}>{t('admin.smsBulkQueued', { count: result.queued || 0 })}</span>
-                    {result.invalid > 0 && <span style={chip('#fef2f2', '#dc2626', '#fecaca')}>{t('admin.smsBulkInvalid', { count: result.invalid })}</span>}
-                    {result.duplicates > 0 && <span style={chip('#fffbeb', '#b45309', '#fde68a')}>{t('admin.smsBulkDuplicates', { count: result.duplicates })}</span>}
-                    {result.empty > 0 && <span style={chip('#f8fafc', '#475569', '#e2e8f0')}>{t('admin.smsBulkEmpty', { count: result.empty })}</span>}
-                    {result.tooLong > 0 && <span style={chip('#fef2f2', '#dc2626', '#fecaca')}>{t('admin.smsBulkTooLong', { count: result.tooLong })}</span>}
-                    {result.failed > 0 && <span style={chip('#fef2f2', '#dc2626', '#fecaca')}>{t('admin.smsBulkFailed', { count: result.failed })}</span>}
+                  <div style={{ display: 'flex', justifyContent: 'flex-end', gap: 8, marginTop: 14 }}>
+                    <button type="button" onClick={() => setConfirmOpen(false)} className="btn btn-outline" style={{ fontSize: 12.5 }}>
+                      {t('admin.smsBulkCancel')}
+                    </button>
+                    <button
+                      type="button"
+                      onClick={send}
+                      disabled={sending}
+                      className="btn btn-primary"
+                      style={{ fontSize: 12.5, display: 'flex', alignItems: 'center', gap: 6 }}
+                    >
+                      <FiSend size={13} /> {sending ? t('admin.smsBulkSending') : t('admin.smsBulkSend', { count: phoneCount })}
+                    </button>
                   </div>
-                  {Array.isArray(result.errors) && result.errors.length > 0 && (
+                </div>
+              )}
+
+              {(result || progress || campaign) && (
+                <div style={{ border: '1px solid var(--border)', background: 'var(--bg-card)', borderRadius: 12, padding: 14 }}>
+                  <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 10, flexWrap: 'wrap' }}>
+                    {polling ? (
+                      <FiRefreshCw size={16} className="spin" style={{ color: 'var(--primary)' }} />
+                    ) : (
+                      <FiCheckCircle size={16} style={{ color: '#059669' }} />
+                    )}
+                    <strong style={{ fontSize: 13 }}>{t('admin.smsBulkProgressTitle')}</strong>
+                    {polling && <span style={{ fontSize: 11, color: 'var(--text-muted)' }}>{t('admin.smsBulkProgressLive')}</span>}
+                    {!polling && progress && (progress.done || 0) >= (progress.total || 0) && (
+                      <span style={{ fontSize: 11.5, fontWeight: 700, color: '#059669' }}>{t('admin.smsBulkProgressDone')}</span>
+                    )}
+                  </div>
+
+                  {progress && progress.total > 0 ? (
+                    <>
+                      <div style={{ height: 10, background: 'var(--bg-secondary)', borderRadius: 999, overflow: 'hidden', border: '1px solid var(--border)' }}>
+                        <div style={{ width: `${progress.percent || 0}%`, height: '100%', background: 'linear-gradient(135deg, var(--primary), #059669)', transition: 'width .4s ease' }} />
+                      </div>
+                      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(110px, 1fr))', gap: 10, marginTop: 12 }}>
+                        <div style={{ background: 'var(--bg-secondary)', borderRadius: 10, padding: 10, textAlign: 'center' }}>
+                          <div style={{ fontSize: 18, fontWeight: 800 }}>{progress.total}</div>
+                          <div style={{ fontSize: 11, color: 'var(--text-muted)' }}>{t('admin.smsBulkProgressTotal')}</div>
+                        </div>
+                        <div style={{ background: '#fffbeb', borderRadius: 10, padding: 10, textAlign: 'center' }}>
+                          <div style={{ fontSize: 18, fontWeight: 800, color: '#d97706' }}>{progress.pending || 0}</div>
+                          <div style={{ fontSize: 11, color: 'var(--text-muted)', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 4 }}><FiClock size={11} /> {t('admin.smsBulkProgressPending')}</div>
+                        </div>
+                        <div style={{ background: '#eff6ff', borderRadius: 10, padding: 10, textAlign: 'center' }}>
+                          <div style={{ fontSize: 18, fontWeight: 800, color: '#2563eb' }}>{progress.sending || 0}</div>
+                          <div style={{ fontSize: 11, color: 'var(--text-muted)', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 4 }}><FiActivity size={11} /> {t('admin.smsBulkProgressSending')}</div>
+                        </div>
+                        <div style={{ background: '#ecfdf5', borderRadius: 10, padding: 10, textAlign: 'center' }}>
+                          <div style={{ fontSize: 18, fontWeight: 800, color: '#059669' }}>{progress.sent || 0}</div>
+                          <div style={{ fontSize: 11, color: 'var(--text-muted)' }}>{t('admin.smsBulkProgressSent')}</div>
+                        </div>
+                        <div style={{ background: '#fef2f2', borderRadius: 10, padding: 10, textAlign: 'center' }}>
+                          <div style={{ fontSize: 18, fontWeight: 800, color: '#dc2626' }}>{progress.failed || 0}</div>
+                          <div style={{ fontSize: 11, color: 'var(--text-muted)' }}>{t('admin.smsBulkProgressFailed')}</div>
+                        </div>
+                        <div style={{ background: 'var(--bg-secondary)', borderRadius: 10, padding: 10, textAlign: 'center' }}>
+                          <div style={{ fontSize: 18, fontWeight: 800 }}>{progress.percent || 0}%</div>
+                          <div style={{ fontSize: 11, color: 'var(--text-muted)' }}>{t('admin.smsBulkProgressPercent')}</div>
+                        </div>
+                      </div>
+                      {campaign && campaign.startId && (
+                        <div style={{ fontSize: 11, color: 'var(--text-muted)', marginTop: 8 }}>
+                          {t('admin.smsBulkProgressMeta', { from: campaign.startId, to: campaign.endId })}
+                        </div>
+                      )}
+                    </>
+                  ) : (
+                    <div style={{ fontSize: 12, color: 'var(--text-muted)' }}>{t('admin.smsBulkProgressWaiting')}</div>
+                  )}
+
+                  {result && (
+                    <div style={{ marginTop: 10, display: 'flex', gap: 8, flexWrap: 'wrap' }}>
+                      <span style={chip('#ecfdf5', '#059669', '#a7f3d0')}>{t('admin.smsBulkQueued', { count: result.queued || 0 })}</span>
+                      {result.invalid > 0 && <span style={chip('#fef2f2', '#dc2626', '#fecaca')}>{t('admin.smsBulkInvalid', { count: result.invalid })}</span>}
+                      {result.duplicates > 0 && <span style={chip('#fffbeb', '#b45309', '#fde68a')}>{t('admin.smsBulkDuplicates', { count: result.duplicates })}</span>}
+                      {result.empty > 0 && <span style={chip('#f8fafc', '#475569', '#e2e8f0')}>{t('admin.smsBulkEmpty', { count: result.empty })}</span>}
+                      {result.tooLong > 0 && <span style={chip('#fef2f2', '#dc2626', '#fecaca')}>{t('admin.smsBulkTooLong', { count: result.tooLong })}</span>}
+                      {result.failed > 0 && <span style={chip('#fef2f2', '#dc2626', '#fecaca')}>{t('admin.smsBulkFailed', { count: result.failed })}</span>}
+                    </div>
+                  )}
+
+                  {result && Array.isArray(result.errors) && result.errors.length > 0 && (
                     <div style={{ marginTop: 10, fontSize: 11.5, color: 'var(--text-secondary)' }}>
                       <div style={{ fontWeight: 700, marginBottom: 4 }}>{t('admin.smsBulkErrorRows')}</div>
                       {result.errors.map((e, i) => (
