@@ -385,6 +385,9 @@ export default function AdminSms() {
                   emailsFailed: allTime.emailFailed || 0,
                 })}
                 <span style={{ display: 'block', fontSize: 11, color: 'var(--text-muted)', marginTop: 2 }}>{t('admin.smsPdfHint')}</span>
+                {(allTime.emailTotal || 0) === 0 && (
+                  <span style={{ display: 'block', fontSize: 11, color: 'var(--text-muted)', marginTop: 2 }}>{t('admin.smsEmailNote')}</span>
+                )}
               </div>
 
               <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap', marginBottom: 12 }}>

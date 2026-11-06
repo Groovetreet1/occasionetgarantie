@@ -158,6 +158,7 @@
     smsDownloadPdf: 'Télécharger le PDF',
     smsPdfGenerating: 'Génération...',
     smsPdfHint: 'Le PDF inclut le logo et le nom Occasion & Garantie.',
+    smsEmailNote: 'Les emails sont journalisés à partir de maintenant ; les envois antérieurs ne sont pas comptés.',
     smsPdfError: 'Impossible de générer le PDF.',
     smsFilterAll: 'Tout',
     smsFilterSms: 'SMS',

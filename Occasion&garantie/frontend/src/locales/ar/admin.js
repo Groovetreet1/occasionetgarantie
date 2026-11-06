@@ -158,6 +158,7 @@
     smsDownloadPdf: 'تحميل PDF',
     smsPdfGenerating: 'جارٍ الإنشاء...',
     smsPdfHint: 'يتضمن ملف PDF شعار واسم Occasion & Garantie.',
+    smsEmailNote: 'يبدأ تسجيل الإيميلات من الآن؛ الإرسالات السابقة غير محسوبة.',
     smsPdfError: 'تعذر إنشاء ملف PDF.',
     smsFilterAll: 'الكل',
     smsFilterSms: 'SMS',
