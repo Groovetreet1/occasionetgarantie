@@ -39,7 +39,7 @@ Kopï l-contenu dyal `gateway.sh` (f nafs had dossier), moraha bddel:
 
 ```bash
 GATEWAY_KEY="<l-cle-li-ghat3tik>"
-API_URL="https://www.occasionetgarantie.store/api/sms-gateway"
+API_URL="https://occasionetgarantie.store/api/sms-gateway"
 ```
 
 Sauvegarder (`Ctrl+O`, `Enter`, `Ctrl+X`) w:

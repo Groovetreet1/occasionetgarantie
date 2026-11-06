@@ -6,7 +6,7 @@
 # ============================================================
 set -u
 
-API_URL="${API_URL:-https://www.occasionetgarantie.store/api/sms-gateway}"
+API_URL="${API_URL:-https://occasionetgarantie.store/api/sms-gateway}"
 GATEWAY_KEY="${GATEWAY_KEY:-REMPLACE_MOI}"
 DEVICE_ID="${DEVICE_ID:-$(getprop ro.product.model 2>/dev/null | tr ' ' '-')}"
 INTERVAL="${INTERVAL:-5}"
