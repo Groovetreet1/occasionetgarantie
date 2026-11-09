@@ -9,6 +9,7 @@ import LanguageToggle from './LanguageToggle';
 import PremiumPopup from './PremiumPopup';
 import api from '../api/axios';
 import { translateNotification } from '../utils/translateNotification';
+import { Menu, X, ChevronDown } from 'lucide-react';
 
 const API_BASE = import.meta.env.VITE_API_URL || '';
 
@@ -20,145 +21,120 @@ const categories = [
 ];
 
 export default function Navbar() {
-  const { user, logout } = useAuth();
-  const { t, dir, lang } = useLanguage();
   const navigate = useNavigate();
   const location = useLocation();
-  const isProductsActive = location.pathname.startsWith('/products');
+  const { user, logout } = useAuth();
+  const { t, lang } = useLanguage();
   const [menuOpen, setMenuOpen] = useState(false);
-  const [dropdownOpen, setDropdownOpen] = useState(false);
   const [prodsOpen, setProdsOpen] = useState(false);
-  const [scrolled, setScrolled] = useState(false);
-  const [showPremium, setShowPremium] = useState(false);
   const [mobileProdsOpen, setMobileProdsOpen] = useState(false);
-  const navRef = useRef(null);
-  const panelRef = useRef(null);
-  const dropdownRef = useRef(null);
-  const prodsRef = useRef(null);
-
-  useEffect(() => {
-    const onScroll = () => setScrolled(window.scrollY > 20);
-    window.addEventListener('scroll', onScroll, { passive: true });
-    return () => window.removeEventListener('scroll', onScroll);
-  }, []);
-
-  useEffect(() => {
-    const handle = (e) => {
-      const inPanel = panelRef.current && panelRef.current.contains(e.target);
-      const onHamburger = e.target.closest && e.target.closest('.navbar-hamburger');
-      if (!inPanel && !onHamburger) setMenuOpen(false);
-      else if (panelRef.current && e.target === panelRef.current) setMenuOpen(false);
-      if (dropdownRef.current && !dropdownRef.current.contains(e.target)) setDropdownOpen(false);
-      if (prodsRef.current && !prodsRef.current.contains(e.target)) setProdsOpen(false);
-    };
-    document.addEventListener('mousedown', handle);
-    return () => document.removeEventListener('mousedown', handle);
-  }, []);
-
+  const [dropdownOpen, setDropdownOpen] = useState(false);
   const [notifOpen, setNotifOpen] = useState(false);
   const [notifications, setNotifications] = useState([]);
   const [unreadCount, setUnreadCount] = useState(0);
+  const [showPremium, setShowPremium] = useState(false);
   const [showCleanConfirm, setShowCleanConfirm] = useState(false);
+
+  const prodsRef = useRef(null);
+  const dropdownRef = useRef(null);
   const notifRef = useRef(null);
+  const panelRef = useRef(null);
+
+  const isProductsActive = location.pathname.startsWith('/products') || location.pathname.startsWith('/boutique');
 
   useEffect(() => {
-    if (!user) return;
-    const fetchNotifs = () => {
-      api.get('/notifications/unread-count').then(r => setUnreadCount(r.data.count)).catch(() => {});
-    };
-    fetchNotifs();
-    const interval = setInterval(fetchNotifs, 15000);
-    return () => clearInterval(interval);
-  }, [user]);
-
-  useEffect(() => {
-    const handle = (e) => {
+    const onClick = (e) => {
+      if (prodsRef.current && !prodsRef.current.contains(e.target)) setProdsOpen(false);
+      if (dropdownRef.current && !dropdownRef.current.contains(e.target)) setDropdownOpen(false);
       if (notifRef.current && !notifRef.current.contains(e.target)) setNotifOpen(false);
     };
-    document.addEventListener('mousedown', handle);
-    return () => document.removeEventListener('mousedown', handle);
+    document.addEventListener('mousedown', onClick);
+    return () => document.removeEventListener('mousedown', onClick);
   }, []);
 
+  const closeMenu = () => { setMenuOpen(false); setMobileProdsOpen(false); };
+
   const openNotifs = async () => {
-    setNotifOpen(true);
-    setDropdownOpen(false);
-    try {
-      const res = await api.get('/notifications');
-      setNotifications(res.data);
-      setUnreadCount(0);
-    } catch {}
+    setNotifOpen((o) => !o);
+    if (!notifOpen) {
+      try {
+        const res = await api.get('/notifications');
+        setNotifications(res.data || []);
+        const unread = (res.data || []).filter((n) => !n.read_at).length;
+        setUnreadCount(unread);
+      } catch (e) {}
+    }
   };
 
   const markRead = async (n) => {
-    try { await api.put(`/notifications/${n.id}/read`); } catch {}
-    if (n.link) navigate(n.link);
-    setNotifOpen(false);
+    try { await api.patch(`/notifications/${n.id}/read`); } catch (e) {}
+    setNotifications((prev) => prev.map((x) => x.id === n.id ? { ...x, read_at: new Date().toISOString() } : x));
+    setUnreadCount((c) => Math.max(0, c - 1));
   };
 
   const markAllRead = async () => {
-    try { await api.put('/notifications/read-all'); setNotifications(n => n.map(n => ({ ...n, read_at: 'now' }))); setUnreadCount(0); } catch {}
+    try { await api.patch('/notifications/read-all'); } catch (e) {}
+    setNotifications((prev) => prev.map((x) => ({ ...x, read_at: x.read_at || new Date().toISOString() })));
+    setUnreadCount(0);
   };
 
-  const cleanAll = async () => {
-    setShowCleanConfirm(true);
-  };
-
+  const cleanAll = () => setShowCleanConfirm(true);
   const confirmClean = async () => {
+    try { await api.delete('/notifications'); } catch (e) {}
+    setNotifications([]);
+    setUnreadCount(0);
     setShowCleanConfirm(false);
-    try { await api.delete('/notifications/all'); setNotifications([]); setUnreadCount(0); } catch {}
   };
-
-  const closeMenu = () => { setMenuOpen(false); setMobileProdsOpen(false); };
 
   return (
     <>
       <motion.nav
-        className={`navbar${scrolled ? ' scrolled' : ''}`}
-        ref={navRef}
-        initial={{ y: -80 }}
-        animate={{ y: 0 }}
+        initial={{ y: -20, opacity: 0 }}
+        animate={{ y: 0, opacity: 1 }}
         transition={{ duration: 0.4, ease: 'easeOut' }}
+        className="fixed top-0 left-0 right-0 z-[1000] bg-zinc-950/90 backdrop-blur-xl border-b border-white/10"
       >
-        <div className="navbar-inner">
-          <Link to="/" className="navbar-logo">
-            <img src="/logo.png" alt="Occasion & Garantie" className="navbar-logo-img" />
-            <span className="navbar-logo-text">Occasion &amp; <b>Garantie</b></span>
+        <div className="max-w-7xl mx-auto px-4 md:px-6 h-[70px] grid grid-cols-[1fr_auto_1fr] items-center gap-4">
+          {/* Logo */}
+          <Link to="/" className="flex items-center gap-2.5 justify-self-start">
+            <img src="/logo.png" alt="Occasion & Garantie" className="w-9 h-9 rounded-xl object-contain bg-white/95 p-1" />
+            <span className="text-base font-extrabold tracking-tight text-white whitespace-nowrap">
+              Occasion &amp; <span className="text-amber-400">Garantie</span>
+            </span>
           </Link>
 
-          <div className="navbar-desktop-nav">
-            <NavLink to="/" end>{t('nav.home')}</NavLink>
-            <div className="navbar-prods"
-              ref={prodsRef}
-              onMouseEnter={() => setProdsOpen(true)}
-              onMouseLeave={() => setProdsOpen(false)}
-            >
-              <button className={`navbar-prods-btn${isProductsActive ? ' active' : ''}`}
+          {/* Desktop nav */}
+          <div className="hidden md:flex items-center gap-1 justify-self-center">
+            <NavLink to="/" end className={({ isActive }) => `px-4 py-2 rounded-lg text-sm font-medium transition-colors ${isActive ? 'text-amber-400 bg-amber-500/10' : 'text-white/75 hover:text-white hover:bg-white/5'}`}>
+              {t('nav.home')}
+            </NavLink>
+            <div className="relative" ref={prodsRef} onMouseEnter={() => setProdsOpen(true)} onMouseLeave={() => setProdsOpen(false)}>
+              <button
                 onClick={() => setProdsOpen((o) => !o)}
+                className={`px-4 py-2 rounded-lg text-sm font-medium transition-colors flex items-center gap-1 ${isProductsActive ? 'text-amber-400 bg-amber-500/10' : 'text-white/75 hover:text-white hover:bg-white/5'}`}
               >
-                {t('nav.products')} <FiChevronDown size={12} />
+                {t('nav.products')} <FiChevronDown className="w-3 h-3" />
               </button>
               <AnimatePresence>
                 {prodsOpen && (
                   <motion.div
-                    className="navbar-prods-menu"
-                    initial={{ opacity: 0, y: -8 }}
-                    animate={{ opacity: 1, y: 0 }}
-                    exit={{ opacity: 0, y: -8 }}
+                    initial={{ opacity: 0, y: -8 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -8 }}
                     transition={{ duration: 0.15 }}
+                    className="absolute top-full left-1/2 -translate-x-1/2 mt-2 w-56 rounded-xl bg-zinc-900 border border-white/10 shadow-2xl overflow-hidden z-[10000]"
                   >
-                    <Link to="/products" onClick={() => setProdsOpen(false)}>{t('nav.allProducts')}</Link>
-                    <Link to="/boutique" onClick={() => setProdsOpen(false)} style={{ color: '#d97706', fontWeight: 600 }}>
-                      <FiShield size={14} /> {t('nav.officialStore')}
+                    <Link to="/products" onClick={() => setProdsOpen(false)} className="block px-4 py-2.5 text-sm text-white/80 hover:bg-amber-500/10 hover:text-amber-400 transition-colors">
+                      {t('nav.allProducts')}
                     </Link>
-                    <div style={{ height: 1, background: 'var(--border)', margin: '4px 0' }} />
+                    <Link to="/boutique" onClick={() => setProdsOpen(false)} className="block px-4 py-2.5 text-sm font-semibold text-amber-400 hover:bg-amber-500/10 transition-colors flex items-center gap-2">
+                      <FiShield className="w-3.5 h-3.5" /> {t('nav.officialStore')}
+                    </Link>
+                    <div className="h-px bg-white/10 my-1" />
                     {categories.map((cat) => {
                       const isActive = location.search === `?category=${cat.slug}`;
                       return (
-                        <Link key={cat.slug} to={`/products?category=${cat.slug}`}
-                          className={isActive ? 'active' : ''}
-                          onClick={() => setProdsOpen(false)}
-                        >
-                          <cat.icon size={14} /> {cat.name}
+                        <Link key={cat.slug} to={`/products?category=${cat.slug}`} onClick={() => setProdsOpen(false)}
+                          className={`flex items-center gap-2 px-4 py-2 text-sm transition-colors ${isActive ? 'text-amber-400 bg-amber-500/10' : 'text-white/75 hover:bg-white/5 hover:text-white'}`}>
+                          <cat.icon className="w-3.5 h-3.5" /> {cat.name}
                         </Link>
                       );
                     })}
@@ -166,67 +142,64 @@ export default function Navbar() {
                 )}
               </AnimatePresence>
             </div>
-            <NavLink to="/about">{t('nav.about')}</NavLink>
-            {user?.role == 'seller' ? (
-              <NavLink to="/reprise/list" className="navbar-sell-link"><FiSmartphone size={14} /> {t('nav.tradeInRequests')}</NavLink>
-            ) : user?.role == 'admin' ? null : (
-              <NavLink to="/reprise" className="navbar-sell-link"><FiSmartphone size={14} /> {t('nav.tradeIn')}</NavLink>
+            <NavLink to="/about" className={({ isActive }) => `px-4 py-2 rounded-lg text-sm font-medium transition-colors ${isActive ? 'text-amber-400 bg-amber-500/10' : 'text-white/75 hover:text-white hover:bg-white/5'}`}>
+              {t('nav.about')}
+            </NavLink>
+            {user?.role === 'seller' ? (
+              <NavLink to="/reprise/list" className="navbar-sell-link">{t('nav.tradeInRequests')}</NavLink>
+            ) : user?.role === 'admin' ? null : (
+              <NavLink to="/reprise" className="navbar-sell-link">{t('nav.tradeIn')}</NavLink>
             )}
-            {user?.role == 'seller' ? (
-              <NavLink to="/seller/products/new" className="navbar-sell-link"><FiTrendingUp size={14} /> {t('nav.sell')}</NavLink>
+            {user?.role === 'seller' ? (
+              <NavLink to="/seller/products/new" className="navbar-sell-link">{t('nav.sell')}</NavLink>
             ) : user?.role !== 'admin' && (
-              <NavLink to="/vendre" className="navbar-sell-link"><FiTrendingUp size={14} /> {t('nav.sell')}</NavLink>
+              <NavLink to="/vendre" className="navbar-sell-link">{t('nav.sell')}</NavLink>
             )}
           </div>
 
-          <div className="navbar-actions">
+          {/* Actions */}
+          <div className="flex items-center gap-2 justify-self-end">
             <ThemeToggle />
             <LanguageToggle />
             {user && (
-              <div className="navbar-notif" ref={notifRef}>
-                <button className="navbar-notif-btn" onClick={openNotifs} aria-label="Notifications">
-                  <FiBell size={18} />
-                  {unreadCount > 0 && <span className="navbar-notif-badge">{unreadCount > 9 ? '9+' : unreadCount}</span>}
+              <div className="relative" ref={notifRef}>
+                <button onClick={openNotifs} aria-label="Notifications" className="p-2 rounded-full text-white/75 hover:text-white hover:bg-white/5 transition-colors relative">
+                  <FiBell className="w-5 h-5" />
+                  {unreadCount > 0 && (
+                    <span className="absolute -top-0.5 -right-0.5 min-w-[18px] h-[18px] px-1 rounded-full bg-red-500 text-white text-[10px] font-bold flex items-center justify-center">
+                      {unreadCount > 9 ? '9+' : unreadCount}
+                    </span>
+                  )}
                 </button>
                 <AnimatePresence>
                   {notifOpen && (
-                    <motion.div className="navbar-notif-dropdown"
-                      initial={{ opacity: 0, y: -8 }}
-                      animate={{ opacity: 1, y: 0 }}
-                      exit={{ opacity: 0, y: -8 }}
+                    <motion.div
+                      initial={{ opacity: 0, y: -8 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -8 }}
                       transition={{ duration: 0.15 }}
+                      className="absolute top-full right-0 mt-2 w-80 max-w-[calc(100vw-24px)] rounded-xl bg-zinc-900 border border-white/10 shadow-2xl overflow-hidden z-[10000]"
                     >
-                      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '8px 12px', borderBottom: '1px solid var(--border)' }}>
-                        <strong style={{ fontSize: 13 }}>{t('nav.notifications')}</strong>
-                        <div style={{ display: 'flex', gap: 8 }}>
+                      <div className="flex justify-between items-center px-3 py-2.5 border-b border-white/10">
+                        <strong className="text-xs">{t('nav.notifications')}</strong>
+                        <div className="flex gap-2">
                           {notifications.length > 0 && (
-                            <button onClick={cleanAll} style={{ fontSize: 10, background: 'none', border: 'none', color: 'var(--error)', cursor: 'pointer', fontFamily: 'var(--font)', padding: 0 }}>
-                              {t('nav.clearAll')}
-                            </button>
+                            <button onClick={cleanAll} className="text-[10px] text-red-400 hover:underline">{t('nav.clearAll')}</button>
                           )}
-                          {notifications.some(n => !n.read_at) && (
-                            <button onClick={markAllRead} style={{ fontSize: 10, background: 'none', border: 'none', color: 'var(--primary)', cursor: 'pointer', fontFamily: 'var(--font)', padding: 0 }}>
-                              {t('nav.markAllRead')}
-                            </button>
+                          {notifications.some((n) => !n.read_at) && (
+                            <button onClick={markAllRead} className="text-[10px] text-amber-400 hover:underline">{t('nav.markAllRead')}</button>
                           )}
                         </div>
                       </div>
-                      <div style={{ maxHeight: 280, overflowY: 'auto' }}>
+                      <div className="max-h-72 overflow-y-auto">
                         {notifications.length === 0 ? (
-                          <div style={{ padding: '20px 16px', textAlign: 'center', fontSize: 12, color: 'var(--text-muted)' }}>
-                            {t('nav.noNotifications')}
-                          </div>
-                        ) : notifications.slice(0, 10).map(n => {
+                          <div className="px-4 py-5 text-center text-xs text-white/50">{t('nav.noNotifications')}</div>
+                        ) : notifications.slice(0, 10).map((n) => {
                           const tr = translateNotification(n, t);
                           return (
-                            <button key={n.id} onClick={() => markRead(n)} style={{
-                              display: 'block', width: '100%', textAlign: lang === 'ar' ? 'right' : 'left', padding: '8px 12px',
-                              border: 'none', borderBottom: '1px solid var(--border)', background: n.read_at ? 'transparent' : 'rgba(99,102,241,0.04)',
-                              cursor: 'pointer', color: 'inherit', fontFamily: 'var(--font)', direction: lang === 'ar' ? 'rtl' : 'ltr',
-                            }}>
-                              <div style={{ fontSize: 12, fontWeight: n.read_at ? 400 : 600 }}>{tr.title}</div>
-                              {tr.message && <div style={{ fontSize: 10, color: 'var(--text-muted)', marginTop: 1, lineHeight: 1.3, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{tr.message}</div>}
-                              <div style={{ fontSize: 9, color: 'var(--text-muted)', marginTop: 2 }}>
+                            <button key={n.id} onClick={() => markRead(n)}
+                              className={`block w-full text-left px-3 py-2 border-b border-white/5 hover:bg-white/5 transition-colors ${n.read_at ? '' : 'bg-indigo-500/5'}`}>
+                              <div className="text-xs font-semibold">{tr.title}</div>
+                              {tr.message && <div className="text-[10px] text-white/50 mt-0.5 truncate">{tr.message}</div>}
+                              <div className="text-[9px] text-white/40 mt-1">
                                 {new Date(n.created_at).toLocaleDateString(lang === 'ar' ? 'ar-MA' : 'fr-FR')} {lang === 'ar' ? ' في ' : ' à '} {new Date(n.created_at).toLocaleTimeString(lang === 'ar' ? 'ar-MA' : 'fr-FR', { hour: '2-digit', minute: '2-digit' })}
                               </div>
                             </button>
@@ -239,186 +212,194 @@ export default function Navbar() {
               </div>
             )}
             {user ? (
-              <div className="navbar-dropdown" ref={dropdownRef}>
-                <button className="navbar-user" onClick={() => setDropdownOpen((o) => !o)} title={user.fullName || user.full_name}>
+              <div className="relative" ref={dropdownRef}>
+                <button onClick={() => setDropdownOpen((o) => !o)} title={user.fullName || user.full_name} className="w-9 h-9 rounded-full border-2 border-white/20 bg-white/10 flex items-center justify-center overflow-hidden">
                   {user.avatar ? (
-                    <img src={typeof user.avatar === 'string' && user.avatar.startsWith('http') ? user.avatar : `${API_BASE}/uploads/avatars/${user.avatar}`} alt="" className="navbar-user-avatar" />
+                    <img src={typeof user.avatar === 'string' && user.avatar.startsWith('http') ? user.avatar : `${API_BASE}/uploads/avatars/${user.avatar}`} alt="" className="w-full h-full object-cover" />
                   ) : (
-                    <span className="navbar-user-fallback"><FiUser size={18} /></span>
+                    <FiUser className="w-4 h-4 text-white" />
                   )}
                 </button>
                 <AnimatePresence>
                   {dropdownOpen && (
                     <motion.div
-                      className="navbar-dropdown-menu"
-                      initial={{ opacity: 0, y: -8 }}
-                      animate={{ opacity: 1, y: 0 }}
-                      exit={{ opacity: 0, y: -8 }}
+                      initial={{ opacity: 0, y: -8 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -8 }}
                       transition={{ duration: 0.15 }}
+                      className="absolute top-full right-0 mt-2 w-64 rounded-xl bg-zinc-900 border border-white/10 shadow-2xl overflow-hidden z-[10000]"
                     >
-                      <div className="navbar-user-card">
+                      <div className="flex items-center gap-3 p-3 border-b border-white/10">
                         {user.avatar ? (
-                          <img src={typeof user.avatar === 'string' && user.avatar.startsWith('http') ? user.avatar : `${API_BASE}/uploads/avatars/${user.avatar}`} alt="" className="navbar-user-card-avatar" />
+                          <img src={typeof user.avatar === 'string' && user.avatar.startsWith('http') ? user.avatar : `${API_BASE}/uploads/avatars/${user.avatar}`} alt="" className="w-10 h-10 rounded-full object-cover" />
                         ) : (
-                          <span className="navbar-user-card-fallback"><FiUser size={20} /></span>
+                          <span className="w-10 h-10 rounded-full bg-white/10 flex items-center justify-center"><FiUser className="w-5 h-5" /></span>
                         )}
-                        <div className="navbar-user-card-info">
-                          <div className="navbar-user-card-name">{user.store_name || user.fullName || user.full_name || user.email}</div>
-                          <div className="navbar-user-card-email">{user.email}</div>
+                        <div className="min-w-0">
+                          <div className="text-sm font-semibold truncate">{user.store_name || user.fullName || user.full_name || user.email}</div>
+                          <div className="text-[11px] text-white/50 truncate">{user.email}</div>
                         </div>
                       </div>
-                      <div className="navbar-user-card-divider" />
-                      <NavLink to="/profile" onClick={() => setDropdownOpen(false)}>
-                        <FiUser size={14} /> {t('nav.myProfile')}
-                      </NavLink>
-                      {user.role !== 'admin' && (
-                        <>
-                          <NavLink to="/offres" onClick={() => setDropdownOpen(false)}>
-                            <FiMessageCircle size={14} /> {t('nav.myOffers')}
-                          </NavLink>
-                          <NavLink to="/messenger" onClick={() => setDropdownOpen(false)}>
-                            <FiMessageCircle size={14} /> {t('nav.messages')}
-                          </NavLink>
-                        </>
-                      )}
-                      {user.role !== 'admin' && (
-                        user.premium ? (
-                          <span className="navbar-premium-badge" onClick={() => setDropdownOpen(false)}>
-                            <FiStar size={14} /> {t('nav.premium')}
-                          </span>
-                        ) : (
-                          <button onClick={() => { setDropdownOpen(false); setShowPremium(true); }} className="navbar-premium-btn">
-                            <FiStar size={14} /> {t('nav.goPremium')}
-                          </button>
-                        )
-                      )}
-                      {(user.role === 'seller') && (
-                        <NavLink to="/seller" onClick={() => setDropdownOpen(false)}>
-                          <FiShoppingBag size={14} /> {t('nav.dashboard')}
+                      <div className="py-1">
+                        <NavLink to="/profile" onClick={() => setDropdownOpen(false)} className="flex items-center gap-2 px-3 py-2 text-sm text-white/80 hover:bg-white/5 transition-colors">
+                          <FiUser className="w-3.5 h-3.5" /> {t('nav.myProfile')}
                         </NavLink>
-                      )}
-                      {user.role === 'admin' && (
-                        <NavLink to="/admin" onClick={() => setDropdownOpen(false)}>
-                          <FiPackage size={14} /> {t('nav.adminDashboard')}
-                        </NavLink>
-                      )}
-                      <button className="navbar-logout-btn" onClick={() => { logout(); navigate('/'); setDropdownOpen(false); }}>
-                        <FiLogOut size={14} /> {t('nav.logout')}
-                      </button>
+                        {user.role !== 'admin' && (
+                          <>
+                            <NavLink to="/offres" onClick={() => setDropdownOpen(false)} className="flex items-center gap-2 px-3 py-2 text-sm text-white/80 hover:bg-white/5 transition-colors">
+                              <FiMessageCircle className="w-3.5 h-3.5" /> {t('nav.myOffers')}
+                            </NavLink>
+                            <NavLink to="/messenger" onClick={() => setDropdownOpen(false)} className="flex items-center gap-2 px-3 py-2 text-sm text-white/80 hover:bg-white/5 transition-colors">
+                              <FiMessageCircle className="w-3.5 h-3.5" /> {t('nav.messages')}
+                            </NavLink>
+                          </>
+                        )}
+                        {user.role !== 'admin' && (
+                          user.premium ? (
+                            <span className="flex items-center gap-2 px-3 py-2 text-sm text-amber-400">
+                              <FiStar className="w-3.5 h-3.5" /> {t('nav.premium')}
+                            </span>
+                          ) : (
+                            <button onClick={() => { setDropdownOpen(false); setShowPremium(true); }} className="w-full flex items-center gap-2 px-3 py-2 text-sm text-white/80 hover:bg-white/5 transition-colors">
+                              <FiStar className="w-3.5 h-3.5" /> {t('nav.goPremium')}
+                            </button>
+                          )
+                        )}
+                        {user.role === 'seller' && (
+                          <NavLink to="/seller" onClick={() => setDropdownOpen(false)} className="flex items-center gap-2 px-3 py-2 text-sm text-white/80 hover:bg-white/5 transition-colors">
+                            <FiShoppingBag className="w-3.5 h-3.5" /> {t('nav.dashboard')}
+                          </NavLink>
+                        )}
+                        {user.role === 'admin' && (
+                          <NavLink to="/admin" onClick={() => setDropdownOpen(false)} className="flex items-center gap-2 px-3 py-2 text-sm text-white/80 hover:bg-white/5 transition-colors">
+                            <FiPackage className="w-3.5 h-3.5" /> {t('nav.adminDashboard')}
+                          </NavLink>
+                        )}
+                        <button onClick={() => { logout(); navigate('/'); setDropdownOpen(false); }} className="w-full flex items-center gap-2 px-3 py-2 text-sm text-red-400 hover:bg-red-500/10 transition-colors">
+                          <FiLogOut className="w-3.5 h-3.5" /> {t('nav.logout')}
+                        </button>
+                      </div>
                     </motion.div>
                   )}
                 </AnimatePresence>
               </div>
             ) : (
-              <motion.div className="navbar-auth" initial={{ opacity: 0 }} animate={{ opacity: 1 }}>
-                <a href="/demo" target="_blank" rel="noopener noreferrer" className="navbar-demo">▶ Demo</a>
-                <Link to="/login" className="navbar-login">{t('nav.login')}</Link>
-                <Link to="/signup" className="navbar-signup">{t('nav.signup')}</Link>
-              </motion.div>
+              <div className="hidden md:flex items-center gap-2">
+                <a href="/demo" target="_blank" rel="noopener noreferrer" className="px-4 py-2 rounded-full border border-white/20 text-white text-xs font-bold hover:bg-white/5 transition-colors">
+                  ▶ Demo
+                </a>
+                <Link to="/login" className="px-4 py-2 rounded-lg text-sm text-white/75 hover:text-white hover:bg-white/5 transition-colors">{t('nav.login')}</Link>
+                <Link to="/signup" className="px-5 py-2 rounded-full bg-amber-500 text-zinc-950 text-sm font-bold hover:bg-amber-400 transition-colors">{t('nav.signup')}</Link>
+              </div>
             )}
-            <button className={`navbar-hamburger${menuOpen ? ' active' : ''}`} onClick={() => setMenuOpen((o) => !o)} aria-label="Menu">
-              <span /><span /><span />
+            <button onClick={() => setMenuOpen((o) => !o)} aria-label="Menu" className="md:hidden p-2 rounded-lg text-white/80 hover:bg-white/5 transition-colors">
+              {menuOpen ? <X className="w-5 h-5" /> : <Menu className="w-5 h-5" />}
             </button>
           </div>
         </div>
       </motion.nav>
 
-      <div className={`navbar-mobile-panel${menuOpen ? ' open' : ''}`} ref={panelRef}>
-        <NavLink to="/" end onClick={closeMenu}>{t('nav.home')}</NavLink>
-        <button onClick={() => setMobileProdsOpen(o => !o)} className="navbar-mobile-prods-btn" style={{
-          background: 'none', border: 'none', color: 'inherit', cursor: 'pointer', width: '100%',
-          padding: '10px', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 6,
-          fontSize: 14, fontFamily: 'var(--font)', fontWeight: 500,
-        }}>
-          {t('nav.products')}
-          <FiChevronDown size={14} style={{ transform: mobileProdsOpen ? 'rotate(180deg)' : 'none', transition: 'transform 0.2s' }} />
-        </button>
-        {mobileProdsOpen && categories.map((cat) => {
-          const isActive = location.search === `?category=${cat.slug}`;
-          return (
-            <Link key={cat.slug} to={`/products?category=${cat.slug}`} onClick={closeMenu}
-              style={{ display: 'block', fontSize: 14, padding: '10px', opacity: 0.7, fontWeight: 500, textAlign: 'center' }}
-              className={isActive ? 'active' : ''}>
-              <cat.icon size={14} style={{ marginInlineEnd: 6, verticalAlign: 'middle' }} /> {cat.name}
-            </Link>
-          );
-        })}
-        <Link to="/products" onClick={closeMenu} style={{ display: 'block', fontSize: 14, padding: '10px', opacity: 0.6, fontWeight: 500, textAlign: 'center' }}>{t('nav.allProducts')} {dir === 'rtl' ? '←' : '→'}</Link>
-        <Link to="/boutique" onClick={closeMenu} style={{ display: 'block', fontSize: 14, padding: '10px', fontWeight: 600, color: '#d97706', textAlign: 'center' }}>
-          <FiShield size={14} style={{ verticalAlign: 'middle', marginInlineEnd: 4 }} /> {t('nav.officialStore')}
-        </Link>
-        <NavLink to="/about" onClick={closeMenu}>{t('nav.about')}</NavLink>
-        {user?.role == 'seller' ? (
-          <NavLink to="/reprise/list" onClick={closeMenu}><FiSmartphone size={14} /> {t('nav.tradeInRequests')}</NavLink>
-        ) : user?.role == 'admin' ? null : (
-          <NavLink to="/reprise" onClick={closeMenu}><FiSmartphone size={14} /> {t('nav.tradeIn')}</NavLink>
-        )}
-        {user?.role == 'seller' ? (
-          <NavLink to="/seller/products/new" onClick={closeMenu} className="navbar-mobile-sell"><FiTrendingUp size={14} /> {t('nav.sell')}</NavLink>
-        ) : user?.role !== 'admin' && (
-          <NavLink to="/vendre" onClick={closeMenu} className="navbar-mobile-sell"><FiTrendingUp size={14} /> {t('nav.sell')}</NavLink>
-        )}
-        <div className="navbar-mobile-divider" />
-        {user ? (
-          <>
-            <NavLink to="/profile" onClick={closeMenu}><FiUser size={14} /> {t('nav.myProfile')}</NavLink>
-            {user.role !== 'admin' && (
-              <>
-                <NavLink to="/offres" onClick={closeMenu}><FiMessageCircle size={14} /> {t('nav.myOffers')}</NavLink>
-                <NavLink to="/messenger" onClick={closeMenu}><FiMessageCircle size={14} /> {t('nav.messages')}</NavLink>
-              </>
-            )}
-            {user.role !== 'admin' && (
-              user.premium ? (
-                <span className="navbar-premium-badge" style={{ padding: '10px', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 6, fontSize: 14, fontWeight: 500 }}>
-                  <FiStar size={14} /> {t('nav.premium')}
-                </span>
-              ) : (
-                <button onClick={() => { closeMenu(); setShowPremium(true); }} style={{ padding: '10px', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 6, fontSize: 14, fontWeight: 500, background: 'none', border: 'none', color: 'inherit', cursor: 'pointer', width: '100%' }}>
-                  <FiStar size={14} /> {t('nav.goPremium')}
-                </button>
-              )
-            )}
-            {(user.role === 'seller') && (
-              <NavLink to="/seller" onClick={closeMenu}><FiShoppingBag size={14} /> {t('nav.dashboard')}</NavLink>
-            )}
-            {user.role === 'admin' && (
-              <NavLink to="/admin" onClick={closeMenu}><FiPackage size={14} /> {t('nav.adminDashboard')}</NavLink>
-            )}
-            <button onClick={() => { logout(); navigate('/'); closeMenu(); }} className="navbar-mobile-logout">
-              <FiLogOut size={14} /> {t('nav.logout')}
-            </button>
-          </>
-        ) : (
-          <>
-            <a href="/demo" target="_blank" rel="noopener noreferrer" className="navbar-mobile-demo">▶ Demo</a>
-            <NavLink to="/login" onClick={closeMenu}>{t('nav.login')}</NavLink>
-            <Link to="/signup" className="navbar-mobile-signup" onClick={closeMenu}>{t('nav.signup')}</Link>
-          </>
-        )}
+      {/* Mobile panel */}
+      <div ref={panelRef} className={`fixed top-[70px] right-0 bottom-0 w-72 max-w-[85vw] bg-zinc-950/98 backdrop-blur-xl border-l border-white/10 z-[9999] overflow-y-auto transition-transform duration-300 md:hidden ${menuOpen ? 'translate-x-0' : 'translate-x-full'}`}>
+        <div className="flex flex-col gap-1 p-4">
+          <NavLink to="/" end onClick={closeMenu} className="px-3 py-2.5 rounded-lg text-sm font-medium text-white/80 hover:bg-white/5 text-center">{t('nav.home')}</NavLink>
+          <button onClick={() => setMobileProdsOpen((o) => !o)} className="px-3 py-2.5 rounded-lg text-sm font-medium text-white/80 hover:bg-white/5 flex items-center justify-center gap-2">
+            {t('nav.products')} <FiChevronDown className={`w-3.5 h-3.5 transition-transform ${mobileProdsOpen ? 'rotate-180' : ''}`} />
+          </button>
+          {mobileProdsOpen && categories.map((cat) => {
+            const isActive = location.search === `?category=${cat.slug}`;
+            return (
+              <Link key={cat.slug} to={`/products?category=${cat.slug}`} onClick={closeMenu}
+                className={`px-3 py-2 rounded-lg text-sm text-center ${isActive ? 'text-amber-400 bg-amber-500/10' : 'text-white/70 hover:bg-white/5'}`}>
+                <cat.icon className="w-3.5 h-3.5 inline mr-1.5" /> {cat.name}
+              </Link>
+            );
+          })}
+          <Link to="/products" onClick={closeMenu} className="px-3 py-2 text-xs text-white/50 text-center">{t('nav.allProducts')}</Link>
+          <Link to="/boutique" onClick={closeMenu} className="px-3 py-2.5 rounded-lg text-sm font-semibold text-amber-400 text-center flex items-center justify-center gap-2">
+            <FiShield className="w-3.5 h-3.5" /> {t('nav.officialStore')}
+          </Link>
+          <NavLink to="/about" onClick={closeMenu} className="px-3 py-2.5 rounded-lg text-sm font-medium text-white/80 hover:bg-white/5 text-center">{t('nav.about')}</NavLink>
+          {user?.role === 'seller' ? (
+            <NavLink to="/reprise/list" onClick={closeMenu} className="px-3 py-2.5 rounded-lg text-sm font-medium text-white/80 hover:bg-white/5 text-center">{t('nav.tradeInRequests')}</NavLink>
+          ) : user?.role === 'admin' ? null : (
+            <NavLink to="/reprise" onClick={closeMenu} className="px-3 py-2.5 rounded-lg text-sm font-medium text-white/80 hover:bg-white/5 text-center">{t('nav.tradeIn')}</NavLink>
+          )}
+          {user?.role === 'seller' ? (
+            <NavLink to="/seller/products/new" onClick={closeMenu} className="mx-2 mt-2 px-3 py-3 rounded-xl bg-amber-500 text-zinc-950 font-bold text-sm text-center flex items-center justify-center gap-2">
+              <FiTrendingUp className="w-4 h-4" /> {t('nav.sell')}
+            </NavLink>
+          ) : user?.role !== 'admin' && (
+            <NavLink to="/vendre" onClick={closeMenu} className="mx-2 mt-2 px-3 py-3 rounded-xl bg-amber-500 text-zinc-950 font-bold text-sm text-center flex items-center justify-center gap-2">
+              <FiTrendingUp className="w-4 h-4" /> {t('nav.sell')}
+            </NavLink>
+          )}
+          <div className="h-px bg-white/10 my-2" />
+          {user ? (
+            <>
+              <NavLink to="/profile" onClick={closeMenu} className="px-3 py-2.5 rounded-lg text-sm font-medium text-white/80 hover:bg-white/5 text-center flex items-center justify-center gap-2">
+                <FiUser className="w-3.5 h-3.5" /> {t('nav.myProfile')}
+              </NavLink>
+              {user.role !== 'admin' && (
+                <>
+                  <NavLink to="/offres" onClick={closeMenu} className="px-3 py-2.5 rounded-lg text-sm font-medium text-white/80 hover:bg-white/5 text-center flex items-center justify-center gap-2">
+                    <FiMessageCircle className="w-3.5 h-3.5" /> {t('nav.myOffers')}
+                  </NavLink>
+                  <NavLink to="/messenger" onClick={closeMenu} className="px-3 py-2.5 rounded-lg text-sm font-medium text-white/80 hover:bg-white/5 text-center flex items-center justify-center gap-2">
+                    <FiMessageCircle className="w-3.5 h-3.5" /> {t('nav.messages')}
+                  </NavLink>
+                </>
+              )}
+              {user.role !== 'admin' && (
+                user.premium ? (
+                  <span className="px-3 py-2.5 rounded-lg text-sm font-medium text-amber-400 text-center flex items-center justify-center gap-2">
+                    <FiStar className="w-3.5 h-3.5" /> {t('nav.premium')}
+                  </span>
+                ) : (
+                  <button onClick={() => { closeMenu(); setShowPremium(true); }} className="px-3 py-2.5 rounded-lg text-sm font-medium text-white/80 hover:bg-white/5 w-full flex items-center justify-center gap-2">
+                    <FiStar className="w-3.5 h-3.5" /> {t('nav.goPremium')}
+                  </button>
+                )
+              )}
+              {user.role === 'seller' && (
+                <NavLink to="/seller" onClick={closeMenu} className="px-3 py-2.5 rounded-lg text-sm font-medium text-white/80 hover:bg-white/5 text-center flex items-center justify-center gap-2">
+                  <FiShoppingBag className="w-3.5 h-3.5" /> {t('nav.dashboard')}
+                </NavLink>
+              )}
+              {user.role === 'admin' && (
+                <NavLink to="/admin" onClick={closeMenu} className="px-3 py-2.5 rounded-lg text-sm font-medium text-white/80 hover:bg-white/5 text-center flex items-center justify-center gap-2">
+                  <FiPackage className="w-3.5 h-3.5" /> {t('nav.adminDashboard')}
+                </NavLink>
+              )}
+              <button onClick={() => { logout(); navigate('/'); closeMenu(); }} className="mx-2 mt-2 px-3 py-3 rounded-xl bg-red-500/10 text-red-400 font-bold text-sm text-center flex items-center justify-center gap-2">
+                <FiLogOut className="w-4 h-4" /> {t('nav.logout')}
+              </button>
+            </>
+          ) : (
+            <>
+              <a href="/demo" target="_blank" rel="noopener noreferrer" className="mx-2 px-3 py-3 rounded-xl bg-red-500 text-white font-bold text-sm text-center">▶ Demo</a>
+              <NavLink to="/login" onClick={closeMenu} className="px-3 py-2.5 rounded-lg text-sm font-medium text-white/80 hover:bg-white/5 text-center">{t('nav.login')}</NavLink>
+              <Link to="/signup" onClick={closeMenu} className="mx-2 px-3 py-3 rounded-xl bg-amber-500 text-zinc-950 font-bold text-sm text-center">{t('nav.signup')}</Link>
+            </>
+          )}
+        </div>
       </div>
 
       <PremiumPopup open={showPremium} onClose={() => setShowPremium(false)} />
 
       {showCleanConfirm && (
-        <div style={{ position: 'fixed', inset: 0, background: 'rgba(0,0,0,0.5)', zIndex: 99999, display: 'flex', alignItems: 'center', justifyContent: 'center', padding: 16 }}
-          onClick={() => setShowCleanConfirm(false)}>
+        <div className="fixed inset-0 bg-black/50 z-[99999] flex items-center justify-center p-4" onClick={() => setShowCleanConfirm(false)}>
           <motion.div initial={{ opacity: 0, scale: 0.9 }} animate={{ opacity: 1, scale: 1 }} exit={{ opacity: 0, scale: 0.9 }}
-            style={{ background: 'var(--bg-card)', borderRadius: 20, padding: 32, maxWidth: 360, width: '100%', boxShadow: '0 25px 80px rgba(0,0,0,0.35)', textAlign: 'center' }}
-            onClick={e => e.stopPropagation()}>
-            <div style={{ width: 56, height: 56, borderRadius: '50%', background: 'rgba(239,68,68,0.1)', display: 'flex', alignItems: 'center', justifyContent: 'center', margin: '0 auto 16px' }}>
-              <FiTrash2 size={26} color="#dc2626" />
+            className="bg-zinc-900 rounded-2xl p-8 max-w-sm w-full shadow-2xl text-center border border-white/10" onClick={(e) => e.stopPropagation()}>
+            <div className="w-14 h-14 rounded-full bg-red-500/10 flex items-center justify-center mx-auto mb-4">
+              <FiTrash2 className="w-6 h-6 text-red-400" />
             </div>
-            <h3 style={{ fontSize: 18, fontWeight: 700, marginBottom: 8 }}>{t('nav.clearNotifsTitle')}</h3>
-            <p style={{ fontSize: 14, color: 'var(--text-secondary)', marginBottom: 24, lineHeight: 1.5 }}>
-              {t('nav.clearNotifsDesc')}
-            </p>
-            <div style={{ display: 'flex', gap: 10 }}>
-              <button onClick={() => setShowCleanConfirm(false)} className="btn btn-outline" style={{ flex: 1, justifyContent: 'center', padding: '10px 0' }}>
+            <h3 className="text-lg font-bold mb-2">{t('nav.clearNotifsTitle')}</h3>
+            <p className="text-sm text-white/60 mb-6 leading-relaxed">{t('nav.clearNotifsDesc')}</p>
+            <div className="flex gap-3">
+              <button onClick={() => setShowCleanConfirm(false)} className="flex-1 py-2.5 rounded-xl border border-white/15 text-white/80 hover:bg-white/5 transition-colors">
                 {t('nav.cancel')}
               </button>
-              <button onClick={confirmClean} className="form-submit" style={{ flex: 1, justifyContent: 'center', padding: '10px 0', background: '#dc2626', borderColor: '#dc2626' }}>
-                <FiTrash2 size={14} /> {t('nav.clearAll')}
+              <button onClick={confirmClean} className="flex-1 py-2.5 rounded-xl bg-red-500 text-white font-bold hover:bg-red-600 transition-colors">
+                <FiTrash2 className="w-3.5 h-3.5 inline mr-1.5" /> {t('nav.clearAll')}
               </button>
             </div>
           </motion.div>
