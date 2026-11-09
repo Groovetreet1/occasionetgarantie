@@ -28,6 +28,8 @@
     all: 'Tous',
     showMore: 'Voir plus',
     remaining: 'restants',
+    of: 'sur',
+    products: 'produits',
     noResults: 'Aucun résultat',
     noResultsDesc: 'Essayez de modifier vos filtres ou votre recherche.',
     resetFilters: 'Réinitialiser les filtres',

@@ -28,6 +28,8 @@
     all: 'الكل',
     showMore: 'عرض المزيد',
     remaining: 'متبقية',
+    of: 'من',
+    products: 'منتجات',
     noResults: 'لا توجد نتائج',
     noResultsDesc: 'حاول تعديل الفلاتر أو البحث.',
     resetFilters: 'إعادة تعيين الفلاتر',

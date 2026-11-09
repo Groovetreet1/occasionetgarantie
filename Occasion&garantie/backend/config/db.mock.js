@@ -109,7 +109,7 @@ const mockPool = {
     }
 
     // SELECT products with LEFT JOIN (public)
-    if (upper.startsWith('SELECT') && upper.includes('FROM PRODUCTS') && upper.includes('LEFT JOIN')) {
+    if (upper.startsWith('SELECT') && upper.includes('FROM PRODUCTS') && upper.includes('LEFT JOIN') && !upper.startsWith('SELECT COUNT')) {
       let results = [...data.products];
 
       if (upper.includes('WHERE P.ACTIVE = TRUE')) {
@@ -126,7 +126,7 @@ const mockPool = {
         const cat = data.categories.find(c => c.name.toLowerCase() === nameParam);
         if (cat) results = results.filter(p => p.category_id === cat.id);
       }
-      if (upper.includes('P.SELLER_ID =')) {
+      if (upper.includes('P.SELLER_ID = ?')) {
         results = results.filter(p => p.seller_id === Number(params[params.length - 1]));
       }
       if (upper.includes('P.FEATURED DESC')) {
@@ -366,7 +366,7 @@ const mockPool = {
     // SELECT COUNT(*) from products
     if (upper.includes('SELECT') && upper.includes('COUNT(*)') && upper.includes('FROM PRODUCTS')) {
       let filtered = [...data.products];
-      if (upper.includes('SELLER_ID =')) {
+      if (upper.includes('SELLER_ID = ?')) {
         filtered = filtered.filter(p => p.seller_id === Number(params[0]));
       }
       if (upper.includes('ACTIVE=TRUE') || upper.includes('ACTIVE = TRUE')) {
@@ -376,7 +376,7 @@ const mockPool = {
     }
 
     // SELECT products simple with seller_id filter (seller dashboard)
-    if (upper.startsWith('SELECT') && upper.includes('FROM PRODUCTS') && upper.includes('SELLER_ID =') && !upper.includes('JOIN')) {
+    if (upper.startsWith('SELECT') && upper.includes('FROM PRODUCTS') && upper.includes('SELLER_ID = ?') && !upper.includes('JOIN')) {
       let results = data.products.filter(p => p.seller_id === Number(params[0]));
       if (upper.includes('LIMIT 5')) results = results.slice(0, 5);
       results = results.map(p => {

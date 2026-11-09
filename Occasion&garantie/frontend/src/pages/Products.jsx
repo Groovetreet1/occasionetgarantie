@@ -18,6 +18,33 @@ const CATEGORIES = ['Tous', 'Smartphones', 'Tablettes', 'Ordinateurs', 'Accessoi
 
 const fadeUp = { hidden: { opacity: 0, y: 24 }, show: { opacity: 1, y: 0, transition: { duration: 0.4 } } };
 
+// Charge jusqu'a 100 produits par page puis complete les pages suivantes
+// pour que la pagination cote client dispose de toute la liste.
+async function fetchAllProducts(params = {}) {
+  const base = new URLSearchParams(params);
+  base.set('limit', '100');
+  base.set('page', '1');
+  const first = await api.get(`/products?${base.toString()}`);
+  const data = first.data;
+  let items = Array.isArray(data?.products) ? data.products : (Array.isArray(data) ? data : []);
+  const totalPages = Math.min(Number(data?.totalPages) || 1, 10);
+  if (totalPages > 1) {
+    const requests = [];
+    for (let p = 2; p <= totalPages; p += 1) {
+      const q = new URLSearchParams(base);
+      q.set('page', String(p));
+      requests.push(
+        api.get(`/products?${q.toString()}`)
+          .then((r) => (Array.isArray(r.data?.products) ? r.data.products : []))
+          .catch(() => [])
+      );
+    }
+    const chunks = await Promise.all(requests);
+    chunks.forEach((arr) => { items = items.concat(arr); });
+  }
+  return items;
+}
+
 export default function Products() {
   const [searchParams] = useSearchParams();
   const { t } = useLanguage();
@@ -30,7 +57,6 @@ export default function Products() {
   const [ville, setVille] = useState(searchParams.get('ville') || '');
   const [priceMin, setPriceMin] = useState('');
   const [priceMax, setPriceMax] = useState('');
-  const [visibleCount, setVisibleCount] = useState(12);
   const [viewMode, setViewMode] = useState(() => {
     try {
       const saved = localStorage.getItem('productsViewMode');
@@ -62,15 +88,15 @@ export default function Products() {
 
   useEffect(() => {
     setLoading(true);
-    const params = new URLSearchParams();
+    const params = {};
     if (search) {
       const brandParam = searchParams.get('brand');
-      if (brandParam && search === brandParam) params.set('brand', brandParam);
-      else params.set('search', search);
+      if (brandParam && search === brandParam) params.brand = brandParam;
+      else params.search = search;
     }
-    if (ville) params.set('ville', ville);
-    api.get(`/products${params.toString() ? `?${params}` : ''}`)
-      .then(res => setAllProducts(res.data.products || res.data))
+    if (ville) params.ville = ville;
+    fetchAllProducts(params)
+      .then(setAllProducts)
       .catch(() => {})
       .finally(() => setLoading(false));
   }, [search, searchParams, ville]);
@@ -104,17 +130,27 @@ export default function Products() {
 
   const pageStart = (page - 1) * PAGE_SIZE;
   const displayed = filtered.slice(pageStart, pageStart + PAGE_SIZE);
-  const hasMore = false;
+
+  const goToPage = (p) => {
+    const next = Math.min(Math.max(1, p), totalPages);
+    setPage(next);
+    if (typeof window !== 'undefined') {
+      const el = document.querySelector('.product-grid-modern');
+      if (el && el.scrollIntoView) {
+        el.scrollIntoView({ behavior: 'smooth', block: 'start' });
+      }
+    }
+  };
   const productCount = Array.isArray(allProducts) ? allProducts.length : 0;
 
   const handleSearchSubmit = (e) => {
     e.preventDefault();
     setLoading(true);
-    const params = new URLSearchParams();
-    if (search) params.set('search', search);
-    if (ville) params.set('ville', ville);
-    api.get(`/products${params.toString() ? `?${params}` : ''}`)
-      .then(res => setAllProducts(res.data.products || res.data))
+    const params = {};
+    if (search) params.search = search;
+    if (ville) params.ville = ville;
+    fetchAllProducts(params)
+      .then(setAllProducts)
       .catch(() => {})
       .finally(() => setLoading(false));
   };
@@ -290,27 +326,52 @@ export default function Products() {
                   <div style={{ display: 'flex', alignItems: 'center', gap: 6, flexWrap: 'wrap' }}>
                     <button
                       type="button"
-                      onClick={() => setPage(Math.max(1, page - 1))}
+                      onClick={() => goToPage(page - 1)}
                       disabled={page === 1}
                       className="btn btn-outline"
                       style={{ padding: '6px 12px', borderRadius: 999, opacity: page === 1 ? 0.5 : 1 }}
                     >
                       ‹
                     </button>
-                    {Array.from({ length: totalPages }, (_, i) => i + 1).slice(0, 10).map((p) => (
-                      <button
-                        key={p}
-                        type="button"
-                        onClick={() => setPage(p)}
-                        className={p === page ? 'btn btn-primary' : 'btn btn-outline'}
-                        style={{ padding: '6px 12px', borderRadius: 999, fontWeight: 700 }}
-                      >
-                        {p}
-                      </button>
-                    ))}
+                    {(() => {
+                      const win = 7;
+                      let start = Math.max(1, page - Math.floor(win / 2));
+                      let end = Math.min(totalPages, start + win - 1);
+                      start = Math.max(1, end - win + 1);
+                      const nums = [];
+                      for (let p = start; p <= end; p += 1) nums.push(p);
+                      const numBtn = (p) => (
+                        <button
+                          key={p}
+                          type="button"
+                          onClick={() => goToPage(p)}
+                          className={p === page ? 'btn btn-primary' : 'btn btn-outline'}
+                          style={{ padding: '6px 12px', borderRadius: 999, fontWeight: 700 }}
+                        >
+                          {p}
+                        </button>
+                      );
+                      return (
+                        <>
+                          {start > 1 && (
+                            <>
+                              {numBtn(1)}
+                              {start > 2 && <span style={{ color: 'var(--text-muted)', padding: '0 2px' }}>…</span>}
+                            </>
+                          )}
+                          {nums.map(numBtn)}
+                          {end < totalPages && (
+                            <>
+                              {end < totalPages - 1 && <span style={{ color: 'var(--text-muted)', padding: '0 2px' }}>…</span>}
+                              {numBtn(totalPages)}
+                            </>
+                          )}
+                        </>
+                      );
+                    })()}
                     <button
                       type="button"
-                      onClick={() => setPage(Math.min(totalPages, page + 1))}
+                      onClick={() => goToPage(page + 1)}
                       disabled={page === totalPages}
                       className="btn btn-outline"
                       style={{ padding: '6px 12px', borderRadius: 999, opacity: page === totalPages ? 0.5 : 1 }}
