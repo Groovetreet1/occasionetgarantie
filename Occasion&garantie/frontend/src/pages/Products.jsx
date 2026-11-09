@@ -304,7 +304,7 @@ export default function Products() {
             <div className={`product-grid-modern ${viewMode === 'list' ? 'view-list' : 'view-grid'}`}>
               {products.map((p, i) => <HomeProductCard key={p.id} product={p} index={i} view={viewMode} />)}
             </div>
-            {totalPages > 1 && (
+            {total > 0 && (
               <div style={{ marginTop: 36 }}>
                 <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: 12 }}>
                   <span style={{ fontSize: 13, color: 'var(--text-muted)' }}>
