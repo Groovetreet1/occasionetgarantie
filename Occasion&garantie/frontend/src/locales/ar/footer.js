@@ -19,5 +19,7 @@
     legal: 'الشروط القانونية',
     hours: 'الاثنين-السبت، 9ص – 7م',
     casablanca: 'الدار البيضاء، المغرب',
+    credit: 'قالب من',
+    creditName: 'TemplatesJungle',
   },
 };

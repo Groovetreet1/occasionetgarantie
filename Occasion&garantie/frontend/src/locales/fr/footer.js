@@ -19,5 +19,7 @@
     legal: 'Mentions légales',
     hours: 'Lun-Sam, 9h – 19h',
     casablanca: 'Casablanca, Maroc',
+    credit: 'Template par',
+    creditName: 'TemplatesJungle',
   },
 };
