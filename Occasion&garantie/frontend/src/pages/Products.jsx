@@ -90,9 +90,21 @@ export default function Products() {
 
   const hasFilters = category !== 'Tous' || stateFilter !== 'Tous' || ville || priceMin || priceMax;
   const resetFilters = () => { setCategory('Tous'); setStateFilter('Tous'); setVille(''); setPriceMin(''); setPriceMax(''); };
-  const showMore = () => setVisibleCount(prev => prev + 12);
-  const displayed = filtered.slice(0, visibleCount);
-  const hasMore = visibleCount < filtered.length;
+  const PAGE_SIZE = viewMode === 'list' ? 20 : 12;
+  const totalPages = Math.max(1, Math.ceil(filtered.length / PAGE_SIZE));
+  const [page, setPage] = useState(1);
+
+  useEffect(() => {
+    setPage(1);
+  }, [category, stateFilter, ville, priceMin, priceMax, search, viewMode, filtered.length]);
+
+  useEffect(() => {
+    setPage((p) => Math.min(p, totalPages));
+  }, [totalPages]);
+
+  const pageStart = (page - 1) * PAGE_SIZE;
+  const displayed = filtered.slice(pageStart, pageStart + PAGE_SIZE);
+  const hasMore = false;
   const productCount = Array.isArray(allProducts) ? allProducts.length : 0;
 
   const handleSearchSubmit = (e) => {
@@ -269,11 +281,44 @@ export default function Products() {
             <div className={`product-grid-modern ${viewMode === 'list' ? 'view-list' : 'view-grid'}`}>
               {displayed.map((p, i) => <HomeProductCard key={p.id} product={p} index={i} view={viewMode} />)}
             </div>
-            {hasMore && (
-              <div className="products-load-more">
-                <button className="btn btn-outline btn-lg" onClick={showMore}>
-                  {t('products.showMore')} ({filtered.length - visibleCount} {t('products.remaining')})
-                </button>
+            {totalPages > 1 && (
+              <div style={{ marginTop: 36 }}>
+                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: 12 }}>
+                  <span style={{ fontSize: 13, color: 'var(--text-muted)' }}>
+                    {pageStart + 1}–{Math.min(pageStart + PAGE_SIZE, filtered.length)} {t('products.of')} {filtered.length} {t('products.products')}
+                  </span>
+                  <div style={{ display: 'flex', alignItems: 'center', gap: 6, flexWrap: 'wrap' }}>
+                    <button
+                      type="button"
+                      onClick={() => setPage(Math.max(1, page - 1))}
+                      disabled={page === 1}
+                      className="btn btn-outline"
+                      style={{ padding: '6px 12px', borderRadius: 999, opacity: page === 1 ? 0.5 : 1 }}
+                    >
+                      ‹
+                    </button>
+                    {Array.from({ length: totalPages }, (_, i) => i + 1).slice(0, 10).map((p) => (
+                      <button
+                        key={p}
+                        type="button"
+                        onClick={() => setPage(p)}
+                        className={p === page ? 'btn btn-primary' : 'btn btn-outline'}
+                        style={{ padding: '6px 12px', borderRadius: 999, fontWeight: 700 }}
+                      >
+                        {p}
+                      </button>
+                    ))}
+                    <button
+                      type="button"
+                      onClick={() => setPage(Math.min(totalPages, page + 1))}
+                      disabled={page === totalPages}
+                      className="btn btn-outline"
+                      style={{ padding: '6px 12px', borderRadius: 999, opacity: page === totalPages ? 0.5 : 1 }}
+                    >
+                      ›
+                    </button>
+                  </div>
+                </div>
               </div>
             )}
           </>
