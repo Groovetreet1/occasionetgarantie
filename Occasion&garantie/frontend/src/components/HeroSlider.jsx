@@ -13,9 +13,9 @@ const slides = [
     ctaKey: 'home.heroSlide1Cta',
     link: '/products',
     image: '/slides/slide1.jpg',
-    overlay: 'linear-gradient(90deg, rgba(8,8,8,0.82) 0%, rgba(8,8,8,0.45) 55%, rgba(8,8,8,0.12) 100%)',
-    titleColor: '#ffffff',
-    subColor: 'rgba(255,255,255,0.88)',
+    overlay: 'linear-gradient(135deg, rgba(15,23,42,0.38) 0%, rgba(15,23,42,0.12) 100%)',
+    titleColor: '#fde68a',
+    subColor: '#fef3c7',
   },
   {
     id: 2,
@@ -24,9 +24,9 @@ const slides = [
     ctaKey: 'home.heroSlide2Cta',
     link: '/signup',
     image: '/slides/slide2.jpg',
-    overlay: 'linear-gradient(90deg, rgba(8,8,8,0.86) 0%, rgba(8,8,8,0.5) 55%, rgba(8,8,8,0.16) 100%)',
-    titleColor: '#ffffff',
-    subColor: 'rgba(255,255,255,0.88)',
+    overlay: 'linear-gradient(135deg, rgba(15,23,42,0.42) 0%, rgba(15,23,42,0.15) 100%)',
+    titleColor: '#7dd3fc',
+    subColor: '#e0f2fe',
   },
   {
     id: 3,
@@ -35,9 +35,9 @@ const slides = [
     ctaKey: 'home.heroSlide3Cta',
     link: '/products',
     image: '/slides/slide3.jpg',
-    overlay: 'linear-gradient(90deg, rgba(8,8,8,0.84) 0%, rgba(8,8,8,0.48) 55%, rgba(8,8,8,0.14) 100%)',
-    titleColor: '#ffffff',
-    subColor: 'rgba(255,255,255,0.88)',
+    overlay: 'linear-gradient(135deg, rgba(15,23,42,0.40) 0%, rgba(15,23,42,0.14) 100%)',
+    titleColor: '#6ee7b7',
+    subColor: '#d1fae5',
   },
   {
     id: 4,
@@ -46,9 +46,9 @@ const slides = [
     ctaKey: 'home.heroSlide1Cta',
     link: '/support',
     image: '/slides/support.jpg',
-    overlay: 'linear-gradient(90deg, rgba(8,8,8,0.84) 0%, rgba(8,8,8,0.46) 55%, rgba(8,8,8,0.14) 100%)',
-    titleColor: '#ffffff',
-    subColor: 'rgba(255,255,255,0.88)',
+    overlay: 'linear-gradient(135deg, rgba(15,23,42,0.36) 0%, rgba(15,23,42,0.10) 100%)',
+    titleColor: '#c4b5fd',
+    subColor: '#ede9fe',
   },
 ];
 
@@ -200,7 +200,6 @@ export default function HeroSlider() {
                 transition={{ duration: 0.5, delay: 0.2 }}
                 style={{ textShadow: '0 2px 12px rgba(0,0,0,0.35)' }}
               >
-                <span className="hero-slide-tag">{t('home.heroTag')}</span>
                 <h2 style={{ color: slides[current].titleColor, textShadow: '0 2px 16px rgba(0,0,0,0.55)', fontWeight: 800, minHeight: '1.2em' }}>
                   <Typewriter key={`t-${current}`} text={t(slides[current].titleKey)} speed={28} color={slides[current].titleColor} />
                 </h2>

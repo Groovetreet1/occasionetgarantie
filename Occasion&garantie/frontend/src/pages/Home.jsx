@@ -61,15 +61,17 @@ const SAAS_CATEGORIES = [
   { slug: 'Tablettes', label: 'Tablettes', icon: FiTablet, descKey: 'home.catTabletsDesc', count: '860+' },
   { slug: 'Ordinateurs', label: 'Ordinateurs', icon: FiMonitor, descKey: 'home.catComputersDesc', count: '1 100+' },
   { slug: 'Accessoires', label: 'Accessoires', icon: FiHeadphones, descKey: 'home.catAccessoriesDesc', count: '3 200+' },
-  { slug: 'Gaming', label: 'Gaming', icon: FiZap, descKey: 'home.catGamingDesc', count: '1 500+' },
 ];
 
-const USP_ITEMS = [
-  { key: 'warranty', icon: FiShield },
-  { key: 'verified', icon: FiCheckCircle },
-  { key: 'delivery', icon: FiTruck },
-  { key: 'payment', icon: FiShoppingBag },
-];
+function WaveDivider() {
+  return (
+    <div style={{ display: 'flex', justifyContent: 'center', margin: '10px 0 0' }}>
+      <svg width="120" height="18" viewBox="0 0 120 16" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden style={{ color: 'var(--primary)', opacity: 0.9 }}>
+        <path d="M2 12 Q 15 2 30 12 T 60 12 T 90 12 T 118 8" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" fill="none" />
+      </svg>
+    </div>
+  );
+}
 
 const API_BASE = import.meta.env.VITE_API_URL || '';
 
@@ -159,7 +161,7 @@ export default function Home() {
   };
 
   return (
-    <motion.div initial="hidden" animate="show" className="sf-home">
+    <motion.div initial="hidden" animate="show">
       <PromoPopup />
       {/* Mobile search - visible only on mobile, since navbar search is hidden */}
       <div className="navbar-search-mobile" style={{ display: 'none', padding: '12px 16px', background: 'var(--bg-card)', borderBottom: '1px solid var(--border-light)' }}>
@@ -185,83 +187,51 @@ export default function Home() {
       {/* SLIDES - Photos from Desktop/photo pour slide (static, not DB) */}
       <HeroSlider />
 
-      {/* USP BAR */}
-      <section className="sf-usp" aria-label={t('home.welcomeLabel')}>
-        <div className="container">
-          <div className="sf-usp-grid">
-            {USP_ITEMS.map(({ key, icon: Icon }) => (
-              <div className="sf-usp-item" key={key}>
-                <span className="sf-usp-icon"><Icon size={20} /></span>
+
+
+      {/* STORE OFFICIAL */}
+      {storeProducts.length > 0 && (
+        <motion.section className="section" variants={fadeUp} initial="hidden" whileInView="show" viewport={{ once: true }} style={{ background: 'var(--bg-secondary)', borderTop: '1px solid var(--border-light)', borderBottom: '1px solid var(--border-light)' }}>
+          <div className="container">
+            <div className="section-header home-section-header" style={{ marginBottom: 28 }}>
+              <div className="home-heading">
+                <span className="home-heading-icon home-heading-icon-store" style={{ background: 'linear-gradient(135deg, #f59e0b, #d97706)', color: '#fff', width: 46, height: 46, borderRadius: 14, display: 'flex', alignItems: 'center', justifyContent: 'center' }}><TbShieldCheck size={22} /></span>
                 <div>
-                  <strong>{t(`home.usp${key.charAt(0).toUpperCase() + key.slice(1)}`)}</strong>
-                  <span>{t(`home.usp${key.charAt(0).toUpperCase() + key.slice(1)}Sub`)}</span>
+                  <h2 className="home-section-title home-section-title-store" style={{ fontSize: 22 }}>{t('home.storeOfficial')}</h2>
+                  <p className="home-section-subtitle">{t('home.storeSubtitle')}</p>
                 </div>
               </div>
-            ))}
-          </div>
-        </div>
-      </section>
-
-      {/* WELCOME / INTRO */}
-      <section className="sf-section">
-        <div className="container">
-          <div className="sf-intro">
-            <div className="sf-intro-content">
-              <span className="sf-intro-badge"><FiAward size={12} /> {t('home.welcomeLabel')}</span>
-              <h2>{t('home.welcomeTitle')} <em>{t('home.welcomeTitleAccent')}</em></h2>
-              <p>{t('home.welcomeText')}</p>
-              <div className="sf-intro-stats">
-                <div className="sf-intro-stat"><strong>12</strong><span>{t('home.statWarranty')}</span></div>
-                <div className="sf-intro-stat"><strong>40+</strong><span>{t('home.statCities')}</span></div>
-                <div className="sf-intro-stat"><strong>7j/7</strong><span>{t('home.statSupport')}</span></div>
+              <Link to="/boutique" className="btn btn-secondary" style={{ borderRadius: 999 }}>{t('home.viewStore')} <FiArrowRight size={16} /></Link>
+            </div>
+            {storeLoad ? <SkeletonGrid count={4} /> : (
+              <div className="products-grid">
+                {storeProducts.map(p => (
+                  <Link key={p.id} to={`/boutique/${p.slug}`} className="product-card saas-preview-card" style={{ textDecoration: 'none', borderRadius: 16 }}>
+                    <div className="product-card-image" style={{ position: 'relative', background: 'var(--bg-secondary)', aspectRatio: '1/1' }}>
+                      {p.image ? <img src={p.image} alt={p.name} style={{ width: '100%', height: '100%', objectFit: 'contain', padding: 18 }} /> : <FiShoppingBag size={48} style={{ opacity: 0.15 }} />}
+                      <span style={{ position: 'absolute', top: 10, right: 10, background: 'var(--primary)', color: '#000', fontSize: 10, fontWeight: 800, padding: '4px 10px', borderRadius: 999, display: 'inline-flex', alignItems: 'center', gap: 4 }}><FiStar size={10} /> {t('home.officialBadge')}</span>
+                      <span className="saas-preview-arrow"><FiArrowRight size={14} /></span>
+                    </div>
+                    <div className="product-card-body" style={{ padding: 14 }}>
+                      <h3 className="product-card-title" style={{ fontSize: 14 }}>{p.name}</h3>
+                      <div style={{ fontSize: 17, fontWeight: 800, color: 'var(--primary)', marginTop: 6 }}>{formatPrice(p.price)}</div>
+                      <div style={{ fontSize: 11, color: 'var(--text-muted)', marginTop: 4, display: 'flex', alignItems: 'center', gap: 4 }}><FiCheckCircle size={11} style={{ color: '#10b981' }} /> Garantie 12 mois</div>
+                    </div>
+                  </Link>
+                ))}
               </div>
-              <div className="sf-intro-actions">
-                <Link to="/products" className="sf-btn-light">{t('home.heroExplore')} <FiArrowRight size={15} /></Link>
-                <Link to="/boutique" className="sf-btn-dark"><FiShield size={14} /> {t('home.viewStore')}</Link>
-              </div>
-            </div>
-            <div className="sf-intro-media">
-              <img src="/slides/slide2.jpg" alt="Produits électroniques vérifiés et garantis" loading="lazy" />
-              <span className="sf-intro-tag"><FiCheckCircle size={13} /> {t('home.uspWarranty')}</span>
-            </div>
+            )}
           </div>
-        </div>
-      </section>
+        </motion.section>
+      )}
 
-      {/* CATEGORIES */}
-      <section className="sf-section" style={{ paddingTop: 0 }}>
-        <div className="container">
-          <div className="sf-head">
-            <div>
-              <span className="sf-kicker">{t('home.shopByCategory')}</span>
-              <h2 className="sf-title">{t('home.explore')}</h2>
-              <p className="sf-sub">{t('home.shopByCategorySub')}</p>
-            </div>
-            <Link to="/products" className="sf-link">{t('home.browseAll')} <FiArrowRight size={14} /></Link>
-          </div>
-          <div className="sf-cats">
-            {SAAS_CATEGORIES.map(({ slug, label, icon: Icon, descKey }) => (
-              <Link key={slug} to={`/products?category=${encodeURIComponent(slug)}`} className="sf-cat-card">
-                <span className="sf-cat-icon"><Icon size={24} /></span>
-                <h3>{label}</h3>
-                <p>{t(descKey)}</p>
-                <span className="sf-cat-arrow"><FiArrowRight size={16} /></span>
-              </Link>
-            ))}
-          </div>
-        </div>
-      </section>
+      <GoMobileFadeBar />
 
-      {/* NEW ARRIVALS */}
-      <motion.section className="sf-section sf-new-section" variants={fadeUp} initial="hidden" whileInView="show" viewport={{ once: true }} style={{ paddingTop: 0 }}>
+      {/* LATEST ADS */}
+      <motion.section className="section" variants={fadeUp} initial="hidden" whileInView="show" viewport={{ once: true }}>
         <div className="container">
-          <div className="sf-head">
-            <div>
-              <span className="sf-kicker">{t('home.latestAds')}</span>
-              <h2 className="sf-title">{t('home.newArrivals')}</h2>
-              <p className="sf-sub">{t('home.newArrivalsSub')}</p>
-            </div>
-            <Link to="/products" className="sf-link">{t('home.viewAll')} <FiArrowRight size={14} /></Link>
+          <div style={{ display: 'flex', justifyContent: 'center', marginBottom: 20 }}>
+            <Link to="/products" className="btn btn-secondary" style={{ borderRadius: 999 }}>{t('home.viewAll')} <FiArrowRight size={16} /></Link>
           </div>
           {loading ? <SkeletonGrid count={8} /> : products.length > 0 ? (
             <div className="products-grid">
@@ -273,56 +243,16 @@ export default function Home() {
         </div>
       </motion.section>
 
-      <GoMobileFadeBar />
-
-      {/* STORE OFFICIAL */}
-      {storeProducts.length > 0 && (
-        <motion.section className="sf-section sf-store" variants={fadeUp} initial="hidden" whileInView="show" viewport={{ once: true }}>
-          <div className="container">
-            <div className="sf-head">
-              <div>
-                <span className="sf-kicker">{t('home.officialBadge')}</span>
-                <h2 className="sf-title">{t('home.storeOfficial')}</h2>
-                <p className="sf-sub">{t('home.storeSubtitle')}</p>
-              </div>
-              <Link to="/boutique" className="sf-link">{t('home.viewStore')} <FiArrowRight size={14} /></Link>
-            </div>
-            {storeLoad ? <SkeletonGrid count={4} /> : (
-              <div className="products-grid">
-                {storeProducts.map(p => (
-                  <Link key={p.id} to={`/boutique/${p.slug}`} className="product-card" style={{ textDecoration: 'none' }}>
-                    <div className="product-card-image" style={{ position: 'relative' }}>
-                      {p.image ? <img src={p.image} alt={p.name} style={{ width: '100%', height: '100%', objectFit: 'contain', padding: 18 }} /> : <FiShoppingBag size={48} style={{ opacity: 0.15 }} />}
-                      <span style={{ position: 'absolute', top: 10, right: 10, background: 'var(--primary)', color: '#000', fontSize: 10, fontWeight: 800, padding: '4px 10px', borderRadius: 999, display: 'inline-flex', alignItems: 'center', gap: 4 }}><FiStar size={10} /> {t('home.officialBadge')}</span>
-                    </div>
-                    <div className="product-card-body" style={{ padding: 16 }}>
-                      <span style={{ fontSize: 10, fontWeight: 700, letterSpacing: 0.6, textTransform: 'uppercase', color: 'var(--text-muted)' }}>{p.category || 'Boutique'}</span>
-                      <h3 className="product-card-title" style={{ fontSize: 15, marginTop: 4 }}>{p.name}</h3>
-                      <div className="product-card-price-row" style={{ margin: '8px 0 10px' }}>
-                        <span className="product-card-price" style={{ fontSize: 19 }}>{formatPrice(p.price)}</span>
-                      </div>
-                      <span className="sf-card-cta">{t('home.viewProduct')} <FiArrowRight size={13} /></span>
-                      <div style={{ fontSize: 11, color: 'var(--text-muted)', display: 'flex', alignItems: 'center', gap: 5 }}><FiCheckCircle size={11} style={{ color: '#10b981' }} /> {t('home.uspWarranty')}</div>
-                    </div>
-                  </Link>
-                ))}
-              </div>
-            )}
-          </div>
-        </motion.section>
-      )}
-
       <TrustBar />
 
-      {/* SELL PROMO */}
-      <motion.section className="sf-section sf-sell" variants={fadeUp} initial="hidden" whileInView="show" viewport={{ once: true }}>
+      <motion.section className="section sell-promo" variants={fadeUp} initial="hidden" whileInView="show" viewport={{ once: true }}>
         <div className="container">
-          <div className="sell-promo-bar">
+          <div className="sell-promo-bar" style={{ borderRadius: 20, background: 'linear-gradient(135deg, #fff 0%, #fef3c7 100%)', border: '1px solid #fde68a', color: '#92400e', padding: '28px 24px' }}>
             <div className="sell-promo-content">
-              <h2>{t('home.sellPhoneTitle')}</h2>
-              <p>{t('home.sellPhoneDesc')}</p>
+              <h2 style={{ color: '#92400e' }}>{t('home.sellPhoneTitle')}</h2>
+              <p style={{ color: '#a16207' }}>{t('home.sellPhoneDesc')}</p>
             </div>
-            <Link to="/vendre" className="btn btn-primary">
+            <Link to="/vendre" className="btn btn-primary" style={{ background: '#f59e0b', color: '#000', borderRadius: 999, boxShadow: '0 8px 20px rgba(245,158,11,0.3)' }}>
               {t('home.sellNow')} <FiArrowRight size={16} />
             </Link>
           </div>

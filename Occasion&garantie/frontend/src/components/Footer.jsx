@@ -67,10 +67,6 @@ export default function Footer() {
             <Link to="/legal">{t('footer.legal')}</Link>
             <Link to="/about">{t('footer.about')}</Link>
           </div>
-          <span className="sf-credit">
-            {t('footer.credit')}{' '}
-            <a href="https://templatesjungle.com/" target="_blank" rel="noopener noreferrer">{t('footer.creditName')}</a>
-          </span>
         </div>
       </div>
     </footer>

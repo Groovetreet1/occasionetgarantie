@@ -93,7 +93,6 @@ export default function HomeProductCard({ product, index = 0, view = 'grid' }) {
               <span className="product-card-old" style={{ fontSize: 12, marginLeft: 8 }}>{formatPrice(product.old_price)}</span>
             )}
           </div>
-          <span className="sf-card-cta">{t('home.viewProduct')} <FiArrowUpRight size={13} /></span>
           <div style={{ display: 'flex', alignItems: 'center', gap: 8, flexWrap: 'wrap', borderTop: '1px solid var(--border-light)', paddingTop: 10, marginTop: 4 }}>
             <span style={{ display: 'inline-flex', alignItems: 'center', gap: 5, fontSize: 11, color: 'var(--text-muted)', fontWeight: 600 }}><FiMapPin size={11} /> {ville}</span>
             <span style={{ marginLeft: 'auto', display: 'inline-flex', alignItems: 'center', gap: 4, fontSize: 10, fontWeight: 700, padding: '4px 8px', borderRadius: 999, background: 'rgba(16,185,129,0.10)', color: '#059669', border: '1px solid rgba(16,185,129,0.15)' }}><FiShield size={10} /> {warranty}</span>
