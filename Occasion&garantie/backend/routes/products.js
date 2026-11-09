@@ -74,6 +74,8 @@ router.get('/', async (req, res) => {
     else if (sort === 'price_desc') sql += ', p.price DESC';
     else if (sort === 'newest') sql += ', p.created_at DESC';
     else sql += ', p.created_at DESC';
+    // Tri stable: evite les doublons / produits manquants entre les pages.
+    sql += ', p.id DESC';
 
     sql += ' LIMIT ? OFFSET ?';
     params.push(limitNum, offset);

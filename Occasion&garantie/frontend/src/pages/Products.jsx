@@ -18,39 +18,16 @@ const CATEGORIES = ['Tous', 'Smartphones', 'Tablettes', 'Ordinateurs', 'Accessoi
 
 const fadeUp = { hidden: { opacity: 0, y: 24 }, show: { opacity: 1, y: 0, transition: { duration: 0.4 } } };
 
-// Charge jusqu'a 100 produits par page puis complete les pages suivantes
-// pour que la pagination cote client dispose de toute la liste.
-async function fetchAllProducts(params = {}) {
-  const base = new URLSearchParams(params);
-  base.set('limit', '100');
-  base.set('page', '1');
-  const first = await api.get(`/products?${base.toString()}`);
-  const data = first.data;
-  let items = Array.isArray(data?.products) ? data.products : (Array.isArray(data) ? data : []);
-  const totalPages = Math.min(Number(data?.totalPages) || 1, 10);
-  if (totalPages > 1) {
-    const requests = [];
-    for (let p = 2; p <= totalPages; p += 1) {
-      const q = new URLSearchParams(base);
-      q.set('page', String(p));
-      requests.push(
-        api.get(`/products?${q.toString()}`)
-          .then((r) => (Array.isArray(r.data?.products) ? r.data.products : []))
-          .catch(() => [])
-      );
-    }
-    const chunks = await Promise.all(requests);
-    chunks.forEach((arr) => { items = items.concat(arr); });
-  }
-  return items;
-}
-
 export default function Products() {
   const [searchParams] = useSearchParams();
   const { t } = useLanguage();
-  const [allProducts, setAllProducts] = useState([]);
+  const [products, setProducts] = useState([]);
+  const [total, setTotal] = useState(0);
+  const [totalPages, setTotalPages] = useState(1);
+  const [page, setPage] = useState(1);
   const [loading, setLoading] = useState(true);
   const [search, setSearch] = useState('');
+  const [appliedSearch, setAppliedSearch] = useState('');
   const [showFilters, setShowFilters] = useState(false);
   const [category, setCategory] = useState(searchParams.get('category') || 'Tous');
   const [stateFilter, setStateFilter] = useState('Tous');
@@ -86,50 +63,66 @@ export default function Products() {
     if (villeParam) setVille(villeParam);
   }, [searchParams]);
 
+  // Taille de page: 20 en mode liste, 12 en mode grille.
+  const PAGE_SIZE = viewMode === 'list' ? 20 : 12;
+
+  // Debounce de la saisie: on n'interroge l'API qu'apres 350ms.
   useEffect(() => {
+    const id = setTimeout(() => setAppliedSearch(search.trim()), 350);
+    return () => clearTimeout(id);
+  }, [search]);
+
+  // Toute modification de filtre ramene a la premiere page.
+  useEffect(() => {
+    setPage(1);
+  }, [appliedSearch, category, stateFilter, ville, priceMin, priceMax, viewMode]);
+
+  // Pagination cote serveur: une seule requete par page.
+  useEffect(() => {
+    let cancelled = false;
     setLoading(true);
-    const params = {};
-    if (search) {
+    const params = new URLSearchParams();
+    params.set('page', String(page));
+    params.set('limit', String(PAGE_SIZE));
+    if (appliedSearch) {
       const brandParam = searchParams.get('brand');
-      if (brandParam && search === brandParam) params.brand = brandParam;
-      else params.search = search;
+      if (brandParam && appliedSearch === brandParam) params.set('brand', brandParam);
+      else params.set('search', appliedSearch);
     }
-    if (ville) params.ville = ville;
-    fetchAllProducts(params)
-      .then(setAllProducts)
-      .catch(() => {})
-      .finally(() => setLoading(false));
-  }, [search, searchParams, ville]);
+    if (category !== 'Tous') params.set('category', category);
+    if (stateFilter !== 'Tous') params.set('state', stateFilter);
+    if (ville) params.set('ville', ville);
+    if (priceMin) params.set('min', priceMin);
+    if (priceMax) params.set('max', priceMax);
+    api.get(`/products?${params.toString()}`)
+      .then((res) => {
+        if (cancelled) return;
+        const data = res.data;
+        const list = Array.isArray(data?.products) ? data.products : (Array.isArray(data) ? data : []);
+        const pages = Math.max(1, Number(data?.totalPages) || 1);
+        setProducts(list);
+        setTotal(Number(data?.total) || list.length);
+        setTotalPages(pages);
+        if (page > pages) setPage(pages);
+      })
+      .catch(() => {
+        if (cancelled) return;
+        setProducts([]);
+        setTotal(0);
+        setTotalPages(1);
+      })
+      .finally(() => { if (!cancelled) setLoading(false); });
+    return () => { cancelled = true; };
+  }, [page, PAGE_SIZE, appliedSearch, category, stateFilter, ville, priceMin, priceMax, searchParams]);
 
   useEffect(() => {
     api.get('/products/cities').then(res => { if (res.data.length) setCities(res.data); }).catch(() => {});
     api.get('/store/products/featured').then(r => setStoreProducts(r.data)).catch(() => {}).finally(() => setStoreLoad(false));
   }, []);
 
-  const filtered = (Array.isArray(allProducts) ? allProducts : []).filter(p => {
-    if (category !== 'Tous' && p.category_name !== category) return false;
-    if (stateFilter !== 'Tous' && p.state !== stateFilter) return false;
-    if (priceMin && Number(p.price) < Number(priceMin)) return false;
-    if (priceMax && Number(p.price) > Number(priceMax)) return false;
-    return true;
-  });
-
   const hasFilters = category !== 'Tous' || stateFilter !== 'Tous' || ville || priceMin || priceMax;
   const resetFilters = () => { setCategory('Tous'); setStateFilter('Tous'); setVille(''); setPriceMin(''); setPriceMax(''); };
-  const PAGE_SIZE = viewMode === 'list' ? 20 : 12;
-  const totalPages = Math.max(1, Math.ceil(filtered.length / PAGE_SIZE));
-  const [page, setPage] = useState(1);
-
-  useEffect(() => {
-    setPage(1);
-  }, [category, stateFilter, ville, priceMin, priceMax, search, viewMode, filtered.length]);
-
-  useEffect(() => {
-    setPage((p) => Math.min(p, totalPages));
-  }, [totalPages]);
-
   const pageStart = (page - 1) * PAGE_SIZE;
-  const displayed = filtered.slice(pageStart, pageStart + PAGE_SIZE);
 
   const goToPage = (p) => {
     const next = Math.min(Math.max(1, p), totalPages);
@@ -141,18 +134,12 @@ export default function Products() {
       }
     }
   };
-  const productCount = Array.isArray(allProducts) ? allProducts.length : 0;
+  const productCount = total;
 
   const handleSearchSubmit = (e) => {
     e.preventDefault();
-    setLoading(true);
-    const params = {};
-    if (search) params.search = search;
-    if (ville) params.ville = ville;
-    fetchAllProducts(params)
-      .then(setAllProducts)
-      .catch(() => {})
-      .finally(() => setLoading(false));
+    setAppliedSearch(search.trim());
+    setPage(1);
   };
 
   const metaCategory = category !== 'Tous' ? category : null;
@@ -224,7 +211,7 @@ export default function Products() {
           {hasFilters && (
             <button className="btn-filter-reset" onClick={resetFilters} style={{ fontWeight: 600 }}>{t('products.reset')}</button>
           )}
-          <span className="products-count" style={{ background: 'var(--bg-secondary)', border: '1px solid var(--border-light)', padding: '6px 14px', borderRadius: 999, fontSize: 12, fontWeight: 600, color: 'var(--text-secondary)' }}>{filtered.length} {filtered.length > 1 ? t('products.results') : t('products.result')}</span>
+          <span className="products-count" style={{ background: 'var(--bg-secondary)', border: '1px solid var(--border-light)', padding: '6px 14px', borderRadius: 999, fontSize: 12, fontWeight: 600, color: 'var(--text-secondary)' }}>{total} {total > 1 ? t('products.results') : t('products.result')}</span>
 
           <div className="products-view-toggle" style={{ marginLeft: 'auto', display: 'inline-flex', padding: 3, gap: 3, background: 'var(--bg-secondary)', border: '1px solid var(--border-light)', borderRadius: 999 }}>
             <button
@@ -312,16 +299,16 @@ export default function Products() {
 
         {loading ? (
           <div className="products-loading"><div className="spinner" /></div>
-        ) : filtered.length > 0 ? (
+        ) : total > 0 ? (
           <>
             <div className={`product-grid-modern ${viewMode === 'list' ? 'view-list' : 'view-grid'}`}>
-              {displayed.map((p, i) => <HomeProductCard key={p.id} product={p} index={i} view={viewMode} />)}
+              {products.map((p, i) => <HomeProductCard key={p.id} product={p} index={i} view={viewMode} />)}
             </div>
             {totalPages > 1 && (
               <div style={{ marginTop: 36 }}>
                 <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: 12 }}>
                   <span style={{ fontSize: 13, color: 'var(--text-muted)' }}>
-                    {pageStart + 1}–{Math.min(pageStart + PAGE_SIZE, filtered.length)} {t('products.of')} {filtered.length} {t('products.products')}
+                    {pageStart + 1}–{Math.min(pageStart + PAGE_SIZE, total)} {t('products.of')} {total} {t('products.products')}
                   </span>
                   <div style={{ display: 'flex', alignItems: 'center', gap: 6, flexWrap: 'wrap' }}>
                     <button
