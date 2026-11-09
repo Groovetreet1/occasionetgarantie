@@ -1,9 +1,9 @@
 import { useState } from 'react';
 import { Link } from 'react-router-dom';
 import { motion } from 'framer-motion';
-import { ShoppingBag, ArrowUpRight, MapPin, Shield, Star, ChevronLeft, ChevronRight } from 'lucide-react';
+import { FiShoppingBag, FiArrowUpRight, FiMapPin, FiShield, FiStar } from 'react-icons/fi';
+import { TbChevronLeft, TbChevronRight } from 'react-icons/tb';
 import { useLanguage } from '../context/LanguageContext';
-import { Badge } from './ui/badge';
 
 const API_BASE = import.meta.env.VITE_API_URL || '';
 
@@ -38,10 +38,14 @@ export default function HomeProductCard({ product, index = 0, view = 'grid' }) {
   const ville = product.ville || product.city || 'Casablanca';
   const warranty = product.warranty || '12 mois';
 
-  const goPrev = (e) => { e.preventDefault(); e.stopPropagation(); setPhotoIndex((i) => (i - 1 + photos.length) % photos.length); };
-  const goNext = (e) => { e.preventDefault(); e.stopPropagation(); setPhotoIndex((i) => (i + 1) % photos.length); };
-
-  const isList = view === 'list';
+  const goPrev = (e) => {
+    e.preventDefault(); e.stopPropagation();
+    setPhotoIndex((i) => (i - 1 + photos.length) % photos.length);
+  };
+  const goNext = (e) => {
+    e.preventDefault(); e.stopPropagation();
+    setPhotoIndex((i) => (i + 1) % photos.length);
+  };
 
   return (
     <motion.div
@@ -50,78 +54,48 @@ export default function HomeProductCard({ product, index = 0, view = 'grid' }) {
       viewport={{ once: true, margin: '-30px' }}
       transition={{ duration: 0.38, delay: index * 0.045, ease: [0.22, 1, 0.36, 1] }}
     >
-      <Link
-        to={detailLink}
-        className={`group block rounded-2xl border border-border bg-card overflow-hidden hover:shadow-lg hover:-translate-y-1 transition-all ${isSold ? 'opacity-75' : ''} ${isList ? 'flex' : ''}`}
-      >
-        <div className={`relative bg-muted overflow-hidden ${isList ? 'w-36 shrink-0 aspect-square' : 'aspect-square'}`}>
-          {discount > 0 && (
-            <Badge className="absolute top-2.5 right-2.5 z-10 bg-red-500 text-white border-0">-{discount}%</Badge>
-          )}
-          {isSold && (
-            <div className="absolute inset-0 z-10 flex items-center justify-center bg-zinc-950/55 backdrop-blur-sm text-white text-sm font-bold uppercase tracking-widest">
-              {t('home.sold')}
-            </div>
-          )}
-          {isPending && (
-            <Badge className="absolute top-2.5 left-2.5 z-10 bg-amber-500 text-white border-0">{t('home.reserved')}</Badge>
-          )}
-          {isStore && (
-            <Badge className="absolute top-2.5 left-2.5 z-10 bg-amber-500 text-zinc-950 border-0">
-              <Star className="w-3 h-3 mr-1" /> Officiel
-            </Badge>
-          )}
-          <span className="absolute top-2.5 right-2.5 z-10 w-8 h-8 rounded-full bg-card border border-border shadow flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity">
-            <ArrowUpRight className="w-4 h-4" />
-          </span>
-          <div className={`w-full h-full flex items-center justify-center ${isList ? 'p-2.5' : 'p-5'}`}>
+      <Link to={detailLink} className={`product-card product-card-compact saas-preview-card ${view === 'list' ? 'product-card-list' : ''} ${isSold ? 'product-sold' : ''}`} style={{ borderRadius: 16, border: '1px solid var(--border-light)', overflow: 'hidden', ...(view === 'list' ? { display: 'flex', alignItems: 'stretch' } : {}) }}>
+        <div className="product-card-image" style={{ background: 'var(--bg-secondary)', position: 'relative', ...(view === 'list' ? { width: 150, maxWidth: 150, aspectRatio: '1 / 1', flexShrink: 0 } : {}) }}>
+          {discount > 0 && <span className="badge-discount" style={{ background: '#ef4444', color: '#fff', borderRadius: 999, padding: '4px 10px', fontSize: 11, fontWeight: 800, top: 10, right: 10 }}>-{discount}%</span>}
+          {isSold && <div className="product-sold-overlay" style={{ background: 'rgba(15,23,42,0.55)', backdropFilter: 'blur(2px)' }}>{t('home.sold')}</div>}
+          {isPending && <span className="badge-pending" style={{ borderRadius: 999 }}>{t('home.reserved')}</span>}
+          {isStore && <span className="badge-store" style={{ borderRadius: 999, background: 'var(--primary)', color: '#000' }}><FiStar size={10} style={{ verticalAlign: 'middle', marginRight: 4 }} />Officiel</span>}
+          <span className="saas-preview-arrow" style={{ background: 'var(--bg-card)', border: '1px solid var(--border-light)', boxShadow: '0 8px 20px rgba(0,0,0,0.08)' }}><FiArrowUpRight size={15} /></span>
+          <div className="product-card-img-wrap" style={{ padding: view === 'list' ? 10 : 16 }}>
             {currentImg ? (
-              <img src={currentImg} alt={product.name} loading="lazy" className="w-full h-full object-contain transition-transform duration-500 group-hover:scale-110" />
+              <img src={currentImg} alt={product.name} loading="lazy" style={{ transition: 'transform 0.5s' }} />
             ) : (
-              <ShoppingBag className="w-10 h-10 opacity-20" />
+              <FiShoppingBag size={40} style={{ opacity: 0.22 }} />
             )}
           </div>
           {photos.length > 1 && (
             <>
-              <button onClick={goPrev} aria-label={t('home.photoPrev')} className="absolute top-1/2 left-2 -translate-y-1/2 z-20 w-7 h-7 rounded-full bg-white/90 text-zinc-900 shadow flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity">
-                <ChevronLeft className="w-4 h-4" />
+              <button className="photo-nav-btn photo-prev" onClick={goPrev} aria-label={t('home.photoPrev')} style={{ width: 30, height: 30 }}>
+                <TbChevronLeft size={16} />
               </button>
-              <button onClick={goNext} aria-label={t('home.photoNext')} className="absolute top-1/2 right-2 -translate-y-1/2 z-20 w-7 h-7 rounded-full bg-white/90 text-zinc-900 shadow flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity">
-                <ChevronRight className="w-4 h-4" />
+              <button className="photo-nav-btn photo-next" onClick={goNext} aria-label={t('home.photoNext')} style={{ width: 30, height: 30 }}>
+                <TbChevronRight size={16} />
               </button>
-              <span className="absolute bottom-2 right-2 z-20 px-2 py-0.5 rounded-full bg-zinc-900/70 backdrop-blur text-white text-[10px] font-semibold">
-                {photoIndex + 1}/{photos.length}
-              </span>
+              <span className="photo-count" style={{ background: 'rgba(15,23,42,0.72)', backdropFilter: 'blur(6px)', border: '1px solid rgba(255,255,255,0.15)', fontSize: 11 }}>{photoIndex + 1}/{photos.length}</span>
             </>
           )}
         </div>
 
-        <div className={`p-3.5 ${isList ? 'flex-1 min-w-0 flex flex-col justify-center' : ''}`}>
-          <div className="flex items-center gap-1.5 mb-1.5">
-            <span className="text-[10px] font-bold tracking-wider uppercase text-muted-foreground">{product.category || product.category_name || 'Smartphone'}</span>
-            <span className="ml-auto inline-flex items-center gap-1 text-[11px] font-bold text-amber-500">
-              <Star className="w-3 h-3 fill-amber-500" /> 4.8
-            </span>
+        <div className="product-card-body" style={{ padding: view === 'list' ? '14px 16px' : '13px 14px 14px', ...(view === 'list' ? { flex: 1, minWidth: 0, display: 'flex', flexDirection: 'column', justifyContent: 'center' } : {}) }}>
+          <div style={{ display: 'flex', alignItems: 'center', gap: 6, marginBottom: 6 }}>
+            <span style={{ fontSize: 10, fontWeight: 700, letterSpacing: 0.6, textTransform: 'uppercase', color: 'var(--text-muted)' }}>{product.category || product.category_name || 'Smartphone'}</span>
+            <span style={{ marginLeft: 'auto', display: 'inline-flex', alignItems: 'center', gap: 4, fontSize: 11, fontWeight: 700, color: '#f59e0b' }}><FiStar size={11} style={{ fill: '#f59e0b', color: '#f59e0b' }} /> 4.8</span>
           </div>
-          <h3 className="text-sm font-bold leading-snug line-clamp-2 min-h-[2.4rem]">{product.name}</h3>
-          <div className="flex items-baseline gap-2 my-2">
-            <span className="text-lg font-extrabold tracking-tight text-amber-500">{formatPrice(product.price)}</span>
+          <h3 className="product-card-title" style={{ fontSize: 14, lineHeight: 1.35, minHeight: 38, display: '-webkit-box', WebkitLineClamp: 2, WebkitBoxOrient: 'vertical', overflow: 'hidden' }}>{product.name}</h3>
+          <div className="product-card-price-row" style={{ margin: '8px 0 10px', alignItems: 'baseline' }}>
+            <span className="product-card-price" style={{ fontSize: 18, fontWeight: 800, letterSpacing: -0.3 }}>{formatPrice(product.price)}</span>
             {product.old_price > product.price && (
-              <span className="text-xs text-muted-foreground line-through">{formatPrice(product.old_price)}</span>
+              <span className="product-card-old" style={{ fontSize: 12, marginLeft: 8 }}>{formatPrice(product.old_price)}</span>
             )}
           </div>
-          {!isList && (
-            <span className="flex items-center justify-center gap-1.5 w-full py-2 rounded-lg border border-foreground/80 text-foreground text-[11px] font-bold uppercase tracking-wider group-hover:bg-amber-500 group-hover:border-amber-500 group-hover:text-zinc-950 transition-colors mb-2.5">
-              {t('home.viewProduct')} <ArrowUpRight className="w-3.5 h-3.5" />
-            </span>
-          )}
-          <div className="flex items-center gap-2 flex-wrap border-t border-border pt-2.5 mt-1">
-            <span className="inline-flex items-center gap-1 text-[11px] text-muted-foreground font-semibold">
-              <MapPin className="w-3 h-3" /> {ville}
-            </span>
-            <span className="ml-auto inline-flex items-center gap-1 text-[10px] font-bold px-2 py-1 rounded-full bg-emerald-500/10 text-emerald-600 border border-emerald-500/20">
-              <Shield className="w-3 h-3" /> {warranty}
-            </span>
+          <div style={{ display: 'flex', alignItems: 'center', gap: 8, flexWrap: 'wrap', borderTop: '1px solid var(--border-light)', paddingTop: 10, marginTop: 4 }}>
+            <span style={{ display: 'inline-flex', alignItems: 'center', gap: 5, fontSize: 11, color: 'var(--text-muted)', fontWeight: 600 }}><FiMapPin size={11} /> {ville}</span>
+            <span style={{ marginLeft: 'auto', display: 'inline-flex', alignItems: 'center', gap: 4, fontSize: 10, fontWeight: 700, padding: '4px 8px', borderRadius: 999, background: 'rgba(16,185,129,0.10)', color: '#059669', border: '1px solid rgba(16,185,129,0.15)' }}><FiShield size={10} /> {warranty}</span>
           </div>
         </div>
       </Link>
