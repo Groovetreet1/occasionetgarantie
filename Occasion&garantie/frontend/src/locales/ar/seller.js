@@ -201,6 +201,7 @@
     // SellerNav
     navDashboard: 'لوحة التحكم',
     navStats: 'الإحصائيات',
+    navReferral: 'الإحالة',
     navNewProduct: 'منتج جديد',
     navProfile: 'ملفي الشخصي',
     navStore: 'المتجر',
@@ -215,5 +216,24 @@
     thanksForReview: 'شكرًا لتقييمك!',
     noReviews: 'لا توجد تقييمات حاليًا.',
     deleteReviewTitle: 'حذف تقييمك؟',
+
+    // SellerReferral
+    referralTitle: 'الإحالة',
+    referralSubtitle: 'ادعُ مستخدمين جدد عبر رابطك. تربح 100 رصيد عن كل تسجيل يتم عبر رابط الإحالة الخاص بك.',
+    referralYourLink: 'رابط الإحالة الخاص بك',
+    referralCopyLink: 'نسخ الرابط',
+    referralTotalSignups: 'التسجيلات عبر رابطك',
+    referralCreditsEarned: 'الأرصدة المكتسبة (الإحالة)',
+    referralListTitle: 'الأشخاص المسجلون عبر رابطك',
+    referralEmpty: 'لا توجد تسجيلات بعد. شارك رابطك لبدء كسب الأرصدة.',
+    referralColUser: 'المستخدم',
+    referralColRole: 'النوع',
+    referralColDate: 'التاريخ',
+    referralColStatus: 'الحالة',
+    referralRoleSeller: 'بائع',
+    referralRoleClient: 'عميل',
+    referralVerified: 'موثّق',
+    referralPending: 'قيد الانتظار',
+    referralPrivacyNote: 'يتم إخفاء الأسماء والبريد الإلكتروني جزئيًا لحماية الخصوصية.',
   },
 };

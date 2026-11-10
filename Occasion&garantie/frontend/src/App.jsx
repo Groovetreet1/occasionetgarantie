@@ -1,5 +1,5 @@
 import { useEffect } from 'react';
-import { Routes, Route, Navigate, useLocation, useNavigate } from 'react-router-dom';
+import { Routes, Route, Navigate, useLocation, useNavigate, useParams } from 'react-router-dom';
 import api from './api/axios';
 import { motion } from 'framer-motion';
 import Navbar from './components/Navbar';
@@ -45,6 +45,7 @@ import SellerDashboard from './pages/SellerDashboard';
 import SellerProductForm from './pages/SellerProductForm';
 import SellerProfile from './pages/SellerProfile';
 import SellerStats from './pages/SellerStats';
+import SellerReferral from './pages/SellerReferral';
 import Messenger from './pages/Messenger';
 import Privacy from './pages/Privacy';
 import RepriseForm from './pages/RepriseForm';
@@ -54,6 +55,11 @@ import Legal from './pages/Legal';
 import StorePage from './pages/StorePage';
 import StoreProductDetail from './pages/StoreProductDetail';
 import CityPage from './pages/CityPage';
+
+function ReferralRedirect() {
+  const { code } = useParams();
+  return <Navigate to={`/signup?ref=${encodeURIComponent(code || '')}`} replace />;
+}
 
 const pageVariants = {
   initial: { opacity: 0, y: 12 },
@@ -128,6 +134,7 @@ export default function App() {
           <Route path="/notifications" element={<AnimatedPage><NotificationsPage /></AnimatedPage>} />
           <Route path="/seller" element={<AnimatedPage><SellerRoute><SellerDashboard /></SellerRoute></AnimatedPage>} />
           <Route path="/seller/stats" element={<AnimatedPage><SellerRoute><SellerStats /></SellerRoute></AnimatedPage>} />
+          <Route path="/seller/referral" element={<AnimatedPage><SellerRoute><SellerReferral /></SellerRoute></AnimatedPage>} />
           <Route path="/seller/products/new" element={<AnimatedPage><SellerRoute><SellerProductForm /></SellerRoute></AnimatedPage>} />
           <Route path="/seller/products/edit/:id" element={<AnimatedPage><SellerRoute><SellerProductForm /></SellerRoute></AnimatedPage>} />
           <Route path="/seller/:id" element={<AnimatedPage><SellerProfile /></AnimatedPage>} />
@@ -138,6 +145,9 @@ export default function App() {
           <Route path="/boutique" element={<AnimatedPage><StorePage /></AnimatedPage>} />
           <Route path="/boutique/:slug" element={<AnimatedPage><StoreProductDetail /></AnimatedPage>} />
           <Route path="/ville/:slug" element={<AnimatedPage><CityPage /></AnimatedPage>} />
+          <Route path="/parrainage/:code" element={<ReferralRedirect />} />
+          <Route path="/ref/:code" element={<ReferralRedirect />} />
+          <Route path="/invite/:code" element={<ReferralRedirect />} />
           <Route path="*" element={<AnimatedPage><NotFound /></AnimatedPage>} />
         </Routes>
       </ErrorBoundary>

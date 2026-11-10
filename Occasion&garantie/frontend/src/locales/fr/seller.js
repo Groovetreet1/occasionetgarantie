@@ -201,6 +201,7 @@
     // SellerNav
     navDashboard: 'Tableau de Bord',
     navStats: 'Statistiques',
+    navReferral: 'Parrainage',
     navNewProduct: 'Nouveau produit',
     navProfile: 'Mon Profil',
     navStore: 'Boutique',
@@ -215,5 +216,24 @@
     thanksForReview: 'Merci pour votre avis !',
     noReviews: 'Aucun avis pour le moment.',
     deleteReviewTitle: 'Supprimer votre avis ?',
+
+    // SellerReferral
+    referralTitle: 'Parrainage',
+    referralSubtitle: 'Invitez de nouveaux utilisateurs avec votre lien. Vous gagnez 100 crédits pour chaque inscription réalisée via votre parrainage.',
+    referralYourLink: 'Votre lien de parrainage',
+    referralCopyLink: 'Copier le lien',
+    referralTotalSignups: 'Inscriptions via votre lien',
+    referralCreditsEarned: 'Crédits gagnés (parrainage)',
+    referralListTitle: 'Personnes inscrites via votre lien',
+    referralEmpty: 'Aucune inscription pour le moment. Partagez votre lien pour commencer à gagner des crédits.',
+    referralColUser: 'Utilisateur',
+    referralColRole: 'Type',
+    referralColDate: 'Date',
+    referralColStatus: 'Statut',
+    referralRoleSeller: 'Vendeur',
+    referralRoleClient: 'Client',
+    referralVerified: 'Vérifié',
+    referralPending: 'En attente',
+    referralPrivacyNote: 'Les noms et emails affichés sont partiellement masqués pour protéger la confidentialité.',
   },
 };

@@ -1,5 +1,5 @@
 import { Link, useLocation } from 'react-router-dom';
-import { FiBarChart2, FiTrendingUp, FiPlus, FiUser, FiShoppingBag } from 'react-icons/fi';
+import { FiBarChart2, FiTrendingUp, FiPlus, FiUser, FiShoppingBag, FiGift } from 'react-icons/fi';
 import { useAuth } from '../context/AuthContext';
 import { useLanguage } from '../context/LanguageContext';
 
@@ -11,6 +11,7 @@ export default function SellerNav() {
   const links = [
     { to: '/seller', label: t('seller.navDashboard'), icon: FiBarChart2 },
     { to: '/seller/stats', label: t('seller.navStats'), icon: FiTrendingUp },
+    { to: '/seller/referral', label: t('seller.navReferral') || 'Parrainage', icon: FiGift },
     { to: '/seller/products/new', label: t('seller.navNewProduct'), icon: FiPlus },
     { to: '/profile', label: t('seller.navProfile'), icon: FiUser },
   ];

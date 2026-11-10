@@ -4,6 +4,26 @@ const { authenticate, sellerOrAdmin } = require('../middleware/auth');
 
 const router = express.Router();
 
+function maskName(name) {
+  if (!name) return 'U***';
+  return String(name).trim().split(/\s+/).filter(Boolean).map(w => {
+    if (w.length <= 1) return '*';
+    if (w.length === 2) return w[0] + '*';
+    return w.slice(0, 2) + '***';
+  }).join(' ');
+}
+
+function maskEmail(email) {
+  if (!email || !email.includes('@')) return '***@***';
+  const [local, domain] = String(email).split('@');
+  const l = local.length <= 1 ? '*' : local.length === 2 ? local[0] + '*' : local.slice(0, 2) + '***';
+  const parts = domain.split('.');
+  const d0 = parts[0] || '';
+  const d = d0.length <= 1 ? '*' : d0[0] + '***';
+  const tld = parts.length > 1 ? '.' + parts.slice(1).join('.') : '';
+  return `${l}@${d}${tld}`;
+}
+
 // Get seller's own profile + stats
 router.get('/me', authenticate, async (req, res) => {
   if (req.user.role !== 'seller' && req.user.role !== 'admin') {
@@ -120,6 +140,60 @@ router.get('/me/commissions', authenticate, async (req, res) => {
     if (err.errno === 1146 || err.code === 'ER_NO_SUCH_TABLE') {
       return res.json({ commissions: [], summary: { total_commission: 0, count: 0 } });
     }
+    res.status(500).json({ message: 'Erreur serveur.' });
+  }
+});
+
+// Referral stats for current seller
+router.get('/me/referrals', authenticate, async (req, res) => {
+  if (req.user.role !== 'seller' && req.user.role !== 'admin') {
+    return res.status(403).json({ message: 'Accès réservé aux vendeurs.' });
+  }
+  try {
+    try { await pool.query("ALTER TABLE users ADD COLUMN referral_code VARCHAR(20) DEFAULT NULL"); } catch {}
+    try { await pool.query("ALTER TABLE users ADD COLUMN referred_by INT DEFAULT NULL"); } catch {}
+    const [me] = await pool.query('SELECT id, referral_code FROM users WHERE id = ?', [req.user.id]);
+    if (!me.length) return res.status(404).json({ message: 'Utilisateur introuvable.' });
+    let code = me[0].referral_code;
+    if (!code) {
+      const chars = 'ABCDEFGHJKLMNPQRSTUVWXYZ23456789';
+      let out = 'OG';
+      for (let i = 0; i < 6; i++) out += chars[Math.floor(Math.random() * chars.length)];
+      code = out;
+      try { await pool.query('UPDATE users SET referral_code = ? WHERE id = ? AND (referral_code IS NULL OR referral_code = "")', [code, req.user.id]); } catch {}
+      const [chk] = await pool.query('SELECT referral_code FROM users WHERE id = ?', [req.user.id]);
+      code = chk[0]?.referral_code || code;
+    }
+    let rows = [];
+    try {
+      const [r] = await pool.query(
+        'SELECT id, full_name, email, role, phone_verified, created_at FROM users WHERE referred_by = ? ORDER BY created_at DESC',
+        [req.user.id]
+      );
+      rows = r;
+    } catch (e) {
+      if (e.errno === 1054 || e.code === 'ER_BAD_FIELD_ERROR') rows = [];
+      else throw e;
+    }
+    const clientUrl = process.env.CLIENT_URL || 'https://www.occasionetgarantie.store';
+    const referrals = rows.map(u => ({
+      id: u.id,
+      name: maskName(u.full_name),
+      email: maskEmail(u.email),
+      role: u.role,
+      phone_verified: !!u.phone_verified,
+      created_at: u.created_at,
+    }));
+    const total = referrals.length;
+    res.json({
+      code,
+      link: `${clientUrl}/parrainage/${encodeURIComponent(code)}`,
+      rewardPerSignup: 100,
+      total,
+      totalCreditsEarned: total * 100,
+      referrals,
+    });
+  } catch (err) {
     res.status(500).json({ message: 'Erreur serveur.' });
   }
 });

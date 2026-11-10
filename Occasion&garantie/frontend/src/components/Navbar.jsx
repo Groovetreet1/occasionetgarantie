@@ -138,7 +138,9 @@ export default function Navbar() {
         {user?.role === 'seller' && referral && (
           <div className="navbar-referral-banner" style={{ background: 'linear-gradient(90deg, rgba(147,197,114,0.18), rgba(147,197,114,0.08))', borderBottom: '1px solid rgba(147,197,114,0.35)', color: 'var(--text-primary)', fontSize: 12, padding: '6px 16px', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 10, flexWrap: 'wrap', textAlign: 'center' }}>
             <FiGift size={14} style={{ color: '#76A85A', flexShrink: 0 }} />
-            <span>{t('nav.referralBanner')}</span>
+            <Link to="/seller/referral" style={{ color: 'inherit', textDecoration: 'none', fontWeight: 600 }}>
+              {t('nav.referralBanner')}
+            </Link>
             <span style={{ fontWeight: 700, color: '#76A85A' }}>{t('nav.referralCode')}: {referral.code}</span>
             <button onClick={copyReferral} style={{ display: 'inline-flex', alignItems: 'center', gap: 6, border: '1px solid rgba(118,168,90,0.45)', background: 'var(--bg-card, #fff)', color: '#5C8A43', borderRadius: 999, padding: '3px 10px', fontSize: 11, fontWeight: 700, cursor: 'pointer' }}>
               <FiCopy size={12} /> {refCopied ? t('nav.referralCopied') : t('nav.referralCopy')}

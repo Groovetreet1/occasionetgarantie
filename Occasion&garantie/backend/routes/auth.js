@@ -993,9 +993,7 @@ router.get('/my-referral', authenticate, async (req, res) => {
   try {
     const code = await ensureReferralCode(req.user.id);
     const clientUrl = process.env.CLIENT_URL || 'https://www.occasionetgarantie.store';
-    const [u] = await pool.query('SELECT role FROM users WHERE id = ?', [req.user.id]);
-    const role = u[0]?.role || 'client';
-    const link = `${clientUrl}/signup?ref=${encodeURIComponent(code)}${role === 'seller' ? '' : ''}`;
+    const link = `${clientUrl}/parrainage/${encodeURIComponent(code)}`;
     res.json({ code, link, rewardCredits: 100 });
   } catch (err) {
     res.status(500).json({ message: 'Erreur serveur.' });
