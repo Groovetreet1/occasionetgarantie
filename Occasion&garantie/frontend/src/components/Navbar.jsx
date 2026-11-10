@@ -147,7 +147,7 @@ export default function Navbar() {
                     transition={{ duration: 0.15 }}
                   >
                     <Link to="/products" onClick={() => setProdsOpen(false)}>{t('nav.allProducts')}</Link>
-                    <Link to="/boutique" onClick={() => setProdsOpen(false)} style={{ color: '#0a0a0a', fontWeight: 700 }}>
+                    <Link to="/boutique" onClick={() => setProdsOpen(false)} style={{ color: '#d97706', fontWeight: 600 }}>
                       <FiShield size={14} /> {t('nav.officialStore')}
                     </Link>
                     <div style={{ height: 1, background: 'var(--border)', margin: '4px 0' }} />
@@ -344,7 +344,7 @@ export default function Navbar() {
           );
         })}
         <Link to="/products" onClick={closeMenu} style={{ display: 'block', fontSize: 14, padding: '10px', opacity: 0.6, fontWeight: 500, textAlign: 'center' }}>{t('nav.allProducts')} {dir === 'rtl' ? '←' : '→'}</Link>
-        <Link to="/boutique" onClick={closeMenu} style={{ display: 'block', fontSize: 14, padding: '10px', fontWeight: 700, color: '#0a0a0a', textAlign: 'center' }}>
+        <Link to="/boutique" onClick={closeMenu} style={{ display: 'block', fontSize: 14, padding: '10px', fontWeight: 600, color: '#d97706', textAlign: 'center' }}>
           <FiShield size={14} style={{ verticalAlign: 'middle', marginInlineEnd: 4 }} /> {t('nav.officialStore')}
         </Link>
         <NavLink to="/about" onClick={closeMenu}>{t('nav.about')}</NavLink>

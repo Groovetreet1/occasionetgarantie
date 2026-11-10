@@ -56,10 +56,10 @@ export default function HomeProductCard({ product, index = 0, view = 'grid' }) {
     >
       <Link to={detailLink} className={`product-card product-card-compact saas-preview-card ${view === 'list' ? 'product-card-list' : ''} ${isSold ? 'product-sold' : ''}`} style={{ borderRadius: 16, border: '1px solid var(--border-light)', overflow: 'hidden', ...(view === 'list' ? { display: 'flex', alignItems: 'stretch' } : {}) }}>
         <div className="product-card-image" style={{ background: 'var(--bg-secondary)', position: 'relative', ...(view === 'list' ? { width: 150, maxWidth: 150, aspectRatio: '1 / 1', flexShrink: 0 } : {}) }}>
-          {discount > 0 && <span className="badge-discount" style={{ background: '#0a0a0a', color: '#fff', borderRadius: 999, padding: '4px 10px', fontSize: 11, fontWeight: 700, top: 10, right: 10 }}>-{discount}%</span>}
-          {isSold && <div className="product-sold-overlay" style={{ background: 'rgba(10,10,10,0.55)', backdropFilter: 'blur(2px)' }}>{t('home.sold')}</div>}
+          {discount > 0 && <span className="badge-discount" style={{ background: '#ef4444', color: '#fff', borderRadius: 999, padding: '4px 10px', fontSize: 11, fontWeight: 800, top: 10, right: 10 }}>-{discount}%</span>}
+          {isSold && <div className="product-sold-overlay" style={{ background: 'rgba(15,23,42,0.55)', backdropFilter: 'blur(2px)' }}>{t('home.sold')}</div>}
           {isPending && <span className="badge-pending" style={{ borderRadius: 999 }}>{t('home.reserved')}</span>}
-          {isStore && <span className="badge-store" style={{ borderRadius: 999, background: '#0a0a0a', color: '#fff' }}><FiStar size={10} style={{ verticalAlign: 'middle', marginRight: 4 }} />Officiel</span>}
+          {isStore && <span className="badge-store" style={{ borderRadius: 999, background: 'var(--primary)', color: '#000' }}><FiStar size={10} style={{ verticalAlign: 'middle', marginRight: 4 }} />Officiel</span>}
           <span className="saas-preview-arrow" style={{ background: 'var(--bg-card)', border: '1px solid var(--border-light)', boxShadow: '0 8px 20px rgba(0,0,0,0.08)' }}><FiArrowUpRight size={15} /></span>
           <div className="product-card-img-wrap" style={{ padding: view === 'list' ? 10 : 16 }}>
             {currentImg ? (
@@ -84,7 +84,7 @@ export default function HomeProductCard({ product, index = 0, view = 'grid' }) {
         <div className="product-card-body" style={{ padding: view === 'list' ? '14px 16px' : '13px 14px 14px', ...(view === 'list' ? { flex: 1, minWidth: 0, display: 'flex', flexDirection: 'column', justifyContent: 'center' } : {}) }}>
           <div style={{ display: 'flex', alignItems: 'center', gap: 6, marginBottom: 6 }}>
             <span style={{ fontSize: 10, fontWeight: 700, letterSpacing: 0.6, textTransform: 'uppercase', color: 'var(--text-muted)' }}>{product.category || product.category_name || 'Smartphone'}</span>
-            <span style={{ marginLeft: 'auto', display: 'inline-flex', alignItems: 'center', gap: 4, fontSize: 11, fontWeight: 700, color: '#0a0a0a' }}><FiStar size={11} style={{ fill: '#0a0a0a', color: '#0a0a0a' }} /> 4.8</span>
+            <span style={{ marginLeft: 'auto', display: 'inline-flex', alignItems: 'center', gap: 4, fontSize: 11, fontWeight: 700, color: '#f59e0b' }}><FiStar size={11} style={{ fill: '#f59e0b', color: '#f59e0b' }} /> 4.8</span>
           </div>
           <h3 className="product-card-title" style={{ fontSize: 14, lineHeight: 1.35, minHeight: 38, display: '-webkit-box', WebkitLineClamp: 2, WebkitBoxOrient: 'vertical', overflow: 'hidden' }}>{product.name}</h3>
           <div className="product-card-price-row" style={{ margin: '8px 0 10px', alignItems: 'baseline' }}>
@@ -93,10 +93,9 @@ export default function HomeProductCard({ product, index = 0, view = 'grid' }) {
               <span className="product-card-old" style={{ fontSize: 12, marginLeft: 8 }}>{formatPrice(product.old_price)}</span>
             )}
           </div>
-          <span className="pm-cta">{t('home.viewProduct')} <FiArrowUpRight size={13} /></span>
           <div style={{ display: 'flex', alignItems: 'center', gap: 8, flexWrap: 'wrap', borderTop: '1px solid var(--border-light)', paddingTop: 10, marginTop: 4 }}>
             <span style={{ display: 'inline-flex', alignItems: 'center', gap: 5, fontSize: 11, color: 'var(--text-muted)', fontWeight: 600 }}><FiMapPin size={11} /> {ville}</span>
-            <span style={{ marginLeft: 'auto', display: 'inline-flex', alignItems: 'center', gap: 4, fontSize: 10, fontWeight: 700, padding: '4px 8px', borderRadius: 999, background: 'rgba(10,10,10,0.05)', color: '#0a0a0a', border: '1px solid var(--border-light)' }}><FiShield size={10} /> {warranty}</span>
+            <span style={{ marginLeft: 'auto', display: 'inline-flex', alignItems: 'center', gap: 4, fontSize: 10, fontWeight: 700, padding: '4px 8px', borderRadius: 999, background: 'rgba(16,185,129,0.10)', color: '#059669', border: '1px solid rgba(16,185,129,0.15)' }}><FiShield size={10} /> {warranty}</span>
           </div>
         </div>
       </Link>

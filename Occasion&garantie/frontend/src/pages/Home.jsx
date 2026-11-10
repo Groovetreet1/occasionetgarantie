@@ -1,7 +1,8 @@
 import { Link, useNavigate } from 'react-router-dom';
 import { useEffect, useRef, useState } from 'react';
 import { motion } from 'framer-motion';
-import { FiSmartphone, FiArrowRight, FiShoppingBag, FiSearch, FiShield, FiTruck, FiAward, FiStar, FiCheckCircle, FiHeadphones, FiMonitor, FiTablet, FiZap } from 'react-icons/fi';
+import { FiSmartphone, FiArrowRight, FiShoppingBag, FiSearch, FiMapPin, FiShield, FiTruck, FiAward, FiStar, FiCheck, FiCheckCircle, FiLayers, FiHeadphones, FiMonitor, FiTablet, FiZap, FiClock } from 'react-icons/fi';
+import { TbShieldCheck, TbClockHour5 } from 'react-icons/tb';
 import api from '../api/axios';
 import HomeProductCard from '../components/HomeProductCard';
 import TrustBar from '../components/TrustBar';
@@ -13,7 +14,8 @@ import HeroSlider from '../components/HeroSlider';
 import { useLanguage } from '../context/LanguageContext';
 import usePageMeta from '../utils/usePageMeta';
 
-const fadeUp = { hidden: { opacity: 0, y: 24 }, show: { opacity: 1, y: 0, transition: { duration: 0.5, ease: [0.22, 1, 0.36, 1] } } };
+const fadeUp = { hidden: { opacity: 0, y: 28 }, show: { opacity: 1, y: 0, transition: { duration: 0.52, ease: [0.22, 1, 0.36, 1] } } };
+const stagger = { hidden: {}, show: { transition: { staggerChildren: 0.09 } } };
 
 function SkeletonGrid({ count = 4 }) {
   return (
@@ -41,12 +43,12 @@ function BrandCircle({ brand }) {
   const src = fallback ? fallback : `https://cdn.simpleicons.org/${slug}`;
   return (
     <Link to={`/products?brand=${encodeURIComponent(brand)}`}
-      style={{ flexShrink: 0, textDecoration: 'none', display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 8, transition: 'transform 0.2s' }}
-      onMouseEnter={e => e.currentTarget.style.transform = 'scale(1.06)'}
+      style={{ flexShrink: 0, textDecoration: 'none', display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 6, transition: 'transform 0.2s' }}
+      onMouseEnter={e => e.currentTarget.style.transform = 'scale(1.08)'}
       onMouseLeave={e => e.currentTarget.style.transform = 'scale(1)'}>
-      <div style={{ width: 56, height: 56, borderRadius: '50%', background: '#fff', border: '1px solid var(--border-light)', boxShadow: '0 2px 10px rgba(0,0,0,0.04)', display: 'flex', alignItems: 'center', justifyContent: 'center', overflow: 'hidden', fontSize: 18, fontWeight: 800, color: '#0a0a0a' }}>
+      <div style={{ width: 56, height: 56, borderRadius: '50%', background: '#fff', border: '1px solid var(--border-light)', boxShadow: '0 2px 10px rgba(0,0,0,0.05)', display: 'flex', alignItems: 'center', justifyContent: 'center', overflow: 'hidden', fontSize: 18, fontWeight: 800, color: '#d97706' }}>
         {hasError ? brand.charAt(0).toUpperCase() : (
-          <img src={src} alt={brand} style={{ width: '66%', height: '66%', objectFit: 'contain', filter: 'grayscale(1)', opacity: 0.75 }} onError={() => setHasError(true)} />
+          <img src={src} alt={brand} style={{ width: '68%', height: '68%', objectFit: 'contain' }} onError={() => setHasError(true)} />
         )}
       </div>
       <span style={{ fontSize: 11, color: 'var(--text-muted)', whiteSpace: 'nowrap', fontWeight: 600 }}>{brand.charAt(0).toUpperCase() + brand.slice(1)}</span>
@@ -54,20 +56,24 @@ function BrandCircle({ brand }) {
   );
 }
 
-const CATEGORIES = [
-  { slug: 'Smartphones', label: 'Smartphones', icon: FiSmartphone, descKey: 'home.catSmartphonesDesc' },
-  { slug: 'Tablettes', label: 'Tablettes', icon: FiTablet, descKey: 'home.catTabletsDesc' },
-  { slug: 'Ordinateurs', label: 'Ordinateurs', icon: FiMonitor, descKey: 'home.catComputersDesc' },
-  { slug: 'Accessoires', label: 'Accessoires', icon: FiHeadphones, descKey: 'home.catAccessoriesDesc' },
-  { slug: 'Gaming', label: 'Gaming', icon: FiZap, descKey: 'home.catGamingDesc' },
+const SAAS_CATEGORIES = [
+  { slug: 'Smartphones', label: 'Smartphones', icon: FiSmartphone, descKey: 'home.catSmartphonesDesc', count: '2 400+' },
+  { slug: 'Tablettes', label: 'Tablettes', icon: FiTablet, descKey: 'home.catTabletsDesc', count: '860+' },
+  { slug: 'Ordinateurs', label: 'Ordinateurs', icon: FiMonitor, descKey: 'home.catComputersDesc', count: '1 100+' },
+  { slug: 'Accessoires', label: 'Accessoires', icon: FiHeadphones, descKey: 'home.catAccessoriesDesc', count: '3 200+' },
 ];
 
-const USP = [
-  { icon: FiShield, titleKey: 'home.uspWarranty', subKey: 'home.uspWarrantySub' },
-  { icon: FiCheckCircle, titleKey: 'home.uspVerified', subKey: 'home.uspVerifiedSub' },
-  { icon: FiTruck, titleKey: 'home.uspDelivery', subKey: 'home.uspDeliverySub' },
-  { icon: FiShoppingBag, titleKey: 'home.uspPayment', subKey: 'home.uspPaymentSub' },
-];
+function WaveDivider() {
+  return (
+    <div style={{ display: 'flex', justifyContent: 'center', margin: '10px 0 0' }}>
+      <svg width="120" height="18" viewBox="0 0 120 16" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden style={{ color: 'var(--primary)', opacity: 0.9 }}>
+        <path d="M2 12 Q 15 2 30 12 T 60 12 T 90 12 T 118 8" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" fill="none" />
+      </svg>
+    </div>
+  );
+}
+
+const API_BASE = import.meta.env.VITE_API_URL || '';
 
 export default function Home() {
   const navigate = useNavigate();
@@ -122,20 +128,26 @@ export default function Home() {
     keywords: 'occasion, garantie, maroc, casablanca, smartphone, iphone, samsung, xiaomi, tablette, pc, gaming, electronique, reconditionne',
     image: '/logo.png',
     canonical: 'https://www.occasionetgarantie.store/',
-    jsonLd: [{ '@context': 'https://schema.org', '@type': 'WebSite', name: 'Occasion & Garantie', url: 'https://www.occasionetgarantie.store/', inLanguage: 'fr-MA' }],
+    jsonLd: [{
+      '@context': 'https://schema.org',
+      '@type': 'WebSite',
+      name: 'Occasion & Garantie',
+      url: 'https://www.occasionetgarantie.store/',
+      inLanguage: 'fr-MA',
+    }],
   });
 
   const trimmed = searchTerm.trim();
   useEffect(() => {
     if (trimmed.length < 2) { setSuggestions([]); setSuggestOpen(false); return; }
     setSuggestLoading(true);
-    const timer = setTimeout(() => {
+    const t = setTimeout(() => {
       api.get(`/products?search=${encodeURIComponent(trimmed)}&limit=6`)
         .then(res => { setSuggestions(res.data.products || []); setSuggestOpen(true); })
         .catch(() => {})
         .finally(() => setSuggestLoading(false));
     }, 300);
-    return () => clearTimeout(timer);
+    return () => clearTimeout(t);
   }, [searchTerm]);
 
   const handleSearch = (e) => {
@@ -151,19 +163,17 @@ export default function Home() {
   return (
     <motion.div initial="hidden" animate="show">
       <PromoPopup />
-
-      {/* Mobile search */}
+      {/* Mobile search - visible only on mobile, since navbar search is hidden */}
       <div className="navbar-search-mobile" style={{ display: 'none', padding: '12px 16px', background: 'var(--bg-card)', borderBottom: '1px solid var(--border-light)' }}>
         <form onSubmit={handleSearch} style={{ display: 'flex', alignItems: 'center', background: 'var(--bg-secondary)', border: '1px solid var(--border-light)', borderRadius: 999, padding: '4px 4px 4px 12px', gap: 6 }}>
           <FiSearch size={16} style={{ color: 'var(--text-muted)', flexShrink: 0 }} />
           <input type="text" value={searchTerm} onChange={e => setSearchTerm(e.target.value)} placeholder={t('home.searchPlaceholder')} style={{ flex: 1, border: 'none', outline: 'none', background: 'transparent', fontSize: 14, color: 'var(--text-primary)', fontFamily: 'var(--font)', minWidth: 0 }} />
-          <button type="submit" style={{ background: '#0a0a0a', color: '#fff', border: 'none', borderRadius: 999, padding: '6px 14px', fontSize: 12, fontWeight: 600, cursor: 'pointer', whiteSpace: 'nowrap' }}>{t('common.search')}</button>
+          <button type="submit" style={{ background: 'var(--primary)', color: '#000', border: 'none', borderRadius: 999, padding: '6px 14px', fontSize: 12, fontWeight: 700, cursor: 'pointer', whiteSpace: 'nowrap' }}>{t('common.search')}</button>
         </form>
       </div>
-
-      {/* Brands */}
+      {/* MARQUES - Samta bayna mabin navbar o slides - nfs l3bar */}
       {brands.length > 0 && (
-        <div style={{ width: '100vw', marginLeft: 'calc(50% - 50vw)', background: '#fff', borderTop: '1px solid var(--border-light)', borderBottom: '1px solid var(--border-light)', padding: '14px 0', marginTop: 'var(--nav-height)', position: 'relative', zIndex: 1 }}>
+        <div style={{ width: '100vw', marginLeft: 'calc(50% - 50vw)', background: 'var(--bg-card)', borderTop: '1px solid var(--border-light)', borderBottom: '1px solid var(--border-light)', padding: '12px 0', marginTop: 'var(--nav-height)', position: 'relative', zIndex: 1 }}>
           <div className="brands-scroll-wrapper" style={{ maxWidth: '100%', overflow: 'hidden' }}>
             <div className="brands-scroll-track">
               {brands.concat(brands).concat(brands).map((brand, i) => (
@@ -174,59 +184,54 @@ export default function Home() {
         </div>
       )}
 
+      {/* SLIDES - Photos from Desktop/photo pour slide (static, not DB) */}
       <HeroSlider />
 
-      {/* USP */}
-      <section className="pm-usp">
-        <div className="container">
-          <div className="pm-usp-grid">
-            {USP.map(({ icon: Icon, titleKey, subKey }) => (
-              <div className="pm-usp-item" key={titleKey}>
-                <span className="pm-usp-icon"><Icon size={19} /></span>
+
+
+      {/* STORE OFFICIAL */}
+      {storeProducts.length > 0 && (
+        <motion.section className="section" variants={fadeUp} initial="hidden" whileInView="show" viewport={{ once: true }} style={{ background: 'var(--bg-secondary)', borderTop: '1px solid var(--border-light)', borderBottom: '1px solid var(--border-light)' }}>
+          <div className="container">
+            <div className="section-header home-section-header" style={{ marginBottom: 28 }}>
+              <div className="home-heading">
+                <span className="home-heading-icon home-heading-icon-store" style={{ background: 'linear-gradient(135deg, #f59e0b, #d97706)', color: '#fff', width: 46, height: 46, borderRadius: 14, display: 'flex', alignItems: 'center', justifyContent: 'center' }}><TbShieldCheck size={22} /></span>
                 <div>
-                  <strong>{t(titleKey)}</strong>
-                  <span>{t(subKey)}</span>
+                  <h2 className="home-section-title home-section-title-store" style={{ fontSize: 22 }}>{t('home.storeOfficial')}</h2>
+                  <p className="home-section-subtitle">{t('home.storeSubtitle')}</p>
                 </div>
               </div>
-            ))}
-          </div>
-        </div>
-      </section>
-
-      {/* Categories */}
-      <section className="pm-section">
-        <div className="container">
-          <div className="pm-head">
-            <div>
-              <span className="pm-kicker">{t('home.shopByCategory')}</span>
-              <h2 className="pm-title">{t('home.explore')}</h2>
-              <p className="pm-sub">{t('home.shopByCategorySub')}</p>
+              <Link to="/boutique" className="btn btn-secondary" style={{ borderRadius: 999 }}>{t('home.viewStore')} <FiArrowRight size={16} /></Link>
             </div>
-            <Link to="/products" className="pm-link">{t('home.browseAll')} <FiArrowRight size={14} /></Link>
+            {storeLoad ? <SkeletonGrid count={4} /> : (
+              <div className="products-grid">
+                {storeProducts.map(p => (
+                  <Link key={p.id} to={`/boutique/${p.slug}`} className="product-card saas-preview-card" style={{ textDecoration: 'none', borderRadius: 16 }}>
+                    <div className="product-card-image" style={{ position: 'relative', background: 'var(--bg-secondary)', aspectRatio: '1/1' }}>
+                      {p.image ? <img src={p.image} alt={p.name} style={{ width: '100%', height: '100%', objectFit: 'contain', padding: 18 }} /> : <FiShoppingBag size={48} style={{ opacity: 0.15 }} />}
+                      <span style={{ position: 'absolute', top: 10, right: 10, background: 'var(--primary)', color: '#000', fontSize: 10, fontWeight: 800, padding: '4px 10px', borderRadius: 999, display: 'inline-flex', alignItems: 'center', gap: 4 }}><FiStar size={10} /> {t('home.officialBadge')}</span>
+                      <span className="saas-preview-arrow"><FiArrowRight size={14} /></span>
+                    </div>
+                    <div className="product-card-body" style={{ padding: 14 }}>
+                      <h3 className="product-card-title" style={{ fontSize: 14 }}>{p.name}</h3>
+                      <div style={{ fontSize: 17, fontWeight: 800, color: 'var(--primary)', marginTop: 6 }}>{formatPrice(p.price)}</div>
+                      <div style={{ fontSize: 11, color: 'var(--text-muted)', marginTop: 4, display: 'flex', alignItems: 'center', gap: 4 }}><FiCheckCircle size={11} style={{ color: '#10b981' }} /> Garantie 12 mois</div>
+                    </div>
+                  </Link>
+                ))}
+              </div>
+            )}
           </div>
-          <div className="pm-cats">
-            {CATEGORIES.map(({ slug, label, icon: Icon, descKey }) => (
-              <Link key={slug} to={`/products?category=${encodeURIComponent(slug)}`} className="pm-cat">
-                <span className="pm-cat-icon"><Icon size={23} /></span>
-                <h3>{label}</h3>
-                <p>{t(descKey)}</p>
-                <span className="pm-cat-arrow"><FiArrowRight size={16} /></span>
-              </Link>
-            ))}
-          </div>
-        </div>
-      </section>
+        </motion.section>
+      )}
 
-      {/* New arrivals */}
-      <motion.section className="pm-section" style={{ paddingTop: 0 }} variants={fadeUp} initial="hidden" whileInView="show" viewport={{ once: true }}>
+      <GoMobileFadeBar />
+
+      {/* LATEST ADS */}
+      <motion.section className="section" variants={fadeUp} initial="hidden" whileInView="show" viewport={{ once: true }}>
         <div className="container">
-          <div className="pm-head">
-            <div>
-              <span className="pm-kicker">{t('home.latestAds')}</span>
-              <h2 className="pm-title">{t('home.newArrivals')}</h2>
-              <p className="pm-sub">{t('home.newArrivalsSub')}</p>
-            </div>
-            <Link to="/products" className="pm-link">{t('home.viewAll')} <FiArrowRight size={14} /></Link>
+          <div style={{ display: 'flex', justifyContent: 'center', marginBottom: 20 }}>
+            <Link to="/products" className="btn btn-secondary" style={{ borderRadius: 999 }}>{t('home.viewAll')} <FiArrowRight size={16} /></Link>
           </div>
           {loading ? <SkeletonGrid count={8} /> : products.length > 0 ? (
             <div className="products-grid">
@@ -238,56 +243,16 @@ export default function Home() {
         </div>
       </motion.section>
 
-      <GoMobileFadeBar />
-
-      {/* Store official */}
-      {storeProducts.length > 0 && (
-        <motion.section className="pm-section pm-store" variants={fadeUp} initial="hidden" whileInView="show" viewport={{ once: true }}>
-          <div className="container">
-            <div className="pm-head">
-              <div>
-                <span className="pm-kicker">{t('home.officialBadge')}</span>
-                <h2 className="pm-title">{t('home.storeOfficial')}</h2>
-                <p className="pm-sub">{t('home.storeSubtitle')}</p>
-              </div>
-              <Link to="/boutique" className="pm-link">{t('home.viewStore')} <FiArrowRight size={14} /></Link>
-            </div>
-            {storeLoad ? <SkeletonGrid count={4} /> : (
-              <div className="products-grid">
-                {storeProducts.map(p => (
-                  <Link key={p.id} to={`/boutique/${p.slug}`} className="product-card" style={{ textDecoration: 'none' }}>
-                    <div className="product-card-image" style={{ position: 'relative' }}>
-                      {p.image ? <img src={p.image} alt={p.name} style={{ width: '100%', height: '100%', objectFit: 'contain', padding: 18 }} /> : <FiShoppingBag size={48} style={{ opacity: 0.15 }} />}
-                      <span style={{ position: 'absolute', top: 10, right: 10, background: '#0a0a0a', color: '#fff', fontSize: 10, fontWeight: 700, padding: '4px 10px', borderRadius: 999, display: 'inline-flex', alignItems: 'center', gap: 4, letterSpacing: 0.4 }}><FiStar size={10} /> {t('home.officialBadge')}</span>
-                    </div>
-                    <div className="product-card-body" style={{ padding: 16 }}>
-                      <span style={{ fontSize: 10, fontWeight: 700, letterSpacing: 0.6, textTransform: 'uppercase', color: 'var(--text-muted)' }}>{p.category || 'Boutique'}</span>
-                      <h3 className="product-card-title" style={{ fontSize: 15, marginTop: 4 }}>{p.name}</h3>
-                      <div className="product-card-price-row" style={{ margin: '8px 0 10px' }}>
-                        <span className="product-card-price" style={{ fontSize: 19 }}>{formatPrice(p.price)}</span>
-                      </div>
-                      <span className="pm-cta">{t('home.viewProduct')} <FiArrowRight size={13} /></span>
-                      <div style={{ fontSize: 11, color: 'var(--text-muted)', display: 'flex', alignItems: 'center', gap: 5 }}><FiCheckCircle size={11} /> {t('home.uspWarranty')}</div>
-                    </div>
-                  </Link>
-                ))}
-              </div>
-            )}
-          </div>
-        </motion.section>
-      )}
-
       <TrustBar />
 
-      {/* Sell promo */}
-      <motion.section className="pm-section pm-sell" variants={fadeUp} initial="hidden" whileInView="show" viewport={{ once: true }}>
+      <motion.section className="section sell-promo" variants={fadeUp} initial="hidden" whileInView="show" viewport={{ once: true }}>
         <div className="container">
-          <div className="sell-promo-bar">
+          <div className="sell-promo-bar" style={{ borderRadius: 20, background: 'linear-gradient(135deg, #fff 0%, #fef3c7 100%)', border: '1px solid #fde68a', color: '#92400e', padding: '28px 24px' }}>
             <div className="sell-promo-content">
-              <h2>{t('home.sellPhoneTitle')}</h2>
-              <p>{t('home.sellPhoneDesc')}</p>
+              <h2 style={{ color: '#92400e' }}>{t('home.sellPhoneTitle')}</h2>
+              <p style={{ color: '#a16207' }}>{t('home.sellPhoneDesc')}</p>
             </div>
-            <Link to="/vendre" className="btn btn-primary">
+            <Link to="/vendre" className="btn btn-primary" style={{ background: '#f59e0b', color: '#000', borderRadius: 999, boxShadow: '0 8px 20px rgba(245,158,11,0.3)' }}>
               {t('home.sellNow')} <FiArrowRight size={16} />
             </Link>
           </div>
@@ -295,6 +260,7 @@ export default function Home() {
       </motion.section>
 
       <GoMobileTicker />
+
       <NewsletterSection />
     </motion.div>
   );
