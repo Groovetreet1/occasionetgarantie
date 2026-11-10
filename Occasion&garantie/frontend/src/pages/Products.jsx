@@ -168,7 +168,7 @@ export default function Products() {
           <motion.form initial="hidden" animate="show" variants={fadeUp} onSubmit={handleSearchSubmit} className="products-page-search" style={{ maxWidth: 560, margin: '0 auto', borderRadius: 999, overflow: 'hidden', boxShadow: '0 12px 32px rgba(0,0,0,0.06)', border: '1px solid var(--border-light)', background: 'var(--bg-card)', display: 'flex', alignItems: 'center' }}>
             <FiSearch size={18} style={{ marginLeft: 16, color: 'var(--text-muted)', flexShrink: 0 }} />
             <input type="text" placeholder={t('products.searchPlaceholder')} value={search} onChange={e => setSearch(e.target.value)} style={{ flex: 1, border: 'none', outline: 'none', padding: '14px 12px', fontSize: 15, background: 'transparent', fontFamily: 'var(--font)' }} />
-            <button type="submit" style={{ margin: 4, padding: '10px 22px', borderRadius: 999, background: 'var(--primary)', color: '#000', fontWeight: 700, border: 'none', cursor: 'pointer', fontFamily: 'var(--font)' }}>{t('products.searchBtn')}</button>
+            <button type="submit" style={{ margin: 4, padding: '10px 22px', borderRadius: 999, background: '#0a0a0a', color: '#fff', fontWeight: 700, border: 'none', cursor: 'pointer', fontFamily: 'var(--font)' }}>{t('products.searchBtn')}</button>
           </motion.form>
         </div>
       </div>
@@ -180,13 +180,13 @@ export default function Products() {
           <motion.div initial="hidden" animate="show" variants={fadeUp} style={{ marginBottom: 32, padding: 20, background: 'var(--bg-card)', border: '1px solid var(--border-light)', borderRadius: 16, boxShadow: '0 8px 24px rgba(0,0,0,0.04)' }}>
             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 16, flexWrap: 'wrap', gap: 12 }}>
               <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
-                <span style={{ width: 36, height: 36, borderRadius: 10, background: 'var(--primary-light)', border: '1px solid rgba(245,158,11,0.18)', display: 'flex', alignItems: 'center', justifyContent: 'center', color: 'var(--primary)' }}><FiShield size={16} /></span>
+                <span style={{ width: 36, height: 36, borderRadius: 10, background: 'rgba(10,10,10,0.05)', border: '1px solid var(--border-light)', display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#0a0a0a' }}><FiShield size={16} /></span>
                 <div>
                   <div style={{ fontWeight: 800, fontSize: 15, letterSpacing: -0.2 }}>{t('products.storeOfficial')}</div>
                   <div style={{ fontSize: 12, color: 'var(--text-muted)' }}>{t('products.storeSoldBy')}</div>
                 </div>
               </div>
-              <Link to="/boutique" style={{ fontSize: 13, color: 'var(--primary)', fontWeight: 700, textDecoration: 'none', display: 'inline-flex', alignItems: 'center', gap: 6, padding: '8px 14px', borderRadius: 999, background: 'var(--primary-light)', border: '1px solid rgba(245,158,11,0.18)' }}>{t('products.viewAll')} <FiArrowRight size={14} /></Link>
+              <Link to="/boutique" style={{ fontSize: 13, color: '#0a0a0a', fontWeight: 700, textDecoration: 'none', display: 'inline-flex', alignItems: 'center', gap: 6, padding: '8px 14px', borderRadius: 999, background: '#fff', border: '1px solid var(--border-light)' }}>{t('products.viewAll')} <FiArrowRight size={14} /></Link>
             </div>
             <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(160px, 1fr))', gap: 12 }}>
               {storeProducts.slice(0, 6).map(p => (
@@ -196,7 +196,7 @@ export default function Products() {
                   </div>
                   <div style={{ padding: 12 }}>
                     <div style={{ fontSize: 13, fontWeight: 700, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap', lineHeight: 1.3 }}>{p.name}</div>
-                    <div style={{ fontSize: 15, fontWeight: 800, color: 'var(--primary)', marginTop: 4 }}>{new Intl.NumberFormat('fr-FR', { style: 'currency', currency: 'MAD' }).format(p.price).replace('MAD', '').trim()} DH</div>
+                    <div style={{ fontSize: 15, fontWeight: 800, color: '#0a0a0a', marginTop: 4 }}>{new Intl.NumberFormat('fr-FR', { style: 'currency', currency: 'MAD' }).format(p.price).replace('MAD', '').trim()} DH</div>
                   </div>
                 </Link>
               ))}
@@ -221,7 +221,7 @@ export default function Products() {
               title={t('products.viewGrid')}
               style={{
                 display: 'inline-flex', alignItems: 'center', gap: 6, padding: '6px 12px', borderRadius: 999, border: 'none',
-                background: viewMode === 'grid' ? 'var(--primary)' : 'transparent', color: viewMode === 'grid' ? '#000' : 'var(--text-secondary)',
+                background: viewMode === 'grid' ? '#0a0a0a' : 'transparent', color: viewMode === 'grid' ? '#fff' : 'var(--text-secondary)',
                 fontSize: 12, fontWeight: 700, cursor: 'pointer',
               }}
             >
@@ -234,7 +234,7 @@ export default function Products() {
               title={t('products.viewList')}
               style={{
                 display: 'inline-flex', alignItems: 'center', gap: 6, padding: '6px 12px', borderRadius: 999, border: 'none',
-                background: viewMode === 'list' ? 'var(--primary)' : 'transparent', color: viewMode === 'list' ? '#000' : 'var(--text-secondary)',
+                background: viewMode === 'list' ? '#0a0a0a' : 'transparent', color: viewMode === 'list' ? '#fff' : 'var(--text-secondary)',
                 fontSize: 12, fontWeight: 700, cursor: 'pointer',
               }}
             >

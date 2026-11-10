@@ -645,3 +645,196 @@ h1, h2, h3, h4 {
   .pm-usp-item { border-top: 1px solid var(--border); }
   .pm-usp-item:first-child { border-top: none; }
 }
+
+/* =========================================================
+   VAGUE 2 — polish global (toutes pages)
+   ========================================================= */
+
+::selection {
+  background: #0a0a0a;
+  color: #fff;
+}
+::-webkit-scrollbar { width: 8px; height: 8px; }
+::-webkit-scrollbar-track { background: var(--bg-primary); }
+::-webkit-scrollbar-thumb { background: #d4d4d8; border-radius: 999px; }
+::-webkit-scrollbar-thumb:hover { background: #a1a1aa; }
+:focus-visible {
+  outline: 2px solid #0a0a0a;
+  outline-offset: 2px;
+  border-radius: 4px;
+}
+img { transition: opacity 0.4s ease; }
+
+/* Titles: solid black, no gradient */
+.section-title {
+  background: none;
+  -webkit-text-fill-color: #0a0a0a;
+  color: #0a0a0a;
+  letter-spacing: -0.03em;
+}
+
+/* Forms: monochrome focus */
+.form-control:focus,
+.form-group input:focus,
+.form-group select:focus,
+.form-group textarea:focus,
+.products-page-search:focus-within {
+  border-color: #0a0a0a;
+  box-shadow: 0 0 0 3px rgba(10, 10, 10, 0.08);
+}
+.form-submit {
+  background: #0a0a0a;
+  color: #fff;
+  border-radius: 999px;
+}
+.form-submit:hover {
+  background: #000;
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.18);
+}
+.form-footer a {
+  color: #0a0a0a;
+  text-decoration: underline;
+  text-underline-offset: 3px;
+}
+
+/* Products page */
+.products-page-hero {
+  background: #fff !important;
+  border-color: var(--border) !important;
+  background-image: radial-gradient(var(--border) 1.2px, transparent 1.2px) !important;
+}
+.products-page-search {
+  border-radius: 999px !important;
+  border-color: var(--border) !important;
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.05) !important;
+}
+.products-page-search button {
+  background: #0a0a0a !important;
+  color: #fff !important;
+  border-radius: 999px !important;
+  margin: 4px;
+  padding: 10px 22px !important;
+  font-weight: 600;
+}
+.filters-popup {
+  border-radius: var(--radius-lg);
+  border-color: var(--border);
+  box-shadow: var(--shadow-lg);
+}
+.product-grid-modern .product-card,
+.products-grid .product-card {
+  border-radius: var(--radius-lg);
+}
+
+/* Product detail */
+.product-detail-image {
+  border-radius: var(--radius-xl);
+  border-color: var(--border);
+  background: var(--bg-secondary);
+}
+.product-detail-thumb {
+  border-radius: 12px;
+  border-color: var(--border);
+}
+.product-detail-thumb.active {
+  border-color: #0a0a0a;
+  box-shadow: none;
+}
+.product-detail-name {
+  letter-spacing: -0.03em;
+  font-weight: 800;
+}
+.product-detail-tag.state {
+  background: rgba(10, 10, 10, 0.05);
+  color: #0a0a0a;
+  border-color: var(--border);
+}
+.product-detail-tag.location {
+  background: rgba(10, 10, 10, 0.04);
+  color: var(--text-secondary);
+  border-color: var(--border);
+}
+.product-detail-tag.verified {
+  background: rgba(22, 163, 74, 0.08);
+  color: #15803d;
+  border-color: rgba(22, 163, 74, 0.2);
+}
+.product-detail-specs-grid > div {
+  border-radius: 12px;
+  border-color: var(--border);
+}
+
+/* Auth: black split panel */
+.auth-split-brand {
+  background: linear-gradient(160deg, #0a0a0a 0%, #18181b 60%, #0a0a0a 100%);
+}
+.auth-split-brand::before,
+.auth-split-brand::after {
+  background: radial-gradient(ellipse at 30% 20%, rgba(255, 255, 255, 0.06) 0%, transparent 55%);
+}
+.auth-split-logo-text {
+  color: #fff;
+}
+.auth-split-brand-greeting h2,
+.auth-split-feature h3 {
+  color: #fff;
+}
+.auth-split-brand-greeting p,
+.auth-split-feature p {
+  color: rgba(255, 255, 255, 0.55);
+}
+.auth-split-brand-eyebrow {
+  color: rgba(255, 255, 255, 0.5);
+}
+.auth-split-feature-icon {
+  background: rgba(255, 255, 255, 0.08);
+  color: #fff;
+}
+.auth-card {
+  border-radius: var(--radius-xl);
+  border-color: var(--border);
+  box-shadow: var(--shadow-lg);
+}
+
+/* About */
+.about-team-card {
+  border-radius: var(--radius-lg);
+  border-color: var(--border);
+}
+.about-team-card:hover {
+  border-color: #0a0a0a;
+}
+.about-team-role {
+  color: #0a0a0a;
+}
+.about-stats-box {
+  border-radius: var(--radius-lg);
+  border-color: var(--border);
+}
+
+/* Empty state + misc */
+.empty-state {
+  border: 1px dashed var(--border);
+  border-radius: var(--radius-xl);
+  background: #fff;
+}
+.skeleton-card {
+  border-radius: var(--radius-lg);
+  border-color: var(--border);
+}
+.saas-preview-arrow {
+  background: #fff;
+  border-color: var(--border);
+  color: #0a0a0a;
+}
+.photo-nav-btn {
+  background: rgba(255, 255, 255, 0.95);
+  color: #0a0a0a;
+}
+.photo-nav-btn:hover {
+  background: #0a0a0a;
+  color: #fff;
+}
+.photo-count {
+  background: rgba(10, 10, 10, 0.7);
+}

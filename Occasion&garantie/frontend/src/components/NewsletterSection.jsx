@@ -69,8 +69,8 @@ export default function NewsletterSection() {
           </div>
 
           <div style={{ position: 'relative', zIndex: 1 }}>
-            <div style={{ display: 'inline-flex', alignItems: 'center', gap: 6, padding: '6px 14px', borderRadius: 999, background: 'rgba(245,158,11,0.15)', border: '1px solid rgba(245,158,11,0.30)', color: '#fbbf24', fontSize: 11, fontWeight: 800, letterSpacing: 0.8, marginBottom: 16 }}>
-              <FiMail size={12} /> NEWSLETTER
+            <div style={{ display: 'inline-flex', alignItems: 'center', gap: 6, padding: '6px 14px', borderRadius: 999, background: 'rgba(255,255,255,0.10)', border: '1px solid rgba(255,255,255,0.20)', color: '#ffffff', fontSize: 11, fontWeight: 700, letterSpacing: 1.2, marginBottom: 16, textTransform: 'uppercase' }}>
+              <FiMail size={12} /> Newsletter
             </div>
             <h2 style={{ color: '#fff', fontSize: 28, fontWeight: 800, marginBottom: 10 }}>{t('home.newsletterTitle')}</h2>
             <p style={{ color: 'rgba(255,255,255,0.68)', fontSize: 15, marginBottom: 24, maxWidth: 560, margin: '0 auto 24px', lineHeight: 1.6 }}>{t('home.newsletterSubtitle')}</p>
@@ -93,13 +93,13 @@ export default function NewsletterSection() {
                   gap: 8,
                   padding: '12px 22px',
                   borderRadius: 999,
-                  background: '#f59e0b',
-                  color: '#000',
-                  fontWeight: 800,
+                  background: '#0a0a0a',
+                  color: '#fff',
+                  fontWeight: 700,
                   border: 'none',
                   cursor: 'pointer',
                   whiteSpace: 'nowrap',
-                  boxShadow: '0 4px 14px rgba(245,158,11,0.35)',
+                  boxShadow: '0 4px 14px rgba(0,0,0,0.25)',
                 }}
               >
                 <FiSend size={16} /> {sent ? t('home.newsletterThanks') : t('home.newsletterSubscribe')}
