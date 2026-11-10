@@ -29,5 +29,9 @@
     empty: 'Aucun produit dans cette catégorie',
     toProducts: 'Vers les produits',
     themeTitle: 'Choisissez un fond',
+    referralBanner: 'Parrainage : partagez votre lien — gagnez 100 crédits pour chaque inscription réalisée avec votre code (pour créer vos annonces).',
+    referralCopy: 'Copier le lien',
+    referralCopied: 'Lien copié !',
+    referralCode: 'Votre code',
   },
 };

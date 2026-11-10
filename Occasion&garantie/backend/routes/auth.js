@@ -51,6 +51,31 @@ function generateCode() {
   return Math.floor(100000 + Math.random() * 900000).toString();
 }
 
+function generateReferralCode() {
+  const chars = 'ABCDEFGHJKLMNPQRSTUVWXYZ23456789';
+  let out = 'OG';
+  for (let i = 0; i < 6; i++) out += chars[Math.floor(Math.random() * chars.length)];
+  return out;
+}
+
+async function ensureReferralCode(userId) {
+  try { await pool.query("ALTER TABLE users ADD COLUMN referral_code VARCHAR(20) DEFAULT NULL"); } catch {}
+  try { await pool.query("ALTER TABLE users ADD COLUMN referred_by INT DEFAULT NULL"); } catch {}
+  const [rows] = await pool.query('SELECT referral_code FROM users WHERE id = ?', [userId]);
+  if (rows.length && rows[0].referral_code) return rows[0].referral_code;
+  for (let i = 0; i < 10; i++) {
+    const code = generateReferralCode();
+    try {
+      await pool.query('UPDATE users SET referral_code = ? WHERE id = ? AND (referral_code IS NULL OR referral_code = "")', [code, userId]);
+      const [check] = await pool.query('SELECT referral_code FROM users WHERE id = ?', [userId]);
+      if (check.length && check[0].referral_code === code) return code;
+    } catch {}
+  }
+  const fallback = 'OG' + String(userId) + Math.floor(Math.random() * 90 + 10);
+  try { await pool.query('UPDATE users SET referral_code = ? WHERE id = ?', [fallback, userId]); } catch {}
+  return fallback;
+}
+
 router.post('/signup', [
   body('fullName').trim().notEmpty().withMessage('Le nom complet est requis.'),
   body('email').isEmail().withMessage('Email invalide.').normalizeEmail(),
@@ -58,9 +83,12 @@ router.post('/signup', [
   body('phone').trim().notEmpty().withMessage('Le numéro de téléphone est requis.'),
   body('verificationMethod').isIn(['email', 'sms']).withMessage('Methode de verification invalide.'),
   body('termsAccepted').isBoolean().withMessage('Vous devez accepter les conditions generales.'),
+  body('referralCode').optional({ checkFalsy: true }).trim(),
+  body('ref').optional({ checkFalsy: true }).trim(),
 ], validate, async (req, res) => {
   try {
-    const { fullName, email, password, phone, role, storeName, verificationMethod, termsAccepted } = req.body;
+    const { fullName, email, password, phone, role, storeName, verificationMethod, termsAccepted, referralCode, ref } = req.body;
+    const refCode = (referralCode || ref || '').trim().toUpperCase();
     if (!termsAccepted) return res.status(400).json({ message: 'Vous devez accepter les conditions generales.' });
     const [existing] = await pool.query('SELECT id FROM users WHERE email = ?', [email]);
     if (existing.length > 0) {
@@ -76,10 +104,20 @@ router.post('/signup', [
     const userRole = (role === 'seller') ? 'seller' : 'client';
 
     try { await pool.query('ALTER TABLE users ADD COLUMN verification_method VARCHAR(10) DEFAULT \'sms\''); } catch {}
+    try { await pool.query("ALTER TABLE users ADD COLUMN referral_code VARCHAR(20) DEFAULT NULL"); } catch {}
+    try { await pool.query("ALTER TABLE users ADD COLUMN referred_by INT DEFAULT NULL"); } catch {}
+
+    let referrerId = null;
+    if (refCode) {
+      try {
+        const [refs] = await pool.query('SELECT id FROM users WHERE referral_code = ?', [refCode]);
+        if (refs.length > 0) referrerId = refs[0].id;
+      } catch {}
+    }
 
     const [result] = await pool.query(
-      'INSERT INTO users (full_name, email, password, phone, phone_verified, verification_token, verification_expires, role, store_name, terms_accepted, verification_method) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)',
-      [fullName, email, hashed, phone, false, code, expiresAt, userRole, (role === 'seller' && storeName) ? storeName : null, true, verificationMethod]
+      'INSERT INTO users (full_name, email, password, phone, phone_verified, verification_token, verification_expires, role, store_name, terms_accepted, verification_method, referred_by) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)',
+      [fullName, email, hashed, phone, false, code, expiresAt, userRole, (role === 'seller' && storeName) ? storeName : null, true, verificationMethod, referrerId]
     );
 
     if (verificationMethod === 'email') {
@@ -116,6 +154,16 @@ router.post('/signup', [
           return res.status(500).json({ message: 'Impossible d\'envoyer le code de verification. Reessayez plus tard.' });
         }
       }
+    }
+
+    if (referrerId) {
+      try {
+        await pool.query('UPDATE users SET credit_balance = COALESCE(credit_balance, 0) + 100 WHERE id = ?', [referrerId]);
+        await pool.query('INSERT INTO credit_transactions (user_id, type, amount, description) VALUES (?, ?, ?, ?)', [referrerId, 'bonus', 100, `Bonus parrainage : inscription via votre code (${refCode})`]);
+        try {
+          await pool.query('INSERT INTO notifications (user_id, type, title, message, link) VALUES (?, ?, ?, ?, ?)', [referrerId, 'referral_bonus', 'Bonus parrainage', 'Félicitations ! Une inscription a été réalisée avec votre code de parrainage. +100 crédits ajoutés à votre solde.', '/seller']);
+        } catch {}
+      } catch (e) { console.log('Referral bonus skipped:', e.message); }
     }
 
     res.status(201).json({
@@ -936,6 +984,19 @@ router.post('/upload-credit-screenshot', authenticate, creditUpload.single('scre
     } catch (notifErr) { console.error('Admin email failed:', notifErr.message); }
 
     res.json({ message: 'Screenshot envoye. En attente de confirmation par l\'administrateur.' });
+  } catch (err) {
+    res.status(500).json({ message: 'Erreur serveur.' });
+  }
+});
+
+router.get('/my-referral', authenticate, async (req, res) => {
+  try {
+    const code = await ensureReferralCode(req.user.id);
+    const clientUrl = process.env.CLIENT_URL || 'https://www.occasionetgarantie.store';
+    const [u] = await pool.query('SELECT role FROM users WHERE id = ?', [req.user.id]);
+    const role = u[0]?.role || 'client';
+    const link = `${clientUrl}/signup?ref=${encodeURIComponent(code)}${role === 'seller' ? '' : ''}`;
+    res.json({ code, link, rewardCredits: 100 });
   } catch (err) {
     res.status(500).json({ message: 'Erreur serveur.' });
   }

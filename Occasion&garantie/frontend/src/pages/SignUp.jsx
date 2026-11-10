@@ -13,6 +13,7 @@ export default function SignUp() {
   const navigate = useNavigate();
   const [searchParams] = useSearchParams();
   const isSeller = searchParams.get('role') === 'seller';
+  const referralCode = searchParams.get('ref') || '';
   const [fullName, setFullName] = useState('');
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
@@ -35,7 +36,7 @@ export default function SignUp() {
     setError('');
     setLoading(true);
     try {
-      await api.post('/auth/signup', { fullName, email, password, phone, role: isSeller ? 'seller' : undefined, storeName: isSeller ? storeName : undefined, termsAccepted: true, verificationMethod: verifMethod });
+      await api.post('/auth/signup', { fullName, email, password, phone, role: isSeller ? 'seller' : undefined, storeName: isSeller ? storeName : undefined, termsAccepted: true, verificationMethod: verifMethod, referralCode: referralCode || undefined });
       navigate(`/verify-code?email=${encodeURIComponent(email)}${isSeller ? '&role=seller' : ''}${verifMethod === 'email' ? '&method=email' : ''}`);
     } catch (err) {
       setError(err.response?.data?.message || t('auth.signupErrorFallback'));

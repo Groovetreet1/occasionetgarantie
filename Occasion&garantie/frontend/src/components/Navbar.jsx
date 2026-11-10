@@ -1,5 +1,5 @@
 import { Link, NavLink, useNavigate, useLocation } from 'react-router-dom';
-import { FiUser, FiLogOut, FiSettings, FiChevronDown, FiSmartphone, FiMonitor, FiHeadphones, FiTablet, FiShoppingBag, FiTrendingUp, FiStar, FiMessageCircle, FiPackage, FiBell, FiTrash2, FiAlertTriangle, FiShield } from 'react-icons/fi';
+import { FiUser, FiLogOut, FiSettings, FiChevronDown, FiSmartphone, FiMonitor, FiHeadphones, FiTablet, FiShoppingBag, FiTrendingUp, FiStar, FiMessageCircle, FiPackage, FiBell, FiTrash2, FiAlertTriangle, FiShield, FiCopy, FiGift } from 'react-icons/fi';
 import { useState, useRef, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useAuth } from '../context/AuthContext';
@@ -60,6 +60,8 @@ export default function Navbar() {
   const [unreadCount, setUnreadCount] = useState(0);
   const [showCleanConfirm, setShowCleanConfirm] = useState(false);
   const notifRef = useRef(null);
+  const [referral, setReferral] = useState(null);
+  const [refCopied, setRefCopied] = useState(false);
 
   useEffect(() => {
     if (!user) return;
@@ -70,6 +72,20 @@ export default function Navbar() {
     const interval = setInterval(fetchNotifs, 15000);
     return () => clearInterval(interval);
   }, [user]);
+
+  useEffect(() => {
+    if (!user || user.role !== 'seller') { setReferral(null); return; }
+    api.get('/auth/my-referral').then(r => setReferral(r.data)).catch(() => {});
+  }, [user?.id, user?.role]);
+
+  const copyReferral = async () => {
+    if (!referral?.link) return;
+    try { await navigator.clipboard.writeText(referral.link); } catch {
+      const ta = document.createElement('textarea'); ta.value = referral.link; document.body.appendChild(ta); ta.select(); document.execCommand('copy'); document.body.removeChild(ta);
+    }
+    setRefCopied(true);
+    setTimeout(() => setRefCopied(false), 2000);
+  };
 
   useEffect(() => {
     const handle = (e) => {
@@ -119,6 +135,16 @@ export default function Navbar() {
         animate={{ y: 0 }}
         transition={{ duration: 0.4, ease: 'easeOut' }}
       >
+        {user?.role === 'seller' && referral && (
+          <div className="navbar-referral-banner" style={{ background: 'linear-gradient(90deg, rgba(147,197,114,0.18), rgba(147,197,114,0.08))', borderBottom: '1px solid rgba(147,197,114,0.35)', color: 'var(--text-primary)', fontSize: 12, padding: '6px 16px', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 10, flexWrap: 'wrap', textAlign: 'center' }}>
+            <FiGift size={14} style={{ color: '#76A85A', flexShrink: 0 }} />
+            <span>{t('nav.referralBanner')}</span>
+            <span style={{ fontWeight: 700, color: '#76A85A' }}>{t('nav.referralCode')}: {referral.code}</span>
+            <button onClick={copyReferral} style={{ display: 'inline-flex', alignItems: 'center', gap: 6, border: '1px solid rgba(118,168,90,0.45)', background: 'var(--bg-card, #fff)', color: '#5C8A43', borderRadius: 999, padding: '3px 10px', fontSize: 11, fontWeight: 700, cursor: 'pointer' }}>
+              <FiCopy size={12} /> {refCopied ? t('nav.referralCopied') : t('nav.referralCopy')}
+            </button>
+          </div>
+        )}
         <div className="navbar-inner">
           <Link to="/" className="navbar-logo">
             <img src="/logo.png" alt="Occasion & Garantie" className="navbar-logo-img" />
