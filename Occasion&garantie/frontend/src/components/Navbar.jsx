@@ -78,6 +78,24 @@ export default function Navbar() {
     api.get('/auth/my-referral').then(r => setReferral(r.data)).catch(() => {});
   }, [user?.id, user?.role]);
 
+  useEffect(() => {
+    const base = '70px';
+    const apply = () => {
+      const withBanner = window.innerWidth <= 600 ? '138px' : '106px';
+      if (user?.role === 'seller' && referral) {
+        document.documentElement.style.setProperty('--nav-height', withBanner);
+      } else {
+        document.documentElement.style.setProperty('--nav-height', base);
+      }
+    };
+    apply();
+    window.addEventListener('resize', apply);
+    return () => {
+      window.removeEventListener('resize', apply);
+      document.documentElement.style.setProperty('--nav-height', base);
+    };
+  }, [user?.role, referral]);
+
   const copyReferral = async () => {
     if (!referral?.link) return;
     try { await navigator.clipboard.writeText(referral.link); } catch {
