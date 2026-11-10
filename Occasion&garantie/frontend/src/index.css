@@ -450,7 +450,7 @@ input, textarea, select, button { font-family: inherit; }
 
 .navbar-inner {
   width: 100%; padding: 0 28px;
-  display: grid; grid-template-columns: 1fr auto 1fr; align-items: center; height: var(--nav-height);
+  display: grid; grid-template-columns: 1fr auto 1fr; align-items: center; height: 70px;
   gap: 16px;
 }
 .navbar-logo {
