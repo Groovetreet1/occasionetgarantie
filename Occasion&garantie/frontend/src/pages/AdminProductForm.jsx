@@ -148,7 +148,7 @@ export default function AdminProductForm() {
   };
 
   return (
-    <section style={{ paddingTop: '100px', paddingBottom: '60px', position: 'relative' }}>
+    <section style={{ paddingTop: 'calc(var(--nav-height) + 30px)', paddingBottom: '60px', position: 'relative' }}>
       <div className="container" style={{ position: 'relative', zIndex: 1, maxWidth: '800px' }}>
         <Link to="/admin" className="btn btn-ghost" style={{ marginBottom: '16px' }}>
           <FiArrowLeft /> {t('admin.backToDashboard')}

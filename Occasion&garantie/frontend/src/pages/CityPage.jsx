@@ -114,7 +114,7 @@ export default function CityPage() {
 
   return (
     <section className="products-page">
-      <div className="container" style={{ paddingTop: '120px', paddingBottom: '60px' }}>
+      <div className="container" style={{ paddingTop: 'calc(var(--nav-height) + 50px)', paddingBottom: '60px' }}>
         <nav className="breadcrumb" style={{ fontSize: 13, color: 'var(--text-muted)', marginBottom: 16, display: 'flex', alignItems: 'center', gap: 6, flexWrap: 'wrap' }}>
           <Link to="/" style={{ color: 'inherit', textDecoration: 'none' }}>Accueil</Link>
           <FiChevronRight size={13} />

@@ -95,7 +95,7 @@ export default function StoreProductDetail() {
   if (!product) return <div className="auth-page"><div className="empty-state"><div className="icon"><FiShoppingBag size={48} /></div><h2>{t('shop.notFound')}</h2><Link to="/boutique" className="btn btn-primary" style={{ marginTop: 16 }}><FiArrowLeft /> {t('shop.backToStore')}</Link></div></div>;
 
   return (
-    <section className="product-detail-section" style={{ paddingTop: '100px' }}>
+    <section className="product-detail-section" style={{ paddingTop: 'calc(var(--nav-height) + 30px)' }}>
       <div className="container">
         <Link to="/boutique" className="btn btn-ghost" style={{ marginBottom: '24px' }}><FiArrowLeft /> {t('shop.backToStore')}</Link>
         <div style={{ background: 'rgba(147, 197, 114,0.08)', border: '1px solid rgba(147, 197, 114,0.2)', borderRadius: 12, padding: '10px 16px', display: 'flex', alignItems: 'center', gap: 8, marginBottom: 24, fontSize: 13, color: '#76A85A', fontWeight: 600 }}>

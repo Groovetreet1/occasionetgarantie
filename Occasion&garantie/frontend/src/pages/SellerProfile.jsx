@@ -27,7 +27,7 @@ export default function SellerProfile() {
   }, [id]);
 
   if (loading) return <div className="loading-spinner" />;
-  if (!seller) return <div className="container" style={{ textAlign: 'center', paddingTop: 80, color: 'var(--text-secondary)' }}><h2>{t('seller.sellerNotFound')}</h2></div>;
+  if (!seller) return <div className="container" style={{ textAlign: 'center', paddingTop: 'calc(var(--nav-height) + 10px)', color: 'var(--text-secondary)' }}><h2>{t('seller.sellerNotFound')}</h2></div>;
 
   return (
     <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }}>

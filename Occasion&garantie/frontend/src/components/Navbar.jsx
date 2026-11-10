@@ -89,20 +89,32 @@ export default function Navbar() {
   }, [user?.id, user?.role]);
 
   useEffect(() => {
-    const base = '70px';
-    const apply = () => {
-      const withBanner = window.innerWidth <= 600 ? '138px' : '106px';
-      if (user?.role === 'seller' && referral) {
-        document.documentElement.style.setProperty('--nav-height', withBanner);
-      } else {
-        document.documentElement.style.setProperty('--nav-height', base);
-      }
+    const base = 70;
+    const setBase = () => document.documentElement.style.setProperty('--nav-height', base + 'px');
+    if (!(user?.role === 'seller' && referral)) {
+      setBase();
+      return () => setBase();
+    }
+    const navEl = navRef.current;
+    if (!navEl) {
+      document.documentElement.style.setProperty('--nav-height', (window.innerWidth <= 600 ? 138 : 106) + 'px');
+      return () => setBase();
+    }
+    const update = () => {
+      const h = Math.ceil(navEl.getBoundingClientRect().height || base);
+      document.documentElement.style.setProperty('--nav-height', h + 'px');
     };
-    apply();
-    window.addEventListener('resize', apply);
+    update();
+    let ro;
+    if (typeof ResizeObserver !== 'undefined') {
+      ro = new ResizeObserver(update);
+      ro.observe(navEl);
+    }
+    window.addEventListener('resize', update);
     return () => {
-      window.removeEventListener('resize', apply);
-      document.documentElement.style.setProperty('--nav-height', base);
+      window.removeEventListener('resize', update);
+      if (ro) ro.disconnect();
+      setBase();
     };
   }, [user?.role, referral]);
 

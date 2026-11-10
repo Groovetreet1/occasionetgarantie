@@ -230,7 +230,7 @@ export default function ProductDetail() {
 
   return (
     <>
-      <section className="product-detail-section" style={{ paddingTop: '100px' }}>
+      <section className="product-detail-section" style={{ paddingTop: 'calc(var(--nav-height) + 30px)' }}>
         <div className="container">
           <Link to="/products" className="btn btn-ghost" style={{ marginBottom: 20, background: 'var(--bg-card)', border: '1px solid var(--border-light)', borderRadius: 999, padding: '9px 16px', fontWeight: 600, boxShadow: '0 2px 8px rgba(0,0,0,0.04)' }}>
             <FiArrowLeft /> {t('products.backToProducts')}
