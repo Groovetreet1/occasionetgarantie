@@ -36,7 +36,7 @@ export default function SellerReferral() {
 
   if (loading) {
     return (
-      <div className="page-wrapper" style={{ padding: '24px 16px', maxWidth: 1100, margin: '0 auto' }}>
+      <div className="seller-page">
         <SellerNav />
         <div style={{ padding: 40, textAlign: 'center', color: 'var(--text-muted)' }}>...</div>
       </div>
@@ -46,7 +46,7 @@ export default function SellerReferral() {
   const referrals = data?.referrals || [];
 
   return (
-    <div className="page-wrapper" style={{ padding: '24px 16px', maxWidth: 1100, margin: '0 auto' }}>
+    <div className="seller-page">
       <SellerNav />
 
       <div style={{ marginTop: 20, marginBottom: 20 }}>
