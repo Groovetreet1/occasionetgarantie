@@ -177,7 +177,7 @@ export default function SellerProductForm() {
   return (
     <div className="seller-page">
       <div className="seller-page-header">
-        <h1>{isEdit ? t('seller.editProduct') : t('seller.newAd')} {isStore && <span style={{ fontSize: 14, fontWeight: 600, color: '#d97706', background: 'rgba(217,119,6,0.1)', padding: '4px 10px', borderRadius: 8, marginLeft: 8, verticalAlign: 'middle' }}>{t('seller.officialStore')}</span>}</h1>
+        <h1>{isEdit ? t('seller.editProduct') : t('seller.newAd')} {isStore && <span style={{ fontSize: 14, fontWeight: 600, color: '#76A85A', background: 'rgba(118, 168, 90,0.1)', padding: '4px 10px', borderRadius: 8, marginLeft: 8, verticalAlign: 'middle' }}>{t('seller.officialStore')}</span>}</h1>
         <button className="btn btn-outline" onClick={() => navigate(isStore ? '/admin/store-products' : '/seller')}>← {t('seller.back')}</button>
       </div>
 
@@ -319,7 +319,7 @@ export default function SellerProductForm() {
 
             <div style={{ display: 'flex', alignItems: 'center', gap: '8px', fontSize: '13px', color: 'var(--text-muted)', marginBottom: '12px', justifyContent: 'center' }}>
               <FiMapPin size={16} style={{
-                color: gpsState === 'got' ? '#10b981' : gpsState === 'waiting' ? '#f59e0b' : '#ef4444',
+                color: gpsState === 'got' ? '#10b981' : gpsState === 'waiting' ? '#93C572' : '#ef4444',
               }} />
               {gpsState === 'got' ? t('seller.gpsGot', { city: form.ville || '...' }) :
                gpsState === 'waiting' ? t('seller.gpsWaiting') :

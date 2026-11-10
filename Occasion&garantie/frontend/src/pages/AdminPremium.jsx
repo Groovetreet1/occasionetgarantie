@@ -128,7 +128,7 @@ export default function AdminPremium() {
                       ) : p.status === 'rejete' ? (
                         <span title={p.rejection_reason} style={{ color: 'var(--error)', display: 'flex', alignItems: 'center', gap: 4, cursor: 'help' }}><FiX size={14} /> {t('admin.rejected')}</span>
                       ) : (
-                        <span style={{ color: '#d97706', display: 'flex', alignItems: 'center', gap: 4 }}><FiClock size={14} /> {t('admin.pending')}</span>
+                        <span style={{ color: '#76A85A', display: 'flex', alignItems: 'center', gap: 4 }}><FiClock size={14} /> {t('admin.pending')}</span>
                       )}
                     </td>
                     <td style={{ padding: '12px 8px' }}>

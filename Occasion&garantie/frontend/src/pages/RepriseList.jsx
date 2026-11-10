@@ -9,7 +9,7 @@ import api from '../api/axios';
 const API_BASE = import.meta.env.VITE_API_URL || '';
 
 const statusStyles = {
-  en_attente: { bg: 'rgba(245,158,11,0.1)', color: '#f59e0b', label: 'reprise.statusNew' },
+  en_attente: { bg: 'rgba(147, 197, 114,0.1)', color: '#93C572', label: 'reprise.statusNew' },
   estime: { bg: 'rgba(59,130,246,0.1)', color: '#3b82f6', label: 'reprise.statusEstimated' },
   accepte: { bg: 'rgba(16,185,129,0.1)', color: '#10b981', label: 'reprise.statusAccepted' },
   refuse: { bg: 'rgba(239,68,68,0.1)', color: '#ef4444', label: 'reprise.statusRefused' },

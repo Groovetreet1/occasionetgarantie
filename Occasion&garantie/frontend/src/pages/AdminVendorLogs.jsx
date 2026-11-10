@@ -168,7 +168,7 @@ export default function AdminVendorLogs() {
               <div style="margin:6px 0">
                 <span style="background:#3b82f6;color:#fff;padding:2px 8px;border-radius:4px;font-size:11px">${actionLabels[l.action] || l.action}</span>
                 ${l.is_vpn === 1 ? '<span style="background:#ef4444;color:#fff;padding:2px 8px;border-radius:4px;font-size:11px;margin-left:4px">VPN</span>' : ''}
-                ${l.is_vpn !== 1 && l.is_datacenter === 1 ? '<span style="background:#f59e0b;color:#fff;padding:2px 8px;border-radius:4px;font-size:11px;margin-left:4px">Hebergement</span>' : ''}
+                ${l.is_vpn !== 1 && l.is_datacenter === 1 ? '<span style="background:#93C572;color:#fff;padding:2px 8px;border-radius:4px;font-size:11px;margin-left:4px">Hebergement</span>' : ''}
               </div>
               <div style="margin:4px 0"><strong style="font-size:13px">${lat.toFixed(5)}, ${lng.toFixed(5)}</strong></div>
               <div style="margin:4px 0">${l.city ? l.city + ', ' : ''}${l.country || ''}</div>
@@ -227,7 +227,7 @@ export default function AdminVendorLogs() {
       <section className="admin-dashboard">
         <div className="container" style={{ position: 'relative', zIndex: 1, maxWidth: 440, margin: '0 auto', paddingTop: 40 }}>
           <div style={{ background: 'var(--bg-card)', border: '1px solid var(--border)', borderRadius: 16, padding: 32, textAlign: 'center' }}>
-            <div style={{ width: 56, height: 56, borderRadius: '50%', background: 'rgba(245,158,11,0.12)', display: 'flex', alignItems: 'center', justifyContent: 'center', margin: '0 auto 16px' }}>
+            <div style={{ width: 56, height: 56, borderRadius: '50%', background: 'rgba(147, 197, 114,0.12)', display: 'flex', alignItems: 'center', justifyContent: 'center', margin: '0 auto 16px' }}>
               <FiShield size={26} style={{ color: 'var(--primary)' }} />
             </div>
             <h1 style={{ fontSize: 22, fontWeight: 800, marginBottom: 8 }}>{t('admin.otpGateTitle')}</h1>
@@ -378,10 +378,10 @@ export default function AdminVendorLogs() {
                       padding: '3px 10px', borderRadius: '12px', fontSize: '11px', fontWeight: 600,
                       background: log.action === 'connexion' ? 'rgba(59,130,246,0.1)' :
                                    log.action === 'produit_ajoute' ? 'rgba(16,185,129,0.1)' :
-                                   log.action === 'statut_vendu' ? 'rgba(239,68,68,0.1)' : 'rgba(245,158,11,0.1)',
+                                   log.action === 'statut_vendu' ? 'rgba(239,68,68,0.1)' : 'rgba(147, 197, 114,0.1)',
                       color: log.action === 'connexion' ? '#3b82f6' :
                              log.action === 'produit_ajoute' ? '#10b981' :
-                             log.action === 'statut_vendu' ? '#ef4444' : '#f59e0b',
+                             log.action === 'statut_vendu' ? '#ef4444' : '#93C572',
                     }}>
                       {actionLabels[log.action] || log.action}
                     </span>
@@ -394,7 +394,7 @@ export default function AdminVendorLogs() {
                     {log.is_vpn !== 1 && log.is_datacenter === 1 && (
                       <span style={{
                         padding: '3px 8px', borderRadius: '12px', fontSize: '10px', fontWeight: 700,
-                        background: 'rgba(245,158,11,0.12)', color: '#f59e0b',
+                        background: 'rgba(147, 197, 114,0.12)', color: '#93C572',
                       }}>Hebergement</span>
                     )}
                   </div>
@@ -413,7 +413,7 @@ export default function AdminVendorLogs() {
                   <div style={{ marginTop: '10px', padding: '12px', background: 'var(--bg-secondary)', borderRadius: '8px', fontSize: '13px', color: 'var(--text-secondary)', lineHeight: '1.8' }}>
                     <div><strong>{t('admin.ipLabel')}</strong> {log.ip_address}
                       {log.is_vpn === 1 && <span style={{ marginLeft: '8px', color: '#ef4444' }}>⚠ VPN</span>}
-                      {log.is_vpn !== 1 && log.is_datacenter === 1 && <span style={{ marginLeft: '8px', color: '#f59e0b' }}>Hebergement</span>}
+                      {log.is_vpn !== 1 && log.is_datacenter === 1 && <span style={{ marginLeft: '8px', color: '#93C572' }}>Hebergement</span>}
                     </div>
                     <div><strong>{t('admin.operatorLabel')}</strong> {log.isp || t('admin.unknown')}</div>
                     {(log.city || log.region || log.country) && (

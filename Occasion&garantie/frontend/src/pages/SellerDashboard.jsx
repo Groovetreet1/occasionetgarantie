@@ -19,7 +19,7 @@ const copyText = async (text) => {
 
 const statusColors = {
   disponible: '#059669',
-  en_attente: '#d97706',
+  en_attente: '#76A85A',
   vendu: '#dc2626',
 };
 
@@ -327,7 +327,7 @@ export default function SellerDashboard() {
             <div style={{ background: 'var(--bg-card)', border: '1px solid var(--border)', borderRadius: 'var(--radius-lg)', padding: 16, marginTop: 16 }}>
               <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 12 }}>
                 <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
-                  <FiSmartphone size={18} style={{ color: '#f59e0b' }} />
+                  <FiSmartphone size={18} style={{ color: '#93C572' }} />
                   <span style={{ fontWeight: 700, fontSize: 15 }}>{t('seller.repriseRequests', { count: pendingReprises.length })}</span>
                 </div>
                 <Link to="/reprise/list" className="btn btn-primary" style={{ fontSize: 12, padding: '6px 14px', textDecoration: 'none' }}>
@@ -346,8 +346,8 @@ export default function SellerDashboard() {
                     </div>
                     <span style={{
                       padding: '2px 8px', borderRadius: 10, fontSize: 10, fontWeight: 600,
-                      background: r.status === 'en_attente' ? 'rgba(245,158,11,0.1)' : 'rgba(59,130,246,0.1)',
-                      color: r.status === 'en_attente' ? '#f59e0b' : '#3b82f6',
+                      background: r.status === 'en_attente' ? 'rgba(147, 197, 114,0.1)' : 'rgba(59,130,246,0.1)',
+                      color: r.status === 'en_attente' ? '#93C572' : '#3b82f6',
                     }}>
                       {r.status === 'en_attente' ? t('seller.new') : t('seller.estimated')}
                     </span>
@@ -462,7 +462,7 @@ export default function SellerDashboard() {
                             <FiInfo size={13} /> {t('seller.rejected')}
                           </span>
                         ) : (
-                          <span style={{ fontSize: 12, color: '#d97706', display: 'flex', alignItems: 'center', gap: 4 }}>
+                          <span style={{ fontSize: 12, color: '#76A85A', display: 'flex', alignItems: 'center', gap: 4 }}>
                             <FiClock size={13} /> {t('seller.inReview')}
                           </span>
                         )}

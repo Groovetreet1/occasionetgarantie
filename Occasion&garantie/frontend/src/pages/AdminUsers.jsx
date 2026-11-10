@@ -184,7 +184,7 @@ export default function AdminUsers() {
                           </span>
                         )}
                         {u.premium ? (
-                          <span style={{ color: '#d97706', fontWeight: 700, background: 'rgba(217,119,6,0.12)', padding: '2px 8px', borderRadius: 8, display: 'inline-flex', alignItems: 'center', gap: 3, width: 'fit-content' }}>
+                          <span style={{ color: '#76A85A', fontWeight: 700, background: 'rgba(118, 168, 90,0.12)', padding: '2px 8px', borderRadius: 8, display: 'inline-flex', alignItems: 'center', gap: 3, width: 'fit-content' }}>
                             <FiStar size={11} /> {t('admin.premium')}
                           </span>
                         ) : (
@@ -225,8 +225,8 @@ export default function AdminUsers() {
                               )}
                               {!u.suspended && (
                                 <button onClick={() => { setOpenMenu(null); setSuspendModal(u); }}
-                                  style={{ display: 'flex', alignItems: 'center', gap: 8, width: '100%', padding: '8px 12px', fontSize: '12px', background: 'none', border: 'none', color: '#d97706', cursor: 'pointer', borderRadius: 8 }}
-                                  onMouseEnter={e => e.currentTarget.style.background = 'rgba(245,158,11,0.08)'}
+                                  style={{ display: 'flex', alignItems: 'center', gap: 8, width: '100%', padding: '8px 12px', fontSize: '12px', background: 'none', border: 'none', color: '#76A85A', cursor: 'pointer', borderRadius: 8 }}
+                                  onMouseEnter={e => e.currentTarget.style.background = 'rgba(147, 197, 114,0.08)'}
                                   onMouseLeave={e => e.currentTarget.style.background = 'none'}>
                                   <FiLock size={14} /> {t('admin.suspend')}
                                 </button>
@@ -241,15 +241,15 @@ export default function AdminUsers() {
                               )}
                               {!u.premium ? (
                                 <button onClick={() => { setOpenMenu(null); handleTogglePremium(u); }}
-                                  style={{ display: 'flex', alignItems: 'center', gap: 8, width: '100%', padding: '8px 12px', fontSize: '12px', background: 'none', border: 'none', color: '#d97706', cursor: 'pointer', borderRadius: 8 }}
-                                  onMouseEnter={e => e.currentTarget.style.background = 'rgba(245,158,11,0.08)'}
+                                  style={{ display: 'flex', alignItems: 'center', gap: 8, width: '100%', padding: '8px 12px', fontSize: '12px', background: 'none', border: 'none', color: '#76A85A', cursor: 'pointer', borderRadius: 8 }}
+                                  onMouseEnter={e => e.currentTarget.style.background = 'rgba(147, 197, 114,0.08)'}
                                   onMouseLeave={e => e.currentTarget.style.background = 'none'}>
                                   <FiStar size={14} /> {t('admin.makePremium')}
                                 </button>
                               ) : (
                                 <button onClick={() => { setOpenMenu(null); handleTogglePremium(u); }}
-                                  style={{ display: 'flex', alignItems: 'center', gap: 8, width: '100%', padding: '8px 12px', fontSize: '12px', background: 'none', border: 'none', color: '#d97706', cursor: 'pointer', borderRadius: 8 }}
-                                  onMouseEnter={e => e.currentTarget.style.background = 'rgba(245,158,11,0.08)'}
+                                  style={{ display: 'flex', alignItems: 'center', gap: 8, width: '100%', padding: '8px 12px', fontSize: '12px', background: 'none', border: 'none', color: '#76A85A', cursor: 'pointer', borderRadius: 8 }}
+                                  onMouseEnter={e => e.currentTarget.style.background = 'rgba(147, 197, 114,0.08)'}
                                   onMouseLeave={e => e.currentTarget.style.background = 'none'}>
                                   <FiStar size={14} /> {t('admin.removePremium')}
                                 </button>
@@ -367,8 +367,8 @@ export default function AdminUsers() {
           <div style={{ background: 'var(--bg-card)', borderRadius: 20, padding: 32, maxWidth: 400, width: '100%', boxShadow: '0 25px 80px rgba(0,0,0,0.35)' }}
             onClick={e => e.stopPropagation()}>
             <div style={{ display: 'flex', alignItems: 'center', gap: 12, marginBottom: 20 }}>
-              <div style={{ width: 48, height: 48, borderRadius: '50%', background: 'rgba(245,158,11,0.1)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-                <FiLock size={24} color="#d97706" />
+              <div style={{ width: 48, height: 48, borderRadius: '50%', background: 'rgba(147, 197, 114,0.1)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                <FiLock size={24} color="#76A85A" />
               </div>
               <div>
                 <h3 style={{ fontSize: 18, fontWeight: 700, margin: 0 }}>{t('admin.suspendAccountTitle')}</h3>
@@ -385,7 +385,7 @@ export default function AdminUsers() {
                 {t('admin.cancel')}
               </button>
               <button onClick={handleSuspend} disabled={suspendLoading}
-                className="form-submit" style={{ flex: 1, justifyContent: 'center', padding: '10px 0', background: '#d97706', borderColor: '#d97706' }}>
+                className="form-submit" style={{ flex: 1, justifyContent: 'center', padding: '10px 0', background: '#76A85A', borderColor: '#76A85A' }}>
                 <FiLock size={14} /> {suspendLoading ? '...' : t('admin.suspend')}
               </button>
             </div>

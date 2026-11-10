@@ -123,7 +123,7 @@ export default function CityPage() {
 
         <div style={{ maxWidth: 760, marginBottom: 28 }}>
           <h1 style={{ fontSize: 30, fontWeight: 800, display: 'flex', alignItems: 'center', gap: 10 }}>
-            <FiMapPin style={{ color: '#d97706' }} /> Téléphones d'occasion à {city}
+            <FiMapPin style={{ color: '#76A85A' }} /> Téléphones d'occasion à {city}
           </h1>
           <p style={{ color: 'var(--text-secondary)', marginTop: 10, lineHeight: 1.7 }}>
             Achetez et vendez des smartphones, tablettes, PC et accessoires d'occasion à {city} avec garantie.

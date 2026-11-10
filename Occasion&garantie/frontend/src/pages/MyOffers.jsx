@@ -17,7 +17,7 @@ export default function MyOffers() {
   const [counterPrice, setCounterPrice] = useState('');
 
   const statusConfig = {
-    en_attente: { label: t('seller.statusPendingVendor'), color: '#f59e0b', bg: 'rgba(245,158,11,0.1)' },
+    en_attente: { label: t('seller.statusPendingVendor'), color: '#93C572', bg: 'rgba(147, 197, 114,0.1)' },
     contre_offre: { label: t('seller.statusCounterOffer'), color: '#3b82f6', bg: 'rgba(59,130,246,0.1)' },
     acceptee: { label: t('seller.statusAccepted'), color: '#10b981', bg: 'rgba(16,185,129,0.1)' },
     refusee: { label: t('seller.statusRefused'), color: '#ef4444', bg: 'rgba(239,68,68,0.1)' },
@@ -153,8 +153,8 @@ export default function MyOffers() {
       {storeContacts.length > 0 && (
         <div style={{ marginTop: 28 }}>
           <h2 style={{ fontSize: 15, fontWeight: 700, marginBottom: 4, display: 'flex', alignItems: 'center', gap: 8 }}>
-            <FiShoppingBag size={16} style={{ color: '#d97706' }} /> Boutique Officielle — Demandes d'information
-            <span style={{ fontSize: 11, background: 'rgba(245,158,11,0.12)', color: '#d97706', padding: '2px 8px', borderRadius: 20, fontWeight: 600 }}>{storeContacts.length}</span>
+            <FiShoppingBag size={16} style={{ color: '#76A85A' }} /> Boutique Officielle — Demandes d'information
+            <span style={{ fontSize: 11, background: 'rgba(147, 197, 114,0.12)', color: '#76A85A', padding: '2px 8px', borderRadius: 20, fontWeight: 600 }}>{storeContacts.length}</span>
           </h2>
           <p style={{ fontSize: 12, color: 'var(--text-muted)', marginBottom: 12 }}>Tracabilité de vos demandes pour téléphones de la Boutique Officielle (information uniquement)</p>
           <div style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
@@ -170,7 +170,7 @@ export default function MyOffers() {
                 <div style={{ flex: 1, minWidth: 180 }}>
                   <div style={{ fontWeight: 600, fontSize: 13, display: 'flex', alignItems: 'center', gap: 6, flexWrap: 'wrap' }}>
                     {c.product_name || c.product_name_full || 'Produit Boutique'}
-                    <span style={{ fontSize: 10, background: '#fef3c7', color: '#92400e', padding: '2px 6px', borderRadius: 6, fontWeight: 700, border: '1px solid #fde68a' }}>Boutique Officielle</span>
+                    <span style={{ fontSize: 10, background: '#EEF6E6', color: '#92400e', padding: '2px 6px', borderRadius: 6, fontWeight: 700, border: '1px solid #DCECC8' }}>Boutique Officielle</span>
                   </div>
                   <div style={{ fontSize: 11, color: 'var(--text-secondary)', marginTop: 2 }}>{c.product_price ? `${Number(c.product_price).toLocaleString()} DH` : ''} · {new Date(c.created_at).toLocaleDateString('fr-FR')}</div>
                   {c.message && <div style={{ fontSize: 11, color: 'var(--text-muted)', marginTop: 4 }}>« {c.message} »</div>}

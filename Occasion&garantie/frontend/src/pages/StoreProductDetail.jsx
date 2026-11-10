@@ -98,7 +98,7 @@ export default function StoreProductDetail() {
     <section className="product-detail-section" style={{ paddingTop: '100px' }}>
       <div className="container">
         <Link to="/boutique" className="btn btn-ghost" style={{ marginBottom: '24px' }}><FiArrowLeft /> {t('shop.backToStore')}</Link>
-        <div style={{ background: 'rgba(245,158,11,0.08)', border: '1px solid rgba(245,158,11,0.2)', borderRadius: 12, padding: '10px 16px', display: 'flex', alignItems: 'center', gap: 8, marginBottom: 24, fontSize: 13, color: '#d97706', fontWeight: 600 }}>
+        <div style={{ background: 'rgba(147, 197, 114,0.08)', border: '1px solid rgba(147, 197, 114,0.2)', borderRadius: 12, padding: '10px 16px', display: 'flex', alignItems: 'center', gap: 8, marginBottom: 24, fontSize: 13, color: '#76A85A', fontWeight: 600 }}>
           <FiShield size={16} /> {t('shop.storeBanner')}
         </div>
         <div className="product-detail-grid">

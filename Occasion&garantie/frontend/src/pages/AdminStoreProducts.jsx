@@ -9,7 +9,7 @@ import { useLanguage } from '../context/LanguageContext';
 const stateLabels = { neuf: 'Neuf', comme_neuf: 'Comme neuf', tres_bon: 'Très bon', bon: 'Bon', acceptable: 'Acceptable' };
 const formatPrice = (p) => new Intl.NumberFormat('fr-FR', { style: 'currency', currency: 'MAD' }).format(p).replace('MAD', '').trim() + ' DH';
 
-const contactStatusColors = { en_attente: { bg: '#d97706', label: 'En attente' }, contacte: { bg: '#3b82f6', label: 'Contacté' }, termine: { bg: '#059669', label: 'Terminé' } };
+const contactStatusColors = { en_attente: { bg: '#76A85A', label: 'En attente' }, contacte: { bg: '#3b82f6', label: 'Contacté' }, termine: { bg: '#059669', label: 'Terminé' } };
 
 export default function AdminStoreProducts() {
   const { t } = useLanguage();
@@ -124,7 +124,7 @@ export default function AdminStoreProducts() {
     }
   };
 
-  const statusColors = { disponible: '#059669', en_attente: '#d97706', vendu: '#dc2626' };
+  const statusColors = { disponible: '#059669', en_attente: '#76A85A', vendu: '#dc2626' };
 
   return (
     <section className="admin-dashboard">
@@ -133,7 +133,7 @@ export default function AdminStoreProducts() {
           <div>
             <Link to="/admin" className="btn btn-ghost" style={{ marginBottom: '8px' }}><FiArrowLeft /> {t('admin.dashboardTitle')}</Link>
             <h1 style={{ fontSize: '28px', fontWeight: 800, display: 'flex', alignItems: 'center', gap: 10 }}>
-              <FiShield style={{ color: '#d97706' }} /> {t('admin.officialStore')}
+              <FiShield style={{ color: '#76A85A' }} /> {t('admin.officialStore')}
             </h1>
           </div>
           <div style={{ display: 'flex', alignItems: 'center', gap: 8, flexWrap: 'wrap' }}>
@@ -146,7 +146,7 @@ export default function AdminStoreProducts() {
               style={{ padding: '10px 20px', borderRadius: 10, fontWeight: 600, fontSize: 14, border: '1px solid var(--border)', background: 'var(--bg-card)', color: 'var(--text)', cursor: seedLoading ? 'wait' : 'pointer', display: 'flex', alignItems: 'center', gap: 8, opacity: seedLoading ? 0.6 : 1 }}>
               <FiPackage size={18} /> {seedLoading ? t('admin.generating') : t('admin.generateProducts')}
             </button>
-            <Link to="/seller/products/new?type=store" className="btn" style={{ background: '#d97706', color: '#fff', padding: '10px 20px', borderRadius: 10, fontWeight: 600, fontSize: 14, display: 'flex', alignItems: 'center', gap: 8 }}>
+            <Link to="/seller/products/new?type=store" className="btn" style={{ background: '#76A85A', color: '#fff', padding: '10px 20px', borderRadius: 10, fontWeight: 600, fontSize: 14, display: 'flex', alignItems: 'center', gap: 8 }}>
               <FiPlus size={18} /> {t('admin.newProduct')}
             </Link>
           </div>
@@ -155,7 +155,7 @@ export default function AdminStoreProducts() {
         <div style={{ display: 'grid', gap: '16px', gridTemplateColumns: 'repeat(auto-fill, minmax(180px, 1fr))', marginBottom: '24px' }}>
           {[
             { label: t('admin.products'), value: stats.total, icon: FiPackage, color: '#3b82f6', bg: 'rgba(59,130,246,0.1)' },
-            { label: t('admin.statsFeatured'), value: stats.featured, icon: FiStar, color: '#d97706', bg: 'rgba(217,119,6,0.1)' },
+            { label: t('admin.statsFeatured'), value: stats.featured, icon: FiStar, color: '#76A85A', bg: 'rgba(118, 168, 90,0.1)' },
             { label: t('admin.statsInStock'), value: stats.inStock, icon: FiShoppingBag, color: '#059669', bg: 'rgba(5,150,105,0.1)' },
             { label: t('admin.statsSold'), value: stats.sold, icon: FiDollarSign, color: '#dc2626', bg: 'rgba(220,38,38,0.1)' },
           ].map(s => {
@@ -176,11 +176,11 @@ export default function AdminStoreProducts() {
 
         <div style={{ display: 'flex', gap: 0, marginBottom: 24, borderBottom: '2px solid var(--border)' }}>
           <button onClick={() => setTab('produits')}
-            style={{ padding: '10px 20px', border: 'none', background: 'none', cursor: 'pointer', fontWeight: 600, fontSize: 14, color: tab === 'produits' ? '#d97706' : 'var(--text-muted)', borderBottom: tab === 'produits' ? '2px solid #d97706' : '2px solid transparent', marginBottom: -2, transition: '0.2s' }}>
+            style={{ padding: '10px 20px', border: 'none', background: 'none', cursor: 'pointer', fontWeight: 600, fontSize: 14, color: tab === 'produits' ? '#76A85A' : 'var(--text-muted)', borderBottom: tab === 'produits' ? '2px solid #76A85A' : '2px solid transparent', marginBottom: -2, transition: '0.2s' }}>
             <FiPackage size={14} style={{ marginRight: 6 }} /> {t('admin.tabProducts', { count: stats.total })}
           </button>
           <button onClick={() => setTab('demandes')}
-            style={{ padding: '10px 20px', border: 'none', background: 'none', cursor: 'pointer', fontWeight: 600, fontSize: 14, color: tab === 'demandes' ? '#d97706' : 'var(--text-muted)', borderBottom: tab === 'demandes' ? '2px solid #d97706' : '2px solid transparent', marginBottom: -2, transition: '0.2s' }}>
+            style={{ padding: '10px 20px', border: 'none', background: 'none', cursor: 'pointer', fontWeight: 600, fontSize: 14, color: tab === 'demandes' ? '#76A85A' : 'var(--text-muted)', borderBottom: tab === 'demandes' ? '2px solid #76A85A' : '2px solid transparent', marginBottom: -2, transition: '0.2s' }}>
             <FiMessageCircle size={14} style={{ marginRight: 6 }} /> {t('admin.tabRequests', { count: cTotal })}
           </button>
         </div>
@@ -190,7 +190,7 @@ export default function AdminStoreProducts() {
             <div style={{ padding: '60px 0' }}><div className="spinner" /></div>
           ) : products.length === 0 ? (
             <div className="empty-state"><FiPackage size={48} /><p>{t('admin.noStoreProducts')}</p>
-              <Link to="/seller/products/new?type=store" className="btn" style={{ marginTop: 12, background: '#d97706', color: '#fff', padding: '10px 20px', borderRadius: 10, fontWeight: 600, fontSize: 14 }}><FiPlus size={16} /> {t('admin.addProduct')}</Link>
+              <Link to="/seller/products/new?type=store" className="btn" style={{ marginTop: 12, background: '#76A85A', color: '#fff', padding: '10px 20px', borderRadius: 10, fontWeight: 600, fontSize: 14 }}><FiPlus size={16} /> {t('admin.addProduct')}</Link>
             </div>
           ) : (
             <>
@@ -234,8 +234,8 @@ export default function AdminStoreProducts() {
                       </td>
                       <td style={{ padding: '8px 6px' }}>
                         <button onClick={() => toggleFeatured(p)} disabled={actionId === p.id}
-                          style={{ background: 'none', border: 'none', cursor: 'pointer', color: p.featured ? '#d97706' : 'var(--text-muted)', padding: 4 }}>
-                          <FiStar size={18} fill={p.featured ? '#d97706' : 'transparent'} />
+                          style={{ background: 'none', border: 'none', cursor: 'pointer', color: p.featured ? '#76A85A' : 'var(--text-muted)', padding: 4 }}>
+                          <FiStar size={18} fill={p.featured ? '#76A85A' : 'transparent'} />
                         </button>
                       </td>
                       <td style={{ padding: '8px 6px' }}>

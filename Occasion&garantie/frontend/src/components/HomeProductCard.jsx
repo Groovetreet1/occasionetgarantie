@@ -84,7 +84,7 @@ export default function HomeProductCard({ product, index = 0, view = 'grid' }) {
         <div className="product-card-body" style={{ padding: view === 'list' ? '14px 16px' : '13px 14px 14px', ...(view === 'list' ? { flex: 1, minWidth: 0, display: 'flex', flexDirection: 'column', justifyContent: 'center' } : {}) }}>
           <div style={{ display: 'flex', alignItems: 'center', gap: 6, marginBottom: 6 }}>
             <span style={{ fontSize: 10, fontWeight: 700, letterSpacing: 0.6, textTransform: 'uppercase', color: 'var(--text-muted)' }}>{product.category || product.category_name || 'Smartphone'}</span>
-            <span style={{ marginLeft: 'auto', display: 'inline-flex', alignItems: 'center', gap: 4, fontSize: 11, fontWeight: 700, color: '#f59e0b' }}><FiStar size={11} style={{ fill: '#f59e0b', color: '#f59e0b' }} /> 4.8</span>
+            <span style={{ marginLeft: 'auto', display: 'inline-flex', alignItems: 'center', gap: 4, fontSize: 11, fontWeight: 700, color: '#93C572' }}><FiStar size={11} style={{ fill: '#93C572', color: '#93C572' }} /> 4.8</span>
           </div>
           <h3 className="product-card-title" style={{ fontSize: 14, lineHeight: 1.35, minHeight: 38, display: '-webkit-box', WebkitLineClamp: 2, WebkitBoxOrient: 'vertical', overflow: 'hidden' }}>{product.name}</h3>
           <div className="product-card-price-row" style={{ margin: '8px 0 10px', alignItems: 'baseline' }}>

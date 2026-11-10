@@ -394,7 +394,7 @@ export default function Profile() {
             )}
 
             {tfaBackup.length > 0 && (
-              <div style={{ marginTop: 16, padding: 14, background: 'rgba(245,158,11,0.07)', border: '1px solid rgba(245,158,11,0.25)', borderRadius: 10 }}>
+              <div style={{ marginTop: 16, padding: 14, background: 'rgba(147, 197, 114,0.07)', border: '1px solid rgba(147, 197, 114,0.25)', borderRadius: 10 }}>
                 <h4 style={{ fontSize: 14, marginBottom: 6 }}>{t('profile.tfaBackupTitle')}</h4>
                 <p style={{ fontSize: 12, color: 'var(--text-secondary)', marginBottom: 10 }}>{t('profile.tfaBackupDesc')}</p>
                 <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 6, fontFamily: 'monospace', fontSize: 13, fontWeight: 700 }}>

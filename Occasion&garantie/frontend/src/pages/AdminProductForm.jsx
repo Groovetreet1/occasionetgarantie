@@ -256,7 +256,7 @@ export default function AdminProductForm() {
             </div>
             <div className="form-group" style={{ display: 'flex', alignItems: 'center', gap: '8px', paddingTop: '8px' }}>
               <input name="product_type" type="checkbox" checked={form.product_type === 'store'} onChange={(e) => setForm(f => ({ ...f, product_type: e.target.checked ? 'store' : 'vendor' }))} id="storeProduct" style={{ width: '18px', height: '18px' }} />
-              <label htmlFor="storeProduct" style={{ margin: 0, cursor: 'pointer', background: 'rgba(245,158,11,0.1)', padding: '4px 12px', borderRadius: 8, color: '#d97706', fontWeight: 600 }}>{t('admin.storeProductLabel')}</label>
+              <label htmlFor="storeProduct" style={{ margin: 0, cursor: 'pointer', background: 'rgba(147, 197, 114,0.1)', padding: '4px 12px', borderRadius: 8, color: '#76A85A', fontWeight: 600 }}>{t('admin.storeProductLabel')}</label>
             </div>
           </div>
 

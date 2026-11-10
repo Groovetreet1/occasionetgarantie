@@ -180,13 +180,13 @@ export default function Products() {
           <motion.div initial="hidden" animate="show" variants={fadeUp} style={{ marginBottom: 32, padding: 20, background: 'var(--bg-card)', border: '1px solid var(--border-light)', borderRadius: 16, boxShadow: '0 8px 24px rgba(0,0,0,0.04)' }}>
             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 16, flexWrap: 'wrap', gap: 12 }}>
               <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
-                <span style={{ width: 36, height: 36, borderRadius: 10, background: 'var(--primary-light)', border: '1px solid rgba(245,158,11,0.18)', display: 'flex', alignItems: 'center', justifyContent: 'center', color: 'var(--primary)' }}><FiShield size={16} /></span>
+                <span style={{ width: 36, height: 36, borderRadius: 10, background: 'var(--primary-light)', border: '1px solid rgba(147, 197, 114,0.18)', display: 'flex', alignItems: 'center', justifyContent: 'center', color: 'var(--primary)' }}><FiShield size={16} /></span>
                 <div>
                   <div style={{ fontWeight: 800, fontSize: 15, letterSpacing: -0.2 }}>{t('products.storeOfficial')}</div>
                   <div style={{ fontSize: 12, color: 'var(--text-muted)' }}>{t('products.storeSoldBy')}</div>
                 </div>
               </div>
-              <Link to="/boutique" style={{ fontSize: 13, color: 'var(--primary)', fontWeight: 700, textDecoration: 'none', display: 'inline-flex', alignItems: 'center', gap: 6, padding: '8px 14px', borderRadius: 999, background: 'var(--primary-light)', border: '1px solid rgba(245,158,11,0.18)' }}>{t('products.viewAll')} <FiArrowRight size={14} /></Link>
+              <Link to="/boutique" style={{ fontSize: 13, color: 'var(--primary)', fontWeight: 700, textDecoration: 'none', display: 'inline-flex', alignItems: 'center', gap: 6, padding: '8px 14px', borderRadius: 999, background: 'var(--primary-light)', border: '1px solid rgba(147, 197, 114,0.18)' }}>{t('products.viewAll')} <FiArrowRight size={14} /></Link>
             </div>
             <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(160px, 1fr))', gap: 12 }}>
               {storeProducts.slice(0, 6).map(p => (

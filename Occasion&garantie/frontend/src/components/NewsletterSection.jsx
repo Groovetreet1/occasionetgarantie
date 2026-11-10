@@ -69,7 +69,7 @@ export default function NewsletterSection() {
           </div>
 
           <div style={{ position: 'relative', zIndex: 1 }}>
-            <div style={{ display: 'inline-flex', alignItems: 'center', gap: 6, padding: '6px 14px', borderRadius: 999, background: 'rgba(245,158,11,0.15)', border: '1px solid rgba(245,158,11,0.30)', color: '#fbbf24', fontSize: 11, fontWeight: 800, letterSpacing: 0.8, marginBottom: 16 }}>
+            <div style={{ display: 'inline-flex', alignItems: 'center', gap: 6, padding: '6px 14px', borderRadius: 999, background: 'rgba(147, 197, 114,0.15)', border: '1px solid rgba(147, 197, 114,0.30)', color: '#B7D98A', fontSize: 11, fontWeight: 800, letterSpacing: 0.8, marginBottom: 16 }}>
               <FiMail size={12} /> NEWSLETTER
             </div>
             <h2 style={{ color: '#fff', fontSize: 28, fontWeight: 800, marginBottom: 10 }}>{t('home.newsletterTitle')}</h2>
@@ -93,13 +93,13 @@ export default function NewsletterSection() {
                   gap: 8,
                   padding: '12px 22px',
                   borderRadius: 999,
-                  background: '#f59e0b',
+                  background: '#93C572',
                   color: '#000',
                   fontWeight: 800,
                   border: 'none',
                   cursor: 'pointer',
                   whiteSpace: 'nowrap',
-                  boxShadow: '0 4px 14px rgba(245,158,11,0.35)',
+                  boxShadow: '0 4px 14px rgba(147, 197, 114,0.35)',
                 }}
               >
                 <FiSend size={16} /> {sent ? t('home.newsletterThanks') : t('home.newsletterSubscribe')}

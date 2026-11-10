@@ -46,7 +46,7 @@ function BrandCircle({ brand }) {
       style={{ flexShrink: 0, textDecoration: 'none', display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 6, transition: 'transform 0.2s' }}
       onMouseEnter={e => e.currentTarget.style.transform = 'scale(1.08)'}
       onMouseLeave={e => e.currentTarget.style.transform = 'scale(1)'}>
-      <div style={{ width: 56, height: 56, borderRadius: '50%', background: '#fff', border: '1px solid var(--border-light)', boxShadow: '0 2px 10px rgba(0,0,0,0.05)', display: 'flex', alignItems: 'center', justifyContent: 'center', overflow: 'hidden', fontSize: 18, fontWeight: 800, color: '#d97706' }}>
+      <div style={{ width: 56, height: 56, borderRadius: '50%', background: '#fff', border: '1px solid var(--border-light)', boxShadow: '0 2px 10px rgba(0,0,0,0.05)', display: 'flex', alignItems: 'center', justifyContent: 'center', overflow: 'hidden', fontSize: 18, fontWeight: 800, color: '#76A85A' }}>
         {hasError ? brand.charAt(0).toUpperCase() : (
           <img src={src} alt={brand} style={{ width: '68%', height: '68%', objectFit: 'contain' }} onError={() => setHasError(true)} />
         )}
@@ -195,7 +195,7 @@ export default function Home() {
           <div className="container">
             <div className="section-header home-section-header" style={{ marginBottom: 28 }}>
               <div className="home-heading">
-                <span className="home-heading-icon home-heading-icon-store" style={{ background: 'linear-gradient(135deg, #f59e0b, #d97706)', color: '#fff', width: 46, height: 46, borderRadius: 14, display: 'flex', alignItems: 'center', justifyContent: 'center' }}><TbShieldCheck size={22} /></span>
+                <span className="home-heading-icon home-heading-icon-store" style={{ background: 'linear-gradient(135deg, #93C572, #76A85A)', color: '#fff', width: 46, height: 46, borderRadius: 14, display: 'flex', alignItems: 'center', justifyContent: 'center' }}><TbShieldCheck size={22} /></span>
                 <div>
                   <h2 className="home-section-title home-section-title-store" style={{ fontSize: 22 }}>{t('home.storeOfficial')}</h2>
                   <p className="home-section-subtitle">{t('home.storeSubtitle')}</p>
@@ -247,12 +247,12 @@ export default function Home() {
 
       <motion.section className="section sell-promo" variants={fadeUp} initial="hidden" whileInView="show" viewport={{ once: true }}>
         <div className="container">
-          <div className="sell-promo-bar" style={{ borderRadius: 20, background: 'linear-gradient(135deg, #fff 0%, #fef3c7 100%)', border: '1px solid #fde68a', color: '#92400e', padding: '28px 24px' }}>
+          <div className="sell-promo-bar" style={{ borderRadius: 20, background: 'linear-gradient(135deg, #fff 0%, #EEF6E6 100%)', border: '1px solid #DCECC8', color: '#92400e', padding: '28px 24px' }}>
             <div className="sell-promo-content">
               <h2 style={{ color: '#92400e' }}>{t('home.sellPhoneTitle')}</h2>
               <p style={{ color: '#a16207' }}>{t('home.sellPhoneDesc')}</p>
             </div>
-            <Link to="/vendre" className="btn btn-primary" style={{ background: '#f59e0b', color: '#000', borderRadius: 999, boxShadow: '0 8px 20px rgba(245,158,11,0.3)' }}>
+            <Link to="/vendre" className="btn btn-primary" style={{ background: '#93C572', color: '#000', borderRadius: 999, boxShadow: '0 8px 20px rgba(147, 197, 114,0.3)' }}>
               {t('home.sellNow')} <FiArrowRight size={16} />
             </Link>
           </div>

@@ -83,7 +83,7 @@ export default function AdminDashboardPage() {
           </div>
           <div style={{ background: 'var(--bg-card)', border: '1px solid var(--border)', borderRadius: 'var(--radius-lg)', padding: '20px' }}>
             <div style={{ fontSize: '12px', color: 'var(--text-muted)', marginBottom: '6px' }}>{t('admin.pending')}</div>
-            <div style={{ fontSize: '28px', fontWeight: 800, color: stats.pendingTickets > 0 ? '#f59e0b' : 'var(--text-primary)' }}>{stats.pendingTickets}</div>
+            <div style={{ fontSize: '28px', fontWeight: 800, color: stats.pendingTickets > 0 ? '#93C572' : 'var(--text-primary)' }}>{stats.pendingTickets}</div>
             <div style={{ fontSize: '12px', color: 'var(--text-secondary)' }}>{t('admin.ticketsSupport')}</div>
           </div>
           <div style={{ background: 'var(--bg-card)', border: '1px solid var(--border)', borderRadius: 'var(--radius-lg)', padding: '20px' }}>
@@ -106,7 +106,7 @@ export default function AdminDashboardPage() {
             <Link to="/admin/premium" className="btn btn-outline"><FiShield size={16} /> {t('admin.premiumRequests')}</Link>
             <Link to="/admin/products" className="btn btn-outline"><FiPackage size={16} /> {t('admin.allProducts')}</Link>
             <Link to="/admin/products/pending" className="btn btn-outline"><FiShield size={16} /> {t('admin.approveProducts')}</Link>
-            <Link to="/admin/store-products" className="btn btn-outline" style={{ borderColor: '#d97706', color: '#d97706' }}><FiShield size={16} /> {t('admin.officialStore')}</Link>
+            <Link to="/admin/store-products" className="btn btn-outline" style={{ borderColor: '#76A85A', color: '#76A85A' }}><FiShield size={16} /> {t('admin.officialStore')}</Link>
             <Link to="/admin/users" className="btn btn-outline"><FiUsers size={16} /> {t('admin.users')}</Link>
           </div>
         </div>

@@ -14,8 +14,8 @@ const slides = [
     link: '/products',
     image: '/slides/slide1.jpg',
     overlay: 'linear-gradient(135deg, rgba(15,23,42,0.38) 0%, rgba(15,23,42,0.12) 100%)',
-    titleColor: '#fde68a',
-    subColor: '#fef3c7',
+    titleColor: '#DCECC8',
+    subColor: '#EEF6E6',
   },
   {
     id: 2,

@@ -5,7 +5,7 @@ import api from '../api/axios';
 import { useLanguage } from '../context/LanguageContext';
 import SellerNav from '../components/SellerNav';
 
-const statusColors = { disponible: '#059669', en_attente: '#d97706', vendu: '#dc2626' };
+const statusColors = { disponible: '#059669', en_attente: '#76A85A', vendu: '#dc2626' };
 
 export default function SellerStats() {
   const { t } = useLanguage();
@@ -60,7 +60,7 @@ export default function SellerStats() {
                 <span className="stat-value">{stats.disponible}</span>
                 <span className="stat-label">{t('seller.statsAvailable')}</span>
               </div>
-              <div className="stat-card large" style={{ borderTop: '3px solid #d97706' }}>
+              <div className="stat-card large" style={{ borderTop: '3px solid #76A85A' }}>
                 <FiClock size={24} />
                 <span className="stat-value">{stats.en_attente}</span>
                 <span className="stat-label">{t('seller.statsPending')}</span>
@@ -91,7 +91,7 @@ export default function SellerStats() {
                   <div className="bar-item">
                     <span className="bar-label">{t('seller.pending')}</span>
                     <div className="bar-track">
-                      <div className="bar-fill" style={{ width: stats.total > 0 ? `${(stats.en_attente / stats.total) * 100}%` : '0%', background: '#d97706' }} />
+                      <div className="bar-fill" style={{ width: stats.total > 0 ? `${(stats.en_attente / stats.total) * 100}%` : '0%', background: '#76A85A' }} />
                     </div>
                     <span className="bar-value">{stats.en_attente}</span>
                   </div>

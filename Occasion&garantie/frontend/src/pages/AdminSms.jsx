@@ -22,7 +22,7 @@ function statusColor(status) {
   if (status === 'sent') return '#059669';
   if (status === 'failed') return '#dc2626';
   if (status === 'sending') return '#2563eb';
-  return '#d97706';
+  return '#76A85A';
 }
 
 function statusIcon(status) {
@@ -292,7 +292,7 @@ export default function AdminSms() {
                   />
                 </div>
                 {!smsEnabled && (
-                  <div style={{ marginTop: 12, display: 'flex', gap: 8, alignItems: 'flex-start', fontSize: 12, color: '#92400e', background: '#fffbeb', border: '1px solid #fde68a', borderRadius: 8, padding: '8px 10px' }}>
+                  <div style={{ marginTop: 12, display: 'flex', gap: 8, alignItems: 'flex-start', fontSize: 12, color: '#92400e', background: '#fffbeb', border: '1px solid #DCECC8', borderRadius: 8, padding: '8px 10px' }}>
                     <FiMail size={14} style={{ marginTop: 2, flexShrink: 0 }} />
                     <span>{t('admin.smsGlobalOffHint')}</span>
                   </div>
@@ -321,7 +321,7 @@ export default function AdminSms() {
                   />
                 </div>
                 {smsEnabled && !otpEnabled && (
-                  <div style={{ marginTop: 12, display: 'flex', gap: 8, alignItems: 'flex-start', fontSize: 12, color: '#92400e', background: '#fffbeb', border: '1px solid #fde68a', borderRadius: 8, padding: '8px 10px' }}>
+                  <div style={{ marginTop: 12, display: 'flex', gap: 8, alignItems: 'flex-start', fontSize: 12, color: '#92400e', background: '#fffbeb', border: '1px solid #DCECC8', borderRadius: 8, padding: '8px 10px' }}>
                     <FiMail size={14} style={{ marginTop: 2, flexShrink: 0 }} />
                     <span>{t('admin.smsOtpOffHint')}</span>
                   </div>
@@ -524,7 +524,7 @@ export default function AdminSms() {
                                 <span style={{
                                   fontSize: 11, fontWeight: 800, padding: '2px 8px', borderRadius: 999,
                                   background: row.type === 'email' ? '#eff6ff' : '#fffbeb',
-                                  color: row.type === 'email' ? '#2563eb' : '#d97706',
+                                  color: row.type === 'email' ? '#2563eb' : '#76A85A',
                                 }}>
                                   {row.type === 'email' ? t('admin.smsTypeEmail') : t('admin.smsTypeSms')}
                                 </span>

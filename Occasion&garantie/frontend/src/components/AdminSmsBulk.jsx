@@ -315,7 +315,7 @@ export default function AdminSmsBulk({ enabled, onSent, notify }) {
       </div>
 
       {!enabled && (
-        <div style={{ marginTop: 12, display: 'flex', gap: 8, alignItems: 'flex-start', fontSize: 12, color: '#92400e', background: '#fffbeb', border: '1px solid #fde68a', borderRadius: 8, padding: '8px 10px' }}>
+        <div style={{ marginTop: 12, display: 'flex', gap: 8, alignItems: 'flex-start', fontSize: 12, color: '#92400e', background: '#fffbeb', border: '1px solid #DCECC8', borderRadius: 8, padding: '8px 10px' }}>
           <FiAlertTriangle size={14} style={{ marginTop: 2, flexShrink: 0 }} />
           <span>{t('admin.smsBulkDisabled')}</span>
         </div>
@@ -342,7 +342,7 @@ export default function AdminSmsBulk({ enabled, onSent, notify }) {
               onDrop={onDrop}
               style={{
                 border: `2px dashed ${dragging ? 'var(--primary)' : 'var(--border)'}`,
-                background: dragging ? 'rgba(245, 158, 11, 0.08)' : 'var(--bg-secondary)',
+                background: dragging ? 'rgba(147, 197, 114, 0.08)' : 'var(--bg-secondary)',
                 borderRadius: 12, padding: '20px 16px', textAlign: 'center', cursor: 'pointer',
                 transition: 'border-color .15s ease, background .15s ease',
               }}
@@ -390,7 +390,7 @@ export default function AdminSmsBulk({ enabled, onSent, notify }) {
                   {t('admin.smsBulkRows', { count: total })}
                 </span>
                 {total > limit && (
-                  <span style={{ fontSize: 11.5, color: '#92400e', background: '#fffbeb', border: '1px solid #fde68a', borderRadius: 6, padding: '2px 8px' }}>
+                  <span style={{ fontSize: 11.5, color: '#92400e', background: '#fffbeb', border: '1px solid #DCECC8', borderRadius: 6, padding: '2px 8px' }}>
                     {t('admin.smsBulkLimit', { max: limit })}
                   </span>
                 )}
@@ -513,7 +513,7 @@ export default function AdminSmsBulk({ enabled, onSent, notify }) {
                 </div>
                 <div style={{ display: 'flex', justifyContent: 'space-between', gap: 10, flexWrap: 'wrap', marginTop: 6 }}>
                   <span style={helpStyle}>{t('admin.smsBulkBrandNote')}</span>
-                  <span style={{ fontSize: 11.5, color: parts > 3 ? '#d97706' : 'var(--text-muted)' }}>
+                  <span style={{ fontSize: 11.5, color: parts > 3 ? '#76A85A' : 'var(--text-muted)' }}>
                     {t('admin.smsBulkChars', { count: firstMessage.length, parts })}
                   </span>
                 </div>
@@ -566,7 +566,7 @@ export default function AdminSmsBulk({ enabled, onSent, notify }) {
               </Step>
 
               {confirmOpen && (
-                <div style={{ ...card, border: '1px solid var(--primary)', boxShadow: '0 10px 30px rgba(245,158,11,0.15)' }}>
+                <div style={{ ...card, border: '1px solid var(--primary)', boxShadow: '0 10px 30px rgba(147, 197, 114,0.15)' }}>
                   <div style={{ display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between', gap: 12 }}>
                     <div style={{ display: 'flex', gap: 10, alignItems: 'flex-start' }}>
                       <span style={{ width: 38, height: 38, borderRadius: '50%', background: '#fffbeb', display: 'inline-flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
@@ -636,7 +636,7 @@ export default function AdminSmsBulk({ enabled, onSent, notify }) {
                           <div style={{ fontSize: 11, color: 'var(--text-muted)' }}>{t('admin.smsBulkProgressTotal')}</div>
                         </div>
                         <div style={{ background: '#fffbeb', borderRadius: 10, padding: 10, textAlign: 'center' }}>
-                          <div style={{ fontSize: 18, fontWeight: 800, color: '#d97706' }}>{progress.pending || 0}</div>
+                          <div style={{ fontSize: 18, fontWeight: 800, color: '#76A85A' }}>{progress.pending || 0}</div>
                           <div style={{ fontSize: 11, color: 'var(--text-muted)', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 4 }}><FiClock size={11} /> {t('admin.smsBulkProgressPending')}</div>
                         </div>
                         <div style={{ background: '#eff6ff', borderRadius: 10, padding: 10, textAlign: 'center' }}>
@@ -670,7 +670,7 @@ export default function AdminSmsBulk({ enabled, onSent, notify }) {
                     <div style={{ marginTop: 10, display: 'flex', gap: 8, flexWrap: 'wrap' }}>
                       <span style={chip('#ecfdf5', '#059669', '#a7f3d0')}>{t('admin.smsBulkQueued', { count: result.queued || 0 })}</span>
                       {result.invalid > 0 && <span style={chip('#fef2f2', '#dc2626', '#fecaca')}>{t('admin.smsBulkInvalid', { count: result.invalid })}</span>}
-                      {result.duplicates > 0 && <span style={chip('#fffbeb', '#b45309', '#fde68a')}>{t('admin.smsBulkDuplicates', { count: result.duplicates })}</span>}
+                      {result.duplicates > 0 && <span style={chip('#fffbeb', '#5C8A43', '#DCECC8')}>{t('admin.smsBulkDuplicates', { count: result.duplicates })}</span>}
                       {result.empty > 0 && <span style={chip('#f8fafc', '#475569', '#e2e8f0')}>{t('admin.smsBulkEmpty', { count: result.empty })}</span>}
                       {result.tooLong > 0 && <span style={chip('#fef2f2', '#dc2626', '#fecaca')}>{t('admin.smsBulkTooLong', { count: result.tooLong })}</span>}
                       {result.failed > 0 && <span style={chip('#fef2f2', '#dc2626', '#fecaca')}>{t('admin.smsBulkFailed', { count: result.failed })}</span>}

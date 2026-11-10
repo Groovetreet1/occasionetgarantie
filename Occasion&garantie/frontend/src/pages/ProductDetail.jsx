@@ -262,7 +262,7 @@ export default function ProductDetail() {
             </div>
 
             <div>
-              <div style={{ display: 'inline-flex', alignItems: 'center', gap: 6, padding: '6px 12px', borderRadius: 999, background: 'var(--primary-light)', border: '1px solid rgba(245,158,11,0.18)', color: 'var(--primary)', fontSize: 11, fontWeight: 800, letterSpacing: 0.5, textTransform: 'uppercase', marginBottom: 12 }}>{product.category_name}</div>
+              <div style={{ display: 'inline-flex', alignItems: 'center', gap: 6, padding: '6px 12px', borderRadius: 999, background: 'var(--primary-light)', border: '1px solid rgba(147, 197, 114,0.18)', color: 'var(--primary)', fontSize: 11, fontWeight: 800, letterSpacing: 0.5, textTransform: 'uppercase', marginBottom: 12 }}>{product.category_name}</div>
               <h1 className="product-detail-name" style={{ fontSize: 28, fontWeight: 800, letterSpacing: -0.6, lineHeight: 1.15 }}>{product.name}</h1>
 
               <div className="product-detail-price">
@@ -379,8 +379,8 @@ export default function ProductDetail() {
                       </div>
                       <span style={{
                         padding: '2px 8px', borderRadius: 10, fontSize: 10, fontWeight: 600, whiteSpace: 'nowrap',
-                        background: r.status === 'en_attente' ? 'rgba(245,158,11,0.1)' : r.status === 'estime' ? 'rgba(59,130,246,0.1)' : 'rgba(16,185,129,0.1)',
-                        color: r.status === 'en_attente' ? '#f59e0b' : r.status === 'estime' ? '#3b82f6' : '#10b981',
+                        background: r.status === 'en_attente' ? 'rgba(147, 197, 114,0.1)' : r.status === 'estime' ? 'rgba(59,130,246,0.1)' : 'rgba(16,185,129,0.1)',
+                        color: r.status === 'en_attente' ? '#93C572' : r.status === 'estime' ? '#3b82f6' : '#10b981',
                       }}>
                         {r.status === 'en_attente' ? t('products.repriseNew') : r.status === 'estime' ? t('products.repriseEstimated') : t('products.repriseAccepted')}
                       </span>

@@ -103,10 +103,10 @@ export default function AdminDashboardCharts({ stats }) {
         itemStyle: {
           borderRadius: [8,8,0,0],
           color: new echarts.graphic.LinearGradient(0,0,0,1, [
-            { offset: 0, color: '#fbbf24' },
-            { offset: 1, color: '#d97706' }
+            { offset: 0, color: '#B7D98A' },
+            { offset: 1, color: '#76A85A' }
           ]),
-          shadowColor: 'rgba(245,158,11,0.45)',
+          shadowColor: 'rgba(147, 197, 114,0.45)',
           shadowBlur: 12,
           shadowOffsetY: 4
         },
@@ -151,14 +151,14 @@ export default function AdminDashboardCharts({ stats }) {
           <div style={{ position: 'absolute', top: -30, right: -30, width: 120, height: 120, background: 'radial-gradient(circle, rgba(56,189,248,0.14) 0%, transparent 70%)', pointerEvents: 'none' }} />
           <h3 style={{ fontSize: 13, fontWeight: 700, color: 'var(--text-secondary)', marginBottom: 4, letterSpacing: 0.4, textTransform: 'uppercase' }}>{t('admin.chartClientsVsSellers')}</h3>
           <p style={{ fontSize: 11, color: 'var(--text-muted)', marginBottom: 8 }}>{t('admin.chartTotalUsers', { count: users.total })}</p>
-          <ReactECharts option={pie3D(roleData, ['#38bdf8','#f59e0b','#94a3b8'])} style={{ height: 220 }} opts={{ renderer: 'canvas' }} className="admin-chart-3d" />
+          <ReactECharts option={pie3D(roleData, ['#38bdf8','#93C572','#94a3b8'])} style={{ height: 220 }} opts={{ renderer: 'canvas' }} className="admin-chart-3d" />
         </div>
 
         <div style={cardStyle} className="admin-chart-card">
-          <div style={{ position: 'absolute', top: -30, right: -30, width: 120, height: 120, background: 'radial-gradient(circle, rgba(245,158,11,0.14) 0%, transparent 70%)', pointerEvents: 'none' }} />
+          <div style={{ position: 'absolute', top: -30, right: -30, width: 120, height: 120, background: 'radial-gradient(circle, rgba(147, 197, 114,0.14) 0%, transparent 70%)', pointerEvents: 'none' }} />
           <h3 style={{ fontSize: 13, fontWeight: 700, color: 'var(--text-secondary)', marginBottom: 4, letterSpacing: 0.4, textTransform: 'uppercase' }}>{t('admin.chartPremium')}</h3>
           <p style={{ fontSize: 11, color: 'var(--text-muted)', marginBottom: 8 }}>{t('admin.chartPremiumSub', { premium: users.byPremium.premium, nonPremium: users.byPremium.nonPremium })}</p>
-          <ReactECharts option={pie3D(premiumData, ['#f59e0b','#0ea5e9'])} style={{ height: 220 }} className="admin-chart-3d" />
+          <ReactECharts option={pie3D(premiumData, ['#93C572','#0ea5e9'])} style={{ height: 220 }} className="admin-chart-3d" />
         </div>
 
         <div style={cardStyle} className="admin-chart-card">

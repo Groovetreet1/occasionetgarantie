@@ -23,7 +23,7 @@ function fmtUptime(s) {
 
 function Bar({ pct }) {
   const v = Math.min(100, parseFloat(pct) || 0);
-  const color = v > 85 ? '#dc2626' : v > 65 ? '#d97706' : '#059669';
+  const color = v > 85 ? '#dc2626' : v > 65 ? '#76A85A' : '#059669';
   return (
     <div style={{ height: 8, borderRadius: 999, background: 'var(--bg-secondary)', overflow: 'hidden', marginTop: 8 }}>
       <div style={{ width: `${v}%`, height: '100%', borderRadius: 999, background: color, transition: 'width 0.5s' }} />
@@ -108,7 +108,7 @@ export default function AdminStorage() {
                 {db && !db.error ? `${db.users} users · ${db.products} produits` : t('admin.storageNoData')}
               </div>
               <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginTop: 10 }}>
-                <FiImage size={16} style={{ color: '#d97706' }} />
+                <FiImage size={16} style={{ color: '#76A85A' }} />
                 <strong style={{ fontSize: 13 }}>{t('admin.storageUploads')}</strong>
                 <span style={{ marginLeft: 'auto', fontWeight: 800 }}>{host ? fmtBytes(host.uploads_bytes) : '-'}</span>
               </div>
