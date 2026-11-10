@@ -1,8 +1,7 @@
 import { useState } from 'react';
 import { Link } from 'react-router-dom';
 import { motion } from 'framer-motion';
-import { FiShoppingBag, FiArrowUpRight, FiMapPin, FiShield, FiStar } from 'react-icons/fi';
-import { TbChevronLeft, TbChevronRight } from 'react-icons/tb';
+import { FiShoppingBag, FiArrowUpRight, FiMapPin, FiShield, FiStar, FiChevronLeft, FiChevronRight } from 'react-icons/fi';
 import { useLanguage } from '../context/LanguageContext';
 
 const API_BASE = import.meta.env.VITE_API_URL || '';
@@ -71,10 +70,10 @@ export default function HomeProductCard({ product, index = 0, view = 'grid' }) {
           {photos.length > 1 && (
             <>
               <button className="photo-nav-btn photo-prev" onClick={goPrev} aria-label={t('home.photoPrev')} style={{ width: 30, height: 30 }}>
-                <TbChevronLeft size={16} />
+                <FiChevronLeft size={16} />
               </button>
               <button className="photo-nav-btn photo-next" onClick={goNext} aria-label={t('home.photoNext')} style={{ width: 30, height: 30 }}>
-                <TbChevronRight size={16} />
+                <FiChevronRight size={16} />
               </button>
               <span className="photo-count" style={{ background: 'rgba(15,23,42,0.72)', backdropFilter: 'blur(6px)', border: '1px solid rgba(255,255,255,0.15)', fontSize: 11 }}>{photoIndex + 1}/{photos.length}</span>
             </>

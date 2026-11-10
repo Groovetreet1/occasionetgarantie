@@ -2,7 +2,6 @@ import { Link, useNavigate } from 'react-router-dom';
 import { useEffect, useRef, useState } from 'react';
 import { motion } from 'framer-motion';
 import { FiSmartphone, FiArrowRight, FiShoppingBag, FiSearch, FiMapPin, FiShield, FiTruck, FiAward, FiStar, FiCheck, FiCheckCircle, FiLayers, FiHeadphones, FiMonitor, FiTablet, FiZap, FiClock } from 'react-icons/fi';
-import { TbShieldCheck, TbClockHour5 } from 'react-icons/tb';
 import api from '../api/axios';
 import HomeProductCard from '../components/HomeProductCard';
 import TrustBar from '../components/TrustBar';
@@ -195,7 +194,7 @@ export default function Home() {
           <div className="container">
             <div className="section-header home-section-header" style={{ marginBottom: 28 }}>
               <div className="home-heading">
-                <span className="home-heading-icon home-heading-icon-store" style={{ background: 'linear-gradient(135deg, #93C572, #76A85A)', color: '#fff', width: 46, height: 46, borderRadius: 14, display: 'flex', alignItems: 'center', justifyContent: 'center' }}><TbShieldCheck size={22} /></span>
+                <span className="home-heading-icon home-heading-icon-store" style={{ background: 'linear-gradient(135deg, #93C572, #76A85A)', color: '#fff', width: 46, height: 46, borderRadius: 14, display: 'flex', alignItems: 'center', justifyContent: 'center' }}><FiShield size={22} /></span>
                 <div>
                   <h2 className="home-section-title home-section-title-store" style={{ fontSize: 22 }}>{t('home.storeOfficial')}</h2>
                   <p className="home-section-subtitle">{t('home.storeSubtitle')}</p>
