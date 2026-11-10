@@ -236,8 +236,8 @@ export default function Navbar() {
           </div>
 
           <div className="navbar-actions">
-            <ThemeToggle />
-            <LanguageToggle />
+            {!user && <ThemeToggle />}
+            {!user && <LanguageToggle />}
             {user?.role === 'seller' && creditBalance !== null && (
               <Link to="/seller" className="navbar-credit-badge" title={t('seller.creditBalance') || 'Solde crédits'} style={{ display: 'inline-flex', alignItems: 'center', gap: 6, padding: '6px 10px', borderRadius: 999, background: 'rgba(147,197,114,0.12)', border: '1px solid rgba(147,197,114,0.35)', color: '#5C8A43', fontSize: 12, fontWeight: 700, textDecoration: 'none', whiteSpace: 'nowrap' }}>
                 <FiCreditCard size={14} />
@@ -327,6 +327,14 @@ export default function Navbar() {
                         <div className="navbar-user-card-info">
                           <div className="navbar-user-card-name">{user.store_name || user.fullName || user.full_name || user.email}</div>
                           <div className="navbar-user-card-email">{user.email}</div>
+                        </div>
+                      </div>
+                      <div className="navbar-user-card-divider" />
+                      <div style={{ padding: '8px 12px', display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 10 }}>
+                        <span style={{ fontSize: 13, fontWeight: 600, color: 'var(--text-secondary)' }}>{t('nav.themeTitle') || 'Thème & langue'}</span>
+                        <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+                          <LanguageToggle />
+                          <ThemeToggle />
                         </div>
                       </div>
                       <div className="navbar-user-card-divider" />
@@ -423,6 +431,11 @@ export default function Navbar() {
         <div className="navbar-mobile-divider" />
         {user ? (
           <>
+            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 12, padding: '8px 10px' }}>
+              <LanguageToggle />
+              <ThemeToggle />
+            </div>
+            <div className="navbar-mobile-divider" />
             <NavLink to="/profile" onClick={closeMenu}><FiUser size={14} /> {t('nav.myProfile')}</NavLink>
             {user.role !== 'admin' && (
               <>
