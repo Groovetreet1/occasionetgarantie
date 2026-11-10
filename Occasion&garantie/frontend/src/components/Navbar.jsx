@@ -1,5 +1,5 @@
 import { Link, NavLink, useNavigate, useLocation } from 'react-router-dom';
-import { FiUser, FiLogOut, FiSettings, FiChevronDown, FiSmartphone, FiMonitor, FiHeadphones, FiTablet, FiShoppingBag, FiTrendingUp, FiStar, FiMessageCircle, FiPackage, FiBell, FiTrash2, FiAlertTriangle, FiShield, FiCopy, FiGift } from 'react-icons/fi';
+import { FiUser, FiLogOut, FiSettings, FiChevronDown, FiSmartphone, FiMonitor, FiHeadphones, FiTablet, FiShoppingBag, FiTrendingUp, FiStar, FiMessageCircle, FiPackage, FiBell, FiTrash2, FiAlertTriangle, FiShield, FiCopy, FiGift, FiCreditCard } from 'react-icons/fi';
 import { useState, useRef, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useAuth } from '../context/AuthContext';
@@ -62,6 +62,7 @@ export default function Navbar() {
   const notifRef = useRef(null);
   const [referral, setReferral] = useState(null);
   const [refCopied, setRefCopied] = useState(false);
+  const [creditBalance, setCreditBalance] = useState(null);
 
   useEffect(() => {
     if (!user) return;
@@ -76,6 +77,15 @@ export default function Navbar() {
   useEffect(() => {
     if (!user || user.role !== 'seller') { setReferral(null); return; }
     api.get('/auth/my-referral').then(r => setReferral(r.data)).catch(() => {});
+  }, [user?.id, user?.role]);
+
+  useEffect(() => {
+    if (!user || user.role !== 'seller') { setCreditBalance(null); return; }
+    let cancelled = false;
+    const fetchCredits = () => api.get('/auth/my-credits').then(r => { if (!cancelled) setCreditBalance(r.data.credit_balance ?? 0); }).catch(() => {});
+    fetchCredits();
+    const interval = setInterval(fetchCredits, 30000);
+    return () => { cancelled = true; clearInterval(interval); };
   }, [user?.id, user?.role]);
 
   useEffect(() => {
@@ -228,6 +238,12 @@ export default function Navbar() {
           <div className="navbar-actions">
             <ThemeToggle />
             <LanguageToggle />
+            {user?.role === 'seller' && creditBalance !== null && (
+              <Link to="/seller" className="navbar-credit-badge" title={t('seller.creditBalance') || 'Solde crédits'} style={{ display: 'inline-flex', alignItems: 'center', gap: 6, padding: '6px 10px', borderRadius: 999, background: 'rgba(147,197,114,0.12)', border: '1px solid rgba(147,197,114,0.35)', color: '#5C8A43', fontSize: 12, fontWeight: 700, textDecoration: 'none', whiteSpace: 'nowrap' }}>
+                <FiCreditCard size={14} />
+                <span>{Number(creditBalance).toLocaleString('fr-FR')} <span style={{ fontWeight: 600, opacity: 0.9 }}>{t('seller.credits') || 'crédits'}</span></span>
+              </Link>
+            )}
             {user && (
               <div className="navbar-notif" ref={notifRef}>
                 <button className="navbar-notif-btn" onClick={openNotifs} aria-label="Notifications">
